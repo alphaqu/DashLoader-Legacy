@@ -11,7 +11,7 @@ import net.quantumfusion.dash.sprite.util.DashImage;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DashUnicodeFont implements Dashable {
+public class DashUnicodeFont {
     @Serialize(order = 0)
     @SerializeNullable()
     @SerializeNullable(path = {1})

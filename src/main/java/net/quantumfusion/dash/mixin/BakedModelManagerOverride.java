@@ -1,6 +1,9 @@
 package net.quantumfusion.dash.mixin;
 
+import com.google.common.collect.ArrayTable;
+import com.google.common.collect.Table;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.client.render.block.BlockModels;
@@ -10,9 +13,11 @@ import net.minecraft.client.render.model.ModelLoader;
 import net.minecraft.client.render.model.SpriteAtlasManager;
 import net.minecraft.client.texture.TextureManager;
 import net.minecraft.resource.ResourceManager;
+import net.minecraft.state.property.Property;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.profiler.Profiler;
 import net.quantumfusion.dash.Dash;
+import net.quantumfusion.dash.model.atlas.DashSpriteAtlasManager;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -79,9 +84,10 @@ public class BakedModelManagerOverride {
             stateLookupCache  = stateLookup;
         } else {
             System.out.println("Dashcache");
-            atlasManager = atlasManagerCache;
+            atlasManager = Dash.compare(atlasManagerCache);
             models = modelsCache;
             stateLookup = stateLookupCache;
+
         }
 
         this.missingModel = this.models.get(ModelLoader.MISSING);

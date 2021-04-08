@@ -4,6 +4,8 @@
   "package": "net.quantumfusion.dash.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
+    "SpriteCreator",
+
     "FontManagerOverride",
     "UnicodeTextureFontOverride",
     "BakedModelManagerOverride",
@@ -18,7 +20,13 @@
     "MainMixin",
     "SplashTextResourceSupplierMixin",
     "TextureUtilMixin",
+    "SpriteInterpolationMixin",
 
+    "AbstactBlockStateAccessor",
+    "StateAccessor",
+    "SpriteDataAccessor",
+    "VoxelShapeAccessor",
+    "SpriteInterpolationAccessor",
     "SpriteAtlasManagerAccessor",
     "SpriteAtlasTextureAccessor",
     "ParticleTextureDataAccessor",

@@ -7,7 +7,7 @@ import net.quantumfusion.dash.common.DashIdentifier;
 import net.quantumfusion.dash.mixin.SpriteInfoAccessor;
 
 
-public class DashInfo {
+public class DashSpriteInfo {
     @Serialize(order = 0)
     public final DashIdentifier id;
     @Serialize(order = 1)
@@ -17,24 +17,24 @@ public class DashInfo {
     @Serialize(order = 3)
     public final DashAnimationResourceMetadata animationData;
 
-    public DashInfo(@Deserialize("id")DashIdentifier id,
-                    @Deserialize("width")   int width,
-                    @Deserialize("height")   int height,
-                    @Deserialize("animationData")   DashAnimationResourceMetadata animationData) {
+    public DashSpriteInfo(@Deserialize("id") DashIdentifier id,
+                          @Deserialize("width") int width,
+                          @Deserialize("height") int height,
+                          @Deserialize("animationData") DashAnimationResourceMetadata animationData) {
         this.id = id;
         this.width = width;
         this.height = height;
         this.animationData = animationData;
     }
 
-    public DashInfo(Sprite.Info info) {
+    public DashSpriteInfo(Sprite.Info info) {
         id = new DashIdentifier(info.getId());
         width = info.getWidth();
         height = info.getHeight();
-        animationData = new DashAnimationResourceMetadata(((SpriteInfoAccessor)(Object)info).getAnimationData());
+        animationData = new DashAnimationResourceMetadata(((SpriteInfoAccessor) (Object) info).getAnimationData());
     }
 
     public Sprite.Info toUndash() {
-        return new Sprite.Info(id.toUndash(),width,height,animationData.toUndash());
+        return new Sprite.Info(id.toUndash(), width, height, animationData.toUndash());
     }
 }

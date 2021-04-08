@@ -9,7 +9,7 @@ import net.quantumfusion.dash.sprite.util.DashImage;
 
 import java.util.HashMap;
 
-public class DashBitmapFont implements Dashable {
+public class DashBitmapFont  {
     @Serialize(order = 0)
     public final DashImage image;
     @Serialize(order = 1)
@@ -34,4 +34,5 @@ public class DashBitmapFont implements Dashable {
         glyphs.forEach((integer, dashBitmapFontGlyph) -> out.put(integer, dashBitmapFontGlyph.toUndash()));
         return new BitmapFont(image.toUndash(), out);
     }
+
 }

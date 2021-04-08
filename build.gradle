@@ -10,6 +10,10 @@ archivesBaseName = project.archives_base_name
 version = project.mod_version
 group = project.maven_group
 
+minecraft {
+    accessWidener =  file("src/main/resources/dash.accesswidener")
+}
+
 dependencies {
     modImplementation "io.activej:activej-serializer:$activej_version"
     include "io.activej:activej-serializer:$activej_version"

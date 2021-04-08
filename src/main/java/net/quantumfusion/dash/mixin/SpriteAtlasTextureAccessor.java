@@ -1,7 +1,5 @@
 package net.quantumfusion.dash.mixin;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.util.Identifier;
@@ -29,4 +27,21 @@ public interface SpriteAtlasTextureAccessor {
 
     @Accessor("maxTextureSize")
     int getMaxTextureSize();
+
+
+    @Accessor("sprites")
+    void setSprites(Map<Identifier, Sprite> sprites);
+
+    @Accessor("animatedSprites")
+    void setAnimatedSprites(List<Sprite> animatedSprites);
+
+    @Accessor("spritesToLoad")
+    void setSpritesToLoad(Set<Identifier> spritesToLoad);
+
+    @Accessor("id")
+    void setId(Identifier id);
+
+    @Accessor("maxTextureSize")
+    void setMaxTextureSize(int maxTextureSize);
+
 }
