@@ -11,10 +11,10 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 public interface BitmapFontAccessor {
 
 
-    @Accessor("glyphs")
-    Int2ObjectMap<RenderableGlyph> getGlyphs();
+	@Accessor("glyphs")
+	Int2ObjectMap<RenderableGlyph> getGlyphs();
 
-    @Accessor("image")
-    NativeImage getImage();
+	@Accessor("image")
+	NativeImage getImage();
 
 }

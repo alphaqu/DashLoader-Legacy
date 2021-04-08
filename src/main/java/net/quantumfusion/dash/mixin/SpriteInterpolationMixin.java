@@ -9,10 +9,10 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(targets = "net.minecraft.client.texture.Sprite$Interpolation")
 public class SpriteInterpolationMixin {
 
-    @Mutable
-    @Shadow @Final private final NativeImage[] images;
+	@Mutable
+	@Shadow @Final private final NativeImage[] images;
 
-    public SpriteInterpolationMixin(NativeImage[] images) {
-        this.images = images;
-    }
+	public SpriteInterpolationMixin(NativeImage[] images) {
+		this.images = images;
+	}
 }

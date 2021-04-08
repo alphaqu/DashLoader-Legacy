@@ -14,20 +14,20 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class DashSpriteAtlasManager {
-    public final ArrayList<DashSpriteAtlasTexture> atlases;
+	public final ArrayList<DashSpriteAtlasTexture> atlases;
 
-    public DashSpriteAtlasManager(ArrayList<DashSpriteAtlasTexture> atlases) {
-        this.atlases = atlases;
-    }
+	public DashSpriteAtlasManager(ArrayList<DashSpriteAtlasTexture> atlases) {
+		this.atlases = atlases;
+	}
 
-    public DashSpriteAtlasManager(SpriteAtlasManager spriteAtlasManager) {
-        atlases = new ArrayList<>();
-        ((SpriteAtlasManagerAccessor)spriteAtlasManager).getAtlases().forEach((identifier, spriteAtlasTexture) -> atlases.add(new DashSpriteAtlasTexture(spriteAtlasTexture)));
-    }
+	public DashSpriteAtlasManager(SpriteAtlasManager spriteAtlasManager) {
+		atlases = new ArrayList<>();
+		((SpriteAtlasManagerAccessor)spriteAtlasManager).getAtlases().forEach((identifier, spriteAtlasTexture) -> atlases.add(new DashSpriteAtlasTexture(spriteAtlasTexture)));
+	}
 
-    public SpriteAtlasManager toUndash() {
-        ArrayList<SpriteAtlasTexture> out = new ArrayList<>();
-        atlases.forEach(spriteAtlasTexture -> out.add(spriteAtlasTexture.toUndash()));
-        return new SpriteAtlasManager(out);
-    }
+	public SpriteAtlasManager toUndash() {
+		ArrayList<SpriteAtlasTexture> out = new ArrayList<>();
+		atlases.forEach(spriteAtlasTexture -> out.add(spriteAtlasTexture.toUndash()));
+		return new SpriteAtlasManager(out);
+	}
 }

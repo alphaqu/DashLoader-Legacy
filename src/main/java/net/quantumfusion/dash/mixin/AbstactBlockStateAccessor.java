@@ -8,18 +8,18 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 public interface AbstactBlockStateAccessor {
 
 
-    @Accessor()
-    AbstractBlock.ContextPredicate getSolidBlockPredicate();
+	@Accessor()
+	AbstractBlock.ContextPredicate getSolidBlockPredicate();
 
-    @Accessor()
-    AbstractBlock.ContextPredicate getSuffocationPredicate();
+	@Accessor()
+	AbstractBlock.ContextPredicate getSuffocationPredicate();
 
-    @Accessor()
-    AbstractBlock.ContextPredicate getBlockVisionPredicate();
+	@Accessor()
+	AbstractBlock.ContextPredicate getBlockVisionPredicate();
 
-    @Accessor()
-    AbstractBlock.ContextPredicate getPostProcessPredicate();
+	@Accessor()
+	AbstractBlock.ContextPredicate getPostProcessPredicate();
 
-    @Accessor()
-    AbstractBlock.ContextPredicate getEmissiveLightingPredicate();
+	@Accessor()
+	AbstractBlock.ContextPredicate getEmissiveLightingPredicate();
 }

@@ -12,14 +12,14 @@ import java.util.Set;
 @Mixin(SpriteAtlasTexture.Data.class)
 public interface SpriteDataAccessor {
 
-    @Accessor("spriteIds")
-    Set<Identifier> getSpriteIds();
-    @Accessor("width")
-    int getWidth();
-    @Accessor("height")
-    int getHeight();
-    @Accessor("maxLevel")
-    int getMaxLevel();
-    @Accessor("sprites")
-    List<Sprite> getSprites();
+	@Accessor("spriteIds")
+	Set<Identifier> getSpriteIds();
+	@Accessor("width")
+	int getWidth();
+	@Accessor("height")
+	int getHeight();
+	@Accessor("maxLevel")
+	int getMaxLevel();
+	@Accessor("sprites")
+	List<Sprite> getSprites();
 }

@@ -12,7 +12,7 @@ import java.util.Map;
 @Mixin(SpriteAtlasManager.class)
 public interface SpriteAtlasManagerAccessor {
 
-    @Accessor("atlases")
-    Map<Identifier, SpriteAtlasTexture> getAtlases();
+	@Accessor("atlases")
+	Map<Identifier, SpriteAtlasTexture> getAtlases();
 
 }

@@ -15,69 +15,69 @@ import java.util.function.ToIntFunction;
 
 @Mixin(AbstractBlock.Settings.class)
 public interface AbstractBlockSettingsAccessor {
-    @Accessor()
-    Material getMaterial();
+	@Accessor()
+	Material getMaterial();
 
-    @Accessor()
-    Function<BlockState, MaterialColor> materialColorFactory();
+	@Accessor()
+	Function<BlockState, MaterialColor> materialColorFactory();
 
-    @Accessor()
-    boolean collidable();
+	@Accessor()
+	boolean collidable();
 
-    @Accessor()
-    BlockSoundGroup soundGroup();
+	@Accessor()
+	BlockSoundGroup soundGroup();
 
-    @Accessor()
-    ToIntFunction<BlockState> luminance();
+	@Accessor()
+	ToIntFunction<BlockState> luminance();
 
-    @Accessor()
-    float resistance();
+	@Accessor()
+	float resistance();
 
-    @Accessor()
-    float hardness();
+	@Accessor()
+	float hardness();
 
-    @Accessor()
-    boolean toolRequired();
+	@Accessor()
+	boolean toolRequired();
 
-    @Accessor()
-    boolean randomTicks();
+	@Accessor()
+	boolean randomTicks();
 
-    @Accessor()
-    float slipperiness();
+	@Accessor()
+	float slipperiness();
 
-    @Accessor()
-    float velocityMultiplier();
+	@Accessor()
+	float velocityMultiplier();
 
-    @Accessor()
-    float jumpVelocityMultiplier();
+	@Accessor()
+	float jumpVelocityMultiplier();
 
-    @Accessor()
-    Identifier lootTableId();
+	@Accessor()
+	Identifier lootTableId();
 
-    @Accessor()
-    boolean opaque();
+	@Accessor()
+	boolean opaque();
 
-    @Accessor()
-    AbstractBlock.TypedContextPredicate<EntityType<?>> allowsSpawningPredicate();
+	@Accessor()
+	AbstractBlock.TypedContextPredicate<EntityType<?>> allowsSpawningPredicate();
 
-    @Accessor()
-    AbstractBlock.ContextPredicate solidBlockPredicate();
+	@Accessor()
+	AbstractBlock.ContextPredicate solidBlockPredicate();
 
-    @Accessor()
-    AbstractBlock.ContextPredicate suffocationPredicate();
+	@Accessor()
+	AbstractBlock.ContextPredicate suffocationPredicate();
 
-    @Accessor()
-    AbstractBlock.ContextPredicate blockVisionPredicate();
+	@Accessor()
+	AbstractBlock.ContextPredicate blockVisionPredicate();
 
-    @Accessor()
-    AbstractBlock.ContextPredicate postProcessPredicate();
+	@Accessor()
+	AbstractBlock.ContextPredicate postProcessPredicate();
 
-    @Accessor()
-    AbstractBlock.ContextPredicate emissiveLightingPredicate();
+	@Accessor()
+	AbstractBlock.ContextPredicate emissiveLightingPredicate();
 
-    @Accessor()
-    boolean getIsAir();
-    @Accessor()
-    boolean dynamic();
+	@Accessor()
+	boolean getIsAir();
+	@Accessor()
+	boolean dynamic();
 
 }

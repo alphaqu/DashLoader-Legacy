@@ -19,32 +19,32 @@ import java.io.IOException;
 @Mixin(UnicodeTextureFont.Loader.class)
 public class UnicodeTextureFontOverride {
 
-    @Shadow @Final private Identifier sizes;
+	@Shadow @Final private Identifier sizes;
 
-    @Shadow @Final private String template;
+	@Shadow @Final private String template;
 
-    @Inject(method = "load(Lnet/minecraft/resource/ResourceManager;)Lnet/minecraft/client/font/Font;",
-            at = @At(value = "HEAD"),
-            cancellable = true)
-    private void fastLoad(ResourceManager manager, CallbackInfoReturnable<Font> cir) {
-        try {
-            System.out.println(sizes);
-            Resource resource = MinecraftClient.getInstance().getResourceManager().getResource(this.sizes);
-            UnicodeFont var5;
-            try {
-                byte[] bs = new byte[65536];
-                resource.getInputStream().read(bs);
-                var5 = new UnicodeFont(manager, bs);
-            } finally {
-                if (resource != null) {
-                    resource.close();
-                }
+	@Inject(method = "load(Lnet/minecraft/resource/ResourceManager;)Lnet/minecraft/client/font/Font;",
+			at = @At(value = "HEAD"),
+			cancellable = true)
+	private void fastLoad(ResourceManager manager, CallbackInfoReturnable<Font> cir) {
+		try {
+			System.out.println(sizes);
+			Resource resource = MinecraftClient.getInstance().getResourceManager().getResource(this.sizes);
+			UnicodeFont var5;
+			try {
+				byte[] bs = new byte[65536];
+				resource.getInputStream().read(bs);
+				var5 = new UnicodeFont(manager, bs);
+			} finally {
+				if (resource != null) {
+					resource.close();
+				}
 
-            }
-            cir.setReturnValue(var5);
-        } catch (IOException var17) {
-            cir.setReturnValue(null);
-        }
+			}
+			cir.setReturnValue(var5);
+		} catch (IOException var17) {
+			cir.setReturnValue(null);
+		}
 
-    }
+	}
 }

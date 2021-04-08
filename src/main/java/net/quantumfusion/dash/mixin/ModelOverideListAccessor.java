@@ -13,10 +13,10 @@ import java.util.List;
 public interface ModelOverideListAccessor {
 
 
-    @Accessor("overrides")
-    List<ModelOverride> getOverrides();
+	@Accessor("overrides")
+	List<ModelOverride> getOverrides();
 
 
-    @Accessor("models")
-    List<BakedModel> getModels();
+	@Accessor("models")
+	List<BakedModel> getModels();
 }

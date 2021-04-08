@@ -16,25 +16,25 @@ import java.util.Map;
 @Mixin(JsonUnbakedModel.class)
 public interface JsonUnbakedModelAccessor {
 
-    @Accessor("textureMap")
-    Map<String, Either<SpriteIdentifier, String>> getTextureMapD();
+	@Accessor("textureMap")
+	Map<String, Either<SpriteIdentifier, String>> getTextureMapD();
 
-    @Accessor("parentId")
-    Identifier getParentIdD();
+	@Accessor("parentId")
+	Identifier getParentIdD();
 
-    @Accessor("guiLight")
-    JsonUnbakedModel.GuiLight getGuiLightD();
+	@Accessor("guiLight")
+	JsonUnbakedModel.GuiLight getGuiLightD();
 
-    @Accessor("transformations")
-    ModelTransformation getTransformationsD();
+	@Accessor("transformations")
+	ModelTransformation getTransformationsD();
 
-    @Accessor("elements")
-    List<ModelElement> getElementsD();
+	@Accessor("elements")
+	List<ModelElement> getElementsD();
 
-    @Accessor("ambientOcclusion")
-    boolean getAmbientOcclusionD();
+	@Accessor("ambientOcclusion")
+	boolean getAmbientOcclusionD();
 
-    @Accessor("overrides")
-    List<ModelOverride> getOverridesD();
+	@Accessor("overrides")
+	List<ModelOverride> getOverridesD();
 
 }

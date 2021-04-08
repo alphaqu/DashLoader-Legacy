@@ -13,11 +13,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class SoundManagerMixin {
 
 
-    @Inject(method = "isSoundResourcePresent(Lnet/minecraft/client/sound/Sound;Lnet/minecraft/util/Identifier;Lnet/minecraft/resource/ResourceManager;)Z",
-            at = @At(value = "HEAD"),
-            cancellable = true)
-    private static void dontchecksounds(Sound sound, Identifier identifier, ResourceManager resourceManager, CallbackInfoReturnable<Boolean> cir) {
-        cir.setReturnValue(true);
-        cir.cancel();
-    }
+	@Inject(method = "isSoundResourcePresent(Lnet/minecraft/client/sound/Sound;Lnet/minecraft/util/Identifier;Lnet/minecraft/resource/ResourceManager;)Z",
+			at = @At(value = "HEAD"),
+			cancellable = true)
+	private static void dontchecksounds(Sound sound, Identifier identifier, ResourceManager resourceManager, CallbackInfoReturnable<Boolean> cir) {
+		cir.setReturnValue(true);
+		cir.cancel();
+	}
 }

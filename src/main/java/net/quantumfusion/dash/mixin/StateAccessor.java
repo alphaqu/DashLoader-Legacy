@@ -9,6 +9,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(State.class)
 public interface StateAccessor<O, S> {
 
-    @Accessor("withTable")
-    void setWithTable(Table<Property<?>, Comparable<?>, S> table);
+	@Accessor("withTable")
+	void setWithTable(Table<Property<?>, Comparable<?>, S> table);
 }

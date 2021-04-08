@@ -15,29 +15,29 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class DashSpriteInterpolation {
-    private final List<DashImage> images;
+	private final List<DashImage> images;
 
-    public DashSpriteInterpolation(ArrayList<DashImage> images) {
-        this.images = images;
-    }
+	public DashSpriteInterpolation(ArrayList<DashImage> images) {
+		this.images = images;
+	}
 
-    public DashSpriteInterpolation(Sprite.Interpolation interpolation){
-        NativeImage[] images = ((SpriteInterpolationAccessor)(Object)interpolation).getImages();
+	public DashSpriteInterpolation(Sprite.Interpolation interpolation){
+		NativeImage[] images = ((SpriteInterpolationAccessor)(Object)interpolation).getImages();
 
-        this.images = Stream.of(images).map(DashImage::new).collect(Collectors.toList());
-    }
+		this.images = Stream.of(images).map(DashImage::new).collect(Collectors.toList());
+	}
 
-    public Sprite.Interpolation toUndash() {
-        try {
-            Sprite.Interpolation spriteInterpolation = (Sprite.Interpolation) Dash.getUnsafe().allocateInstance(Sprite.Interpolation.class);
-            SpriteInterpolationAccessor spriteInterpolationAccessor = ((SpriteInterpolationAccessor)(Object)spriteInterpolation);
-            List<NativeImage> nativeImages = new ArrayList<>();
-            images.forEach(dashImage -> nativeImages.add(dashImage.toUndash()));
-            spriteInterpolationAccessor.setImages(nativeImages.toArray(new NativeImage[0]));
-            return spriteInterpolation;
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
+	public Sprite.Interpolation toUndash() {
+		try {
+			Sprite.Interpolation spriteInterpolation = (Sprite.Interpolation) Dash.getUnsafe().allocateInstance(Sprite.Interpolation.class);
+			SpriteInterpolationAccessor spriteInterpolationAccessor = ((SpriteInterpolationAccessor)(Object)spriteInterpolation);
+			List<NativeImage> nativeImages = new ArrayList<>();
+			images.forEach(dashImage -> nativeImages.add(dashImage.toUndash()));
+			spriteInterpolationAccessor.setImages(nativeImages.toArray(new NativeImage[0]));
+			return spriteInterpolation;
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
 }

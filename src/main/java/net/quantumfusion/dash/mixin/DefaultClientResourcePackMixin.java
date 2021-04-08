@@ -19,16 +19,16 @@ import java.io.File;
 @Mixin(DefaultClientResourcePack.class)
 public class DefaultClientResourcePackMixin {
 
-    @Shadow @Final private ResourceIndex index;
+	@Shadow @Final private ResourceIndex index;
 
-    @Inject(method = "contains(Lnet/minecraft/resource/ResourceType;Lnet/minecraft/util/Identifier;)Z",
-            at = @At(value = "HEAD"), cancellable = true)
-    private void prepare(ResourceType type, Identifier id, CallbackInfoReturnable<Boolean> cir) {
-        if (type == ResourceType.CLIENT_RESOURCES) {
-            File file = this.index.getResource(id);
-            if (file != null && file.exists()) {
-                cir.setReturnValue(true);
-            }
-        }
-    }
+	@Inject(method = "contains(Lnet/minecraft/resource/ResourceType;Lnet/minecraft/util/Identifier;)Z",
+			at = @At(value = "HEAD"), cancellable = true)
+	private void prepare(ResourceType type, Identifier id, CallbackInfoReturnable<Boolean> cir) {
+		if (type == ResourceType.CLIENT_RESOURCES) {
+			File file = this.index.getResource(id);
+			if (file != null && file.exists()) {
+				cir.setReturnValue(true);
+			}
+		}
+	}
 }

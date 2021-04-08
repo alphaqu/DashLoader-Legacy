@@ -14,8 +14,8 @@ import java.util.List;
 @Mixin(ParticleTextureData.class)
 public interface ParticleTextureDataAccessor {
 
-    @Invoker("<init>")
-    static ParticleTextureData newParticleTextureData(@Nullable List<Identifier> textureList){
-        throw new AssertionError();
-    }
+	@Invoker("<init>")
+	static ParticleTextureData newParticleTextureData(@Nullable List<Identifier> textureList){
+		throw new AssertionError();
+	}
 }

@@ -13,9 +13,9 @@ import java.util.Map;
 
 public interface FontManagerAccessor {
 
-    @Accessor("textureManager")
-    TextureManager getTextureManager();
+	@Accessor("textureManager")
+	TextureManager getTextureManager();
 
-    @Accessor("fontStorages")
-    Map<Identifier, FontStorage> getFontStorages();
+	@Accessor("fontStorages")
+	Map<Identifier, FontStorage> getFontStorages();
 }

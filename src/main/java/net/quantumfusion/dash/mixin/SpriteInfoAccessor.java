@@ -11,7 +11,7 @@ import java.util.Map;
 @Mixin(targets = "net.minecraft.client.texture.Sprite$Info")
 public interface SpriteInfoAccessor {
 
-    @Accessor("animationData")
-    AnimationResourceMetadata getAnimationData();
+	@Accessor("animationData")
+	AnimationResourceMetadata getAnimationData();
 
 }

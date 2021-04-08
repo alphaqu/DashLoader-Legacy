@@ -8,33 +8,33 @@ import net.quantumfusion.dash.mixin.SpriteInfoAccessor;
 
 
 public class DashSpriteInfo {
-    @Serialize(order = 0)
-    public final DashIdentifier id;
-    @Serialize(order = 1)
-    public final int width;
-    @Serialize(order = 2)
-    public final int height;
-    @Serialize(order = 3)
-    public final DashAnimationResourceMetadata animationData;
+	@Serialize(order = 0)
+	public final DashIdentifier id;
+	@Serialize(order = 1)
+	public final int width;
+	@Serialize(order = 2)
+	public final int height;
+	@Serialize(order = 3)
+	public final DashAnimationResourceMetadata animationData;
 
-    public DashSpriteInfo(@Deserialize("id") DashIdentifier id,
-                          @Deserialize("width") int width,
-                          @Deserialize("height") int height,
-                          @Deserialize("animationData") DashAnimationResourceMetadata animationData) {
-        this.id = id;
-        this.width = width;
-        this.height = height;
-        this.animationData = animationData;
-    }
+	public DashSpriteInfo(@Deserialize("id") DashIdentifier id,
+						  @Deserialize("width") int width,
+						  @Deserialize("height") int height,
+						  @Deserialize("animationData") DashAnimationResourceMetadata animationData) {
+		this.id = id;
+		this.width = width;
+		this.height = height;
+		this.animationData = animationData;
+	}
 
-    public DashSpriteInfo(Sprite.Info info) {
-        id = new DashIdentifier(info.getId());
-        width = info.getWidth();
-        height = info.getHeight();
-        animationData = new DashAnimationResourceMetadata(((SpriteInfoAccessor) (Object) info).getAnimationData());
-    }
+	public DashSpriteInfo(Sprite.Info info) {
+		id = new DashIdentifier(info.getId());
+		width = info.getWidth();
+		height = info.getHeight();
+		animationData = new DashAnimationResourceMetadata(((SpriteInfoAccessor) (Object) info).getAnimationData());
+	}
 
-    public Sprite.Info toUndash() {
-        return new Sprite.Info(id.toUndash(), width, height, animationData.toUndash());
-    }
+	public Sprite.Info toUndash() {
+		return new Sprite.Info(id.toUndash(), width, height, animationData.toUndash());
+	}
 }

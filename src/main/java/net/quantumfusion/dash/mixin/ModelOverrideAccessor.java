@@ -10,6 +10,6 @@ import java.util.Map;
 @Mixin(ModelOverride.class)
 public interface ModelOverrideAccessor {
 
-    @Accessor("predicateToThresholds")
-    Map<Identifier, Float> getPredicateToThresholdsD();
+	@Accessor("predicateToThresholds")
+	Map<Identifier, Float> getPredicateToThresholdsD();
 }

@@ -8,6 +8,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(VoxelShape.class)
 public interface VoxelShapeAccessor {
 
-    @Accessor()
-    public VoxelSet getVoxels();
+	@Accessor()
+	public VoxelSet getVoxels();
 }

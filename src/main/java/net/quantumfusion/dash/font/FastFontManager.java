@@ -29,86 +29,86 @@ import java.util.Objects;
 
 public class FastFontManager {
 
-    private static final Logger LOGGER = LogManager.getLogger();
-    private final FontManagerAccessor fontManager;
+	private static final Logger LOGGER = LogManager.getLogger();
+	private final FontManagerAccessor fontManager;
 
 
-    public FastFontManager(FontManagerAccessor fontManager) {
-        this.fontManager = fontManager;
-    }
+	public FastFontManager(FontManagerAccessor fontManager) {
+		this.fontManager = fontManager;
+	}
 
-    public final ResourceReloadListener resourceReloadListener = new SinglePreparationResourceReloadListener<Map<Identifier, List<Font>>>() {
-        protected Map<Identifier, List<Font>> prepare(ResourceManager resourceManager, Profiler profiler) {
-            System.out.println("Preparing fonts.");
-            profiler.startTick();
-            Gson gson = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
-            Map<Identifier, List<Font>> map = Maps.newHashMap();
-            for (Identifier identifier : resourceManager.findResources("font", (stringx) -> stringx.endsWith(".json"))) {
-                String string = identifier.getPath();
-                Identifier identifier2 = new Identifier(identifier.getNamespace(), string.substring("font/".length(), string.length() - ".json".length()));
-                List<Font> list = map.computeIfAbsent(identifier2, (identifierx) -> Lists.newArrayList((new BlankFont())));
-                profiler.push(identifier2::toString);
-                try {
-                    Resource resource = resourceManager.getResource(identifier);
-                        profiler.push(resource::getResourcePackName);
-                        try {
-                            try (InputStream inputStream = resource.getInputStream()) {
-                                try (Reader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-                                    profiler.push("reading");
-                                    JsonArray jsonArray = JsonHelper.getArray(Objects.requireNonNull(JsonHelper.deserialize(gson, reader, JsonObject.class)), "providers");
-                                    profiler.swap("parsing");
+	public final ResourceReloadListener resourceReloadListener = new SinglePreparationResourceReloadListener<Map<Identifier, List<Font>>>() {
+		protected Map<Identifier, List<Font>> prepare(ResourceManager resourceManager, Profiler profiler) {
+			System.out.println("Preparing fonts.");
+			profiler.startTick();
+			Gson gson = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
+			Map<Identifier, List<Font>> map = Maps.newHashMap();
+			for (Identifier identifier : resourceManager.findResources("font", (stringx) -> stringx.endsWith(".json"))) {
+				String string = identifier.getPath();
+				Identifier identifier2 = new Identifier(identifier.getNamespace(), string.substring("font/".length(), string.length() - ".json".length()));
+				List<Font> list = map.computeIfAbsent(identifier2, (identifierx) -> Lists.newArrayList((new BlankFont())));
+				profiler.push(identifier2::toString);
+				try {
+					Resource resource = resourceManager.getResource(identifier);
+						profiler.push(resource::getResourcePackName);
+						try {
+							try (InputStream inputStream = resource.getInputStream()) {
+								try (Reader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+									profiler.push("reading");
+									JsonArray jsonArray = JsonHelper.getArray(Objects.requireNonNull(JsonHelper.deserialize(gson, reader, JsonObject.class)), "providers");
+									profiler.swap("parsing");
 
-                                    for (int i = jsonArray.size() - 1; i >= 0; --i) {
-                                        JsonObject jsonObject = JsonHelper.asObject(jsonArray.get(i), "providers[" + i + "]");
-                                        try {
-                                            String string2 = JsonHelper.getString(jsonObject, "type");
-                                            profiler.push(string2);
-                                            Font font = FontType.byId(string2).createLoader(jsonObject).load(resourceManager);
-                                            if (font != null) {
-                                                list.add(font);
-                                            }
-                                            profiler.pop();
-                                        } catch (RuntimeException var49) {
-                                            LOGGER.warn("Unable to read definition '{}' in fonts.json in resourcepack: '{}': {}", identifier2, resource.getResourcePackName(), var49.getMessage());
-                                        }
-                                    }
+									for (int i = jsonArray.size() - 1; i >= 0; --i) {
+										JsonObject jsonObject = JsonHelper.asObject(jsonArray.get(i), "providers[" + i + "]");
+										try {
+											String string2 = JsonHelper.getString(jsonObject, "type");
+											profiler.push(string2);
+											Font font = FontType.byId(string2).createLoader(jsonObject).load(resourceManager);
+											if (font != null) {
+												list.add(font);
+											}
+											profiler.pop();
+										} catch (RuntimeException var49) {
+											LOGGER.warn("Unable to read definition '{}' in fonts.json in resourcepack: '{}': {}", identifier2, resource.getResourcePackName(), var49.getMessage());
+										}
+									}
 
-                                    profiler.pop();
-                                }
-                            }
-                        } catch (RuntimeException var54) {
-                            LOGGER.warn("Unable to load font '{}' in fonts.json in resourcepack: '{}': {}", identifier2, resource.getResourcePackName(), var54.getMessage());
-                        }
-                        profiler.pop();
-                } catch (IOException var55) {
-                    LOGGER.warn("Unable to load font '{}' in fonts.json: {}", identifier2, var55.getMessage());
-                }
+									profiler.pop();
+								}
+							}
+						} catch (RuntimeException var54) {
+							LOGGER.warn("Unable to load font '{}' in fonts.json in resourcepack: '{}': {}", identifier2, resource.getResourcePackName(), var54.getMessage());
+						}
+						profiler.pop();
+				} catch (IOException var55) {
+					LOGGER.warn("Unable to load font '{}' in fonts.json: {}", identifier2, var55.getMessage());
+				}
 
-                profiler.push("caching");
+				profiler.push("caching");
 
-                profiler.pop();
-                profiler.pop();
-            }
-            return map;
-        }
+				profiler.pop();
+				profiler.pop();
+			}
+			return map;
+		}
 
-        protected void apply(Map<Identifier, List<Font>> map, ResourceManager resourceManager, Profiler profiler) {
-            profiler.startTick();
-            profiler.push("closing");
-            fontManager.getFontStorages().values().forEach(FontStorage::close);
-            fontManager.getFontStorages().clear();
-            profiler.swap("reloading");
-            map.forEach((identifier, list) -> {
-                FontStorage fontStorage = new FontStorage(fontManager.getTextureManager(), identifier);
-                fontStorage.setFonts(Lists.reverse(list));
-                fontManager.getFontStorages().put(identifier, fontStorage);
-            });
-            profiler.pop();
-            profiler.endTick();
-        }
+		protected void apply(Map<Identifier, List<Font>> map, ResourceManager resourceManager, Profiler profiler) {
+			profiler.startTick();
+			profiler.push("closing");
+			fontManager.getFontStorages().values().forEach(FontStorage::close);
+			fontManager.getFontStorages().clear();
+			profiler.swap("reloading");
+			map.forEach((identifier, list) -> {
+				FontStorage fontStorage = new FontStorage(fontManager.getTextureManager(), identifier);
+				fontStorage.setFonts(Lists.reverse(list));
+				fontManager.getFontStorages().put(identifier, fontStorage);
+			});
+			profiler.pop();
+			profiler.endTick();
+		}
 
-        public String getName() {
-            return "FontManager";
-        }
-    };
+		public String getName() {
+			return "FontManager";
+		}
+	};
 }

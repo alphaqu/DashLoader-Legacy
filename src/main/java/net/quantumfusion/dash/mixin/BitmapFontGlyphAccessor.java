@@ -7,25 +7,25 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(targets = "net.minecraft.client.font.BitmapFont$BitmapFontGlyph")
 public interface BitmapFontGlyphAccessor {
 
-    @Accessor("image")
-    NativeImage getImageD();
+	@Accessor("image")
+	NativeImage getImageD();
 
-    @Accessor("x")
-    int getXD();
+	@Accessor("x")
+	int getXD();
 
-    @Accessor("y")
-    int getYD();
+	@Accessor("y")
+	int getYD();
 
-    @Accessor("scaleFactor")
-    float getScaleFactorD();
+	@Accessor("scaleFactor")
+	float getScaleFactorD();
 
 
-    @Accessor("width")
-    int getWidthD();
-    @Accessor("height")
-    int getHeightD();
-    @Accessor("advance")
-    int getAdvanceD();
-    @Accessor("ascent")
-    int getAscentD();
+	@Accessor("width")
+	int getWidthD();
+	@Accessor("height")
+	int getHeightD();
+	@Accessor("advance")
+	int getAdvanceD();
+	@Accessor("ascent")
+	int getAscentD();
 }
