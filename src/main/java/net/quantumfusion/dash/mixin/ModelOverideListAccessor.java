@@ -16,7 +16,12 @@ public interface ModelOverideListAccessor {
     @Accessor("overrides")
     List<ModelOverride> getOverrides();
 
-
     @Accessor("models")
     List<BakedModel> getModels();
+
+    @Accessor("overrides")
+    void setOverrides(List<ModelOverride> overrides);
+
+    @Accessor("models")
+    void setModels(List<BakedModel> models);
 }

@@ -7,24 +7,16 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.block.Material;
 import net.minecraft.client.render.model.SpriteAtlasManager;
 import net.minecraft.client.render.model.json.JsonUnbakedModel;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.Sprite;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.state.property.BooleanProperty;
-import net.minecraft.state.property.DirectionProperty;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 import net.quantumfusion.dash.misc.DashParticleTextureData;
 import net.quantumfusion.dash.misc.DashSplashTextData;
-import net.quantumfusion.dash.model.atlas.DashSpriteAtlasManager;
-import net.quantumfusion.dash.model.object.DashJsonUnbakedModel;
+import net.quantumfusion.dash.cache.atlas.DashSpriteAtlasManager;
+import net.quantumfusion.dash.cache.models.DashJsonUnbakedModel;
 import net.quantumfusion.dash.sprite.SpriteInfoCache;
 import net.quantumfusion.dash.util.TimeHelper;
 import sun.misc.Unsafe;
@@ -94,8 +86,7 @@ public class Dash implements ModInitializer {
     }
 
     public static void reload() {
-        registerMaterials();
-                caching = true;
+        caching = true;
         particleCache = new HashMap<>();
         spriteInfoCache = new HashMap<>();
         jsonModelMap = new HashMap<>();
@@ -123,53 +114,6 @@ public class Dash implements ModInitializer {
         dash.start();
     }
 
-    private static void registerMaterials() {
-      materialRegistry.put("AIR",Material.AIR);
-      materialRegistry.put("STRUCTURE_VOID",Material.STRUCTURE_VOID);
-      materialRegistry.put("PORTAL",Material.PORTAL);
-      materialRegistry.put("CARPET",Material.CARPET);
-      materialRegistry.put("PLANT",Material.PLANT);
-      materialRegistry.put("UNDERWATER_PLANT",Material.UNDERWATER_PLANT);
-      materialRegistry.put("REPLACEABLE_PLANT",Material.REPLACEABLE_PLANT);
-      materialRegistry.put("NETHER_SHOOTS",Material.NETHER_SHOOTS);
-      materialRegistry.put("REPLACEABLE_UNDERWATER_PLANT",Material.REPLACEABLE_UNDERWATER_PLANT);
-      materialRegistry.put("WATER",Material.WATER);
-      materialRegistry.put("BUBBLE_COLUMN",Material.BUBBLE_COLUMN);
-      materialRegistry.put("LAVA",Material.LAVA);
-      materialRegistry.put("SNOW_LAYER",Material.SNOW_LAYER);
-      materialRegistry.put("FIRE",Material.FIRE);
-      materialRegistry.put("SUPPORTED",Material.SUPPORTED);
-      materialRegistry.put("COBWEB",Material.COBWEB);
-      materialRegistry.put("REDSTONE_LAMP",Material.REDSTONE_LAMP);
-      materialRegistry.put("ORGANIC_PRODUCT",Material.ORGANIC_PRODUCT);
-      materialRegistry.put("SOIL",Material.SOIL);
-      materialRegistry.put("SOLID_ORGANIC",Material.SOLID_ORGANIC);
-      materialRegistry.put("DENSE_ICE",Material.DENSE_ICE);
-      materialRegistry.put("AGGREGATE",Material.AGGREGATE);
-      materialRegistry.put("SPONGE",Material.SPONGE);
-      materialRegistry.put("SHULKER_BOX",Material.SHULKER_BOX);
-      materialRegistry.put("WOOD",Material.WOOD);
-      materialRegistry.put("NETHER_WOOD",Material.NETHER_WOOD);
-      materialRegistry.put("BAMBOO_SAPLING",Material.BAMBOO_SAPLING);
-      materialRegistry.put("BAMBOO",Material.BAMBOO);
-      materialRegistry.put("WOOL",Material.WOOL);
-      materialRegistry.put("TNT",Material.TNT);
-      materialRegistry.put("LEAVES",Material.LEAVES);
-      materialRegistry.put("GLASS",Material.GLASS);
-      materialRegistry.put("ICE",Material.ICE);
-      materialRegistry.put("CACTUS",Material.CACTUS);
-      materialRegistry.put("STONE",Material.STONE);
-      materialRegistry.put("METAL",Material.METAL);
-      materialRegistry.put("SNOW_BLOCK",Material.SNOW_BLOCK);
-      materialRegistry.put("REPAIR_STATION",Material.REPAIR_STATION);
-      materialRegistry.put("BARRIER",Material.BARRIER);
-      materialRegistry.put("PISTON",Material.PISTON);
-      materialRegistry.put("UNUSED_PLANT",Material.UNUSED_PLANT);
-      materialRegistry.put("GOURD",Material.GOURD);
-      materialRegistry.put("EGG",Material.EGG);
-      materialRegistry.put("CAKE",Material.CAKE);
-
-    }
 
     private static void makeFolders() {
         createDirectory("dash");

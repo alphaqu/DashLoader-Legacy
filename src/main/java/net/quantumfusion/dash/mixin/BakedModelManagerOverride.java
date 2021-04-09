@@ -1,26 +1,22 @@
 package net.quantumfusion.dash.mixin;
 
-import com.google.common.collect.ArrayTable;
-import com.google.common.collect.Table;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import it.unimi.dsi.fastutil.objects.Object2IntOpenCustomHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.client.render.block.BlockModels;
-import net.minecraft.client.render.model.BakedModel;
-import net.minecraft.client.render.model.BakedModelManager;
-import net.minecraft.client.render.model.ModelLoader;
-import net.minecraft.client.render.model.SpriteAtlasManager;
+import net.minecraft.client.render.model.*;
 import net.minecraft.client.texture.TextureManager;
 import net.minecraft.resource.ResourceManager;
-import net.minecraft.state.property.Property;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.profiler.Profiler;
 import net.quantumfusion.dash.Dash;
-import net.quantumfusion.dash.model.atlas.DashSpriteAtlasManager;
-import net.quantumfusion.dash.model.blockstates.DashBlockState;
+import net.quantumfusion.dash.cache.DashModelLoader;
+import net.quantumfusion.dash.cache.atlas.DashSpriteAtlasManager;
+import net.quantumfusion.dash.cache.blockstates.DashBlockState;
+import net.quantumfusion.dash.cache.models.DashBakedModel;
+import net.quantumfusion.dash.cache.models.basic.DashBasicBakedModel;
+import net.quantumfusion.dash.common.DashIdentifier;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -30,6 +26,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
 
@@ -43,9 +40,10 @@ public class BakedModelManagerOverride {
 
     @Shadow @Nullable private SpriteAtlasManager atlasManager;
 
-    private static SpriteAtlasManager atlasManagerCache;
-    private static Map<Identifier, BakedModel> modelsCache;
-    private static Object2IntMap<BlockState> stateLookupCache;
+    private static DashSpriteAtlasManager atlasManagerCache;
+    private static Map<DashIdentifier, DashBakedModel> modelsCache;
+    private static Map<Identifier, BakedModel> modelsCachetemp;
+    private static Object2IntMap<DashBlockState> stateLookupCache;
 
     @Shadow @Final private TextureManager textureManager;
 
@@ -79,20 +77,26 @@ public class BakedModelManagerOverride {
 
         if(modelLoader != null){
             System.out.println("Creating model cache");
+            //serialization
             this.atlasManager = modelLoader.upload(this.textureManager, profiler);
             this.models = modelLoader.getBakedModelMap();
             this.stateLookup = modelLoader.getStateLookup();
-            atlasManagerCache =  Dash.compare(atlasManager);
+
+            atlasManagerCache = new DashSpriteAtlasManager(atlasManager);
             stateLookupCache = new Object2IntOpenHashMap<>();
-            stateLookup.forEach((blockState, integer) -> stateLookupCache.put((new DashBlockState(blockState).toUndash()),integer));
-            modelsCache = models;
+            modelsCache = new HashMap<>();
+            modelsCachetemp = new HashMap<>();
 
+            stateLookup.forEach((blockState, integer) -> stateLookupCache.put((new DashBlockState(blockState)),integer));
+            models.forEach((identifier, bakedModel) -> {
+                    modelsCachetemp.put(identifier,bakedModel);
+            });
         } else {
-            System.out.println("Dashcache");
-            atlasManager = atlasManagerCache;
-            models = modelsCache;
-            stateLookup = stateLookupCache;
-
+            DashModelLoader loader = new DashModelLoader(atlasManagerCache,modelsCache,stateLookupCache);
+            loader.load(modelsCachetemp);
+            atlasManager = loader.atlasManagerOut;
+            stateLookup = loader.stateLookupOut;
+            models = loader.modelsOut;
         }
 
         this.missingModel = this.models.get(ModelLoader.MISSING);

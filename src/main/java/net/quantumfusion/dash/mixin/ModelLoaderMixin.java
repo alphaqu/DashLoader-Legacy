@@ -10,7 +10,7 @@ import net.minecraft.resource.Resource;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.util.Identifier;
 import net.quantumfusion.dash.Dash;
-import net.quantumfusion.dash.model.object.DashJsonUnbakedModel;
+import net.quantumfusion.dash.cache.models.DashJsonUnbakedModel;
 import net.quantumfusion.dash.util.StringHelper;
 import org.apache.commons.compress.utils.IOUtils;
 import org.spongepowered.asm.mixin.Final;

@@ -11,6 +11,7 @@
   "license": "MIT",
   "icon": "assets/dash/icon.png",
   "environment": "*",
+  "accessWidener" : "dash.accesswidener",
   "entrypoints": {
     "client": [
       "net.quantumfusion.dash.client.DashClient"

@@ -21,6 +21,8 @@
     "SplashTextResourceSupplierMixin",
     "TextureUtilMixin",
     "SpriteInterpolationMixin",
+
+    "BasicBakedModelAccessor",
     "AbstractBlockStateAccessor",
     "StateAccessor",
     "SpriteDataAccessor",
