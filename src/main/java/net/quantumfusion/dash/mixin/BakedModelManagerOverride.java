@@ -3,6 +3,8 @@ package net.quantumfusion.dash.mixin;
 import com.google.common.collect.ArrayTable;
 import com.google.common.collect.Table;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenCustomHashMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.color.block.BlockColors;
@@ -18,6 +20,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.profiler.Profiler;
 import net.quantumfusion.dash.Dash;
 import net.quantumfusion.dash.model.atlas.DashSpriteAtlasManager;
+import net.quantumfusion.dash.model.blockstates.DashBlockState;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -79,12 +82,14 @@ public class BakedModelManagerOverride {
             this.atlasManager = modelLoader.upload(this.textureManager, profiler);
             this.models = modelLoader.getBakedModelMap();
             this.stateLookup = modelLoader.getStateLookup();
-            atlasManagerCache = atlasManager;
+            atlasManagerCache =  Dash.compare(atlasManager);
+            stateLookupCache = new Object2IntOpenHashMap<>();
+            stateLookup.forEach((blockState, integer) -> stateLookupCache.put((new DashBlockState(blockState).toUndash()),integer));
             modelsCache = models;
-            stateLookupCache  = stateLookup;
+
         } else {
             System.out.println("Dashcache");
-            atlasManager = Dash.compare(atlasManagerCache);
+            atlasManager = atlasManagerCache;
             models = modelsCache;
             stateLookup = stateLookupCache;
 

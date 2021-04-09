@@ -21,8 +21,7 @@
     "SplashTextResourceSupplierMixin",
     "TextureUtilMixin",
     "SpriteInterpolationMixin",
-
-    "AbstactBlockStateAccessor",
+    "AbstractBlockStateAccessor",
     "StateAccessor",
     "SpriteDataAccessor",
     "VoxelShapeAccessor",

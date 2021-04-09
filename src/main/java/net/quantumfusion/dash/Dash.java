@@ -7,7 +7,9 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.Material;
 import net.minecraft.client.render.model.SpriteAtlasManager;
 import net.minecraft.client.render.model.json.JsonUnbakedModel;
@@ -18,6 +20,7 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.DirectionProperty;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registry;
 import net.quantumfusion.dash.misc.DashParticleTextureData;
 import net.quantumfusion.dash.misc.DashSplashTextData;
 import net.quantumfusion.dash.model.atlas.DashSpriteAtlasManager;
@@ -87,7 +90,6 @@ public class Dash implements ModInitializer {
 
     public static SpriteAtlasManager compare(SpriteAtlasManager atlasManagerCache) {
         SpriteAtlasManager out = new DashSpriteAtlasManager(atlasManagerCache).toUndash();
-        System.out.println("test");
         return out;
     }
 
