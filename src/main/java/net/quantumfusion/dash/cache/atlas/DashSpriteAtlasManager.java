@@ -1,15 +1,19 @@
 package net.quantumfusion.dash.cache.atlas;
 
+import io.activej.serializer.annotations.Deserialize;
+import io.activej.serializer.annotations.Serialize;
 import net.minecraft.client.render.model.SpriteAtlasManager;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.quantumfusion.dash.mixin.SpriteAtlasManagerAccessor;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class DashSpriteAtlasManager {
-    public final ArrayList<DashSpriteAtlasTexture> atlases;
+    @Serialize(order = 0)
+    public final List<DashSpriteAtlasTexture> atlases;
 
-    public DashSpriteAtlasManager(ArrayList<DashSpriteAtlasTexture> atlases) {
+    public DashSpriteAtlasManager(@Deserialize("atlases") List<DashSpriteAtlasTexture> atlases) {
         this.atlases = atlases;
     }
 

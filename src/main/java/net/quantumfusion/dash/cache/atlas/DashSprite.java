@@ -1,5 +1,8 @@
 package net.quantumfusion.dash.cache.atlas;
 
+import io.activej.serializer.annotations.Deserialize;
+import io.activej.serializer.annotations.Serialize;
+import io.activej.serializer.annotations.SerializeNullable;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.texture.SpriteAtlasTexture;
@@ -10,29 +13,58 @@ import net.quantumfusion.dash.sprite.util.DashImage;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class DashSprite {
-
-    private final DashSpriteInfo info;
-    private final DashAnimationResourceMetadata animationMetadata;
-    protected List<DashImage> images;
-    private final int[] frameXs;
-    private final int[] frameYs;
+    @Serialize(order = 0)
+    public final DashSpriteInfo info;
+    @Serialize(order = 1)
+    public final DashAnimationResourceMetadata animationMetadata;
+    @Serialize(order = 2)
+    public List<DashImage> images;
+    @Serialize(order = 3)
+    public final int[] frameXs;
+    @Serialize(order = 4)
+    public final int[] frameYs;
+    @Serialize(order = 5)
+    @SerializeNullable
     @Nullable
-    private final DashSpriteInterpolation interpolation;
-    private final int x;
-    private final int y;
-    private final float uMin;
-    private final float uMax;
-    private final float vMin;
-    private final float vMax;
-    private final int frameIndex;
-    private final int frameTicks;
+    public final DashSpriteInterpolation interpolation;
+    @Serialize(order = 6)
+    public final int x;
+    @Serialize(order = 7)
+    public final int y;
+    @Serialize(order = 8)
+    public final float uMin;
+    @Serialize(order = 9)
+    public final float uMax;
+    @Serialize(order = 10)
+    public final float vMin;
+    @Serialize(order = 11)
+    public final float vMax;
+    @Serialize(order = 12)
+    public final int frameIndex;
+    @Serialize(order = 13)
+    public final int frameTicks;
 
-    public DashSprite(DashSpriteInfo info, DashAnimationResourceMetadata animationMetadata, List<DashImage> images, int[] frameXs, int[] frameYs, @Nullable DashSpriteInterpolation interpolation, int x, int y, float uMin, float uMax, float vMin, float vMax, int frameIndex, int frameTicks) {
+
+    public DashSprite(@Deserialize("info") DashSpriteInfo info,
+                      @Deserialize("animationMetadata") DashAnimationResourceMetadata animationMetadata,
+                      @Deserialize("images") List<DashImage> images,
+                      @Deserialize("frameXs") int[] frameXs,
+                      @Deserialize("frameYs") int[] frameYs,
+                      @Deserialize("interpolation") @Nullable DashSpriteInterpolation interpolation,
+                      @Deserialize("x") int x,
+                      @Deserialize("y") int y,
+                      @Deserialize("uMin") float uMin,
+                      @Deserialize("uMax") float uMax,
+                      @Deserialize("vMin") float vMin,
+                      @Deserialize("vMax") float vMax,
+                      @Deserialize("frameIndex") int frameIndex,
+                      @Deserialize("frameTicks") int frameTicks) {
         this.info = info;
         this.animationMetadata = animationMetadata;
         this.images = images;
@@ -53,11 +85,12 @@ public class DashSprite {
         SpriteAccessor spriteAccess = ((SpriteAccessor) sprite);
         info = new DashSpriteInfo(spriteAccess.getInfo());
         animationMetadata = new DashAnimationResourceMetadata(spriteAccess.getAnimationMetadata());
-        images = Stream.of(spriteAccess.getImages()).map(DashImage::new).collect(Collectors.toList());
+        images =  new ArrayList<>();
+        Arrays.stream(spriteAccess.getImages()).forEach(nativeImage -> images.add(new DashImage(nativeImage)));
         frameXs = spriteAccess.getFrameXs();
         frameYs = spriteAccess.getFrameYs();
         Sprite.Interpolation interpolation = spriteAccess.getInterpolation();
-        if(interpolation != null){
+        if (interpolation != null) {
             this.interpolation = new DashSpriteInterpolation(spriteAccess.getInterpolation());
         } else {
             this.interpolation = null;
@@ -84,7 +117,7 @@ public class DashSprite {
             spriteAccessor.setImages(imagesOut.toArray(new NativeImage[0]));
             spriteAccessor.setFrameXs(frameXs);
             spriteAccessor.setFrameYs(frameYs);
-            if(interpolation != null){
+            if (interpolation != null) {
                 spriteAccessor.setInterpolation(interpolation.toUndash());
             } else {
                 spriteAccessor.setInterpolation(null);

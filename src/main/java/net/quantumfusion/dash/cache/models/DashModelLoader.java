@@ -1,5 +1,7 @@
 package net.quantumfusion.dash.cache.models;
 
+import io.activej.serializer.BinarySerializer;
+import io.activej.serializer.SerializerBuilder;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.block.BlockState;
@@ -40,7 +42,13 @@ public class DashModelLoader {
                            Object2IntMap<BlockState> stateLookup,
                            Map<Identifier, BakedModel> models) {
         System.out.println("Caching atlas");
-        this.atlas = new DashSpriteAtlasManager(atlasManager);
+
+
+        byte[] buffer = new byte[20000000];
+        BinarySerializer<DashSpriteAtlasManager> serializer = SerializerBuilder.create()
+                .build(DashSpriteAtlasManager.class);
+        serializer.encode(buffer,0,new DashSpriteAtlasManager(atlasManager));
+        this.atlas = serializer.decode(buffer,0);
         this.blockstates = new Object2IntOpenHashMap<>();
         this.models = new HashMap<>();
         modelsOut = new HashMap<>();

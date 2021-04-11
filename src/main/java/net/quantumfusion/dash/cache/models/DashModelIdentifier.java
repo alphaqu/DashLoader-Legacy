@@ -1,11 +1,13 @@
 package net.quantumfusion.dash.cache.models;
 
 
+import io.activej.serializer.annotations.Serialize;
 import net.minecraft.client.util.ModelIdentifier;
 import net.minecraft.util.Identifier;
 import net.quantumfusion.dash.cache.DashIdentifier;
 
 public class DashModelIdentifier extends DashIdentifier {
+    @Serialize(order = 3)
     String variant;
 
 

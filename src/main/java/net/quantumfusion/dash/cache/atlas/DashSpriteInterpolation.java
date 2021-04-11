@@ -1,5 +1,7 @@
 package net.quantumfusion.dash.cache.atlas;
 
+import io.activej.serializer.annotations.Deserialize;
+import io.activej.serializer.annotations.Serialize;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.Sprite;
 import net.quantumfusion.dash.Dash;
@@ -12,9 +14,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class DashSpriteInterpolation {
-    private final List<DashImage> images;
+    @Serialize(order = 0)
+    public final List<DashImage> images;
 
-    public DashSpriteInterpolation(ArrayList<DashImage> images) {
+    public DashSpriteInterpolation(@Deserialize("images") List<DashImage> images) {
         this.images = images;
     }
 

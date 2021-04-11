@@ -12,7 +12,6 @@
 
     "SpriteAtlasTextureMixin",
     "SoundManagerMixin",
-    "ModelLoaderMixin",
     "MinecraftClientMixin",
     "ParticleManagerMixin",
     "MipmapHelperMixin",

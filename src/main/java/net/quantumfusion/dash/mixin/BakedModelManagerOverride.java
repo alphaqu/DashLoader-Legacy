@@ -1,5 +1,7 @@
 package net.quantumfusion.dash.mixin;
 
+import io.activej.serializer.BinarySerializer;
+import io.activej.serializer.SerializerBuilder;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.block.BlockState;
@@ -79,6 +81,7 @@ public class BakedModelManagerOverride {
             this.models = modelLoader.getBakedModelMap();
             this.stateLookup = modelLoader.getStateLookup();
             loader = new DashModelLoader(atlasManager,stateLookup,models);
+
         } else {
             loader.load();
             atlasManager = loader.atlasManagerOut;
