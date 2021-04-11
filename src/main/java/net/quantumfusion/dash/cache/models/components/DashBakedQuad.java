@@ -1,4 +1,4 @@
-package net.quantumfusion.dash.cache.models;
+package net.quantumfusion.dash.cache.models.components;
 
 import net.minecraft.client.render.model.BakedQuad;
 import net.minecraft.client.texture.Sprite;

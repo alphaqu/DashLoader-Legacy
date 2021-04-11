@@ -3,7 +3,7 @@ package net.quantumfusion.dash.sprite.info;
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import net.minecraft.client.texture.Sprite;
-import net.quantumfusion.dash.common.DashIdentifier;
+import net.quantumfusion.dash.cache.DashIdentifier;
 import net.quantumfusion.dash.mixin.SpriteInfoAccessor;
 
 

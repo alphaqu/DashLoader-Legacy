@@ -22,6 +22,11 @@
     "TextureUtilMixin",
     "SpriteInterpolationMixin",
 
+    "BuiltinBakedModelAccessor",
+    "WeightedBakedModelAccessor",
+    "WeightedBakedModelEntryAccessor",
+    "WeightedPickerEntryAccessor",
+    "MultipartBakedModelAccessor",
     "BasicBakedModelAccessor",
     "AbstractBlockStateAccessor",
     "StateAccessor",

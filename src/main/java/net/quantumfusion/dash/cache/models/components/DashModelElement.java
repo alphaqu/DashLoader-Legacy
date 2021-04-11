@@ -1,4 +1,4 @@
-package net.quantumfusion.dash.cache.models;
+package net.quantumfusion.dash.cache.models.components;
 
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
@@ -6,7 +6,6 @@ import io.activej.serializer.annotations.SerializeNullable;
 import net.minecraft.client.render.model.json.ModelElement;
 import net.minecraft.client.render.model.json.ModelElementFace;
 import net.minecraft.util.math.Direction;
-import net.quantumfusion.dash.cache.DashVector3f;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;

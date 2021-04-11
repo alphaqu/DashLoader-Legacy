@@ -1,11 +1,10 @@
-package net.quantumfusion.dash.cache.models;
+package net.quantumfusion.dash.cache.models.components;
 
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import io.activej.serializer.annotations.SerializeNullable;
 import net.minecraft.client.render.model.json.ModelTransformation;
 import net.minecraft.client.render.model.json.Transformation;
-import net.quantumfusion.dash.cache.DashTransformation;
 import org.jetbrains.annotations.Nullable;
 
 public class DashModelTransformation {

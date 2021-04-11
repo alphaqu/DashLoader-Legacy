@@ -4,7 +4,7 @@ import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.util.Identifier;
-import net.quantumfusion.dash.common.DashIdentifier;
+import net.quantumfusion.dash.cache.DashIdentifier;
 import net.quantumfusion.dash.sprite.info.DashSpriteInfo;
 
 import java.util.ArrayList;

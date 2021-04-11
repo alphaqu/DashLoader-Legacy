@@ -1,7 +1,8 @@
-package net.quantumfusion.dash.common;
+package net.quantumfusion.dash.cache;
 
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
+import net.minecraft.client.util.ModelIdentifier;
 import net.minecraft.util.Identifier;
 
 public class DashIdentifier {
@@ -18,8 +19,8 @@ public class DashIdentifier {
     }
 
     public DashIdentifier(Identifier identifier) {
-        this.namespace = identifier.getNamespace();
-        this.path = identifier.getPath();
+            this.namespace = identifier.getNamespace();
+            this.path = identifier.getPath();
     }
 
     public Identifier toUndash() {

@@ -1,4 +1,4 @@
-package net.quantumfusion.dash.cache.properties;
+package net.quantumfusion.dash.cache.blockstates.properties;
 
 import net.minecraft.state.property.DirectionProperty;
 import net.minecraft.util.math.Direction;

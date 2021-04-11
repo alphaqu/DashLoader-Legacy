@@ -1,7 +1,7 @@
 package net.quantumfusion.dash.cache.atlas;
 
 import net.minecraft.client.texture.SpriteAtlasTexture;
-import net.quantumfusion.dash.common.DashIdentifier;
+import net.quantumfusion.dash.cache.DashIdentifier;
 import net.quantumfusion.dash.mixin.SpriteDataAccessor;
 
 import java.util.HashSet;

@@ -1,11 +1,10 @@
-package net.quantumfusion.dash.cache.models;
+package net.quantumfusion.dash.cache.models.components;
 
 
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import net.minecraft.client.render.model.json.ModelRotation;
 import net.minecraft.util.math.Direction;
-import net.quantumfusion.dash.cache.DashVector3f;
 
 public class DashModelRotation {
 

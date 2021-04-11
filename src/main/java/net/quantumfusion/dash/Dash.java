@@ -16,7 +16,7 @@ import net.minecraft.util.Identifier;
 import net.quantumfusion.dash.misc.DashParticleTextureData;
 import net.quantumfusion.dash.misc.DashSplashTextData;
 import net.quantumfusion.dash.cache.atlas.DashSpriteAtlasManager;
-import net.quantumfusion.dash.cache.models.DashJsonUnbakedModel;
+import net.quantumfusion.dash.cache.models.components.DashJsonUnbakedModel;
 import net.quantumfusion.dash.sprite.SpriteInfoCache;
 import net.quantumfusion.dash.util.TimeHelper;
 import sun.misc.Unsafe;

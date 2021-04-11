@@ -4,7 +4,7 @@ import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.util.Identifier;
 import net.quantumfusion.dash.Dash;
-import net.quantumfusion.dash.common.DashIdentifier;
+import net.quantumfusion.dash.cache.DashIdentifier;
 import net.quantumfusion.dash.mixin.SpriteAtlasTextureAccessor;
 
 import java.util.*;

@@ -6,9 +6,9 @@ import net.minecraft.block.BlockState;
 import net.minecraft.state.property.*;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.registry.Registry;
-import net.quantumfusion.dash.common.DashIdentifier;
+import net.quantumfusion.dash.cache.DashIdentifier;
 import net.quantumfusion.dash.mixin.StateAccessor;
-import net.quantumfusion.dash.cache.properties.*;
+import net.quantumfusion.dash.cache.blockstates.properties.*;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.ArrayList;

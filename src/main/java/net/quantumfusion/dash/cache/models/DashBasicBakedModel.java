@@ -1,20 +1,20 @@
-package net.quantumfusion.dash.cache.models.basic;
+package net.quantumfusion.dash.cache.models;
 
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.BakedQuad;
 import net.minecraft.client.render.model.BasicBakedModel;
-import net.minecraft.client.render.model.SpriteAtlasManager;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Direction;
 import net.quantumfusion.dash.DashException;
 import net.quantumfusion.dash.cache.DashDirection;
+import net.quantumfusion.dash.cache.models.DashModelLoader;
 import net.quantumfusion.dash.cache.models.DashBakedModel;
-import net.quantumfusion.dash.cache.models.DashBakedQuad;
-import net.quantumfusion.dash.cache.models.DashModelOverrideList;
-import net.quantumfusion.dash.cache.models.DashModelTransformation;
-import net.quantumfusion.dash.common.DashIdentifier;
+import net.quantumfusion.dash.cache.models.components.DashBakedQuad;
+import net.quantumfusion.dash.cache.models.components.DashModelOverrideList;
+import net.quantumfusion.dash.cache.models.components.DashModelTransformation;
+import net.quantumfusion.dash.cache.DashIdentifier;
 import net.quantumfusion.dash.mixin.BasicBakedModelAccessor;
 import net.quantumfusion.dash.mixin.SpriteAtlasManagerAccessor;
 import net.quantumfusion.dash.mixin.SpriteAtlasTextureAccessor;
@@ -36,7 +36,7 @@ public class DashBasicBakedModel implements DashBakedModel {
     DashIdentifier spritePointer;
 
 
-    public DashBasicBakedModel(BasicBakedModel basicBakedModel) {
+    public DashBasicBakedModel(BasicBakedModel basicBakedModel, DashModelLoader loader) {
         BasicBakedModelAccessor access = ((BasicBakedModelAccessor) basicBakedModel);
         quads = new ArrayList<>();
         faceQuads = new HashMap<>();
@@ -47,7 +47,7 @@ public class DashBasicBakedModel implements DashBakedModel {
             faceQuads.put(new DashDirection(direction), out);
         });
 
-        itemPropertyOverrides = new DashModelOverrideList(access.getItemPropertyOverrides());
+        itemPropertyOverrides = new DashModelOverrideList(access.getItemPropertyOverrides(),loader);
         usesAo = access.getUsesAo();
         hasDepth = access.getHasDepth();
         isSideLit = access.getIsSideLit();
@@ -57,10 +57,10 @@ public class DashBasicBakedModel implements DashBakedModel {
 
 
     @Override
-    public BakedModel toUndash(SpriteAtlasManager manager) {
+    public BakedModel toUndash(DashModelLoader loader) {
         Identifier id = spritePointer.toUndash();
         Sprite sprite = null;
-        for (Map.Entry<Identifier, SpriteAtlasTexture> entry : ((SpriteAtlasManagerAccessor) manager).getAtlases().entrySet()) {
+        for (Map.Entry<Identifier, SpriteAtlasTexture> entry : ((SpriteAtlasManagerAccessor) loader.atlasManagerOut).getAtlases().entrySet()) {
             SpriteAtlasTexture spriteAtlasTexture = entry.getValue();
             if (((SpriteAtlasTextureAccessor) spriteAtlasTexture).getSprites().containsKey(id)) {
                 sprite = spriteAtlasTexture.getSprite(id);
@@ -85,6 +85,6 @@ public class DashBasicBakedModel implements DashBakedModel {
             faceQuadsOut.put(dashDirection.toUndash(), out);
         }
 
-        return new BasicBakedModel(quadsOut, faceQuadsOut, usesAo, isSideLit, hasDepth, sprite, transformation.toUndash(), itemPropertyOverrides.toUndash());
+        return new BasicBakedModel(quadsOut, faceQuadsOut, usesAo, isSideLit, hasDepth, sprite, transformation.toUndash(), itemPropertyOverrides.toUndash(loader));
     }
 }

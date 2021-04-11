@@ -1,4 +1,4 @@
-package net.quantumfusion.dash.cache.properties;
+package net.quantumfusion.dash.cache.blockstates.properties;
 
 import net.minecraft.state.property.EnumProperty;
 import org.apache.commons.lang3.tuple.MutablePair;

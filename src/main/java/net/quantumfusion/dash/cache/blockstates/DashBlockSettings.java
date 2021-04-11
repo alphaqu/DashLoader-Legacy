@@ -1,7 +1,7 @@
 package net.quantumfusion.dash.cache.blockstates;
 
 import net.minecraft.block.AbstractBlock;
-import net.quantumfusion.dash.common.DashIdentifier;
+import net.quantumfusion.dash.cache.DashIdentifier;
 import net.quantumfusion.dash.mixin.AbstractBlockSettingsAccessor;
 import net.quantumfusion.dash.registry.DashPropertyRegistry;
 

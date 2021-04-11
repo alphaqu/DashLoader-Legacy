@@ -1,4 +1,4 @@
-package net.quantumfusion.dash.cache.models;
+package net.quantumfusion.dash.cache.models.components;
 
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;

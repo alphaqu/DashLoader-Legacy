@@ -1,4 +1,4 @@
-package net.quantumfusion.dash.cache.models;
+package net.quantumfusion.dash.cache.models.components;
 
 import com.mojang.datafixers.util.Either;
 import io.activej.serializer.annotations.Deserialize;
@@ -11,7 +11,7 @@ import net.minecraft.client.render.model.json.ModelTransformation;
 import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.util.Identifier;
 
-import net.quantumfusion.dash.common.DashIdentifier;
+import net.quantumfusion.dash.cache.DashIdentifier;
 import net.quantumfusion.dash.mixin.JsonUnbakedModelAccessor;
 import org.jetbrains.annotations.Nullable;
 

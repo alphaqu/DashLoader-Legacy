@@ -11,12 +11,11 @@ import net.minecraft.resource.ResourceManager;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.profiler.Profiler;
 import net.quantumfusion.dash.Dash;
-import net.quantumfusion.dash.cache.DashModelLoader;
+import net.quantumfusion.dash.cache.models.DashModelLoader;
 import net.quantumfusion.dash.cache.atlas.DashSpriteAtlasManager;
 import net.quantumfusion.dash.cache.blockstates.DashBlockState;
 import net.quantumfusion.dash.cache.models.DashBakedModel;
-import net.quantumfusion.dash.cache.models.basic.DashBasicBakedModel;
-import net.quantumfusion.dash.common.DashIdentifier;
+import net.quantumfusion.dash.cache.DashIdentifier;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -40,10 +39,9 @@ public class BakedModelManagerOverride {
 
     @Shadow @Nullable private SpriteAtlasManager atlasManager;
 
-    private static DashSpriteAtlasManager atlasManagerCache;
-    private static Map<DashIdentifier, DashBakedModel> modelsCache;
+    private static DashModelLoader loader;
     private static Map<Identifier, BakedModel> modelsCachetemp;
-    private static Object2IntMap<DashBlockState> stateLookupCache;
+
 
     @Shadow @Final private TextureManager textureManager;
 
@@ -59,9 +57,8 @@ public class BakedModelManagerOverride {
             at = @At(value = "HEAD"), cancellable = true)
     private void prepare(ResourceManager resourceManager, Profiler profiler, CallbackInfoReturnable<ModelLoader> cir) {
         profiler.startTick();
-        Dash.modelLoading = Executors.newFixedThreadPool(4);
         ModelLoader modelLoader = null;
-        if(modelsCache == null){
+        if(loader == null){
             modelLoader = new ModelLoader(resourceManager, this.colorMap, profiler, this.mipmap);
         }
         profiler.endTick();
@@ -81,23 +78,14 @@ public class BakedModelManagerOverride {
             this.atlasManager = modelLoader.upload(this.textureManager, profiler);
             this.models = modelLoader.getBakedModelMap();
             this.stateLookup = modelLoader.getStateLookup();
-
-            atlasManagerCache = new DashSpriteAtlasManager(atlasManager);
-            stateLookupCache = new Object2IntOpenHashMap<>();
-            modelsCache = new HashMap<>();
-            modelsCachetemp = new HashMap<>();
-
-            stateLookup.forEach((blockState, integer) -> stateLookupCache.put((new DashBlockState(blockState)),integer));
-            models.forEach((identifier, bakedModel) -> {
-                    modelsCachetemp.put(identifier,bakedModel);
-            });
+            loader = new DashModelLoader(atlasManager,stateLookup,models);
         } else {
-            DashModelLoader loader = new DashModelLoader(atlasManagerCache,modelsCache,stateLookupCache);
-            loader.load(modelsCachetemp);
+            loader.load();
             atlasManager = loader.atlasManagerOut;
             stateLookup = loader.stateLookupOut;
             models = loader.modelsOut;
         }
+        stateLookup = new Object2IntOpenHashMap<>();
 
         this.missingModel = this.models.get(ModelLoader.MISSING);
         profiler.swap("cache");
