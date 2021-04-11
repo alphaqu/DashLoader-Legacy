@@ -9,7 +9,7 @@ import net.quantumfusion.dash.sprite.util.DashImage;
 
 import java.util.HashMap;
 
-public class DashBitmapFont  {
+public class DashBitmapFont {
     @Serialize(order = 0)
     public final DashImage image;
     @Serialize(order = 1)

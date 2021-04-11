@@ -1,12 +1,9 @@
 package net.quantumfusion.dash.mixin;
 
-import net.minecraft.client.font.FontManager;
 import net.minecraft.client.resource.DefaultClientResourcePack;
 import net.minecraft.client.resource.ResourceIndex;
-import net.minecraft.resource.ResourceReloadListener;
 import net.minecraft.resource.ResourceType;
 import net.minecraft.util.Identifier;
-import net.quantumfusion.dash.font.FastFontManager;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -19,7 +16,9 @@ import java.io.File;
 @Mixin(DefaultClientResourcePack.class)
 public class DefaultClientResourcePackMixin {
 
-    @Shadow @Final private ResourceIndex index;
+    @Shadow
+    @Final
+    private ResourceIndex index;
 
     @Inject(method = "contains(Lnet/minecraft/resource/ResourceType;Lnet/minecraft/util/Identifier;)Z",
             at = @At(value = "HEAD"), cancellable = true)

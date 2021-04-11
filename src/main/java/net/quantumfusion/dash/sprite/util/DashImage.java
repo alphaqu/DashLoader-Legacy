@@ -3,17 +3,9 @@ package net.quantumfusion.dash.sprite.util;
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import net.minecraft.client.texture.NativeImage;
-import org.apache.commons.io.IOUtils;
-import org.lwjgl.stb.STBImageWrite;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.ByteBuffer;
-import java.nio.channels.Channels;
-import java.nio.channels.WritableByteChannel;
-import java.util.Arrays;
 
 public class DashImage {
 
@@ -40,8 +32,6 @@ public class DashImage {
         }
         return null;
     }
-
-
 
 
 }

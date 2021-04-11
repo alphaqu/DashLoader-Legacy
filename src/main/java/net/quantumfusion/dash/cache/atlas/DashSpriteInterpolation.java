@@ -21,8 +21,8 @@ public class DashSpriteInterpolation {
         this.images = images;
     }
 
-    public DashSpriteInterpolation(Sprite.Interpolation interpolation){
-        NativeImage[] images = ((SpriteInterpolationAccessor)(Object)interpolation).getImages();
+    public DashSpriteInterpolation(Sprite.Interpolation interpolation) {
+        NativeImage[] images = ((SpriteInterpolationAccessor) (Object) interpolation).getImages();
 
         this.images = Stream.of(images).map(DashImage::new).collect(Collectors.toList());
     }
@@ -30,7 +30,7 @@ public class DashSpriteInterpolation {
     public Sprite.Interpolation toUndash() {
         try {
             Sprite.Interpolation spriteInterpolation = (Sprite.Interpolation) Dash.getUnsafe().allocateInstance(Sprite.Interpolation.class);
-            SpriteInterpolationAccessor spriteInterpolationAccessor = ((SpriteInterpolationAccessor)(Object)spriteInterpolation);
+            SpriteInterpolationAccessor spriteInterpolationAccessor = ((SpriteInterpolationAccessor) (Object) spriteInterpolation);
             List<NativeImage> nativeImages = new ArrayList<>();
             images.forEach(dashImage -> nativeImages.add(dashImage.toUndash()));
             spriteInterpolationAccessor.setImages(nativeImages.toArray(new NativeImage[0]));

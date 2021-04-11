@@ -4,8 +4,6 @@
   "package": "net.quantumfusion.dash.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "SpriteCreator",
-
     "FontManagerOverride",
     "UnicodeTextureFontOverride",
     "BakedModelManagerOverride",

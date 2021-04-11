@@ -20,13 +20,14 @@ public class ReloadableResourceManagerImplMixin {
     @Inject(method = "beginMonitoredReload(Ljava/util/concurrent/Executor;Ljava/util/concurrent/Executor;Ljava/util/concurrent/CompletableFuture;Ljava/util/List;)Lnet/minecraft/resource/ResourceReloadMonitor;",
             at = @At(value = "HEAD"),
             cancellable = true)
-    private void waitForDash(Executor prepareExecutor, Executor applyExecutor, CompletableFuture<Unit> initialStage, List<ResourcePack> packs, CallbackInfoReturnable<ResourceReloadMonitor> cir)  {
+    private void waitForDash(Executor prepareExecutor, Executor applyExecutor, CompletableFuture<Unit> initialStage, List<ResourcePack> packs, CallbackInfoReturnable<ResourceReloadMonitor> cir) {
         while (Dash.caching) {
             try {
                 System.out.println("Waiting for dash");
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
-                e.printStackTrace(); }
+                e.printStackTrace();
+            }
         }
     }
 }

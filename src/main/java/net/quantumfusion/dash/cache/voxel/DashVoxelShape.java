@@ -11,7 +11,7 @@ public class DashVoxelShape {
     }
 
     public DashVoxelShape(VoxelShape voxelShape) {
-        voxels = new DashVoxelSet(((VoxelShapeAccessor)voxelShape).getVoxels());
+        voxels = new DashVoxelSet(((VoxelShapeAccessor) voxelShape).getVoxels());
     }
 
 

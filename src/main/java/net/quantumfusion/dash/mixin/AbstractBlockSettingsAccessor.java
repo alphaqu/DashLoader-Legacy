@@ -77,6 +77,7 @@ public interface AbstractBlockSettingsAccessor {
 
     @Accessor()
     boolean getIsAir();
+
     @Accessor()
     boolean dynamic();
 

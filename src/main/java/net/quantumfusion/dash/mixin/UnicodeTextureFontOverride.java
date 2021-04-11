@@ -19,9 +19,13 @@ import java.io.IOException;
 @Mixin(UnicodeTextureFont.Loader.class)
 public class UnicodeTextureFontOverride {
 
-    @Shadow @Final private Identifier sizes;
+    @Shadow
+    @Final
+    private Identifier sizes;
 
-    @Shadow @Final private String template;
+    @Shadow
+    @Final
+    private String template;
 
     @Inject(method = "load(Lnet/minecraft/resource/ResourceManager;)Lnet/minecraft/client/font/Font;",
             at = @At(value = "HEAD"),

@@ -1,21 +1,28 @@
 package net.quantumfusion.dash.cache.models.components;
 
+import io.activej.serializer.annotations.Deserialize;
+import io.activej.serializer.annotations.Serialize;
 import net.minecraft.client.render.model.BakedQuad;
 import net.minecraft.client.texture.Sprite;
-import net.minecraft.util.math.Direction;
 import net.quantumfusion.dash.cache.DashDirection;
-import net.quantumfusion.dash.cache.atlas.DashSprite;
 
 public class DashBakedQuad {
-    int[] vertexData;
-    int colorIndex;
-    DashDirection face;
-    boolean shade;
+    @Serialize(order = 0)
+    public int[] vertexData;
+    @Serialize(order = 1)
+    public int colorIndex;
+    @Serialize(order = 2)
+    public DashDirection face;
+    @Serialize(order = 3)
+    public boolean shade;
 
     //post
 
 
-    public DashBakedQuad(int[] vertexData, int colorIndex, DashDirection face, boolean shade) {
+    public DashBakedQuad(@Deserialize("vertexData") int[] vertexData,
+                         @Deserialize("colorIndex")   int colorIndex,
+                         @Deserialize("face")    DashDirection face,
+                         @Deserialize("shade")    boolean shade) {
         this.vertexData = vertexData;
         this.colorIndex = colorIndex;
         this.face = face;
@@ -30,6 +37,6 @@ public class DashBakedQuad {
     }
 
     public BakedQuad toUndash(Sprite sprite) {
-        return new BakedQuad(vertexData,colorIndex,face.toUndash(),sprite,shade);
+        return new BakedQuad(vertexData, colorIndex, face.toUndash(), sprite, shade);
     }
 }

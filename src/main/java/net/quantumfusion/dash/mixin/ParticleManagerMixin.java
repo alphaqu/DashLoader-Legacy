@@ -31,9 +31,11 @@ import java.util.stream.Collectors;
 @Mixin(ParticleManager.class)
 public class ParticleManagerMixin {
 
-    @Shadow @Final private Map<Identifier, Object> spriteAwareFactories;
+    @Shadow
+    @Final
+    private Map<Identifier, Object> spriteAwareFactories;
 
-    @Inject(method = "loadTextureList(Lnet/minecraft/resource/ResourceManager;Lnet/minecraft/util/Identifier;Ljava/util/Map;)V",at = @At(value = "HEAD"),cancellable = true)
+    @Inject(method = "loadTextureList(Lnet/minecraft/resource/ResourceManager;Lnet/minecraft/util/Identifier;Ljava/util/Map;)V", at = @At(value = "HEAD"), cancellable = true)
     private void loadTextureListFast(ResourceManager resourceManager, Identifier id, Map<Identifier, List<Identifier>> result, CallbackInfo ci) {
         Identifier identifier = new Identifier(id.getNamespace(), "particles/" + id.getPath() + ".json");
         try {

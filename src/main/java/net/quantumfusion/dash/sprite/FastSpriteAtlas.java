@@ -3,7 +3,6 @@ package net.quantumfusion.dash.sprite;
 import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Pair;
 import io.activej.serializer.stream.StreamOutput;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.resource.metadata.AnimationResourceMetadata;
 import net.minecraft.client.texture.MissingSprite;
 import net.minecraft.client.texture.Sprite;
@@ -27,7 +26,7 @@ public class FastSpriteAtlas {
 
     public static Collection<Sprite.Info> loadSprites(ResourceManager resourceManager, Set<Identifier> ids, Identifier id) {
         HashMap<Identifier, ArrayList<Sprite.Info>> spriteInfoCache = Dash.spriteInfoCache;
-        if(spriteInfoCache.containsKey(id)){
+        if (spriteInfoCache.containsKey(id)) {
             return spriteInfoCache.get(id);
         } else {
             List<CompletableFuture<?>> list = Lists.newArrayList();
@@ -60,7 +59,7 @@ public class FastSpriteAtlas {
 
             CompletableFuture.allOf(list.toArray(new CompletableFuture[0])).join();
             ArrayList<Sprite.Info> out = new ArrayList<>(concurrentLinkedQueue);
-            SpriteInfoCache info = SpriteInfoCache.create(out,id);
+            SpriteInfoCache info = SpriteInfoCache.create(out, id);
             try {
                 StreamOutput streamOutput = StreamOutput.create(
                         Files.newOutputStream(Dash.config.resolve("dash/sprite/info/" + StringHelper.idToFile(id.toString()) + ".activej"),

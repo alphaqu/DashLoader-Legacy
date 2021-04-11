@@ -1,7 +1,6 @@
 package net.quantumfusion.dash.mixin;
 
 import net.minecraft.client.render.model.SpriteAtlasManager;
-import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.util.Identifier;
 import org.spongepowered.asm.mixin.Mixin;

@@ -15,16 +15,12 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class DashSprite {
     @Serialize(order = 0)
     public final DashSpriteInfo info;
     @Serialize(order = 1)
     public final DashAnimationResourceMetadata animationMetadata;
-    @Serialize(order = 2)
-    public List<DashImage> images;
     @Serialize(order = 3)
     public final int[] frameXs;
     @Serialize(order = 4)
@@ -49,6 +45,8 @@ public class DashSprite {
     public final int frameIndex;
     @Serialize(order = 13)
     public final int frameTicks;
+    @Serialize(order = 2)
+    public List<DashImage> images;
 
 
     public DashSprite(@Deserialize("info") DashSpriteInfo info,
@@ -85,7 +83,7 @@ public class DashSprite {
         SpriteAccessor spriteAccess = ((SpriteAccessor) sprite);
         info = new DashSpriteInfo(spriteAccess.getInfo());
         animationMetadata = new DashAnimationResourceMetadata(spriteAccess.getAnimationMetadata());
-        images =  new ArrayList<>();
+        images = new ArrayList<>();
         Arrays.stream(spriteAccess.getImages()).forEach(nativeImage -> images.add(new DashImage(nativeImage)));
         frameXs = spriteAccess.getFrameXs();
         frameYs = spriteAccess.getFrameYs();

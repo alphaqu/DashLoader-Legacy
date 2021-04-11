@@ -1,33 +1,51 @@
 package net.quantumfusion.dash.cache.blockstates.properties;
 
+import io.activej.serializer.annotations.Deserialize;
+import io.activej.serializer.annotations.Serialize;
 import net.minecraft.state.property.EnumProperty;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.ArrayList;
+import java.util.List;
 
-public class DashEnumProperty extends DashProperty{
-    String value;
-    ArrayList<String> values;
+public class DashEnumProperty implements DashProperty {
 
-    public DashEnumProperty(String type, String name) {
-        super(type, name);
+    @Serialize(order = 0)
+    public String value;
+
+    @Serialize(order = 1)
+    public List<String> values;
+
+    @Serialize(order = 2)
+    public String propertyType;
+
+    @Serialize(order = 3)
+    public String name;
+
+    public DashEnumProperty(@Deserialize("value") String value,
+                            @Deserialize("values")  List<String> values,
+                            @Deserialize("propertyType") String propertyType,
+                            @Deserialize("name")  String name) {
+        this.value = value;
+        this.values = values;
+        this.propertyType = propertyType;
+        this.name = name;
     }
 
-    public <T extends Enum> DashEnumProperty(EnumProperty property, T value) {
-        super(property);
+    public DashEnumProperty(EnumProperty property, Enum value) {
+        propertyType = property.getType().toString();
+        name = property.getName();
         values = new ArrayList<>();
-        property.getValues().forEach(valuee -> {
-            values.add(valuee.toString());
-        });
+        property.getValues().forEach(valuee -> values.add(valuee.toString()));
         this.value = value.name();
     }
 
     public MutablePair<EnumProperty, Enum> toUndash() {
-        MutablePair<EnumProperty,Enum> out = new MutablePair<>();
+        MutablePair<EnumProperty, Enum> out = new MutablePair<>();
         try {
-            Class type = Class.forName(this.type.replaceFirst("class ", ""));
-            out.setLeft(EnumProperty.of(name,type));
-            out.setRight(Enum.valueOf(type,value));
+            Class type = Class.forName(this.propertyType.replaceFirst("class ", ""));
+            out.setLeft(EnumProperty.of(name, type));
+            out.setRight(Enum.valueOf(type, value));
             return out;
         } catch (ClassNotFoundException e) {
             e.printStackTrace();

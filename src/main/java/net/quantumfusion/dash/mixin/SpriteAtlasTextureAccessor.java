@@ -16,30 +16,29 @@ public interface SpriteAtlasTextureAccessor {
     @Accessor("sprites")
     Map<Identifier, Sprite> getSprites();
 
-    @Accessor("animatedSprites")
-    List<Sprite> getAnimatedSprites();
-
-    @Accessor("spritesToLoad")
-    Set<Identifier> getSpritesToLoad();
-
-    @Accessor("id")
-    Identifier getId();
-
-    @Accessor("maxTextureSize")
-    int getMaxTextureSize();
-
-
     @Accessor("sprites")
     void setSprites(Map<Identifier, Sprite> sprites);
+
+    @Accessor("animatedSprites")
+    List<Sprite> getAnimatedSprites();
 
     @Accessor("animatedSprites")
     void setAnimatedSprites(List<Sprite> animatedSprites);
 
     @Accessor("spritesToLoad")
+    Set<Identifier> getSpritesToLoad();
+
+    @Accessor("spritesToLoad")
     void setSpritesToLoad(Set<Identifier> spritesToLoad);
 
     @Accessor("id")
+    Identifier getId();
+
+    @Accessor("id")
     void setId(Identifier id);
+
+    @Accessor("maxTextureSize")
+    int getMaxTextureSize();
 
     @Accessor("maxTextureSize")
     void setMaxTextureSize(int maxTextureSize);

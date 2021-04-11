@@ -25,23 +25,33 @@ import java.util.concurrent.CompletableFuture;
 @Mixin(MinecraftClient.class)
 public abstract class MinecraftClientMixin {
 
-    @Shadow @Final private ReloadableResourceManager resourceManager;
+    @Shadow
+    @Final
+    private static CompletableFuture<Unit> COMPLETED_UNIT_FUTURE;
+    @Shadow
+    @Nullable
+    public Overlay overlay;
+    @Shadow
+    @Final
+    public WorldRenderer worldRenderer;
+    @Shadow
+    @Final
+    private ReloadableResourceManager resourceManager;
+    @Shadow
+    @Nullable
+    private CompletableFuture<Void> resourceReloadFuture;
+    @Shadow
+    @Final
+    private ResourcePackManager resourcePackManager;
+    @Shadow
+    @Final
+    private BakedModelManager bakedModelManager;
 
-    @Shadow @Nullable private CompletableFuture<Void> resourceReloadFuture;
+    @Shadow
+    public abstract void setOverlay(@Nullable Overlay overlay);
 
-    @Shadow @Nullable public Overlay overlay;
-
-    @Shadow @Final private ResourcePackManager resourcePackManager;
-
-    @Shadow public abstract void setOverlay(@Nullable Overlay overlay);
-
-    @Shadow @Final public WorldRenderer worldRenderer;
-
-    @Shadow protected abstract void handleResourceReloadException(Throwable throwable);
-
-    @Shadow @Final private static CompletableFuture<Unit> COMPLETED_UNIT_FUTURE;
-
-    @Shadow @Final private BakedModelManager bakedModelManager;
+    @Shadow
+    protected abstract void handleResourceReloadException(Throwable throwable);
 
     @Inject(method = "reloadResources()Ljava/util/concurrent/CompletableFuture;",
             at = @At(value = "HEAD"), cancellable = true)
@@ -57,7 +67,7 @@ public abstract class MinecraftClientMixin {
                 System.out.println(bakedModelManager);
                 this.resourcePackManager.scanPacks();
                 List<ResourcePack> list = this.resourcePackManager.createResourcePacks();
-                this.setOverlay(new SplashScreen((MinecraftClient)(Object)this, this.resourceManager.beginMonitoredReload(Util.getMainWorkerExecutor(), (MinecraftClient)(Object)this, COMPLETED_UNIT_FUTURE, list), (optional) -> {
+                this.setOverlay(new SplashScreen((MinecraftClient) (Object) this, this.resourceManager.beginMonitoredReload(Util.getMainWorkerExecutor(), (MinecraftClient) (Object) this, COMPLETED_UNIT_FUTURE, list), (optional) -> {
                     Util.ifPresentOrElse(optional, this::handleResourceReloadException, () -> {
                         this.worldRenderer.reload();
                         completableFuture.complete(null);

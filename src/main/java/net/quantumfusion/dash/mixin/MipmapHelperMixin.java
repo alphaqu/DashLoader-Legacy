@@ -26,22 +26,22 @@ public abstract class MipmapHelperMixin {
 
             int k;
             label51:
-            for(k = 0; k < image.getWidth(); ++k) {
-                for(int j = 0; j < image.getHeight(); ++j) {
+            for (k = 0; k < image.getWidth(); ++k) {
+                for (int j = 0; j < image.getHeight(); ++j) {
                     if (image.getPixelColor(k, j) >> 24 == 0) {
                         bl = true;
                         break label51;
                     }
                 }
             }
-            for(k = 1; k <= mipmap; ++k) {
+            for (k = 1; k <= mipmap; ++k) {
                 NativeImage nativeImage = nativeImages[k - 1];
                 NativeImage nativeImage2 = new NativeImage(nativeImage.getWidth() >> 1, nativeImage.getHeight() >> 1, false);
                 int l = nativeImage2.getWidth();
                 int m = nativeImage2.getHeight();
 
-                for(int n = 0; n < l; ++n) {
-                    for(int o = 0; o < m; ++o) {
+                for (int n = 0; n < l; ++n) {
+                    for (int o = 0; o < m; ++o) {
                         nativeImage2.setPixelColor(n, o, blend(nativeImage.getPixelColor(n * 2, o * 2), nativeImage.getPixelColor(n * 2 + 1, o * 2), nativeImage.getPixelColor(n * 2, o * 2 + 1), nativeImage.getPixelColor(n * 2 + 1, o * 2 + 1), bl));
                     }
                 }

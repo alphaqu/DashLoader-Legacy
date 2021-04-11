@@ -25,9 +25,9 @@ import java.util.Map;
 
 public class UnicodeFont implements Font {
     private static final Logger LOGGER = LogManager.getLogger();
-    private ResourceManager resourceManager;
     public final Map<Identifier, NativeImage> images;
     public final byte[] sizes;
+    private ResourceManager resourceManager;
 
     public UnicodeFont(UnicodeTextureFont font) {
         UnicodeTextureFontAccessor fontAccessor = ((UnicodeTextureFontAccessor) font);
@@ -40,10 +40,6 @@ public class UnicodeFont implements Font {
                        byte[] sizes) {
         this.images = images;
         this.sizes = sizes;
-    }
-
-    public void setResourceManager(ResourceManager resourceManager) {
-        this.resourceManager = resourceManager;
     }
 
     public UnicodeFont(ResourceManager resourceManager, byte[] sizes) {
@@ -97,6 +93,18 @@ public class UnicodeFont implements Font {
             Arrays.fill(sizes, j, j + 256, (byte) 0);
         }
 
+    }
+
+    private static int getStart(byte size) {
+        return size >> 4 & 15;
+    }
+
+    private static int getEnd(byte size) {
+        return (size & 15) + 1;
+    }
+
+    public void setResourceManager(ResourceManager resourceManager) {
+        this.resourceManager = resourceManager;
     }
 
     public void close() {
@@ -156,15 +164,6 @@ public class UnicodeFont implements Font {
             return null;
         }
     }
-
-    private static int getStart(byte size) {
-        return size >> 4 & 15;
-    }
-
-    private static int getEnd(byte size) {
-        return (size & 15) + 1;
-    }
-
 
     @Environment(EnvType.CLIENT)
     static class UnicodeTextureGlyph implements RenderableGlyph {

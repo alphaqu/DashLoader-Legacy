@@ -3,15 +3,12 @@ package net.quantumfusion.dash.mixin;
 import io.activej.serializer.stream.StreamOutput;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.resource.SplashTextResourceSupplier;
-import net.minecraft.client.sound.Sound;
 import net.minecraft.resource.Resource;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.profiler.Profiler;
 import net.quantumfusion.dash.Dash;
-import net.quantumfusion.dash.misc.DashParticleTextureData;
 import net.quantumfusion.dash.misc.DashSplashTextData;
-import net.quantumfusion.dash.util.StringHelper;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -32,14 +29,16 @@ import java.util.stream.Collectors;
 @Mixin(SplashTextResourceSupplier.class)
 public class SplashTextResourceSupplierMixin {
 
-    @Shadow @Final private static Identifier RESOURCE_ID;
+    @Shadow
+    @Final
+    private static Identifier RESOURCE_ID;
 
     @Inject(method = "prepare(Lnet/minecraft/resource/ResourceManager;Lnet/minecraft/util/profiler/Profiler;)Ljava/util/List;",
             at = @At(value = "HEAD"),
             cancellable = true)
     private void fastSplash(ResourceManager resourceManager, Profiler profiler, CallbackInfoReturnable<List<String>> cir) {
         try {
-            if(Dash.splashText != null){
+            if (Dash.splashText != null) {
                 System.out.println("loaded splash fast");
                 cir.setReturnValue(Dash.splashText);
             } else {

@@ -19,7 +19,7 @@ public class DashSpriteAtlasManager {
 
     public DashSpriteAtlasManager(SpriteAtlasManager spriteAtlasManager) {
         atlases = new ArrayList<>();
-        ((SpriteAtlasManagerAccessor)spriteAtlasManager).getAtlases().forEach((identifier, spriteAtlasTexture) -> atlases.add(new DashSpriteAtlasTexture(spriteAtlasTexture)));
+        ((SpriteAtlasManagerAccessor) spriteAtlasManager).getAtlases().forEach((identifier, spriteAtlasTexture) -> atlases.add(new DashSpriteAtlasTexture(spriteAtlasTexture)));
     }
 
     public SpriteAtlasManager toUndash() {

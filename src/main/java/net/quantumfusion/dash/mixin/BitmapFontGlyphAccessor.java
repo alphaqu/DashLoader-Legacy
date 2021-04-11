@@ -22,10 +22,13 @@ public interface BitmapFontGlyphAccessor {
 
     @Accessor("width")
     int getWidthD();
+
     @Accessor("height")
     int getHeightD();
+
     @Accessor("advance")
     int getAdvanceD();
+
     @Accessor("ascent")
     int getAscentD();
 }

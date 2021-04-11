@@ -21,7 +21,7 @@ public class DashModelElementFace {
     public final DashModelElementTexture textureData;
 
     public DashModelElementFace(@Deserialize("cullFace") @Nullable DashDirection cullFace,
-                                @Deserialize("tintIndex")  int tintIndex,
+                                @Deserialize("tintIndex") int tintIndex,
                                 @Deserialize("textureId") String textureId,
                                 @Deserialize("textureData") DashModelElementTexture textureData
     ) {

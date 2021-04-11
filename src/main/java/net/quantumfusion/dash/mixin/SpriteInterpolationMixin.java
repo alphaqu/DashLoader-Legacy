@@ -10,7 +10,9 @@ import org.spongepowered.asm.mixin.Shadow;
 public class SpriteInterpolationMixin {
 
     @Mutable
-    @Shadow @Final private final NativeImage[] images;
+    @Shadow
+    @Final
+    private final NativeImage[] images;
 
     public SpriteInterpolationMixin(NativeImage[] images) {
         this.images = images;

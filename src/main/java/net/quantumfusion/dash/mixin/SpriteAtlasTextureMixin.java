@@ -21,7 +21,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.io.File;
@@ -37,18 +36,16 @@ public abstract class SpriteAtlasTextureMixin {
 
     @Shadow
     @Final
-    private int maxTextureSize;
-
-
+    private static Logger LOGGER;
     @Shadow
     @Final
-    private static Logger LOGGER;
-
+    private int maxTextureSize;
     @Shadow
     @Final
     private Identifier id;
 
-    @Shadow protected abstract Identifier getTexturePath(Identifier identifier);
+    @Shadow
+    protected abstract Identifier getTexturePath(Identifier identifier);
 
     @Inject(method = "stitch(Lnet/minecraft/resource/ResourceManager;Ljava/util/stream/Stream;Lnet/minecraft/util/profiler/Profiler;I)Lnet/minecraft/client/texture/SpriteAtlasTexture$Data;",
             at = @At(value = "HEAD"),
@@ -68,7 +65,7 @@ public abstract class SpriteAtlasTextureMixin {
 
         Sprite.Info info;
         int p;
-        for (Iterator<Sprite.Info> var10 = FastSpriteAtlas.loadSprites(resourceManager, set,id).iterator(); var10.hasNext(); textureStitcher.add(info)) {
+        for (Iterator<Sprite.Info> var10 = FastSpriteAtlas.loadSprites(resourceManager, set, id).iterator(); var10.hasNext(); textureStitcher.add(info)) {
             info = var10.next();
             j = Math.min(j, Math.min(info.getWidth(), info.getHeight()));
             p = Math.min(Integer.lowestOneBit(info.getWidth()), Integer.lowestOneBit(info.getHeight()));
@@ -114,14 +111,14 @@ public abstract class SpriteAtlasTextureMixin {
         List<CompletableFuture<?>> list = Lists.newArrayList();
         textureStitcher.getStitchedSprites((info, atlasWidth, atlasHeight, x, y) -> {
             if (info == MissingSprite.getMissingInfo()) {
-                MissingSprite missingSprite = MissingSprite.getMissingSprite((SpriteAtlasTexture) (Object)this, maxLevel, atlasWidth, atlasHeight, x, y);
+                MissingSprite missingSprite = MissingSprite.getMissingSprite((SpriteAtlasTexture) (Object) this, maxLevel, atlasWidth, atlasHeight, x, y);
                 concurrentLinkedQueue.add(missingSprite);
             } else {
                 list.add(CompletableFuture.runAsync(() -> {
                     String key = StringHelper.idToFile(info.getId().toString());
                     Sprite sprite;
                     if (spriteCache.containsKey(key)) {
-                        sprite = SpriteAccessor.newSprite((SpriteAtlasTexture)(Object)this, info, maxLevel, atlasWidth, atlasHeight, x, y, spriteCache.get(key));
+                        sprite = SpriteAccessor.newSprite((SpriteAtlasTexture) (Object) this, info, maxLevel, atlasWidth, atlasHeight, x, y, spriteCache.get(key));
                     } else {
                         sprite = loadSpriteFast(resourceManager, info, atlasWidth, atlasHeight, maxLevel, x, y);
                     }
@@ -141,33 +138,32 @@ public abstract class SpriteAtlasTextureMixin {
     private Sprite loadSpriteFast(ResourceManager container, Sprite.Info info, int atlasWidth, int atlasHeight, int maxLevel, int x, int y) {
         String key = StringHelper.idToFile(info.getId().toString());
         Identifier identifier = this.getTexturePath(info.getId());
-            System.out.println("not fast: " + info.getId());
+        System.out.println("not fast: " + info.getId());
+        try {
+            Resource resource = container.getResource(identifier);
+            Sprite var12;
             try {
-                Resource resource = container.getResource(identifier);
-                Sprite var12;
-                try {
-                    NativeImage nativeImage = NativeImage.read(resource.getInputStream());
-                    var12 = SpriteAccessor.newSprite((SpriteAtlasTexture)(Object)this, info, maxLevel, atlasWidth, atlasHeight, x, y, nativeImage);
-                    File file = new File(String.valueOf(Dash.config.resolve("dash/sprite/" + key + ".png")));
-                    file.createNewFile();
-                    nativeImage.writeFile(file);
+                NativeImage nativeImage = NativeImage.read(resource.getInputStream());
+                var12 = SpriteAccessor.newSprite((SpriteAtlasTexture) (Object) this, info, maxLevel, atlasWidth, atlasHeight, x, y, nativeImage);
+                File file = new File(String.valueOf(Dash.config.resolve("dash/sprite/" + key + ".png")));
+                file.createNewFile();
+                nativeImage.writeFile(file);
+                resource.close();
+            } finally {
+                if (resource != null) {
                     resource.close();
-                } finally {
-                    if (resource != null) {
-                        resource.close();
-                    }
-
                 }
-                return var12;
-            } catch (RuntimeException var25) {
-                LOGGER.error("Unable to parse metadata from {}", identifier, var25);
-                return null;
-            } catch (IOException var26) {
-                LOGGER.error("Using missing texture, unable to load {}", identifier, var26);
-                return null;
-            }
-    }
 
+            }
+            return var12;
+        } catch (RuntimeException var25) {
+            LOGGER.error("Unable to parse metadata from {}", identifier, var25);
+            return null;
+        } catch (IOException var26) {
+            LOGGER.error("Using missing texture, unable to load {}", identifier, var26);
+            return null;
+        }
+    }
 
 
 }

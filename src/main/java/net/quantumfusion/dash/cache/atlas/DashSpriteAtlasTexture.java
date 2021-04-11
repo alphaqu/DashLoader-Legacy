@@ -13,6 +13,10 @@ import net.quantumfusion.dash.mixin.SpriteAtlasTextureAccessor;
 import java.util.*;
 
 public class DashSpriteAtlasTexture {
+    @Serialize(order = 3)
+    public final DashIdentifier id;
+    @Serialize(order = 4)
+    public final int maxTextureSize;
     @Serialize(order = 0)
     public List<DashSprite> animatedSprites;
     @Serialize(order = 1)
@@ -22,10 +26,6 @@ public class DashSpriteAtlasTexture {
     @SerializeNullable(path = {1})
     @SerializeNullable(path = {0})
     public Map<DashIdentifier, DashSprite> sprites;
-    @Serialize(order = 3)
-    public final DashIdentifier id;
-    @Serialize(order = 4)
-    public final int maxTextureSize;
 
     public DashSpriteAtlasTexture(@Deserialize("animatedSprites") List<DashSprite> animatedSprites,
                                   @Deserialize("spritesToLoad") Set<DashIdentifier> spritesToLoad,

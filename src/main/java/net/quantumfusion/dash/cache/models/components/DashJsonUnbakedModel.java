@@ -10,7 +10,6 @@ import net.minecraft.client.render.model.json.ModelOverride;
 import net.minecraft.client.render.model.json.ModelTransformation;
 import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.util.Identifier;
-
 import net.quantumfusion.dash.cache.DashIdentifier;
 import net.quantumfusion.dash.mixin.JsonUnbakedModelAccessor;
 import org.jetbrains.annotations.Nullable;

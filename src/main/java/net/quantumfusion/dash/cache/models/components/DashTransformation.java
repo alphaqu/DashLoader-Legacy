@@ -12,7 +12,9 @@ public class DashTransformation {
     @Serialize(order = 2)
     public final DashVector3f scale;
 
-    public DashTransformation(@Deserialize("rotation") DashVector3f rotation, @Deserialize("translation")DashVector3f translation, @Deserialize("scale")DashVector3f scale) {
+    public DashTransformation(@Deserialize("rotation") DashVector3f rotation,
+                              @Deserialize("translation") DashVector3f translation,
+                              @Deserialize("scale") DashVector3f scale) {
         this.rotation = rotation;
         this.translation = translation;
         this.scale = scale;

@@ -13,10 +13,10 @@ import net.minecraft.client.render.model.json.JsonUnbakedModel;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.util.Identifier;
-import net.quantumfusion.dash.misc.DashParticleTextureData;
-import net.quantumfusion.dash.misc.DashSplashTextData;
 import net.quantumfusion.dash.cache.atlas.DashSpriteAtlasManager;
 import net.quantumfusion.dash.cache.models.components.DashJsonUnbakedModel;
+import net.quantumfusion.dash.misc.DashParticleTextureData;
+import net.quantumfusion.dash.misc.DashSplashTextData;
 import net.quantumfusion.dash.sprite.SpriteInfoCache;
 import net.quantumfusion.dash.util.TimeHelper;
 import sun.misc.Unsafe;
@@ -56,11 +56,7 @@ public class Dash implements ModInitializer {
     public static BinarySerializer<DashSplashTextData> splashTextSerializer = SerializerBuilder.create().build(DashSplashTextData.class);
     public static BinarySerializer<DashParticleTextureData> dashParticleTextureDataSerializer = SerializerBuilder.create().build(DashParticleTextureData.class);
 
-    public static Object2ObjectMap<String,Material> materialRegistry = new Object2ObjectOpenHashMap<>();
-
-    @Override
-    public void onInitialize() {
-    }
+    public static Object2ObjectMap<String, Material> materialRegistry = new Object2ObjectOpenHashMap<>();
 
     public static Unsafe getUnsafe() {
         Field f = null;
@@ -78,7 +74,6 @@ public class Dash implements ModInitializer {
         }
         return null;
     }
-
 
     public static SpriteAtlasManager compare(SpriteAtlasManager atlasManagerCache) {
         SpriteAtlasManager out = new DashSpriteAtlasManager(atlasManagerCache).toUndash();
@@ -99,7 +94,7 @@ public class Dash implements ModInitializer {
             makeFolders();
             int threads = Runtime.getRuntime().availableProcessors();
             System.out.println("Starting dash with " + threads + " + 1 threads.");
-            ExecutorService executorService = Executors.newFixedThreadPool(Math.max(threads - 1,1));
+            ExecutorService executorService = Executors.newFixedThreadPool(Math.max(threads - 1, 1));
             misc(executorService);
             fontCacheRegister(executorService);
             spriteInfoRegister(executorService);
@@ -114,7 +109,6 @@ public class Dash implements ModInitializer {
         dash.start();
     }
 
-
     private static void makeFolders() {
         createDirectory("dash");
         createDirectory("dash/fonts");
@@ -124,10 +118,9 @@ public class Dash implements ModInitializer {
         createDirectory("dash/sprite/info");
     }
 
-
     private static void misc(ExecutorService executorService) {
         Arrays.stream(listCacheFiles("dash")).forEach(file -> executorService.execute(() -> {
-            if(file.getName().equals("splash.activej")){
+            if (file.getName().equals("splash.activej")) {
                 try {
                     System.out.println("loaded splash");
                     splashText = StreamInput.create(new FileInputStream(prepareAccess(file))).deserialize(splashTextSerializer).splashList;
@@ -137,6 +130,7 @@ public class Dash implements ModInitializer {
             }
         }));
     }
+
     private static void particleCacheRegister(ExecutorService executorService) {
         Arrays.stream(listCacheFiles("dash/particles")).forEach(particle -> executorService.execute(() -> {
             try {
@@ -172,7 +166,6 @@ public class Dash implements ModInitializer {
         }
     }
 
-
     private static void fontCacheRegister(ExecutorService executorService) {
         System.out.println(config.resolve("dash"));
         Arrays.stream(listCacheFiles("dash/fonts")).forEach(fontFile -> executorService.execute(() -> {
@@ -199,7 +192,6 @@ public class Dash implements ModInitializer {
         }));
     }
 
-
     private static File prepareAccess(File file) {
         if (!file.canWrite()) {
             file.setWritable(true);
@@ -216,5 +208,9 @@ public class Dash implements ModInitializer {
 
     private static void createDirectory(String s) {
         prepareAccess(new File(String.valueOf(config.resolve(s)))).mkdir();
+    }
+
+    @Override
+    public void onInitialize() {
     }
 }

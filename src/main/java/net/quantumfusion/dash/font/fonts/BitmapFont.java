@@ -12,10 +12,9 @@ import net.minecraft.client.texture.NativeImage;
 import net.quantumfusion.dash.font.DashFont;
 import net.quantumfusion.dash.mixin.BitmapFontAccessor;
 import net.quantumfusion.dash.mixin.BitmapFontGlyphAccessor;
-import net.quantumfusion.dash.sprite.util.DashImage;
 import org.jetbrains.annotations.Nullable;
 
-public class BitmapFont implements DashFont,Font {
+public class BitmapFont implements DashFont, Font {
     public final NativeImage image;
     public final Int2ObjectMap<BitmapFontGlyph> glyphs;
 
@@ -25,14 +24,16 @@ public class BitmapFont implements DashFont,Font {
     }
 
     public BitmapFont(net.minecraft.client.font.BitmapFont font) {
-        BitmapFontAccessor fontAccess = ((BitmapFontAccessor)font);
+        BitmapFontAccessor fontAccess = ((BitmapFontAccessor) font);
         image = fontAccess.getImage();
         Int2ObjectMap<BitmapFontGlyph> out = new Int2ObjectOpenHashMap<>();
-        fontAccess.getGlyphs().forEach((integer, renderableGlyph) -> out.put(integer,new BitmapFontGlyph((BitmapFontGlyphAccessor)renderableGlyph)));
+        fontAccess.getGlyphs().forEach((integer, renderableGlyph) -> out.put(integer, new BitmapFontGlyph((BitmapFontGlyphAccessor) renderableGlyph)));
         glyphs = out;
     }
 
-    public void close() { this.image.close(); }
+    public void close() {
+        this.image.close();
+    }
 
     @Nullable
     public RenderableGlyph getGlyph(int codePoint) {
@@ -75,7 +76,7 @@ public class BitmapFont implements DashFont,Font {
             this.ascent = ascent;
         }
 
-        public BitmapFontGlyph(BitmapFontGlyphAccessor font){
+        public BitmapFontGlyph(BitmapFontGlyphAccessor font) {
             scaleFactor = font.getScaleFactorD();
             image = font.getImageD();
             x = font.getXD();
@@ -99,11 +100,11 @@ public class BitmapFont implements DashFont,Font {
         }
 
         public float getAdvance() {
-            return (float)this.advance;
+            return (float) this.advance;
         }
 
         public float getAscent() {
-            return RenderableGlyph.super.getAscent() + 7.0F - (float)this.ascent;
+            return RenderableGlyph.super.getAscent() + 7.0F - (float) this.ascent;
         }
 
         public void upload(int x, int y) {

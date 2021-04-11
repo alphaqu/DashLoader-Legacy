@@ -2,10 +2,10 @@ package net.quantumfusion.dash.cache;
 
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
-import net.minecraft.client.util.ModelIdentifier;
 import net.minecraft.util.Identifier;
+import net.quantumfusion.dash.Dash;
 
-public class DashIdentifier {
+public class DashIdentifier implements DashID {
     @Serialize(order = 0)
     public String namespace;
     @Serialize(order = 1)
@@ -19,10 +19,11 @@ public class DashIdentifier {
     }
 
     public DashIdentifier(Identifier identifier) {
-            this.namespace = identifier.getNamespace();
-            this.path = identifier.getPath();
+        this.namespace = identifier.getNamespace();
+        this.path = identifier.getPath();
     }
 
+    @Override
     public Identifier toUndash() {
         return new Identifier(namespace, path);
     }

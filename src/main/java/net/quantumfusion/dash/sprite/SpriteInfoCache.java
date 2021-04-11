@@ -25,7 +25,7 @@ public class SpriteInfoCache {
     public static SpriteInfoCache create(ArrayList<Sprite.Info> infos, Identifier id) {
         ArrayList<DashSpriteInfo> info = new ArrayList<>();
         infos.forEach(info1 -> info.add(new DashSpriteInfo(info1)));
-        return new SpriteInfoCache(info,new DashIdentifier(id));
+        return new SpriteInfoCache(info, new DashIdentifier(id));
     }
 
     public ArrayList<Sprite.Info> toUndash() {
