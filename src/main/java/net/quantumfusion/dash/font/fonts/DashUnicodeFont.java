@@ -6,7 +6,7 @@ import io.activej.serializer.annotations.SerializeNullable;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.util.Identifier;
 import net.quantumfusion.dash.cache.DashIdentifier;
-import net.quantumfusion.dash.sprite.util.DashImage;
+import net.quantumfusion.dash.cache.atlas.DashImage;
 
 import java.util.HashMap;
 import java.util.Map;

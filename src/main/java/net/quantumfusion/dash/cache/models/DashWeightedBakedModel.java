@@ -2,7 +2,6 @@ package net.quantumfusion.dash.cache.models;
 
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
-import io.activej.serializer.annotations.SerializeNullable;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.WeightedBakedModel;
 import net.quantumfusion.dash.cache.DashModelLoader;
@@ -12,7 +11,7 @@ import net.quantumfusion.dash.mixin.WeightedBakedModelAccessor;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DashWeightedBakedModel implements DashBakedModel {
+public class DashWeightedBakedModel implements DashModel,DashBakedModel {
 
     @Serialize(order = 0)
     public List<DashWeightedModelEntry> models;

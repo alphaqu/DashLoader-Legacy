@@ -1,83 +1,111 @@
 package net.quantumfusion.dash.cache;
 
-import io.activej.serializer.BinarySerializer;
-import io.activej.serializer.CompatibilityLevel;
-import io.activej.serializer.SerializerBuilder;
 import io.activej.serializer.stream.StreamInput;
 import io.activej.serializer.stream.StreamOutput;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.render.model.*;
+import net.minecraft.client.texture.SpriteAtlasTexture;
+import net.minecraft.client.texture.TextureManager;
+import net.minecraft.client.texture.TextureUtil;
 import net.minecraft.util.Identifier;
+import net.quantumfusion.dash.Dash;
 import net.quantumfusion.dash.DashException;
 import net.quantumfusion.dash.cache.atlas.DashSpriteAtlasManager;
-import net.quantumfusion.dash.cache.blockstates.DashBlockStateData;
+import net.quantumfusion.dash.cache.atlas.DashSpriteAtlasTextureData;
 import net.quantumfusion.dash.cache.models.*;
-import org.apache.commons.lang3.tuple.Pair;
+import net.quantumfusion.dash.mixin.AbstractTextureAccessor;
+import net.quantumfusion.dash.mixin.SpriteAtlasManagerAccessor;
+import net.quantumfusion.dash.mixin.SpriteAtlasTextureAccessor;
+import org.apache.logging.log4j.LogManager;
 
 import java.io.IOException;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+
+import static net.quantumfusion.dash.Dash.*;
 
 public class DashModelLoader {
     //output
     public SpriteAtlasManager atlasManagerOut;
     public Object2IntMap<BlockState> stateLookupOut;
     public Map<Identifier, BakedModel> modelsOut;
-
-    Path modelPath = FileSystems.getDefault().getPath("C:\\Program Files (x86)\\inkscape\\MinecraftMods\\Dash\\run\\config\\dash\\model.activej");
-    Path atlasPath = FileSystems.getDefault().getPath("C:\\Program Files (x86)\\inkscape\\MinecraftMods\\Dash\\run\\config\\dash\\atlas.activej");
-    Path blockstatePath = FileSystems.getDefault().getPath("C:\\Program Files (x86)\\inkscape\\MinecraftMods\\Dash\\run\\config\\dash\\blockstate.activej");
+    public boolean loaded = false;
 
 
+    public DashRegistry registry;
 
-    public DashModelLoader(SpriteAtlasManager atlasManager,
-                           Object2IntMap<BlockState> stateLookup,
-                           Map<Identifier, BakedModel> models) {
-        modelsOut = new HashMap<>();
+    public HashMap<SpriteAtlasTexture, DashSpriteAtlasTextureData> atlasData = new HashMap<>();
 
 
-        System.out.println("Caching atlas");
-        try {
-            BinarySerializer<DashSpriteAtlasManager> serializer = SerializerBuilder.create().build(DashSpriteAtlasManager.class);
-            StreamOutput output = StreamOutput.create(Files.newOutputStream(atlasPath, StandardOpenOption.CREATE, StandardOpenOption.WRITE));
-            output.serialize(serializer, new DashSpriteAtlasManager(atlasManager));
-            output.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
 
-        System.out.println("Caching blockstates");
-        try {
-            BinarySerializer<DashBlockStateData> serializer = SerializerBuilder.create().build(DashBlockStateData.class);
-            StreamOutput output = StreamOutput.create(Files.newOutputStream(blockstatePath, StandardOpenOption.CREATE, StandardOpenOption.WRITE));
-            output.serialize(serializer, new DashBlockStateData(stateLookup));
-            output.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+//    Path blockstatePath = FileSystems.getDefault().getPath("C:\\Program Files (x86)\\inkscape\\MinecraftMods\\Dash\\run\\config\\dash\\blockstate.activej");
 
-
-        System.out.println("Caching models");
-        try {
-            BinarySerializer<DashModelData> serializer = SerializerBuilder.create().build(DashModelData.class);
-            StreamOutput output = StreamOutput.create(Files.newOutputStream(modelPath, StandardOpenOption.CREATE, StandardOpenOption.WRITE));
-            output.serialize(serializer, new DashModelData(models, this));
-            output.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-
-        System.out.println("Caching complete.");
+    public DashModelLoader() {
     }
 
-    public DashBakedModel convertSimpleModel(BakedModel model) {
+    public void serialize(SpriteAtlasManager atlasManager,
+                          Object2IntMap<BlockState> stateLookup,
+                          Map<Identifier, BakedModel> models) {
+        Dash.LOGGER.info("Creating DashRegistry");
+        registry = new DashRegistry();
+        Dash.LOGGER.info("Mapping Atlas");
+        DashSpriteAtlasManager atlas = new DashSpriteAtlasManager(atlasManager, atlasData, this);
+//        Dash.LOGGER.info("Mapping Blockstates");
+//        DashBlockStateData blockstate = new DashBlockStateData(stateLookup);
+        Dash.LOGGER.info("Mapping Models");
+        DashModelData model = new DashModelData(models, this);
+
+        Dash.LOGGER.info("Serializing Registry");
+        try {
+
+            StreamOutput output = StreamOutput.create(Files.newOutputStream(registryPath, StandardOpenOption.CREATE, StandardOpenOption.WRITE));
+            output.serialize(Dash.registrySerializer, registry);
+            output.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Dash.LOGGER.info("Serializing atlas");
+        try {
+            StreamOutput output = StreamOutput.create(Files.newOutputStream(atlasPath, StandardOpenOption.CREATE, StandardOpenOption.WRITE));
+            output.serialize(Dash.atlasSerializer, atlas);
+            output.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+//        Dash.LOGGER.info("Serializing blockstates");
+//        try {
+//
+//            StreamOutput output = StreamOutput.create(Files.newOutputStream(blockstatePath, StandardOpenOption.CREATE, StandardOpenOption.WRITE));
+//            output.serialize(Dash.blockStateSerializer, blockstate);
+//            output.close();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+
+
+        Dash.LOGGER.info("Serializing models");
+        try {
+            StreamOutput output = StreamOutput.create(Files.newOutputStream(modelPath, StandardOpenOption.CREATE, StandardOpenOption.WRITE));
+            output.serialize(Dash.modelSerializer, model);
+            output.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+        Dash.LOGGER.info("Caching complete.");
+    }
+
+    public DashModel convertSimpleModel(BakedModel model) {
         if (model instanceof BasicBakedModel) {
             return new DashBasicBakedModel((BasicBakedModel) model, this);
         } else if (model instanceof BuiltinBakedModel) {
@@ -88,58 +116,102 @@ public class DashModelLoader {
             return new DashWeightedBakedModel((WeightedBakedModel) model, this);
         } else {
             if (model != null) {
-                System.err.println(model.getClass().getCanonicalName() + " is not supported by Dash, ask the developer to add support.");
+                String canonicalName = model.getClass().getCanonicalName();
+                if (canonicalName.contains("wraith")) {
+                    LOGGER.error("DH mods are not supported by Dash, ping him really hard on discord here so he can start working on it: DH#9367");
+                } else {
+                    LOGGER.error(canonicalName + " is not supported by Dash, ask the developer to add support.");
+                }
             }
         }
         return null;
     }
 
 
-    public void load() {
-        System.out.println("Deserializing atlas");
-        try {
-            BinarySerializer<DashSpriteAtlasManager> serializer = SerializerBuilder.create().build(DashSpriteAtlasManager.class);
-            StreamInput input = StreamInput.create(Files.newInputStream(atlasPath));
-            DashSpriteAtlasManager atlas = input.deserialize(serializer);
-            System.out.println("Loading atlas");
-            atlasManagerOut = atlas.toUndash();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public void init(ExecutorService threadPool) {
+        threadPool.execute(() -> {
+            if (atlasPath.toFile().exists() && /*blockstatePath.toFile().exists() && */ modelPath.toFile().exists() && registryPath.toFile().exists()) {
+
+                Dash.LOGGER.info("Deserializing registry");
+                try {
+                    registry = StreamInput.create(Files.newInputStream(registryPath)).deserialize(Dash.registrySerializer);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                if (registry == null) {
+                    throw new DashException("Registry deserialization failed");
+                }
+
+                Dash.LOGGER.info("Deserializing atlas");
+                DashSpriteAtlasManager atlas = null;
+                try {
+                    atlas = StreamInput.create(Files.newInputStream(atlasPath)).deserialize(Dash.atlasSerializer);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                if (atlas == null) {
+                    throw new DashException("Atlas deserialization failed");
+                }
 
 
-        System.out.println("Deserializing blockstates");
-        try {
-            BinarySerializer<DashBlockStateData> serializer = SerializerBuilder.create().build(DashBlockStateData.class);
-            StreamInput input = StreamInput.create(Files.newInputStream(blockstatePath));
-            DashBlockStateData blockStateData = input.deserialize(serializer);
-            System.out.println("Loading blockstates");
-            stateLookupOut = blockStateData.toUndash();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+                //TODO find out if these are ever used (1/2)
+//                Dash.LOGGER.info("Deserializing blockstates");
+//                try {
+//                    blockStateData = StreamInput.create(Files.newInputStream(blockstatePath)).deserialize(Dash.blockStateSerializer);
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
 
+                Dash.LOGGER.info("Deserializing models");
+                modelsOut = new HashMap<>();
+                DashModelData modelData = null;
+                try {
+                    modelData = StreamInput.create(Files.newInputStream(modelPath)).deserialize(Dash.modelSerializer);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                if (modelData == null) {
+                    throw new DashException("Model deserialization failed");
+                }
 
-        System.out.println("Deserializing models");
-        Pair<Map<DashID, DashBakedModel>, Map<DashID, DashBakedModel>> modelsToUndash = null;
-        try {
-            BinarySerializer<DashModelData> serializer = SerializerBuilder.create().build(DashModelData.class);
-            StreamInput input = StreamInput.create(Files.newInputStream(blockstatePath));
-            DashModelData modelData = input.deserialize(serializer);
-            System.out.println("Loading models");
-            modelsToUndash = modelData.toUndash();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+                Dash.LOGGER.info("Loading registry");
+                registry.toUndash();
+                Dash.LOGGER.info("Loading atlas");
+                atlasManagerOut = atlas.toUndash(this);
+                //TODO find out if these are ever used (2/2)
+//                Dash.LOGGER.info("Loading blockstates");
+//                blockStateData.toUndash();
+                //load basicmodels
+                Dash.LOGGER.info("Loading simple models");
+                modelData.simpleModels.forEach((dashIdentifier, dashBakedModel) -> modelsOut.put(dashIdentifier.toUndash(), dashBakedModel.toUndash(this)));
+                //load other models
+                Dash.LOGGER.info("Loading complex models");
+                modelData.advancedModels.forEach((dashIdentifier, dashBakedModel) -> {
+                    modelsOut.put(dashIdentifier.toUndash(), dashBakedModel.toUndash(this));
+                });
+                Dash.LOGGER.info("Loaded DashCache");
+                stateLookupOut = new Object2IntOpenHashMap<>();
+                loaded = true;
+            } else {
+                LogManager.getLogger().warn("DashCache files missing, Cache creation is appending and slow start predicted.");
+            }
+        });
+    }
 
-
-        //load basicmodels
-        System.out.println("Loading simple models");
-        modelsToUndash.getLeft().forEach((dashIdentifier, dashBakedModel) -> modelsOut.put(dashIdentifier.toUndash(), dashBakedModel.toUndash(this)));
-        System.out.println("Loading complex models");
-        //load other models
-        modelsToUndash.getRight().forEach((dashIdentifier, dashBakedModel) -> modelsOut.put(dashIdentifier.toUndash(), dashBakedModel.toUndash(this)));
-        System.out.println("Loaded DashCache");
+    public void load(TextureManager textureManager) {
+        //register textures
+        ((SpriteAtlasManagerAccessor) atlasManagerOut).getAtlases().forEach((identifier, spriteAtlasTexture) -> {
+            //atlas registration
+            DashSpriteAtlasTextureData data = atlasData.get(spriteAtlasTexture);
+            int glId = TextureUtil.generateId();
+            LogManager.getLogger().info("Allocated: {}x{}x{} {}-atlas", data.width, data.height, data.maxLevel, identifier);
+            TextureUtil.allocate(glId, data.maxLevel, data.width, data.height);
+            ((AbstractTextureAccessor) spriteAtlasTexture).setGlId(glId);
+            //ding dong lwjgl here are their styles
+            ((SpriteAtlasTextureAccessor)spriteAtlasTexture).getSprites().forEach((identifier1, sprite) -> sprite.upload());
+            //helu textures here are the atlases
+            textureManager.registerTexture(identifier,spriteAtlasTexture);
+        });
     }
 
 

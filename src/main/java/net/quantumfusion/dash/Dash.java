@@ -1,24 +1,23 @@
 package net.quantumfusion.dash;
 
 import io.activej.serializer.BinarySerializer;
+import io.activej.serializer.CompatibilityLevel;
 import io.activej.serializer.SerializerBuilder;
 import io.activej.serializer.stream.StreamInput;
-import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.block.Material;
-import net.minecraft.client.render.model.SpriteAtlasManager;
-import net.minecraft.client.render.model.json.JsonUnbakedModel;
 import net.minecraft.client.texture.NativeImage;
-import net.minecraft.client.texture.Sprite;
 import net.minecraft.util.Identifier;
+import net.quantumfusion.dash.cache.DashModelLoader;
+import net.quantumfusion.dash.cache.DashRegistry;
 import net.quantumfusion.dash.cache.atlas.DashSpriteAtlasManager;
-import net.quantumfusion.dash.cache.models.components.DashJsonUnbakedModel;
+import net.quantumfusion.dash.cache.blockstates.DashBlockStateData;
+import net.quantumfusion.dash.cache.models.*;
 import net.quantumfusion.dash.misc.DashParticleTextureData;
 import net.quantumfusion.dash.misc.DashSplashTextData;
-import net.quantumfusion.dash.sprite.SpriteInfoCache;
 import net.quantumfusion.dash.util.TimeHelper;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import sun.misc.Unsafe;
 
 import java.io.BufferedInputStream;
@@ -26,9 +25,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -38,25 +37,41 @@ import java.util.concurrent.Executors;
 import static net.quantumfusion.dash.util.ThreadHelper.awaitTerminationAfterShutdown;
 
 public class Dash implements ModInitializer {
-    public static boolean modelCache = false;
 
+    public static Logger LOGGER;
     public static HashMap<String, NativeImage> fontCache;
-    public static HashMap<String, NativeImage> spriteCache;
-    public static HashMap<Identifier, JsonUnbakedModel> jsonModelMap;
     public static HashMap<Identifier, List<Identifier>> particleCache;
-    public static HashMap<Identifier, ArrayList<Sprite.Info>> spriteInfoCache;
     public static List<String> splashText;
 
     public static Path config = FabricLoader.getInstance().getConfigDir().normalize();
     public static boolean caching = true;
-    public static ExecutorService modelLoading;
 
-    public static BinarySerializer<SpriteInfoCache> spriteSerializer = SerializerBuilder.create().build(SpriteInfoCache.class);
-    public static BinarySerializer<DashJsonUnbakedModel> jsonModelSerializer = SerializerBuilder.create().build(DashJsonUnbakedModel.class);
     public static BinarySerializer<DashSplashTextData> splashTextSerializer = SerializerBuilder.create().build(DashSplashTextData.class);
     public static BinarySerializer<DashParticleTextureData> dashParticleTextureDataSerializer = SerializerBuilder.create().build(DashParticleTextureData.class);
 
-    public static Object2ObjectMap<String, Material> materialRegistry = new Object2ObjectOpenHashMap<>();
+
+    public static BinarySerializer<DashModelData> modelSerializer = SerializerBuilder.create()
+            .withSubclasses("models", DashBasicBakedModel.class, DashBuiltinBakedModel.class, DashMultipartBakedModel.class, DashWeightedBakedModel.class)
+            .withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE)
+            .build(DashModelData.class);
+
+    public static BinarySerializer<DashBlockStateData> blockStateSerializer = SerializerBuilder.create()
+            .withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE)
+            .build(DashBlockStateData.class);
+
+    public static BinarySerializer<DashSpriteAtlasManager> atlasSerializer = SerializerBuilder.create()
+            .withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE)
+            .build(DashSpriteAtlasManager.class);
+
+    public static BinarySerializer<DashRegistry> registrySerializer = SerializerBuilder.create()
+            .withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE)
+            .build(DashRegistry.class);
+
+    public static DashModelLoader loader = new DashModelLoader();
+
+    public static   Path registryPath = config.resolve("dash/registry.activej");
+    public static   Path modelPath = config.resolve("dash/model-mappings.activej");
+    public static  Path atlasPath = config.resolve("dash/atlas-mappings.activej");
 
     public static Unsafe getUnsafe() {
         Field f = null;
@@ -75,34 +90,26 @@ public class Dash implements ModInitializer {
         return null;
     }
 
-    public static SpriteAtlasManager compare(SpriteAtlasManager atlasManagerCache) {
-        SpriteAtlasManager out = new DashSpriteAtlasManager(atlasManagerCache).toUndash();
-        return out;
-    }
 
     public static void reload() {
         caching = true;
+        LOGGER = LogManager.getLogger();
         particleCache = new HashMap<>();
-        spriteInfoCache = new HashMap<>();
-        jsonModelMap = new HashMap<>();
         fontCache = new HashMap<>();
-        spriteCache = new HashMap<>();
-        modelLoading = Executors.newFixedThreadPool(4);
-        System.out.println("Starting dash thread.");
-        Instant start = Instant.now();
+        LOGGER.info("Starting dash thread.");
         Thread dash = new Thread(() -> {
+            Instant start = Instant.now();
             makeFolders();
             int threads = Runtime.getRuntime().availableProcessors();
-            System.out.println("Starting dash with " + threads + " + 1 threads.");
-            ExecutorService executorService = Executors.newFixedThreadPool(Math.max(threads - 1, 1));
+            LOGGER.info("Starting dash threadpool");
+            ExecutorService executorService = Executors.newFixedThreadPool(threads);
+            loader.init(executorService);
             misc(executorService);
             fontCacheRegister(executorService);
-            spriteInfoRegister(executorService);
-            spriteRegister(executorService);
-            jsonModelRegister(executorService);
             particleCacheRegister(executorService);
             awaitTerminationAfterShutdown(executorService);
-            System.out.println("Loaded cache in " + TimeHelper.getDecimalMs(start, Instant.now()) + "ms");
+            Instant stop = Instant.now();
+            LOGGER.info("Loaded cache in " + TimeHelper.getDecimalMs(start, stop) + "ms");
             caching = false;
         });
         dash.setName("dash-manager");
@@ -112,17 +119,13 @@ public class Dash implements ModInitializer {
     private static void makeFolders() {
         createDirectory("dash");
         createDirectory("dash/fonts");
-        createDirectory("dash/models");
         createDirectory("dash/particles");
-        createDirectory("dash/sprite");
-        createDirectory("dash/sprite/info");
     }
 
     private static void misc(ExecutorService executorService) {
         Arrays.stream(listCacheFiles("dash")).forEach(file -> executorService.execute(() -> {
             if (file.getName().equals("splash.activej")) {
                 try {
-                    System.out.println("loaded splash");
                     splashText = StreamInput.create(new FileInputStream(prepareAccess(file))).deserialize(splashTextSerializer).splashList;
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -142,50 +145,10 @@ public class Dash implements ModInitializer {
         }));
     }
 
-    private static void spriteInfoRegister(ExecutorService executorService) {
-        Arrays.stream(listCacheFiles("dash/sprite/info")).forEach(spriteInfoFile -> executorService.execute(() -> {
-            try {
-                SpriteInfoCache cache = StreamInput.create(new FileInputStream(prepareAccess(spriteInfoFile))).deserialize(spriteSerializer);
-                spriteInfoCache.put(cache.id.toUndash(), cache.toUndash());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }));
-    }
-
-    private static void jsonModelRegister(ExecutorService executorService) {
-        if (modelCache) {
-            Arrays.stream(listCacheFiles("dash/models")).forEach(jsonModelFile -> executorService.execute(() -> {
-                try {
-                    DashJsonUnbakedModel cache = StreamInput.create(new FileInputStream(prepareAccess(jsonModelFile))).deserialize(jsonModelSerializer);
-                    jsonModelMap.put(cache.id.toUndash(), cache.toUndash());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }));
-        }
-    }
-
     private static void fontCacheRegister(ExecutorService executorService) {
-        System.out.println(config.resolve("dash"));
         Arrays.stream(listCacheFiles("dash/fonts")).forEach(fontFile -> executorService.execute(() -> {
             try {
                 fontCache.put(prepareAccess(fontFile).getName().split("-")[1].replace(".png", ""), NativeImage.read(NativeImage.Format.ABGR, new BufferedInputStream(new FileInputStream(fontFile))));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }));
-    }
-
-    private static void spriteRegister(ExecutorService executorService) {
-
-        Arrays.stream(listCacheFiles("dash/sprite")).forEach(spriteFile -> executorService.execute(() -> {
-            try {
-                if (spriteFile.isDirectory()) {
-                    return;
-                }
-                prepareAccess(spriteFile);
-                spriteCache.put(spriteFile.getName().replace(".png", ""), NativeImage.read(new FileInputStream(spriteFile)));
             } catch (IOException e) {
                 e.printStackTrace();
             }

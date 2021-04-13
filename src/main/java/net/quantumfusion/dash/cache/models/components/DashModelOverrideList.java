@@ -9,10 +9,6 @@ import net.minecraft.client.render.model.json.ModelOverride;
 import net.minecraft.client.render.model.json.ModelOverrideList;
 import net.quantumfusion.dash.Dash;
 import net.quantumfusion.dash.cache.DashModelLoader;
-import net.quantumfusion.dash.cache.blockstates.properties.DashBooleanProperty;
-import net.quantumfusion.dash.cache.blockstates.properties.DashDirectionProperty;
-import net.quantumfusion.dash.cache.blockstates.properties.DashEnumProperty;
-import net.quantumfusion.dash.cache.blockstates.properties.DashIntProperty;
 import net.quantumfusion.dash.cache.models.*;
 import net.quantumfusion.dash.mixin.ModelOverideListAccessor;
 
@@ -24,16 +20,11 @@ public class DashModelOverrideList {
     public List<DashModelOverride> overrides;
     @Serialize(order = 1)
     @SerializeNullable(path = {0})
-    @SerializeSubclasses(path = {0}, value = {
-            DashBasicBakedModel.class,
-            DashBuiltinBakedModel.class,
-            DashMultipartBakedModel.class,
-            DashWeightedBakedModel.class
-    })
-    public List<DashBakedModel> bakedModels;
+    @SerializeSubclasses(path = {0}, extraSubclassesId = "models")
+    public List<DashModel> bakedModels;
 
     public DashModelOverrideList(@Deserialize("overrides")List<DashModelOverride> overrides,
-                                 @Deserialize("bakedModels")List<DashBakedModel> bakedModels) {
+                                 @Deserialize("bakedModels")List<DashModel> bakedModels) {
         this.overrides = overrides;
         this.bakedModels = bakedModels;
     }
@@ -52,7 +43,13 @@ public class DashModelOverrideList {
         try {
             ModelOverrideList out = (ModelOverrideList) Dash.getUnsafe().allocateInstance(ModelOverrideList.class);
             List<BakedModel> outModels = new ArrayList<>();
-            bakedModels.forEach(dashBakedModel -> outModels.add(dashBakedModel.toUndash(loader)));
+            bakedModels.forEach(dashBakedModel -> {
+                if (dashBakedModel != null) {
+                    outModels.add(dashBakedModel.toUndash(loader));
+                } else {
+                    outModels.add(null);
+                }
+            });
             ((ModelOverideListAccessor) out).setModels(outModels);
             List<ModelOverride> overridesOut = new ArrayList<>();
             overrides.forEach(dashModelOverride -> overridesOut.add(dashModelOverride.toUndash()));

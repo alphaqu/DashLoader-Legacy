@@ -11,12 +11,7 @@ import net.quantumfusion.dash.mixin.WeightedPickerEntryAccessor;
 
 public class DashWeightedModelEntry {
     @Serialize(order = 0)
-    @SerializeSubclasses(value = {
-            DashBasicBakedModel.class,
-            DashBuiltinBakedModel.class,
-            DashMultipartBakedModel.class,
-            DashWeightedBakedModel.class
-    })
+    @SerializeSubclasses(extraSubclassesId = "models")
     public DashBakedModel model;
 
     @Serialize(order = 1)
@@ -29,11 +24,12 @@ public class DashWeightedModelEntry {
     }
 
     public DashWeightedModelEntry(WeightedBakedModel.Entry entry, DashModelLoader loader) {
-        model = loader.convertSimpleModel(((WeightedBakedModelEntryAccessor) entry).getModel());
+        model = (DashBakedModel) loader.convertSimpleModel(((WeightedBakedModelEntryAccessor) entry).getModel());
         weight = ((WeightedPickerEntryAccessor) entry).getWeight();
     }
 
     public WeightedBakedModel.Entry toUndash(DashModelLoader loader) {
+        DashModel model = (DashModel) this.model;
         return new WeightedBakedModel.Entry(model.toUndash(loader), weight);
 
     }

@@ -8,7 +8,6 @@
     "UnicodeTextureFontOverride",
     "BakedModelManagerOverride",
 
-    "SpriteAtlasTextureMixin",
     "SoundManagerMixin",
     "MinecraftClientMixin",
     "ParticleManagerMixin",
@@ -18,7 +17,10 @@
     "SplashTextResourceSupplierMixin",
     "TextureUtilMixin",
     "SpriteInterpolationMixin",
+    "SpriteAtlasTextureMixin",
 
+    "AbstractTextureAccessor",
+    "SpriteAtlasTextureDataAccessor",
     "BuiltinBakedModelAccessor",
     "WeightedBakedModelAccessor",
     "WeightedBakedModelEntryAccessor",

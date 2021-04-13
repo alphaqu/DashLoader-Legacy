@@ -17,6 +17,8 @@ public class DashBlockStateData {
     @SerializeNullable(path = {0})
     public Map<DashBlockState, Integer> blockstates;
 
+    public Object2IntMap<BlockState> stateLookupOut;
+
     public DashBlockStateData(@Deserialize("blockstates") Map<DashBlockState, Integer> blockstates) {
         this.blockstates = blockstates;
     }
@@ -26,8 +28,13 @@ public class DashBlockStateData {
         blockstatess.forEach((blockState, integer) -> this.blockstates.put(new DashBlockState(blockState), integer));
     }
 
-    public Object2IntMap<BlockState> toUndash() {
-        Object2IntMap<BlockState> stateLookupOut = new Object2IntOpenHashMap<>();
+    public void toUndash() {
+        stateLookupOut = new Object2IntOpenHashMap<>();
+        blockstates.forEach((dashBlockState, integer) -> dashBlockState.toUndash());
+    }
+
+    public Object2IntMap<BlockState> load() {
+        stateLookupOut = new Object2IntOpenHashMap<>();
         blockstates.forEach((dashBlockState, integer) -> stateLookupOut.put(dashBlockState.toUndash(), integer));
         return stateLookupOut;
     }

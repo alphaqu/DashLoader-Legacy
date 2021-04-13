@@ -26,13 +26,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class DashBasicBakedModel implements DashBakedModel {
+public class DashBasicBakedModel implements DashModel,DashBakedModel {
     @Serialize(order = 0)
     public List<DashBakedQuad> quads;
     @Serialize(order = 1)
     @SerializeNullable()
     @SerializeNullable(path = {0})
-    @SerializeNullable(path = {1,0})
+    @SerializeNullable(path = {1})
     public Map<DashDirection, List<DashBakedQuad>> faceQuads;
     @Serialize(order = 2)
     public boolean usesAo;
@@ -45,7 +45,7 @@ public class DashBasicBakedModel implements DashBakedModel {
     @Serialize(order = 6)
     public DashModelOverrideList itemPropertyOverrides;
     @Serialize(order = 7)
-    public DashIdentifier spritePointer;
+    public Integer spritePointer;
 
 
     public DashBasicBakedModel(@Deserialize("quads") List<DashBakedQuad> quads,
@@ -55,7 +55,7 @@ public class DashBasicBakedModel implements DashBakedModel {
                                @Deserialize("isSideLit") boolean isSideLit,
                                @Deserialize("transformation") DashModelTransformation transformation,
                                @Deserialize("itemPropertyOverrides") DashModelOverrideList itemPropertyOverrides,
-                               @Deserialize("spritePointer") DashIdentifier spritePointer) {
+                               @Deserialize("spritePointer") Integer spritePointer) {
         this.quads = quads;
         this.faceQuads = faceQuads;
         this.usesAo = usesAo;
@@ -77,37 +77,24 @@ public class DashBasicBakedModel implements DashBakedModel {
             bakedQuads.forEach(bakedQuad -> out.add(new DashBakedQuad(bakedQuad)));
             faceQuads.put(new DashDirection(direction), out);
         });
-
         itemPropertyOverrides = new DashModelOverrideList(access.getItemPropertyOverrides(), loader);
         usesAo = access.getUsesAo();
         hasDepth = access.getHasDepth();
         isSideLit = access.getIsSideLit();
         transformation = new DashModelTransformation(access.getTransformation());
-        spritePointer = new DashIdentifier(access.getSprite().getId());
+        spritePointer = loader.registry.createSpritePointer(access.getSprite());
     }
 
 
     @Override
     public BakedModel toUndash(DashModelLoader loader) {
-        Identifier id = spritePointer.toUndash();
-        Sprite sprite = null;
-        for (Map.Entry<Identifier, SpriteAtlasTexture> entry : ((SpriteAtlasManagerAccessor) loader.atlasManagerOut).getAtlases().entrySet()) {
-            SpriteAtlasTexture spriteAtlasTexture = entry.getValue();
-            if (((SpriteAtlasTextureAccessor) spriteAtlasTexture).getSprites().containsKey(id)) {
-                sprite = spriteAtlasTexture.getSprite(id);
-            }
-        }
-
-        if (sprite == null) {
-            throw new DashException("Sprite not found in deserialized sprite cache: " + id);
-        }
-
+        Sprite sprite = loader.registry.getSprite(spritePointer);
         List<BakedQuad> quadsOut = new ArrayList<>();
         Map<Direction, List<BakedQuad>> faceQuadsOut = new HashMap<>();
-        for (DashBakedQuad dashBakedQuad : quads) {
-            quadsOut.add(dashBakedQuad.toUndash(sprite));
-        }
-        for (Map.Entry<DashDirection, List<DashBakedQuad>> entry : faceQuads.entrySet()) {
+
+        quads.forEach(dashBakedQuad -> quadsOut.add(dashBakedQuad.toUndash(sprite)));
+
+        faceQuads.entrySet().forEach(entry -> {
             DashDirection dashDirection = entry.getKey();
             List<DashBakedQuad> dashBakedQuads = entry.getValue();
             List<BakedQuad> out = new ArrayList<>();
@@ -115,7 +102,7 @@ public class DashBasicBakedModel implements DashBakedModel {
                 out.add(dashBakedQuad.toUndash(sprite));
             }
             faceQuadsOut.put(dashDirection.toUndash(), out);
-        }
+        });
 
         return new BasicBakedModel(quadsOut, faceQuadsOut, usesAo, isSideLit, hasDepth, sprite, transformation.toUndash(), itemPropertyOverrides.toUndash(loader));
     }

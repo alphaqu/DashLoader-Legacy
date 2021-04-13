@@ -18,6 +18,5 @@ public class SoundManagerMixin {
             cancellable = true)
     private static void dontchecksounds(Sound sound, Identifier identifier, ResourceManager resourceManager, CallbackInfoReturnable<Boolean> cir) {
         cir.setReturnValue(true);
-        cir.cancel();
     }
 }

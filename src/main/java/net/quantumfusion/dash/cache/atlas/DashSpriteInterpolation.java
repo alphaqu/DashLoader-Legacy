@@ -6,7 +6,7 @@ import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.Sprite;
 import net.quantumfusion.dash.Dash;
 import net.quantumfusion.dash.mixin.SpriteInterpolationAccessor;
-import net.quantumfusion.dash.sprite.util.DashImage;
+import net.quantumfusion.dash.util.duck.SpriteInterpolationDuck;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,13 +27,14 @@ public class DashSpriteInterpolation {
         this.images = Stream.of(images).map(DashImage::new).collect(Collectors.toList());
     }
 
-    public Sprite.Interpolation toUndash() {
+    public Sprite.Interpolation toUndash(Sprite owner) {
         try {
             Sprite.Interpolation spriteInterpolation = (Sprite.Interpolation) Dash.getUnsafe().allocateInstance(Sprite.Interpolation.class);
             SpriteInterpolationAccessor spriteInterpolationAccessor = ((SpriteInterpolationAccessor) (Object) spriteInterpolation);
             List<NativeImage> nativeImages = new ArrayList<>();
             images.forEach(dashImage -> nativeImages.add(dashImage.toUndash()));
             spriteInterpolationAccessor.setImages(nativeImages.toArray(new NativeImage[0]));
+            ((SpriteInterpolationDuck)(Object)spriteInterpolation).interpolation(owner);
             return spriteInterpolation;
         } catch (InstantiationException e) {
             e.printStackTrace();

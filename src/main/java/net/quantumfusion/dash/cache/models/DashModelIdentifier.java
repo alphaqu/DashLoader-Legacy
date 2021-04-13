@@ -6,7 +6,7 @@ import io.activej.serializer.annotations.Serialize;
 import net.minecraft.client.util.ModelIdentifier;
 import net.minecraft.util.Identifier;
 import net.quantumfusion.dash.cache.DashID;
-import net.quantumfusion.dash.cache.DashIdentifier;
+
 
 public class DashModelIdentifier implements DashID {
     @Serialize(order = 0)

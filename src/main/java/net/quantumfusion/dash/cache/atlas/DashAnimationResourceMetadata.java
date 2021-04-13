@@ -37,11 +37,11 @@ public class DashAnimationResourceMetadata {
     public DashAnimationResourceMetadata(AnimationResourceMetadata animationResourceMetadata) {
         frames = new ArrayList<>();
         AnimationResourceMetadataAccessor metadataAccessor = ((AnimationResourceMetadataAccessor) animationResourceMetadata);
-        metadataAccessor.getFramesD().forEach(animationFrameResourceMetadata -> frames.add(new DashAnimationFrameResourceMetadata(animationFrameResourceMetadata)));
-        width = metadataAccessor.getWidthD();
-        height = metadataAccessor.getHeightD();
-        defaultFrameTime = metadataAccessor.getDefaultFrameTimeD();
-        interpolate = metadataAccessor.interpolateD();
+        metadataAccessor.getFrames().forEach(animationFrameResourceMetadata -> frames.add(new DashAnimationFrameResourceMetadata(animationFrameResourceMetadata)));
+        width = metadataAccessor.getWidth();
+        height = metadataAccessor.getHeight();
+        defaultFrameTime = metadataAccessor.getDefaultFrameTime();
+        interpolate = metadataAccessor.getInterpolate();
     }
 
     public AnimationResourceMetadata toUndash() {

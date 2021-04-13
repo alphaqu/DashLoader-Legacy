@@ -7,17 +7,17 @@ import net.quantumfusion.dash.util.Dashable;
 
 public class DashDirection implements Dashable {
     @Serialize(order = 0)
-    public final String name;
+    public final int id;
 
-    public DashDirection(@Deserialize("name") String name) {
-        this.name = name;
+    public DashDirection(@Deserialize("id") int id) {
+        this.id = id;
     }
 
     public DashDirection(Direction direction) {
-        name = direction.getName();
+        id = direction.getId();
     }
 
     public Direction toUndash() {
-        return Direction.byName(name);
+        return Direction.byId(id);
     }
 }

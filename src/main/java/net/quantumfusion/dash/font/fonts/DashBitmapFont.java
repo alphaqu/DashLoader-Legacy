@@ -5,7 +5,7 @@ import io.activej.serializer.annotations.Serialize;
 import io.activej.serializer.annotations.SerializeNullable;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.quantumfusion.dash.sprite.util.DashImage;
+import net.quantumfusion.dash.cache.atlas.DashImage;
 
 import java.util.HashMap;
 

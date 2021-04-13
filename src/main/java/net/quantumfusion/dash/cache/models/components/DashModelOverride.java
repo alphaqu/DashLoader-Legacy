@@ -22,11 +22,12 @@ public class DashModelOverride {
 
     @Serialize(order = 1)
     @SerializeNullable()
-    @SerializeNullable(path = {1})
     @SerializeSubclasses(path = {0}, value = {
             DashIdentifier.class,
             DashModelIdentifier.class
     })
+    @SerializeNullable(path = {1})
+
     public final Map<DashID, Float> predicateToThresholds;
 
     public DashModelOverride(@Deserialize("modelId") String modelId,

@@ -20,9 +20,9 @@ public class DashBakedQuad {
 
 
     public DashBakedQuad(@Deserialize("vertexData") int[] vertexData,
-                         @Deserialize("colorIndex")   int colorIndex,
-                         @Deserialize("face")    DashDirection face,
-                         @Deserialize("shade")    boolean shade) {
+                         @Deserialize("colorIndex") int colorIndex,
+                         @Deserialize("face") DashDirection face,
+                         @Deserialize("shade") boolean shade) {
         this.vertexData = vertexData;
         this.colorIndex = colorIndex;
         this.face = face;

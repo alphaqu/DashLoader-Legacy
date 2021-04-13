@@ -16,10 +16,10 @@ public interface SpriteAccessor {
         throw new AssertionError();
     }
 
-    @Accessor("atlas")
+    @Accessor
     SpriteAtlasTexture getAtlas();
 
-    @Accessor("atlas")
+    @Accessor
     void setAtlas(SpriteAtlasTexture atlas);
 
     @Accessor("info")

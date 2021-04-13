@@ -2,7 +2,7 @@ package net.quantumfusion.dash.font.fonts;
 
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
-import net.quantumfusion.dash.sprite.util.DashImage;
+import net.quantumfusion.dash.cache.atlas.DashImage;
 
 public class DashBitmapFontGlyph {
     @Serialize(order = 0)

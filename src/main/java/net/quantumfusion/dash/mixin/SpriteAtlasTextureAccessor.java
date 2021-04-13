@@ -13,34 +13,34 @@ import java.util.Set;
 @Mixin(SpriteAtlasTexture.class)
 public interface SpriteAtlasTextureAccessor {
 
-    @Accessor("sprites")
+    @Accessor
     Map<Identifier, Sprite> getSprites();
 
-    @Accessor("sprites")
+    @Accessor
     void setSprites(Map<Identifier, Sprite> sprites);
 
-    @Accessor("animatedSprites")
+    @Accessor
     List<Sprite> getAnimatedSprites();
 
-    @Accessor("animatedSprites")
+    @Accessor
     void setAnimatedSprites(List<Sprite> animatedSprites);
 
-    @Accessor("spritesToLoad")
+    @Accessor
     Set<Identifier> getSpritesToLoad();
 
-    @Accessor("spritesToLoad")
+    @Accessor
     void setSpritesToLoad(Set<Identifier> spritesToLoad);
 
-    @Accessor("id")
+    @Accessor
     Identifier getId();
 
-    @Accessor("id")
+    @Accessor
     void setId(Identifier id);
 
-    @Accessor("maxTextureSize")
+    @Accessor
     int getMaxTextureSize();
 
-    @Accessor("maxTextureSize")
+    @Accessor
     void setMaxTextureSize(int maxTextureSize);
 
 }

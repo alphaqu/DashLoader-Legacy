@@ -13,7 +13,9 @@ import net.minecraft.client.texture.TextureManager;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.profiler.Profiler;
+import net.quantumfusion.dash.Dash;
 import net.quantumfusion.dash.cache.DashModelLoader;
+import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -28,9 +30,6 @@ import java.util.Map;
 @Mixin(BakedModelManager.class)
 public class BakedModelManagerOverride {
 
-
-    private static DashModelLoader loader;
-    private static Map<Identifier, BakedModel> modelsCachetemp;
     @Shadow
     @Final
     private BlockColors colorMap;
@@ -60,9 +59,12 @@ public class BakedModelManagerOverride {
             at = @At(value = "HEAD"), cancellable = true)
     private void prepare(ResourceManager resourceManager, Profiler profiler, CallbackInfoReturnable<ModelLoader> cir) {
         profiler.startTick();
-        ModelLoader modelLoader = null;
-        if (loader == null) {
+        ModelLoader modelLoader;
+        if (!Dash.loader.loaded) {
             modelLoader = new ModelLoader(resourceManager, this.colorMap, profiler, this.mipmap);
+        } else {
+            //hipidy hopedy this is now dashes property
+            modelLoader = null;
         }
         profiler.endTick();
         cir.setReturnValue(modelLoader);
@@ -74,22 +76,21 @@ public class BakedModelManagerOverride {
     private void apply(ModelLoader modelLoader, ResourceManager resourceManager, Profiler profiler, CallbackInfo ci) {
         profiler.startTick();
         profiler.push("upload");
-
-        if (modelLoader != null) {
-            System.out.println("Creating model cache");
+        DashModelLoader loader = Dash.loader;
+        if (!loader.loaded) {
             //serialization
             this.atlasManager = modelLoader.upload(this.textureManager, profiler);
             this.models = modelLoader.getBakedModelMap();
             this.stateLookup = modelLoader.getStateLookup();
-            loader = new DashModelLoader(atlasManager, stateLookup, models);
+            Dash.loader.serialize(atlasManager, stateLookup, models);
 
         } else {
-            loader.load();
-            atlasManager = loader.atlasManagerOut;
-            stateLookup = loader.stateLookupOut;
-            models = loader.modelsOut;
+            //cache go brr
+            loader.load(textureManager);
+            this.atlasManager = loader.atlasManagerOut;
+            this.models = loader.modelsOut;
+            this.stateLookup = loader.stateLookupOut;
         }
-        stateLookup = new Object2IntOpenHashMap<>();
         this.missingModel = this.models.get(ModelLoader.MISSING);
         profiler.swap("cache");
         this.blockModelCache.reload();

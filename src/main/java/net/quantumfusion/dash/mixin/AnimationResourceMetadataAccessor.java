@@ -10,18 +10,18 @@ import java.util.List;
 @Mixin(AnimationResourceMetadata.class)
 public interface AnimationResourceMetadataAccessor {
 
-    @Accessor("frames")
-    List<AnimationFrameResourceMetadata> getFramesD();
+    @Accessor
+    List<AnimationFrameResourceMetadata> getFrames();
 
-    @Accessor("width")
-    int getWidthD();
+    @Accessor
+    int getWidth();
 
-    @Accessor("height")
-    int getHeightD();
+    @Accessor
+    int getHeight();
 
-    @Accessor("defaultFrameTime")
-    int getDefaultFrameTimeD();
+    @Accessor
+    int getDefaultFrameTime();
 
-    @Accessor("interpolate")
-    boolean interpolateD();
+    @Accessor
+    boolean getInterpolate();
 }

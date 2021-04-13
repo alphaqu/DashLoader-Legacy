@@ -1,4 +1,4 @@
-package net.quantumfusion.dash.sprite.info;
+package net.quantumfusion.dash.cache.atlas;
 
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;

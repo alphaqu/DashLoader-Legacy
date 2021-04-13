@@ -33,6 +33,7 @@ public class DashBlockState {
     })
     public List<DashProperty> entriesEncoded;
 
+
     public DashBlockState(@Deserialize("owner") DashIdentifier owner,
                           @Deserialize("entriesEncoded") List<DashProperty> entriesEncoded) {
         this.owner = owner;
@@ -41,9 +42,8 @@ public class DashBlockState {
 
     public DashBlockState(BlockState blockState) {
         StateAccessor<Block, BlockState> accessState = ((StateAccessor<Block, BlockState>) blockState);
-        ImmutableMap<Property<?>, Comparable<?>> entries = accessState.getEntries();
         entriesEncoded = new ArrayList<>();
-        entries.forEach((property, comparable) -> {
+        accessState.getEntries().forEach((property, comparable) -> {
             if (property instanceof BooleanProperty) {
                 entriesEncoded.add(new DashBooleanProperty((BooleanProperty) property, comparable.toString()));
             } else if (property instanceof DirectionProperty) {

@@ -10,7 +10,6 @@ import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.MultipartBakedModel;
 import net.minecraft.util.Util;
 import net.quantumfusion.dash.cache.DashModelLoader;
-import net.quantumfusion.dash.cache.blockstates.DashBlockState;
 import net.quantumfusion.dash.mixin.MultipartBakedModelAccessor;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -20,26 +19,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
-public class DashMultipartBakedModel implements DashBakedModel {
+public class DashMultipartBakedModel implements DashModel,DashBakedModel {
     //identifier baked model
     @Serialize(order = 0)
-    @SerializeSubclasses(path = {0}, value = {
-            DashBasicBakedModel.class,
-            DashBuiltinBakedModel.class,
-            DashMultipartBakedModel.class,
-            DashWeightedBakedModel.class
-    })
+    @SerializeSubclasses(path = {0},extraSubclassesId = "models")
     public final List<DashBakedModel> components;
 
 
     @Serialize(order = 1)
     @SerializeNullable()
-    @SerializeNullable(path = {1})
     @SerializeNullable(path = {0})
-    public Map<DashBlockState, BitSet> stateCache;
+    @SerializeNullable(path = {1})
+    public Map<Integer, byte[]> stateCache;
 
     public DashMultipartBakedModel(@Deserialize("components") List<DashBakedModel> components,
-                                   @Deserialize("stateCache")  Map<DashBlockState, BitSet> stateCache) {
+                                   @Deserialize("stateCache")  Map<Integer, byte[]> stateCache) {
         this.components = components;
         this.stateCache = stateCache;
     }
@@ -49,21 +43,22 @@ public class DashMultipartBakedModel implements DashBakedModel {
         this.components = new ArrayList<>();
         stateCache = new Object2ObjectOpenCustomHashMap(Util.identityHashStrategy());
         access.getComponents().forEach(predicateBakedModelPair -> {
-            components.add(loader.convertSimpleModel(predicateBakedModelPair.getRight()));
+            components.add((DashBakedModel) loader.convertSimpleModel(predicateBakedModelPair.getRight()));
         });
-        access.getStateCache().forEach((blockState, bitSet) -> stateCache.put(new DashBlockState(blockState), bitSet));
+        access.getStateCache().forEach((blockState, bitSet) -> stateCache.put(loader.registry.createBlockStatePointer(blockState), bitSet.toByteArray()));
 
     }
 
     @Override
     public BakedModel toUndash(DashModelLoader loader) {
         List<Pair<Predicate<BlockState>, BakedModel>> componentsOut = new ArrayList<>();
-        for (DashBakedModel component : components) {
+        for (DashBakedModel componentRaw : components) {
+            DashModel component = (DashModel) componentRaw;
             componentsOut.add(Pair.of((blockState -> true), component.toUndash(loader)));
         }
         MultipartBakedModel model = new MultipartBakedModel(componentsOut);
         Map<BlockState, BitSet> stateCacheOut = new Object2ObjectOpenCustomHashMap(Util.identityHashStrategy());
-        stateCache.forEach((dashBlockState, bitSet) -> stateCacheOut.put(dashBlockState.toUndash(), bitSet));
+        stateCache.forEach((blockstatePointer, bitSet) -> stateCacheOut.put(loader.registry.getBlockstate(blockstatePointer), BitSet.valueOf(bitSet)));
         ((MultipartBakedModelAccessor) model).setStateCache(stateCacheOut);
         return model;
     }
