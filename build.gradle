@@ -14,6 +14,13 @@ minecraft {
     accessWidener =  file("src/main/resources/dash.accesswidener")
 }
 
+repositories {
+    maven {
+        name = "Jitpack"
+        url = "https://jitpack.io"
+    }
+}
+
 dependencies {
     modImplementation "io.activej:activej-serializer:$activej_version"
     include "io.activej:activej-serializer:$activej_version"
@@ -30,6 +37,8 @@ dependencies {
 
     // PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
     // You may need to force-disable transitiveness on them.
+    // Uncomment to add Sodium to the dev environment
+    // modImplementation "com.github.CaffeineMC:sodium-fabric:${project.sodium_version}"
 }
 
 processResources {
