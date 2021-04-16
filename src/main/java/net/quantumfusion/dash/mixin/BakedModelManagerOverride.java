@@ -1,7 +1,7 @@
 package net.quantumfusion.dash.mixin;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.client.render.block.BlockModels;
@@ -13,9 +13,10 @@ import net.minecraft.client.texture.TextureManager;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.profiler.Profiler;
+import net.minecraft.util.registry.Registry;
 import net.quantumfusion.dash.Dash;
-import net.quantumfusion.dash.cache.DashModelLoader;
-import org.apache.logging.log4j.LogManager;
+import net.quantumfusion.dash.cache.DashCache;
+import net.quantumfusion.dash.cache.DashCacheState;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -25,7 +26,11 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+
+import static net.minecraft.client.render.block.BlockModels.getModelId;
 
 @Mixin(BakedModelManager.class)
 public class BakedModelManagerOverride {
@@ -60,7 +65,7 @@ public class BakedModelManagerOverride {
     private void prepare(ResourceManager resourceManager, Profiler profiler, CallbackInfoReturnable<ModelLoader> cir) {
         profiler.startTick();
         ModelLoader modelLoader;
-        if (!Dash.loader.loaded) {
+        if (Dash.loader.state != DashCacheState.LOADED) {
             modelLoader = new ModelLoader(resourceManager, this.colorMap, profiler, this.mipmap);
         } else {
             //hipidy hopedy this is now dashes property
@@ -76,13 +81,13 @@ public class BakedModelManagerOverride {
     private void apply(ModelLoader modelLoader, ResourceManager resourceManager, Profiler profiler, CallbackInfo ci) {
         profiler.startTick();
         profiler.push("upload");
-        DashModelLoader loader = Dash.loader;
-        if (!loader.loaded) {
+        DashCache loader = Dash.loader;
+        if (Dash.loader.state != DashCacheState.LOADED) {
             //serialization
             this.atlasManager = modelLoader.upload(this.textureManager, profiler);
             this.models = modelLoader.getBakedModelMap();
             this.stateLookup = modelLoader.getStateLookup();
-            Dash.loader.serialize(atlasManager, stateLookup, models);
+            Dash.loader.addBakedModelAssets(atlasManager, stateLookup, models);
 
         } else {
             //cache go brr

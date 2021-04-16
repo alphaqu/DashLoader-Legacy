@@ -17,24 +17,18 @@ public class DashIntProperty implements DashProperty {
     public int value;
 
     @Serialize(order = 2)
-    public String propertyType;
-
-    @Serialize(order = 3)
     public String name;
 
 
     public DashIntProperty(@Deserialize("values") List<Integer> values,
                            @Deserialize("value")   int value,
-                           @Deserialize("propertyType")  String propertyType,
                            @Deserialize("name")   String name) {
         this.values = values;
         this.value = value;
-        this.propertyType = propertyType;
         this.name = name;
     }
 
     public DashIntProperty(IntProperty property, String value) {
-        propertyType = property.getType().toString();
         name = property.getName();
         values = new ArrayList<>();
         values.addAll(property.getValues());

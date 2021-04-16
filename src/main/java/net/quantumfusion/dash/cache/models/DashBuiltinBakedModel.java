@@ -4,19 +4,12 @@ import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.BuiltinBakedModel;
+import net.minecraft.client.render.model.WeightedBakedModel;
 import net.minecraft.client.texture.Sprite;
-import net.minecraft.client.texture.SpriteAtlasTexture;
-import net.minecraft.util.Identifier;
-import net.quantumfusion.dash.DashException;
-import net.quantumfusion.dash.cache.DashIdentifier;
-import net.quantumfusion.dash.cache.DashModelLoader;
+import net.quantumfusion.dash.cache.DashCache;
 import net.quantumfusion.dash.cache.models.components.DashModelOverrideList;
 import net.quantumfusion.dash.cache.models.components.DashModelTransformation;
 import net.quantumfusion.dash.mixin.BuiltinBakedModelAccessor;
-import net.quantumfusion.dash.mixin.SpriteAtlasManagerAccessor;
-import net.quantumfusion.dash.mixin.SpriteAtlasTextureAccessor;
-
-import java.util.Map;
 
 public class DashBuiltinBakedModel implements DashModel,DashBakedModel {
     @Serialize(order = 0)
@@ -38,7 +31,10 @@ public class DashBuiltinBakedModel implements DashModel,DashBakedModel {
         this.sideLit = sideLit;
     }
 
-    public DashBuiltinBakedModel(BuiltinBakedModel builtinBakedModel, DashModelLoader loader) {
+    public DashBuiltinBakedModel() {
+    }
+
+    public DashBuiltinBakedModel(BuiltinBakedModel builtinBakedModel, DashCache loader) {
         BuiltinBakedModelAccessor access = ((BuiltinBakedModelAccessor) builtinBakedModel);
         transformation = new DashModelTransformation(access.getTransformation());
         itemPropertyOverrides = new DashModelOverrideList(access.getItemPropertyOverrides(), loader);
@@ -48,8 +44,23 @@ public class DashBuiltinBakedModel implements DashModel,DashBakedModel {
 
 
     @Override
-    public BakedModel toUndash(DashModelLoader loader) {
+    public BakedModel toUndash(DashCache loader) {
         Sprite sprite = loader.registry.getSprite(spritePointer);
         return new BuiltinBakedModel(transformation.toUndash(), itemPropertyOverrides.toUndash(loader), sprite, sideLit);
+    }
+
+    @Override
+    public void apply(DashCache loader) {
+        itemPropertyOverrides.applyOverrides(loader);
+    }
+
+    @Override
+    public DashModel toDash(BakedModel model, DashCache loader) {
+        return new DashBuiltinBakedModel((BuiltinBakedModel) model,loader);
+    }
+
+    @Override
+    public ModelStage getStage() {
+        return ModelStage.SIMPLE;
     }
 }

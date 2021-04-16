@@ -11,24 +11,18 @@ public class DashBooleanProperty implements DashProperty {
     public boolean value;
 
     @Serialize(order = 1)
-    public String propertyType;
-
-    @Serialize(order = 2)
     public String name;
 
     public DashBooleanProperty(@Deserialize("value") boolean value,
-                               @Deserialize("propertyType") String propertyType,
                                @Deserialize("name") String name) {
-        this.propertyType = propertyType;
         this.name = name;
         this.value = value;
     }
 
 
-    public DashBooleanProperty(BooleanProperty property, String value) {
-        propertyType = property.getType().toString();
+    public DashBooleanProperty(BooleanProperty property, boolean value) {
         name = property.getName();
-        this.value = Boolean.parseBoolean(value);
+        this.value = value;
     }
 
     public MutablePair<BooleanProperty, Boolean> toUndash() {

@@ -6,6 +6,7 @@ import io.activej.serializer.annotations.SerializeNullable;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.Sprite;
 import net.quantumfusion.dash.Dash;
+import net.quantumfusion.dash.cache.DashCache;
 import net.quantumfusion.dash.mixin.SpriteAccessor;
 import org.jetbrains.annotations.Nullable;
 
@@ -77,9 +78,9 @@ public class DashSprite {
         this.frameTicks = frameTicks;
     }
 
-    public DashSprite(Sprite sprite) {
+    public DashSprite(Sprite sprite, DashCache loader) {
         SpriteAccessor spriteAccess = ((SpriteAccessor) sprite);
-        info = new DashSpriteInfo(spriteAccess.getInfo());
+        info = new DashSpriteInfo(spriteAccess.getInfo(),loader);
         animationMetadata = new DashAnimationResourceMetadata(spriteAccess.getAnimationMetadata());
         images = new ArrayList<>();
         Arrays.stream(spriteAccess.getImages()).forEach(nativeImage -> images.add(new DashImage(nativeImage)));
@@ -101,11 +102,11 @@ public class DashSprite {
         frameTicks = spriteAccess.getFrameTicks();
     }
 
-    public Sprite toUndash() {
+    public Sprite toUndash(DashCache loader) {
         try {
             Sprite out = (Sprite) Dash.getUnsafe().allocateInstance(Sprite.class);
             SpriteAccessor spriteAccessor = ((SpriteAccessor) out);
-            spriteAccessor.setInfo(info.toUndash());
+            spriteAccessor.setInfo(info.toUndash(loader));
             spriteAccessor.setAnimationMetadata(animationMetadata.toUndash());
             ArrayList<NativeImage> imagesOut = new ArrayList<>();
             images.forEach(dashImage -> imagesOut.add(dashImage.toUndash()));

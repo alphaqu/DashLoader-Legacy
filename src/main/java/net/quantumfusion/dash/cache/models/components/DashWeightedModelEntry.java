@@ -4,34 +4,31 @@ import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import io.activej.serializer.annotations.SerializeSubclasses;
 import net.minecraft.client.render.model.WeightedBakedModel;
-import net.quantumfusion.dash.cache.DashModelLoader;
+import net.quantumfusion.dash.cache.DashCache;
 import net.quantumfusion.dash.cache.models.*;
 import net.quantumfusion.dash.mixin.WeightedBakedModelEntryAccessor;
 import net.quantumfusion.dash.mixin.WeightedPickerEntryAccessor;
 
 public class DashWeightedModelEntry {
     @Serialize(order = 0)
-    @SerializeSubclasses(extraSubclassesId = "models")
-    public DashBakedModel model;
+    public Integer model;
 
     @Serialize(order = 1)
     public int weight;
 
-    public DashWeightedModelEntry(@Deserialize("model") DashBakedModel model,
+    public DashWeightedModelEntry(@Deserialize("model") Integer model,
                                   @Deserialize("weight")int weight) {
         this.model = model;
         this.weight = weight;
     }
 
-    public DashWeightedModelEntry(WeightedBakedModel.Entry entry, DashModelLoader loader) {
-        model = (DashBakedModel) loader.convertSimpleModel(((WeightedBakedModelEntryAccessor) entry).getModel());
+    public DashWeightedModelEntry(WeightedBakedModel.Entry entry, DashCache loader) {
+        model = loader.registry.createModelPointer(((WeightedBakedModelEntryAccessor) entry).getModel());
         weight = ((WeightedPickerEntryAccessor) entry).getWeight();
     }
 
-    public WeightedBakedModel.Entry toUndash(DashModelLoader loader) {
-        DashModel model = (DashModel) this.model;
-        return new WeightedBakedModel.Entry(model.toUndash(loader), weight);
-
+    public WeightedBakedModel.Entry toUndash(DashCache loader) {
+        return new WeightedBakedModel.Entry(loader.registry.getModel(model), weight);
     }
 
 

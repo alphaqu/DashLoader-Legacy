@@ -19,8 +19,6 @@ public class SpriteAtlasTextureMixin {
     @Inject(method = "upload(Lnet/minecraft/client/texture/SpriteAtlasTexture$Data;)V",
     at = @At(value = "HEAD"))
     private void saveAtlasInfo(SpriteAtlasTexture.Data data, CallbackInfo ci) {
-        DashSpriteAtlasTextureData dataValue = new DashSpriteAtlasTextureData(data);
-        LOGGER.info("Added data "  + dataValue.maxLevel + " /" + dataValue.width + " / " + dataValue.height  + " to TempCache.");
-        Dash.loader.atlasData.put((SpriteAtlasTexture)(Object)this,dataValue);
+        Dash.loader.atlasData.put((SpriteAtlasTexture)(Object)this,new DashSpriteAtlasTextureData(data));
     }
 }

@@ -4,14 +4,23 @@ import io.activej.serializer.BinarySerializer;
 import io.activej.serializer.CompatibilityLevel;
 import io.activej.serializer.SerializerBuilder;
 import io.activej.serializer.stream.StreamInput;
+import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.render.model.*;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.util.Identifier;
-import net.quantumfusion.dash.cache.DashModelLoader;
+import net.quantumfusion.dash.cache.DashCache;
 import net.quantumfusion.dash.cache.DashRegistry;
+import net.quantumfusion.dash.cache.atlas.DashExtraAtlasData;
 import net.quantumfusion.dash.cache.atlas.DashSpriteAtlasManager;
 import net.quantumfusion.dash.cache.blockstates.DashBlockStateData;
+import net.quantumfusion.dash.cache.font.DashFontManagerData;
+import net.quantumfusion.dash.cache.font.fonts.DashBitmapFont;
+import net.quantumfusion.dash.cache.font.fonts.DashBlankFont;
+import net.quantumfusion.dash.cache.font.fonts.DashUnicodeFont;
+import net.quantumfusion.dash.cache.misc.DashParticleData;
 import net.quantumfusion.dash.cache.models.*;
 import net.quantumfusion.dash.misc.DashParticleTextureData;
 import net.quantumfusion.dash.misc.DashSplashTextData;
@@ -25,53 +34,36 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-import static net.quantumfusion.dash.util.ThreadHelper.awaitTerminationAfterShutdown;
 
 public class Dash implements ModInitializer {
 
-    public static Logger LOGGER;
-    public static HashMap<String, NativeImage> fontCache;
-    public static HashMap<Identifier, List<Identifier>> particleCache;
+    public static final Logger LOGGER = LogManager.getLogger();
     public static List<String> splashText;
 
     public static Path config = FabricLoader.getInstance().getConfigDir().normalize();
     public static boolean caching = true;
 
     public static BinarySerializer<DashSplashTextData> splashTextSerializer = SerializerBuilder.create().build(DashSplashTextData.class);
-    public static BinarySerializer<DashParticleTextureData> dashParticleTextureDataSerializer = SerializerBuilder.create().build(DashParticleTextureData.class);
 
 
-    public static BinarySerializer<DashModelData> modelSerializer = SerializerBuilder.create()
-            .withSubclasses("models", DashBasicBakedModel.class, DashBuiltinBakedModel.class, DashMultipartBakedModel.class, DashWeightedBakedModel.class)
-            .withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE)
-            .build(DashModelData.class);
+    public static final Object2ObjectMap<Class, BinarySerializer> serializers = new Object2ObjectOpenHashMap<>();
+    public static final HashMap<Class<? extends BakedModel>, DashModel> modelMappings = new HashMap<>();
 
-    public static BinarySerializer<DashBlockStateData> blockStateSerializer = SerializerBuilder.create()
-            .withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE)
-            .build(DashBlockStateData.class);
+    public static DashCache loader = new DashCache();
 
-    public static BinarySerializer<DashSpriteAtlasManager> atlasSerializer = SerializerBuilder.create()
-            .withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE)
-            .build(DashSpriteAtlasManager.class);
-
-    public static BinarySerializer<DashRegistry> registrySerializer = SerializerBuilder.create()
-            .withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE)
-            .build(DashRegistry.class);
-
-    public static DashModelLoader loader = new DashModelLoader();
-
-    public static   Path registryPath = config.resolve("dash/registry.activej");
-    public static   Path modelPath = config.resolve("dash/model-mappings.activej");
-    public static  Path atlasPath = config.resolve("dash/atlas-mappings.activej");
+    public static Path registryPath = config.resolve("dash/registry.activej");
+    public static Path blockstatePath = config.resolve("dash/blockstate-mappings.activej");
+    public static Path modelPath = config.resolve("dash/model-mappings.activej");
+    public static Path atlasPath = config.resolve("dash/atlas-mappings.activej");
+    public static Path particlePath = config.resolve("dash/particle-mappings.activej");
+    public static Path fontPath = config.resolve("dash/font-mappings.activej");
+    public static Path extraAtlasPath = config.resolve("dash/extraatlas-mappings.activej");
 
     public static Unsafe getUnsafe() {
         Field f = null;
@@ -93,21 +85,15 @@ public class Dash implements ModInitializer {
 
     public static void reload() {
         caching = true;
-        LOGGER = LogManager.getLogger();
-        particleCache = new HashMap<>();
-        fontCache = new HashMap<>();
         LOGGER.info("Starting dash thread.");
         Thread dash = new Thread(() -> {
             Instant start = Instant.now();
+            initModelMappings();
+            initSerializers();
             makeFolders();
-            int threads = Runtime.getRuntime().availableProcessors();
-            LOGGER.info("Starting dash threadpool");
-            ExecutorService executorService = Executors.newFixedThreadPool(threads);
-            loader.init(executorService);
-            misc(executorService);
-            fontCacheRegister(executorService);
-            particleCacheRegister(executorService);
-            awaitTerminationAfterShutdown(executorService);
+            LOGGER.info("Starting Dash init");
+            loader.init();
+            misc();
             Instant stop = Instant.now();
             LOGGER.info("Loaded cache in " + TimeHelper.getDecimalMs(start, stop) + "ms");
             caching = false;
@@ -122,8 +108,8 @@ public class Dash implements ModInitializer {
         createDirectory("dash/particles");
     }
 
-    private static void misc(ExecutorService executorService) {
-        Arrays.stream(listCacheFiles("dash")).forEach(file -> executorService.execute(() -> {
+    private static void misc() {
+        Arrays.stream(listCacheFiles("dash")).parallel().forEach(file -> {
             if (file.getName().equals("splash.activej")) {
                 try {
                     splashText = StreamInput.create(new FileInputStream(prepareAccess(file))).deserialize(splashTextSerializer).splashList;
@@ -131,29 +117,60 @@ public class Dash implements ModInitializer {
                     e.printStackTrace();
                 }
             }
-        }));
+        });
     }
 
-    private static void particleCacheRegister(ExecutorService executorService) {
-        Arrays.stream(listCacheFiles("dash/particles")).forEach(particle -> executorService.execute(() -> {
-            try {
-                DashParticleTextureData cache = StreamInput.create(new FileInputStream(prepareAccess(particle))).deserialize(dashParticleTextureDataSerializer);
-                particleCache.put(cache.id.toUndash(), cache.toUndash().getTextureList());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }));
+    private static void initModelMappings() {
+        modelMappings.put(BasicBakedModel.class, new DashBasicBakedModel());
+        modelMappings.put(BuiltinBakedModel.class, new DashBuiltinBakedModel());
+        modelMappings.put(MultipartBakedModel.class, new DashMultipartBakedModel());
+        modelMappings.put(WeightedBakedModel.class, new DashWeightedBakedModel());
     }
 
-    private static void fontCacheRegister(ExecutorService executorService) {
-        Arrays.stream(listCacheFiles("dash/fonts")).forEach(fontFile -> executorService.execute(() -> {
-            try {
-                fontCache.put(prepareAccess(fontFile).getName().split("-")[1].replace(".png", ""), NativeImage.read(NativeImage.Format.ABGR, new BufferedInputStream(new FileInputStream(fontFile))));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }));
+    private static void initSerializers() {
+        ArrayList<Class<?>> list = new ArrayList<>();
+        modelMappings.values().forEach(dashModel -> list.add(dashModel.getClass()));
+
+        serializers.put(DashRegistry.class,
+                SerializerBuilder.create()
+                        .withSubclasses("models", DashBasicBakedModel.class,DashBuiltinBakedModel.class,DashMultipartBakedModel.class,DashWeightedBakedModel.class)
+                        .withSubclasses("fonts", DashBitmapFont.class, DashUnicodeFont.class, DashBlankFont.class)
+                        .withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE)
+                        .build(DashRegistry.class));
+
+
+        serializers.put(DashModelData.class,
+                SerializerBuilder.create()
+                        .withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE)
+                        .build(DashModelData.class));
+
+        serializers.put(DashSpriteAtlasManager.class,
+                SerializerBuilder.create()
+                        .withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE)
+                        .build(DashSpriteAtlasManager.class));
+
+        serializers.put(DashBlockStateData.class,
+                SerializerBuilder.create()
+                        .withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE)
+                        .build(DashBlockStateData.class));
+
+
+        serializers.put(DashParticleData.class,
+                SerializerBuilder.create()
+                        .withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE)
+                        .build(DashParticleData.class));
+
+        serializers.put(DashExtraAtlasData.class,
+                SerializerBuilder.create()
+                        .withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE)
+                        .build(DashExtraAtlasData.class));
+
+        serializers.put(DashFontManagerData.class,
+                SerializerBuilder.create()
+                        .withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE)
+                        .build(DashFontManagerData.class));
     }
+
 
     private static File prepareAccess(File file) {
         if (!file.canWrite()) {

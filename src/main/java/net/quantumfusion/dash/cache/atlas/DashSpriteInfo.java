@@ -3,13 +3,13 @@ package net.quantumfusion.dash.cache.atlas;
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import net.minecraft.client.texture.Sprite;
-import net.quantumfusion.dash.cache.DashIdentifier;
+import net.quantumfusion.dash.cache.DashCache;
 import net.quantumfusion.dash.mixin.SpriteInfoAccessor;
 
 
 public class DashSpriteInfo {
     @Serialize(order = 0)
-    public final DashIdentifier id;
+    public final Integer id;
     @Serialize(order = 1)
     public final int width;
     @Serialize(order = 2)
@@ -17,7 +17,7 @@ public class DashSpriteInfo {
     @Serialize(order = 3)
     public final DashAnimationResourceMetadata animationData;
 
-    public DashSpriteInfo(@Deserialize("id") DashIdentifier id,
+    public DashSpriteInfo(@Deserialize("id") Integer id,
                           @Deserialize("width") int width,
                           @Deserialize("height") int height,
                           @Deserialize("animationData") DashAnimationResourceMetadata animationData) {
@@ -27,14 +27,14 @@ public class DashSpriteInfo {
         this.animationData = animationData;
     }
 
-    public DashSpriteInfo(Sprite.Info info) {
-        id = new DashIdentifier(info.getId());
+    public DashSpriteInfo(Sprite.Info info, DashCache loader) {
+        id = loader.registry.createIdentifierPointer(info.getId());
         width = info.getWidth();
         height = info.getHeight();
         animationData = new DashAnimationResourceMetadata(((SpriteInfoAccessor) (Object) info).getAnimationData());
     }
 
-    public Sprite.Info toUndash() {
-        return new Sprite.Info(id.toUndash(), width, height, animationData.toUndash());
+    public Sprite.Info toUndash( DashCache loader) {
+        return new Sprite.Info(loader.registry.getIdentifier(id), width, height, animationData.toUndash());
     }
 }

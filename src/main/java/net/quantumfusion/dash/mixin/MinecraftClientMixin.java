@@ -1,6 +1,9 @@
 package net.quantumfusion.dash.mixin;
 
+import com.mojang.authlib.minecraft.SocialInteractionsService;
+import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.RunArgs;
 import net.minecraft.client.gui.screen.Overlay;
 import net.minecraft.client.gui.screen.SplashScreen;
 import net.minecraft.client.render.WorldRenderer;
@@ -11,6 +14,7 @@ import net.minecraft.resource.ResourcePackManager;
 import net.minecraft.util.Unit;
 import net.minecraft.util.Util;
 import net.quantumfusion.dash.Dash;
+import net.quantumfusion.dash.cache.DashCache;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -63,8 +67,6 @@ public abstract class MinecraftClientMixin {
             if (this.overlay instanceof SplashScreen) {
                 this.resourceReloadFuture = completableFuture;
             } else {
-                Dash.reload();
-                System.out.println(bakedModelManager);
                 this.resourcePackManager.scanPacks();
                 List<ResourcePack> list = this.resourcePackManager.createResourcePacks();
                 this.setOverlay(new SplashScreen((MinecraftClient) (Object) this, this.resourceManager.beginMonitoredReload(Util.getMainWorkerExecutor(), (MinecraftClient) (Object) this, COMPLETED_UNIT_FUTURE, list), (optional) -> {
@@ -77,4 +79,5 @@ public abstract class MinecraftClientMixin {
             cir.setReturnValue(completableFuture);
         }
     }
+
 }

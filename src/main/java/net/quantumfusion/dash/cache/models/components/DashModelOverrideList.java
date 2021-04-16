@@ -8,7 +8,7 @@ import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.json.ModelOverride;
 import net.minecraft.client.render.model.json.ModelOverrideList;
 import net.quantumfusion.dash.Dash;
-import net.quantumfusion.dash.cache.DashModelLoader;
+import net.quantumfusion.dash.cache.DashCache;
 import net.quantumfusion.dash.cache.models.*;
 import net.quantumfusion.dash.mixin.ModelOverideListAccessor;
 
@@ -20,40 +20,34 @@ public class DashModelOverrideList {
     public List<DashModelOverride> overrides;
     @Serialize(order = 1)
     @SerializeNullable(path = {0})
-    @SerializeSubclasses(path = {0}, extraSubclassesId = "models")
-    public List<DashModel> bakedModels;
+    public List<Integer> bakedModels;
+
+    ModelOverrideList toApply;
 
     public DashModelOverrideList(@Deserialize("overrides")List<DashModelOverride> overrides,
-                                 @Deserialize("bakedModels")List<DashModel> bakedModels) {
+                                 @Deserialize("bakedModels")List<Integer> bakedModels) {
         this.overrides = overrides;
         this.bakedModels = bakedModels;
     }
 
-    public DashModelOverrideList(ModelOverrideList modelOverrideList, DashModelLoader loader) {
+    public DashModelOverrideList(ModelOverrideList modelOverrideList, DashCache loader) {
         overrides = new ArrayList<>();
         bakedModels = new ArrayList<>();
         ModelOverideListAccessor access = ((ModelOverideListAccessor) modelOverrideList);
         List<BakedModel> models =  access.getModels();
 
-        models.forEach(bakedModel -> bakedModels.add(loader.convertSimpleModel(bakedModel)));
-        access.getOverrides().forEach(modelOverride -> overrides.add(new DashModelOverride(modelOverride)));
+        models.forEach(bakedModel -> bakedModels.add(loader.registry.createModelPointer(bakedModel)));
+        access.getOverrides().forEach(modelOverride -> overrides.add(new DashModelOverride(modelOverride,loader)));
     }
 
-    public ModelOverrideList toUndash(DashModelLoader loader) {
+    public ModelOverrideList toUndash(DashCache loader) {
         try {
             ModelOverrideList out = (ModelOverrideList) Dash.getUnsafe().allocateInstance(ModelOverrideList.class);
-            List<BakedModel> outModels = new ArrayList<>();
-            bakedModels.forEach(dashBakedModel -> {
-                if (dashBakedModel != null) {
-                    outModels.add(dashBakedModel.toUndash(loader));
-                } else {
-                    outModels.add(null);
-                }
-            });
-            ((ModelOverideListAccessor) out).setModels(outModels);
+
             List<ModelOverride> overridesOut = new ArrayList<>();
-            overrides.forEach(dashModelOverride -> overridesOut.add(dashModelOverride.toUndash()));
+            overrides.forEach(dashModelOverride -> overridesOut.add(dashModelOverride.toUndash(loader)));
             ((ModelOverideListAccessor) out).setOverrides(overridesOut);
+            toApply = out;
             return out;
         } catch (InstantiationException e) {
             e.printStackTrace();
@@ -64,5 +58,17 @@ public class DashModelOverrideList {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public void applyOverrides(DashCache loader) {
+        List<BakedModel> outModels = new ArrayList<>();
+        bakedModels.forEach(dashBakedModel -> {
+            if (dashBakedModel != null) {
+                outModels.add(loader.registry.getModel(dashBakedModel));
+            } else {
+                outModels.add(null);
+            }
+        });
+        ((ModelOverideListAccessor) toApply).setModels(outModels);
     }
 }

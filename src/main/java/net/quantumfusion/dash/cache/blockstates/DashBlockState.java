@@ -1,6 +1,7 @@
 package net.quantumfusion.dash.cache.blockstates;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import io.activej.serializer.annotations.SerializeNullable;
@@ -11,17 +12,21 @@ import net.minecraft.state.property.*;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.registry.Registry;
 import net.quantumfusion.dash.cache.DashIdentifier;
+import net.quantumfusion.dash.cache.DashRegistry;
 import net.quantumfusion.dash.cache.blockstates.properties.*;
 import net.quantumfusion.dash.mixin.StateAccessor;
+import net.quantumfusion.dash.util.Dashable;
 import org.apache.commons.lang3.tuple.MutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.LogManager;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.function.Predicate;
 
 public class DashBlockState {
 
     @Serialize(order = 0)
-    public DashIdentifier owner;
+    public Integer owner;
 
     @Serialize(order = 1)
     @SerializeNullable()
@@ -34,18 +39,18 @@ public class DashBlockState {
     public List<DashProperty> entriesEncoded;
 
 
-    public DashBlockState(@Deserialize("owner") DashIdentifier owner,
+    public DashBlockState(@Deserialize("owner") Integer owner,
                           @Deserialize("entriesEncoded") List<DashProperty> entriesEncoded) {
         this.owner = owner;
         this.entriesEncoded = entriesEncoded;
     }
 
-    public DashBlockState(BlockState blockState) {
+    public DashBlockState(BlockState blockState, DashRegistry registry) {
         StateAccessor<Block, BlockState> accessState = ((StateAccessor<Block, BlockState>) blockState);
         entriesEncoded = new ArrayList<>();
         accessState.getEntries().forEach((property, comparable) -> {
             if (property instanceof BooleanProperty) {
-                entriesEncoded.add(new DashBooleanProperty((BooleanProperty) property, comparable.toString()));
+                entriesEncoded.add(new DashBooleanProperty((BooleanProperty) property, (Boolean) comparable));
             } else if (property instanceof DirectionProperty) {
                 entriesEncoded.add(new DashDirectionProperty((DirectionProperty) property, (Direction) comparable));
             } else if (property instanceof EnumProperty) {
@@ -54,30 +59,36 @@ public class DashBlockState {
                 entriesEncoded.add(new DashIntProperty((IntProperty) property, comparable.toString()));
             }
         });
-        owner = new DashIdentifier(Registry.BLOCK.getId(accessState.getOwner()));
+        owner = registry.createIdentifierPointer(Registry.BLOCK.getId(accessState.getOwner()));
     }
 
-    public BlockState toUndash() {
-        ImmutableMap.Builder<Property<?>, Comparable<?>> builder = ImmutableMap.builder();
-        //TODO hardcoded, this is bad
-        //above comment is correct, this is horrible
-        entriesEncoded.forEach(property -> {
-            if (property instanceof DashBooleanProperty) {
-                MutablePair<BooleanProperty, Boolean> out = ((DashBooleanProperty) property).toUndash();
-                builder.put(out.left, out.right);
-            } else if (property instanceof DashDirectionProperty) {
-                MutablePair<DirectionProperty, Direction> out = ((DashDirectionProperty) property).toUndash();
-                builder.put(out.left, out.right);
-            } else if (property instanceof DashEnumProperty) {
-                MutablePair<EnumProperty, Enum> out = ((DashEnumProperty) property).toUndash();
-                builder.put(out.left, out.right);
-            } else if (property instanceof DashIntProperty) {
-                MutablePair<IntProperty, Integer> out = ((DashIntProperty) property).toUndash();
-                builder.put(out.left, out.right);
-            }
-        });
+    public Pair<BlockState,Predicate<BlockState>> toUndash(DashRegistry registry) {
+        try {
+            ImmutableMap.Builder<Property<?>, Comparable<?>> builder = ImmutableMap.builder();
+            //TODO hardcoded, this is bad
+            //above comment is correct, this is horrible
+            entriesEncoded.forEach(property -> {
+                if (property instanceof DashBooleanProperty) {
+                    MutablePair<BooleanProperty, Boolean> out = ((DashBooleanProperty) property).toUndash();
+                    builder.put(out.left, out.right);
+                } else if (property instanceof DashDirectionProperty) {
+                    MutablePair<DirectionProperty, Direction> out = ((DashDirectionProperty) property).toUndash();
+                    builder.put(out.left, out.right);
+                } else if (property instanceof DashEnumProperty) {
+                    MutablePair<EnumProperty, Enum> out = ((DashEnumProperty) property).toUndash();
+                    builder.put(out.left, out.right);
+                } else if (property instanceof DashIntProperty) {
+                    MutablePair<IntProperty, Integer> out = ((DashIntProperty) property).toUndash();
+                    builder.put(out.left, out.right);
+                }
+            });
 
-        return new BlockState(Registry.BLOCK.get(owner.toUndash()), builder.build(), null);
+            return Pair.of(new BlockState(Registry.BLOCK.get(registry.getIdentifier(owner)), builder.build(), null), (blockState -> true));
+        } catch (Exception e) {
+            e.printStackTrace();
+            LogManager.getLogger().error(Registry.BLOCK.get(registry.getIdentifier(owner)).getDefaultState().toString());
+        }
+        return null;
     }
 
 }

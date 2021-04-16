@@ -18,7 +18,12 @@
     "TextureUtilMixin",
     "SpriteInterpolationMixin",
     "SpriteAtlasTextureMixin",
+    "SplashScreenMixin",
+    "SpriteAtlasHolderMixin",
+    "ModelIdentifierMixin",
 
+    "BlockModelsAccessor",
+    "ParticleManagerSimpleSpriteProviderAccessor",
     "AbstractTextureAccessor",
     "SpriteAtlasTextureDataAccessor",
     "BuiltinBakedModelAccessor",

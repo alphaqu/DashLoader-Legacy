@@ -1,75 +1,107 @@
 package net.quantumfusion.dash.mixin;
 
-import com.google.common.base.Charsets;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Maps;
 import io.activej.serializer.stream.StreamOutput;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import net.minecraft.client.particle.Particle;
+import net.minecraft.client.particle.ParticleFactory;
 import net.minecraft.client.particle.ParticleManager;
-import net.minecraft.client.particle.ParticleTextureData;
-import net.minecraft.resource.Resource;
+import net.minecraft.client.particle.ParticleTextureSheet;
+import net.minecraft.client.texture.MissingSprite;
+import net.minecraft.client.texture.Sprite;
+import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.resource.ResourceManager;
+import net.minecraft.resource.ResourceReloadListener;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.JsonHelper;
+import net.minecraft.util.profiler.Profiler;
+import net.minecraft.util.registry.Registry;
 import net.quantumfusion.dash.Dash;
+import net.quantumfusion.dash.cache.misc.DashParticleData;
 import net.quantumfusion.dash.misc.DashParticleTextureData;
-import net.quantumfusion.dash.util.StringHelper;
+import org.apache.logging.log4j.LogManager;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.stream.Stream;
+
+import static net.quantumfusion.dash.Dash.particlePath;
+import static net.quantumfusion.dash.Dash.registryPath;
 
 @Mixin(ParticleManager.class)
-public class ParticleManagerMixin {
+public abstract class ParticleManagerMixin {
 
     @Shadow
     @Final
-    private Map<Identifier, Object> spriteAwareFactories;
+    private Map<Identifier, ParticleManager.SimpleSpriteProvider> spriteAwareFactories;
 
-    @Inject(method = "loadTextureList(Lnet/minecraft/resource/ResourceManager;Lnet/minecraft/util/Identifier;Ljava/util/Map;)V", at = @At(value = "HEAD"), cancellable = true)
-    private void loadTextureListFast(ResourceManager resourceManager, Identifier id, Map<Identifier, List<Identifier>> result, CallbackInfo ci) {
-        Identifier identifier = new Identifier(id.getNamespace(), "particles/" + id.getPath() + ".json");
-        try {
-            HashMap<Identifier, List<Identifier>> particleCache = Dash.particleCache;
-            List<Identifier> list;
-            if (particleCache.containsKey(id)) {
-                list = particleCache.get(id);
-            } else {
-                Resource resource = resourceManager.getResource(identifier);
-                Reader reader = new InputStreamReader(resource.getInputStream(), Charsets.UTF_8);
-                ParticleTextureData particleTextureData = ParticleTextureData.load(JsonHelper.deserialize(reader));
-                list = particleTextureData.getTextureList();
-                String dashId = StringHelper.idToFile(id);
-                StreamOutput output = StreamOutput.create(Files.newOutputStream(Dash.config.resolve("dash/particles/" + dashId + ".activej"), StandardOpenOption.CREATE, StandardOpenOption.WRITE));
-                output.serialize(Dash.dashParticleTextureDataSerializer, new DashParticleTextureData(particleTextureData, id));
-                output.flush();
-                reader.close();
-                resource.close();
-                System.out.println("Created particle: " + id);
-            }
-            boolean bl = this.spriteAwareFactories.containsKey(id);
-            if (list == null) {
-                if (bl) {
-                    throw new IllegalStateException("Missing texture list for particle " + id);
-                }
-            } else {
-                if (!bl) {
-                    throw new IllegalStateException("Redundant texture list for particle " + id);
-                }
+    @Shadow
+    protected abstract void loadTextureList(ResourceManager resourceManager, Identifier id, Map<Identifier, List<Identifier>> result);
 
-                result.put(id, list.stream().map((identifierx) -> new Identifier(identifierx.getNamespace(), "particle/" + identifierx.getPath())).collect(Collectors.toList()));
-            }
-        } catch (IOException var39) {
-            throw new IllegalStateException("Failed to load description for particle " + id, var39);
+    @Shadow
+    @Final
+    private SpriteAtlasTexture particleAtlasTexture;
+
+    @Shadow @Final private Map<ParticleTextureSheet, Queue<Particle>> particles;
+
+    @Inject(method = "reload(Lnet/minecraft/resource/ResourceReloadListener$Synchronizer;Lnet/minecraft/resource/ResourceManager;Lnet/minecraft/util/profiler/Profiler;Lnet/minecraft/util/profiler/Profiler;Ljava/util/concurrent/Executor;Ljava/util/concurrent/Executor;)Ljava/util/concurrent/CompletableFuture;",
+            at = @At(value = "HEAD"), cancellable = true)
+    private void reloadParticlesFast(ResourceReloadListener.Synchronizer synchronizer, ResourceManager manager, Profiler prepareProfiler, Profiler applyProfiler, Executor prepareExecutor, Executor applyExecutor, CallbackInfoReturnable<CompletableFuture<Void>> cir) {
+        if (Dash.loader.particlesOut != null) {
+            LogManager.getLogger().info("Particles loading");
+            cir.setReturnValue(CompletableFuture.runAsync(() -> Dash.loader.particlesOut.forEach((identifier, sprites) -> spriteAwareFactories.get(identifier).setSprites(sprites))).thenCompose(synchronizer::whenPrepared));
+        } else {
+            Map<Identifier, List<Identifier>> map = Maps.newConcurrentMap();
+            CompletableFuture<?>[] completableFutures = Registry.PARTICLE_TYPE.getIds().stream().map((identifier)
+                    -> CompletableFuture.runAsync(()
+                    -> this.loadTextureList(manager, identifier, map), prepareExecutor)).toArray(CompletableFuture<?>[]::new);
+            CompletableFuture<?> var10000 = CompletableFuture.allOf(completableFutures).thenApplyAsync((void_)
+                    -> {
+                    prepareProfiler.startTick();
+                    prepareProfiler.push("stitching");
+                    SpriteAtlasTexture.Data data = this.particleAtlasTexture.stitch(manager, map.values().stream().flatMap(Collection::stream), prepareProfiler, 0);
+                    prepareProfiler.pop();
+                    prepareProfiler.endTick();
+                    return data;
+            }, prepareExecutor);
+            cir.setReturnValue(var10000.thenCompose(synchronizer::whenPrepared).thenAcceptAsync((data) -> {
+                    LogManager.getLogger().info("Particle Apply");
+                    this.particles.clear();
+                    applyProfiler.startTick();
+                    applyProfiler.push("upload");
+                    this.particleAtlasTexture.upload((SpriteAtlasTexture.Data) data);
+                    applyProfiler.swap("bindSpriteSets");
+                    Sprite sprite = this.particleAtlasTexture.getSprite(MissingSprite.getMissingSpriteId());
+                    map.forEach((identifier, spritesAssets) -> {
+                        ImmutableList<Sprite> spriteList;
+                        if (spritesAssets.isEmpty()) {
+                            spriteList = ImmutableList.of(sprite);
+                        } else {
+                            Stream<Identifier> spriteStream = spritesAssets.stream();
+                            SpriteAtlasTexture spriteAtlasTexture = this.particleAtlasTexture;
+                            spriteList = spriteStream.map(spriteAtlasTexture::getSprite).collect(ImmutableList.toImmutableList());
+                        }
+                        ImmutableList<Sprite> immutableList = spriteList;
+                        ((ParticleManagerSimpleSpriteProviderAccessor) this.spriteAwareFactories.get(identifier)).setSprites(immutableList);
+                    });
+
+
+                    Dash.loader.addParticleManagerAssets(spriteAwareFactories,particleAtlasTexture);
+
+                    applyProfiler.pop();
+                    applyProfiler.endTick();
+            }, applyExecutor));
         }
+        cir.cancel();
     }
 }

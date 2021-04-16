@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>net.fabricmc.fabric-api</groupId>
+  <artifactId>fabric-lifecycle-events-v1</artifactId>
+  <version>1.2.1+ca58154a7d</version>
+  <dependencies>
+    <dependency>
+      <groupId>net.fabricmc.fabric-api</groupId>
+      <artifactId>fabric-api-base</artifactId>
+      <version>0.2.1+9354966b7d</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>net.fabricmc</groupId>
+      <artifactId>fabric-loader</artifactId>
+      <version>0.10.5+build.213</version>
+      <scope>compile</scope>
+    </dependency>
+  </dependencies>
+</project>

@@ -6,7 +6,7 @@ import net.minecraft.client.font.UnicodeTextureFont;
 import net.minecraft.resource.Resource;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.util.Identifier;
-import net.quantumfusion.dash.font.fonts.UnicodeFont;
+import net.quantumfusion.dash.cache.font.fonts.UnicodeFont;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
