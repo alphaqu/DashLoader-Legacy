@@ -10,6 +10,7 @@ import net.minecraft.client.render.model.MultipartBakedModel;
 import net.minecraft.util.Util;
 import net.quantumfusion.dash.Dash;
 import net.quantumfusion.dash.cache.DashCache;
+import net.quantumfusion.dash.cache.DashRegistry;
 import net.quantumfusion.dash.mixin.MultipartBakedModelAccessor;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -27,12 +28,12 @@ public class DashMultipartBakedModel implements DashModel, DashBakedModel {
     @SerializeNullable()
     @SerializeNullable(path = {0})
     @SerializeNullable(path = {1})
-    public Map<Integer, long[]> stateCache;
+    public Map<Integer, byte[]> stateCache;
 
     MultipartBakedModel toApply;
 
     public DashMultipartBakedModel(@Deserialize("components") List<Integer> components,
-                                   @Deserialize("stateCache") Map<Integer, long[]> stateCache) {
+                                   @Deserialize("stateCache") Map<Integer, byte[]> stateCache) {
         this.components = components;
         this.stateCache = stateCache;
     }
@@ -40,24 +41,24 @@ public class DashMultipartBakedModel implements DashModel, DashBakedModel {
     public DashMultipartBakedModel() {
     }
 
-    public DashMultipartBakedModel(MultipartBakedModel model, DashCache loader) {
+    public DashMultipartBakedModel(MultipartBakedModel model, DashRegistry registry) {
         MultipartBakedModelAccessor access = ((MultipartBakedModelAccessor) model);
         this.components = new ArrayList<>();
         stateCache = new HashMap<>();
         access.getComponents().forEach(predicateBakedModelPair -> {
-            components.add(loader.registry.createModelPointer(predicateBakedModelPair.getRight()));
+            components.add(registry.createModelPointer(predicateBakedModelPair.getRight()));
         });
-        access.getStateCache().forEach((blockState, bitSet) -> stateCache.put(loader.registry.createBlockStatePointer(blockState), bitSet.toLongArray()));
+        access.getStateCache().forEach((blockState, bitSet) -> stateCache.put(registry.createBlockStatePointer(blockState), bitSet.toByteArray()));
 
     }
 
     @Override
-    public BakedModel toUndash(DashCache loader) {
+    public BakedModel toUndash(DashRegistry registry) {
 
         try {
             MultipartBakedModel model = (MultipartBakedModel) Dash.getUnsafe().allocateInstance(MultipartBakedModel.class);
             Map<BlockState, BitSet> stateCacheOut = new Object2ObjectOpenCustomHashMap<>(Util.identityHashStrategy());
-            stateCache.forEach((blockstatePointer, bitSet) -> stateCacheOut.put(loader.registry.getBlockstate(blockstatePointer), BitSet.valueOf(bitSet)));
+            stateCache.forEach((blockstatePointer, bitSet) -> stateCacheOut.put(registry.getBlockstate(blockstatePointer), BitSet.valueOf(bitSet)));
             ((MultipartBakedModelAccessor) model).setStateCache(stateCacheOut);
             toApply = model;
             return model;
@@ -68,9 +69,9 @@ public class DashMultipartBakedModel implements DashModel, DashBakedModel {
     }
 
     @Override
-    public void apply(DashCache loader) {
+    public void apply(DashRegistry registry) {
         List<Pair<Predicate<BlockState>, BakedModel>> componentsOut = new ArrayList<>();
-        components.forEach(integer -> componentsOut.add(Pair.of((blockState -> true), loader.registry.getModel(integer))));
+        components.forEach(integer -> componentsOut.add(Pair.of((blockState -> true), registry.getModel(integer))));
         MultipartBakedModelAccessor access = ((MultipartBakedModelAccessor) toApply);
         BakedModel bakedModel = (BakedModel) ((Pair) componentsOut.iterator().next()).getRight();
         access.setComponents(componentsOut);
@@ -83,8 +84,8 @@ public class DashMultipartBakedModel implements DashModel, DashBakedModel {
     }
 
     @Override
-    public DashModel toDash(BakedModel model, DashCache loader) {
-        return new DashMultipartBakedModel((MultipartBakedModel) model, loader);
+    public DashModel toDash(BakedModel model, DashRegistry registry) {
+        return new DashMultipartBakedModel((MultipartBakedModel) model, registry);
     }
 
     @Override

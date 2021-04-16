@@ -8,6 +8,7 @@ import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.util.Identifier;
 import net.quantumfusion.dash.Dash;
 import net.quantumfusion.dash.cache.DashCache;
+import net.quantumfusion.dash.cache.DashRegistry;
 import net.quantumfusion.dash.mixin.AbstractTextureAccessor;
 import net.quantumfusion.dash.mixin.SpriteAccessor;
 import net.quantumfusion.dash.mixin.SpriteAtlasTextureAccessor;
@@ -57,20 +58,20 @@ public class DashSpriteAtlasTexture {
         this.data = data;
     }
 
-    public DashSpriteAtlasTexture(SpriteAtlasTexture spriteAtlasTexture, DashSpriteAtlasTextureData data, DashCache loader) {
+    public DashSpriteAtlasTexture(SpriteAtlasTexture spriteAtlasTexture, DashSpriteAtlasTextureData data, DashRegistry registry) {
         SpriteAtlasTextureAccessor spriteTextureAccess = ((SpriteAtlasTextureAccessor) spriteAtlasTexture);
         this.data = data;
         animatedSprites = new ArrayList<>();
         sprites = new HashMap<>();
-        spriteTextureAccess.getAnimatedSprites().forEach(sprite -> animatedSprites.add(loader.registry.createSpritePointer(sprite)));
-        spriteTextureAccess.getSprites().forEach((identifier, sprite) -> sprites.put(loader.registry.createIdentifierPointer(identifier), loader.registry.createSpritePointer(sprite)));
-        id = loader.registry.createIdentifierPointer(spriteAtlasTexture.getId());
+        spriteTextureAccess.getAnimatedSprites().forEach(sprite -> animatedSprites.add(registry.createSpritePointer(sprite)));
+        spriteTextureAccess.getSprites().forEach((identifier, sprite) -> sprites.put(registry.createIdentifierPointer(identifier), registry.createSpritePointer(sprite)));
+        id = registry.createIdentifierPointer(spriteAtlasTexture.getId());
         maxTextureSize = spriteTextureAccess.getMaxTextureSize();
         bilinear = ((AbstractTextureAccessor)spriteAtlasTexture).getBilinear();
         mipmap = ((AbstractTextureAccessor)spriteAtlasTexture).getMipmap();
     }
 
-    public SpriteAtlasTexture toUndash(DashCache loader) {
+    public SpriteAtlasTexture toUndash(DashRegistry registry) {
         try {
             SpriteAtlasTexture spriteAtlasTexture = (SpriteAtlasTexture) Dash.getUnsafe().allocateInstance(SpriteAtlasTexture.class);
             AbstractTextureAccessor access = ((AbstractTextureAccessor) spriteAtlasTexture);
@@ -78,16 +79,16 @@ public class DashSpriteAtlasTexture {
             access.setMipmap(mipmap);
             SpriteAtlasTextureAccessor spriteAtlasTextureAccessor = ((SpriteAtlasTextureAccessor) spriteAtlasTexture);
             Map<Identifier, Sprite> out = new HashMap<>();
-            sprites.forEach((dashIdentifier, spritePointer) -> out.put(loader.registry.getIdentifier(dashIdentifier), loadSprite(spritePointer,loader,spriteAtlasTexture)));
+            sprites.forEach((dashIdentifier, spritePointer) -> out.put(registry.getIdentifier(dashIdentifier), loadSprite(spritePointer,registry,spriteAtlasTexture)));
             Set<Identifier> outLoad = new HashSet<>();
             List<Sprite> outAnimatedSprites = new ArrayList<>();
-            animatedSprites.forEach(spritePointer -> outAnimatedSprites.add(loadSprite(spritePointer,loader,spriteAtlasTexture)));
+            animatedSprites.forEach(spritePointer -> outAnimatedSprites.add(loadSprite(spritePointer,registry,spriteAtlasTexture)));
             spriteAtlasTextureAccessor.setAnimatedSprites(outAnimatedSprites);
             spriteAtlasTextureAccessor.setSpritesToLoad(outLoad);
             spriteAtlasTextureAccessor.setSprites(out);
-            spriteAtlasTextureAccessor.setId(loader.registry.getIdentifier(id));
+            spriteAtlasTextureAccessor.setId(registry.getIdentifier(id));
             spriteAtlasTextureAccessor.setMaxTextureSize(maxTextureSize);
-            loader.atlasData.put(spriteAtlasTexture,data);
+            Dash.loader.atlasData.put(spriteAtlasTexture,data);
             return spriteAtlasTexture;
         } catch (InstantiationException e) {
             e.printStackTrace();
@@ -95,8 +96,8 @@ public class DashSpriteAtlasTexture {
         return null;
     }
 
-    private Sprite loadSprite(int spritePointer, DashCache loader, SpriteAtlasTexture spriteAtlasTexture) {
-        Sprite sprite =  loader.registry.getSprite(spritePointer);
+    private Sprite loadSprite(int spritePointer, DashRegistry registry, SpriteAtlasTexture spriteAtlasTexture) {
+        Sprite sprite =  registry.getSprite(spritePointer);
         ((SpriteAccessor)sprite).setAtlas(spriteAtlasTexture);
         return sprite;
     }

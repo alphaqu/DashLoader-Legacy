@@ -24,9 +24,8 @@ public class DashModelData {
         this.models = models;
     }
 
-    public DashModelData(Map<Identifier, BakedModel> models, DashCache loader) {
+    public DashModelData(Map<Identifier, BakedModel> models, DashRegistry registry) {
         this.models = new HashMap<>();
-        DashRegistry registry = loader.registry;
         models.forEach((identifier, bakedModel) -> {
             if (bakedModel != null) {
                 this.models.put(registry.createIdentifierPointer(identifier), registry.createModelPointer(bakedModel));

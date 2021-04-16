@@ -120,12 +120,12 @@ public class DashRegistry {
         if (models.get(hash) == null) {
             DashModel model = Dash.modelMappings.get(bakedModel.getClass());
             if (model != null) {
-                models.put(hash, model.toDash(bakedModel, loader));
+                models.put(hash, model.toDash(bakedModel, this));
             } else {
                 if (bakedModel.getClass().getName().contains("wraith")) {
                     DashCache.LOGGER.error("DH mods dont work with dash because DH is lazy, spam bot him at DH#9367");
                 } else {
-                    DashCache.LOGGER.warn(bakedModel.getClass().getSimpleName() + " is not a supported model format, please contact mod developer to add support.");
+                    DashCache.LOGGER.warn(bakedModel.getClass().getName() + " is not a supported model format, please contact mod developer to add support.");
                 }
             }
         }
@@ -135,7 +135,7 @@ public class DashRegistry {
     public int createSpritePointer(Sprite sprite) {
         final int hash = sprite.hashCode();
         if (sprites.get(hash) == null) {
-            sprites.put(hash, new DashSprite(sprite, loader));
+            sprites.put(hash, new DashSprite(sprite, this));
         }
         return hash;
     }
@@ -172,7 +172,7 @@ public class DashRegistry {
             } else if (font instanceof BlankFont) {
                 fonts.put(hash, new DashBlankFont());
             } else {
-                DashCache.LOGGER.warn(font.getClass().getSimpleName() + " is not a supported font format, please contact mod developer to add support.");
+                DashCache.LOGGER.warn(font.getClass().getName() + " is not a supported font format, please contact mod developer to add support.");
             }
         }
         return hash;
@@ -265,7 +265,7 @@ public class DashRegistry {
             predicateOut.put(key, out.getValue());
         });
         logger.info("Loading Sprites");
-        sprites.entrySet().parallelStream().forEach(spriteEntry -> spritesOut.put(spriteEntry.getKey(), spriteEntry.getValue().toUndash(loader)));
+        sprites.entrySet().parallelStream().forEach(spriteEntry -> spritesOut.put(spriteEntry.getKey(), spriteEntry.getValue().toUndash(this)));
 
 
         logger.info("Loading FontImage");
@@ -277,7 +277,7 @@ public class DashRegistry {
         models.entrySet().parallelStream().forEach(modelEntry -> {
             final DashModel value = modelEntry.getValue();
             if (value.getStage() == ModelStage.SIMPLE) {
-                modelsOut.put(modelEntry.getKey(), value.toUndash(loader));
+                modelsOut.put(modelEntry.getKey(), value.toUndash(this));
             }
         });
 
@@ -285,7 +285,7 @@ public class DashRegistry {
         models.entrySet().parallelStream().forEach(modelEntry -> {
             final DashModel value = modelEntry.getValue();
             if (value.getStage() == ModelStage.INTERMEDIATE) {
-                modelsOut.put(modelEntry.getKey(), value.toUndash(loader));
+                modelsOut.put(modelEntry.getKey(), value.toUndash(this));
             }
         });
 
@@ -293,12 +293,12 @@ public class DashRegistry {
         models.entrySet().parallelStream().forEach(modelEntry -> {
             final DashModel value = modelEntry.getValue();
             if (value.getStage() == ModelStage.ADVANCED) {
-                modelsOut.put(modelEntry.getKey(), value.toUndash(loader));
+                modelsOut.put(modelEntry.getKey(), value.toUndash(this));
             }
         });
 
         logger.info("Applying Model Overrides");
-        models.forEach((key, value) -> value.apply(loader));
+        models.forEach((key, value) -> value.apply(this));
     }
 
 }

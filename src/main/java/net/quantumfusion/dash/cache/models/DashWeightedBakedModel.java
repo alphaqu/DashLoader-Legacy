@@ -5,6 +5,7 @@ import io.activej.serializer.annotations.Serialize;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.WeightedBakedModel;
 import net.quantumfusion.dash.cache.DashCache;
+import net.quantumfusion.dash.cache.DashRegistry;
 import net.quantumfusion.dash.cache.models.components.DashWeightedModelEntry;
 import net.quantumfusion.dash.mixin.WeightedBakedModelAccessor;
 
@@ -25,22 +26,22 @@ public class DashWeightedBakedModel implements DashModel, DashBakedModel {
         this.models = models;
     }
 
-    public DashWeightedBakedModel(WeightedBakedModel model, DashCache models) {
+    public DashWeightedBakedModel(WeightedBakedModel model, DashRegistry registry) {
         this.models = new ArrayList<>();
-        ((WeightedBakedModelAccessor) model).getModels().forEach(entry -> this.models.add(new DashWeightedModelEntry(entry, models)));
+        ((WeightedBakedModelAccessor) model).getModels().forEach(entry -> this.models.add(new DashWeightedModelEntry(entry, registry)));
     }
 
     @Override
-    public BakedModel toUndash(DashCache loader) {
+    public BakedModel toUndash(DashRegistry registry) {
         List<WeightedBakedModel.Entry> modelsOut = new ArrayList<>();
-        models.forEach(dashWeightedModelEntry -> modelsOut.add((dashWeightedModelEntry.toUndash(loader))));
+        models.forEach(dashWeightedModelEntry -> modelsOut.add((dashWeightedModelEntry.toUndash(registry))));
         new WeightedBakedModel(modelsOut);
         return new WeightedBakedModel(modelsOut);
     }
 
     @Override
-    public DashModel toDash(BakedModel model, DashCache loader) {
-        return new DashWeightedBakedModel((WeightedBakedModel) model, loader);
+    public DashModel toDash(BakedModel model, DashRegistry registry) {
+        return new DashWeightedBakedModel((WeightedBakedModel) model, registry);
     }
 
     @Override

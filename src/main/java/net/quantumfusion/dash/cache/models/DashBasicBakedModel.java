@@ -10,6 +10,7 @@ import net.minecraft.client.texture.Sprite;
 import net.minecraft.util.math.Direction;
 import net.quantumfusion.dash.cache.DashDirection;
 import net.quantumfusion.dash.cache.DashCache;
+import net.quantumfusion.dash.cache.DashRegistry;
 import net.quantumfusion.dash.cache.models.components.DashBakedQuad;
 import net.quantumfusion.dash.cache.models.components.DashModelOverrideList;
 import net.quantumfusion.dash.cache.models.components.DashModelTransformation;
@@ -63,7 +64,7 @@ public class DashBasicBakedModel implements DashModel,DashBakedModel {
     }
 
     public DashBasicBakedModel(BasicBakedModel basicBakedModel,
-                               DashCache loader) {
+                               DashRegistry registry) {
         BasicBakedModelAccessor access = ((BasicBakedModelAccessor) basicBakedModel);
         quads = new ArrayList<>();
         faceQuads = new HashMap<>();
@@ -73,18 +74,18 @@ public class DashBasicBakedModel implements DashModel,DashBakedModel {
             bakedQuads.forEach(bakedQuad -> out.add(new DashBakedQuad(bakedQuad)));
             faceQuads.put(new DashDirection(direction), out);
         });
-        itemPropertyOverrides = new DashModelOverrideList(access.getItemPropertyOverrides(), loader);
+        itemPropertyOverrides = new DashModelOverrideList(access.getItemPropertyOverrides(), registry);
         usesAo = access.getUsesAo();
         hasDepth = access.getHasDepth();
         isSideLit = access.getIsSideLit();
         transformation = new DashModelTransformation(access.getTransformation());
-        spritePointer = loader.registry.createSpritePointer(access.getSprite());
+        spritePointer = registry.createSpritePointer(access.getSprite());
     }
 
 
     @Override
-    public BakedModel toUndash(DashCache loader) {
-        Sprite sprite = loader.registry.getSprite(spritePointer);
+    public BakedModel toUndash(DashRegistry registry) {
+        Sprite sprite = registry.getSprite(spritePointer);
         List<BakedQuad> quadsOut = new ArrayList<>();
         Map<Direction, List<BakedQuad>> faceQuadsOut = new HashMap<>();
 
@@ -100,17 +101,17 @@ public class DashBasicBakedModel implements DashModel,DashBakedModel {
             faceQuadsOut.put(dashDirection.toUndash(), out);
         });
 
-        return new BasicBakedModel(quadsOut, faceQuadsOut, usesAo, isSideLit, hasDepth, sprite, transformation.toUndash(), itemPropertyOverrides.toUndash(loader));
+        return new BasicBakedModel(quadsOut, faceQuadsOut, usesAo, isSideLit, hasDepth, sprite, transformation.toUndash(), itemPropertyOverrides.toUndash(registry));
     }
 
     @Override
-    public void apply(DashCache loader) {
-        itemPropertyOverrides.applyOverrides(loader);
+    public void apply(DashRegistry registry) {
+        itemPropertyOverrides.applyOverrides(registry);
     }
 
     @Override
-    public DashModel toDash(BakedModel model, DashCache loader) {
-        return new DashBasicBakedModel((BasicBakedModel) model,loader);
+    public DashModel toDash(BakedModel model, DashRegistry registry) {
+        return new DashBasicBakedModel((BasicBakedModel) model,registry);
     }
 
 

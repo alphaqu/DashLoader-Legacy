@@ -6,6 +6,7 @@ import io.activej.serializer.annotations.SerializeNullable;
 import net.minecraft.client.render.model.json.ModelOverride;
 import net.minecraft.util.Identifier;
 import net.quantumfusion.dash.cache.DashCache;
+import net.quantumfusion.dash.cache.DashRegistry;
 import net.quantumfusion.dash.mixin.ModelOverrideAccessor;
 
 import java.util.HashMap;
@@ -29,15 +30,15 @@ public class DashModelOverride {
         this.predicateToThresholds = predicateToThresholds;
     }
 
-    public DashModelOverride(ModelOverride modelOverride, DashCache loader) {
-        modelId = loader.registry.createIdentifierPointer(modelOverride.getModelId());
+    public DashModelOverride(ModelOverride modelOverride, DashRegistry registry) {
+        modelId = registry.createIdentifierPointer(modelOverride.getModelId());
         predicateToThresholds = new HashMap<>();
-        ((ModelOverrideAccessor) modelOverride).getPredicateToThresholdsD().forEach((identifier, aFloat) -> predicateToThresholds.put(loader.registry.createIdentifierPointer(identifier), aFloat));
+        ((ModelOverrideAccessor) modelOverride).getPredicateToThresholdsD().forEach((identifier, aFloat) -> predicateToThresholds.put(registry.createIdentifierPointer(identifier), aFloat));
     }
 
-    public ModelOverride toUndash(DashCache loader) {
+    public ModelOverride toUndash(DashRegistry registry) {
         Map<Identifier, Float> out = new HashMap<>();
-        predicateToThresholds.forEach((s, aFloat) -> out.put(loader.registry.getIdentifier(s), aFloat));
-        return new ModelOverride(loader.registry.getIdentifier(modelId), out);
+        predicateToThresholds.forEach((s, aFloat) -> out.put(registry.getIdentifier(s), aFloat));
+        return new ModelOverride(registry.getIdentifier(modelId), out);
     }
 }

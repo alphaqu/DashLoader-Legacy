@@ -7,6 +7,7 @@ import net.minecraft.client.render.model.BuiltinBakedModel;
 import net.minecraft.client.render.model.WeightedBakedModel;
 import net.minecraft.client.texture.Sprite;
 import net.quantumfusion.dash.cache.DashCache;
+import net.quantumfusion.dash.cache.DashRegistry;
 import net.quantumfusion.dash.cache.models.components.DashModelOverrideList;
 import net.quantumfusion.dash.cache.models.components.DashModelTransformation;
 import net.quantumfusion.dash.mixin.BuiltinBakedModelAccessor;
@@ -34,29 +35,29 @@ public class DashBuiltinBakedModel implements DashModel,DashBakedModel {
     public DashBuiltinBakedModel() {
     }
 
-    public DashBuiltinBakedModel(BuiltinBakedModel builtinBakedModel, DashCache loader) {
+    public DashBuiltinBakedModel(BuiltinBakedModel builtinBakedModel, DashRegistry registry) {
         BuiltinBakedModelAccessor access = ((BuiltinBakedModelAccessor) builtinBakedModel);
         transformation = new DashModelTransformation(access.getTransformation());
-        itemPropertyOverrides = new DashModelOverrideList(access.getItemPropertyOverrides(), loader);
-        spritePointer = loader.registry.createSpritePointer(access.getSprite());
+        itemPropertyOverrides = new DashModelOverrideList(access.getItemPropertyOverrides(), registry);
+        spritePointer = registry.createSpritePointer(access.getSprite());
         sideLit = access.getSideLit();
     }
 
 
     @Override
-    public BakedModel toUndash(DashCache loader) {
-        Sprite sprite = loader.registry.getSprite(spritePointer);
-        return new BuiltinBakedModel(transformation.toUndash(), itemPropertyOverrides.toUndash(loader), sprite, sideLit);
+    public BakedModel toUndash(DashRegistry registry) {
+        Sprite sprite = registry.getSprite(spritePointer);
+        return new BuiltinBakedModel(transformation.toUndash(), itemPropertyOverrides.toUndash(registry), sprite, sideLit);
     }
 
     @Override
-    public void apply(DashCache loader) {
-        itemPropertyOverrides.applyOverrides(loader);
+    public void apply(DashRegistry registry) {
+        itemPropertyOverrides.applyOverrides(registry);
     }
 
     @Override
-    public DashModel toDash(BakedModel model, DashCache loader) {
-        return new DashBuiltinBakedModel((BuiltinBakedModel) model,loader);
+    public DashModel toDash(BakedModel model, DashRegistry registry) {
+        return new DashBuiltinBakedModel((BuiltinBakedModel) model,registry);
     }
 
     @Override

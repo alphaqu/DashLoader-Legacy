@@ -5,6 +5,7 @@ import io.activej.serializer.annotations.Serialize;
 import net.minecraft.client.render.model.SpriteAtlasManager;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.quantumfusion.dash.cache.DashCache;
+import net.quantumfusion.dash.cache.DashRegistry;
 import net.quantumfusion.dash.mixin.SpriteAtlasManagerAccessor;
 
 import java.util.ArrayList;
@@ -19,13 +20,13 @@ public class DashSpriteAtlasManager {
         this.atlases = atlases;
     }
 
-    public DashSpriteAtlasManager(SpriteAtlasManager spriteAtlasManager, HashMap<SpriteAtlasTexture, DashSpriteAtlasTextureData> atlasData, DashCache loader) {
+    public DashSpriteAtlasManager(SpriteAtlasManager spriteAtlasManager, HashMap<SpriteAtlasTexture, DashSpriteAtlasTextureData> atlasData, DashRegistry loader) {
         atlases = new ArrayList<>();
         ((SpriteAtlasManagerAccessor) spriteAtlasManager).getAtlases().forEach((identifier, spriteAtlasTexture) -> atlases.add(new DashSpriteAtlasTexture(spriteAtlasTexture, atlasData.get(spriteAtlasTexture),loader)));
 
     }
 
-    public SpriteAtlasManager toUndash(DashCache loader) {
+    public SpriteAtlasManager toUndash(DashRegistry loader) {
         ArrayList<SpriteAtlasTexture> out = new ArrayList<>();
         atlases.forEach(spriteAtlasTexture -> out.add(spriteAtlasTexture.toUndash(loader)));
         return new SpriteAtlasManager(out);

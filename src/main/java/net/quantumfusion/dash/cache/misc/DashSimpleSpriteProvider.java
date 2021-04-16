@@ -6,6 +6,7 @@ import net.minecraft.client.particle.ParticleManager;
 import net.minecraft.client.texture.Sprite;
 import net.quantumfusion.dash.Dash;
 import net.quantumfusion.dash.cache.DashCache;
+import net.quantumfusion.dash.cache.DashRegistry;
 import net.quantumfusion.dash.mixin.ParticleManagerSimpleSpriteProviderAccessor;
 
 import java.util.ArrayList;
@@ -19,12 +20,12 @@ public class DashSimpleSpriteProvider {
         this.sprites = sprites;
     }
 
-    public DashSimpleSpriteProvider(ParticleManager.SimpleSpriteProvider simpleSpriteProvider) {
+    public DashSimpleSpriteProvider(ParticleManager.SimpleSpriteProvider simpleSpriteProvider,DashRegistry registry) {
         sprites = new ArrayList<>();
-        ((ParticleManagerSimpleSpriteProviderAccessor)simpleSpriteProvider).getSprites().forEach(sprite -> sprites.add(Dash.loader.registry.createSpritePointer(sprite)));
+        ((ParticleManagerSimpleSpriteProviderAccessor)simpleSpriteProvider).getSprites().forEach(sprite -> sprites.add(registry.createSpritePointer(sprite)));
     }
 
-    public ParticleManager.SimpleSpriteProvider toUndash(DashCache loader) {
+    public ParticleManager.SimpleSpriteProvider toUndash(DashRegistry registry) {
         ParticleManager.SimpleSpriteProvider out = null;
         try {
             out = (ParticleManager.SimpleSpriteProvider) Dash.getUnsafe().allocateInstance(ParticleManager.SimpleSpriteProvider.class);
@@ -32,7 +33,7 @@ public class DashSimpleSpriteProvider {
             e.printStackTrace();
         }
         List<Sprite> spritesOut = new ArrayList<>();
-        sprites.forEach(integer -> spritesOut.add(loader.registry.getSprite(integer)));
+        sprites.forEach(integer -> spritesOut.add(registry.getSprite(integer)));
         out.setSprites(spritesOut);
         return out;
     }

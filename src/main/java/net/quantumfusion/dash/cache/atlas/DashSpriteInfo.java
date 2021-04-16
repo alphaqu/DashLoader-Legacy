@@ -4,6 +4,7 @@ import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import net.minecraft.client.texture.Sprite;
 import net.quantumfusion.dash.cache.DashCache;
+import net.quantumfusion.dash.cache.DashRegistry;
 import net.quantumfusion.dash.mixin.SpriteInfoAccessor;
 
 
@@ -27,14 +28,14 @@ public class DashSpriteInfo {
         this.animationData = animationData;
     }
 
-    public DashSpriteInfo(Sprite.Info info, DashCache loader) {
-        id = loader.registry.createIdentifierPointer(info.getId());
+    public DashSpriteInfo(Sprite.Info info, DashRegistry registry) {
+        id = registry.createIdentifierPointer(info.getId());
         width = info.getWidth();
         height = info.getHeight();
         animationData = new DashAnimationResourceMetadata(((SpriteInfoAccessor) (Object) info).getAnimationData());
     }
 
-    public Sprite.Info toUndash( DashCache loader) {
-        return new Sprite.Info(loader.registry.getIdentifier(id), width, height, animationData.toUndash());
+    public Sprite.Info toUndash(DashRegistry registry) {
+        return new Sprite.Info(registry.getIdentifier(id), width, height, animationData.toUndash());
     }
 }

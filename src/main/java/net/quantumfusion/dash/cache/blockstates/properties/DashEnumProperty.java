@@ -3,6 +3,7 @@ package net.quantumfusion.dash.cache.blockstates.properties;
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import net.minecraft.state.property.EnumProperty;
+import net.minecraft.util.StringIdentifiable;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.ArrayList;
@@ -40,10 +41,10 @@ public class DashEnumProperty implements DashProperty {
         this.value = value.name();
     }
 
-    public MutablePair<EnumProperty, Enum> toUndash() {
-        MutablePair<EnumProperty, Enum> out = new MutablePair<>();
+    public  <T extends Enum<T> & StringIdentifiable> MutablePair<EnumProperty<T> , Enum<T>> toUndash() {
+        MutablePair<EnumProperty<T>, Enum<T>> out = new MutablePair<>();
         try {
-            Class type = Class.forName(this.propertyType.replaceFirst("class ", ""));
+            Class<T> type = (Class<T>) Class.forName(this.propertyType.replaceFirst("class ", ""));
             out.setLeft(EnumProperty.of(name, type));
             out.setRight(Enum.valueOf(type, value));
             return out;

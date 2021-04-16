@@ -9,6 +9,7 @@ import io.activej.serializer.annotations.SerializeSubclasses;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.state.property.*;
+import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.registry.Registry;
 import net.quantumfusion.dash.cache.DashIdentifier;
@@ -45,7 +46,7 @@ public class DashBlockState {
         this.entriesEncoded = entriesEncoded;
     }
 
-    public DashBlockState(BlockState blockState, DashRegistry registry) {
+    public  <T extends Enum<T> & StringIdentifiable> DashBlockState(BlockState blockState, DashRegistry registry) {
         StateAccessor<Block, BlockState> accessState = ((StateAccessor<Block, BlockState>) blockState);
         entriesEncoded = new ArrayList<>();
         accessState.getEntries().forEach((property, comparable) -> {
@@ -54,15 +55,15 @@ public class DashBlockState {
             } else if (property instanceof DirectionProperty) {
                 entriesEncoded.add(new DashDirectionProperty((DirectionProperty) property, (Direction) comparable));
             } else if (property instanceof EnumProperty) {
-                entriesEncoded.add(new DashEnumProperty((EnumProperty) property, (Enum) comparable));
+                entriesEncoded.add(new DashEnumProperty((EnumProperty<T>) property, (Enum<T>) comparable));
             } else if (property instanceof IntProperty) {
                 entriesEncoded.add(new DashIntProperty((IntProperty) property, comparable.toString()));
             }
         });
-        owner = registry.createIdentifierPointer(Registry.BLOCK.getId(accessState.getOwner()));
+        owner = registry.createIdentifierPointer(Registry.BLOCK.getId(blockState.getBlock()));
     }
 
-    public Pair<BlockState,Predicate<BlockState>> toUndash(DashRegistry registry) {
+    public  <T extends Enum<T> & StringIdentifiable>  Pair<BlockState,Predicate<BlockState>> toUndash(DashRegistry registry) {
         try {
             ImmutableMap.Builder<Property<?>, Comparable<?>> builder = ImmutableMap.builder();
             //TODO hardcoded, this is bad
@@ -75,7 +76,7 @@ public class DashBlockState {
                     MutablePair<DirectionProperty, Direction> out = ((DashDirectionProperty) property).toUndash();
                     builder.put(out.left, out.right);
                 } else if (property instanceof DashEnumProperty) {
-                    MutablePair<EnumProperty, Enum> out = ((DashEnumProperty) property).toUndash();
+                    MutablePair<EnumProperty<T>, Enum<T>> out = ((DashEnumProperty) property).toUndash();
                     builder.put(out.left, out.right);
                 } else if (property instanceof DashIntProperty) {
                     MutablePair<IntProperty, Integer> out = ((DashIntProperty) property).toUndash();

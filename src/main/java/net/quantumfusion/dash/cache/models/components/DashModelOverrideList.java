@@ -9,6 +9,7 @@ import net.minecraft.client.render.model.json.ModelOverride;
 import net.minecraft.client.render.model.json.ModelOverrideList;
 import net.quantumfusion.dash.Dash;
 import net.quantumfusion.dash.cache.DashCache;
+import net.quantumfusion.dash.cache.DashRegistry;
 import net.quantumfusion.dash.cache.models.*;
 import net.quantumfusion.dash.mixin.ModelOverideListAccessor;
 
@@ -30,22 +31,22 @@ public class DashModelOverrideList {
         this.bakedModels = bakedModels;
     }
 
-    public DashModelOverrideList(ModelOverrideList modelOverrideList, DashCache loader) {
+    public DashModelOverrideList(ModelOverrideList modelOverrideList, DashRegistry registry) {
         overrides = new ArrayList<>();
         bakedModels = new ArrayList<>();
         ModelOverideListAccessor access = ((ModelOverideListAccessor) modelOverrideList);
         List<BakedModel> models =  access.getModels();
 
-        models.forEach(bakedModel -> bakedModels.add(loader.registry.createModelPointer(bakedModel)));
-        access.getOverrides().forEach(modelOverride -> overrides.add(new DashModelOverride(modelOverride,loader)));
+        models.forEach(bakedModel -> bakedModels.add(registry.createModelPointer(bakedModel)));
+        access.getOverrides().forEach(modelOverride -> overrides.add(new DashModelOverride(modelOverride,registry)));
     }
 
-    public ModelOverrideList toUndash(DashCache loader) {
+    public ModelOverrideList toUndash(DashRegistry registry) {
         try {
             ModelOverrideList out = (ModelOverrideList) Dash.getUnsafe().allocateInstance(ModelOverrideList.class);
 
             List<ModelOverride> overridesOut = new ArrayList<>();
-            overrides.forEach(dashModelOverride -> overridesOut.add(dashModelOverride.toUndash(loader)));
+            overrides.forEach(dashModelOverride -> overridesOut.add(dashModelOverride.toUndash(registry)));
             ((ModelOverideListAccessor) out).setOverrides(overridesOut);
             toApply = out;
             return out;
@@ -60,11 +61,11 @@ public class DashModelOverrideList {
         return null;
     }
 
-    public void applyOverrides(DashCache loader) {
+    public void applyOverrides(DashRegistry registry) {
         List<BakedModel> outModels = new ArrayList<>();
         bakedModels.forEach(dashBakedModel -> {
             if (dashBakedModel != null) {
-                outModels.add(loader.registry.getModel(dashBakedModel));
+                outModels.add(registry.getModel(dashBakedModel));
             } else {
                 outModels.add(null);
             }

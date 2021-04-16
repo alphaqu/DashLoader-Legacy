@@ -4,7 +4,9 @@ import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.texture.SpriteAtlasTexture;
+import net.quantumfusion.dash.Dash;
 import net.quantumfusion.dash.cache.DashCache;
+import net.quantumfusion.dash.cache.DashRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,13 +25,13 @@ public class DashExtraAtlasData {
     }
 
 
-    public void addAtlas(SpriteAtlasTexture atlas,DashCache loader) {
-        extraAtlases.add(new DashSpriteAtlasTexture(atlas,loader.atlasData.get(atlas),loader));
+    public void addAtlas(SpriteAtlasTexture atlas,DashRegistry registry) {
+        extraAtlases.add(new DashSpriteAtlasTexture(atlas, Dash.loader.atlasData.get(atlas),registry));
     }
 
-    public List<SpriteAtlasTexture> toUndash(DashCache loader) {
+    public List<SpriteAtlasTexture> toUndash(DashRegistry registry) {
         List<SpriteAtlasTexture> out = new ArrayList<>();
-        extraAtlases.forEach(dashSpriteAtlasTexture -> out.add(dashSpriteAtlasTexture.toUndash(loader)));
+        extraAtlases.forEach(dashSpriteAtlasTexture -> out.add(dashSpriteAtlasTexture.toUndash(registry)));
         return out;
     }
 }

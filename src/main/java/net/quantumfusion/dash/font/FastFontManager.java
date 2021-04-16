@@ -18,7 +18,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
 import net.minecraft.util.profiler.Profiler;
 import net.quantumfusion.dash.Dash;
-import net.quantumfusion.dash.cache.DashCache;
+import net.quantumfusion.dash.cache.font.fonts.UnicodeFont;
 import net.quantumfusion.dash.mixin.FontManagerAccessor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -35,8 +35,15 @@ public class FastFontManager {
     private final FontManagerAccessor fontManager;
     public final ResourceReloadListener resourceReloadListener = new SinglePreparationResourceReloadListener<Map<Identifier, List<Font>>>() {
         protected Map<Identifier, List<Font>> prepare(ResourceManager resourceManager, Profiler profiler) {
-            if (Dash.loader.fontsOut != null) {
-                return Dash.loader.fontsOut;
+            final Map<Identifier, List<Font>> fontsOut = Dash.loader.fontsOut;
+            if (fontsOut != null) {
+                fontsOut.forEach((identifier, list) -> list.forEach(font -> {
+                            if (font instanceof UnicodeFont) {
+                                ((UnicodeFont) font).setResourceManager(resourceManager);
+                            }
+                        }
+                ));
+                return fontsOut;
             } else {
                 System.out.println("font override");
                 profiler.startTick();

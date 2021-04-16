@@ -7,7 +7,8 @@ import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.font.Font;
 import net.minecraft.client.particle.ParticleManager;
-import net.minecraft.client.render.model.*;
+import net.minecraft.client.render.model.BakedModel;
+import net.minecraft.client.render.model.SpriteAtlasManager;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.texture.TextureManager;
@@ -20,7 +21,7 @@ import net.quantumfusion.dash.cache.atlas.DashSpriteAtlasTextureData;
 import net.quantumfusion.dash.cache.blockstates.DashBlockStateData;
 import net.quantumfusion.dash.cache.font.DashFontManagerData;
 import net.quantumfusion.dash.cache.misc.DashParticleData;
-import net.quantumfusion.dash.cache.models.*;
+import net.quantumfusion.dash.cache.models.DashModelData;
 import net.quantumfusion.dash.mixin.AbstractTextureAccessor;
 import net.quantumfusion.dash.mixin.SpriteAtlasManagerAccessor;
 import net.quantumfusion.dash.mixin.SpriteAtlasTextureAccessor;
@@ -50,9 +51,7 @@ public class DashCache {
     public Map<Identifier, List<Font>> fontsOut;
 
 
-    private List<SpriteAtlasTexture> atlasesToRegister;
-    public DashRegistry registry;
-
+    private final List<SpriteAtlasTexture> atlasesToRegister;
 
 
     //toserialize
@@ -63,11 +62,11 @@ public class DashCache {
     private SpriteAtlasTexture particleAtlas;
     private List<SpriteAtlasTexture> extraAtlases;
     private Map<Identifier, List<Font>> fonts;
+
     public HashMap<SpriteAtlasTexture, DashSpriteAtlasTextureData> atlasData = new HashMap<>();
 
     public DashCache() {
         LOGGER.info("Creating DashCache Instance");
-        registry = new DashRegistry(this);
         extraAtlases = new ArrayList<>();
         atlasesToRegister = new ArrayList<>();
     }
@@ -95,46 +94,47 @@ public class DashCache {
     }
 
     public void serialize() {
+        DashRegistry registry = new DashRegistry(this);
         LOGGER.info("Mapping BakedModelAtlas");
-        serializeObject(new DashSpriteAtlasManager(atlasManager, atlasData, this), atlasPath, "BakedModelAtlas");
+        serializeObject(new DashSpriteAtlasManager(atlasManager, atlasData, registry), atlasPath, "BakedModelAtlas");
         LOGGER.info("Mapping Blockstates");
-        serializeObject(new DashBlockStateData(stateLookup,this),blockstatePath,"BlockState");
+        serializeObject(new DashBlockStateData(stateLookup, registry), blockstatePath, "BlockState");
         LOGGER.info("Mapping Models");
-        serializeObject(new DashModelData(models, this), modelPath, "Model");
+        serializeObject(new DashModelData(models, registry), modelPath, "Model");
         LOGGER.info("Mapping Particles");
-        serializeObject(new DashParticleData(particleSprites, particleAtlas), particlePath, "Particle");
+        serializeObject(new DashParticleData(particleSprites, particleAtlas, registry), particlePath, "Particle");
         LOGGER.info("Mapping Fonts");
-        serializeObject(DashFontManagerData.toDash(fonts,registry),fontPath,"Font");
+        serializeObject(DashFontManagerData.toDash(fonts, registry), fontPath, "Font");
         LOGGER.info("Mapping Extra Atlases");
         DashExtraAtlasData extraAtlasData = new DashExtraAtlasData();
-        this.extraAtlases.forEach(spriteAtlasTexture -> extraAtlasData.addAtlas(spriteAtlasTexture, this));
+        this.extraAtlases.forEach(spriteAtlasTexture -> extraAtlasData.addAtlas(spriteAtlasTexture, registry));
         serializeObject(extraAtlasData, extraAtlasPath, "Extra Atlas");
         serializeObject(registry, registryPath, "Registry");
     }
 
 
     public void init() {
-        if (atlasPath.toFile().exists() && blockstatePath.toFile().exists() &&  modelPath.toFile().exists() && registryPath.toFile().exists() && particlePath.toFile().exists()) {
+        if (atlasPath.toFile().exists() && blockstatePath.toFile().exists() && modelPath.toFile().exists() && registryPath.toFile().exists() && particlePath.toFile().exists()) {
             try {
-                registry = deserialize(DashRegistry.class, registryPath, "Registry");
+                DashRegistry registry = deserialize(DashRegistry.class, registryPath, "Registry");
                 LOGGER.info("      Loading Registry");
                 registry.toUndash(this);
 
 
                 DashSpriteAtlasManager atlas = deserialize(DashSpriteAtlasManager.class, atlasPath, "BakedModel Atlas");
                 LOGGER.info("      Loading BakedModel Atlas");
-                atlasManagerOut = atlas.toUndash(this);
+                atlasManagerOut = atlas.toUndash(registry);
                 ((SpriteAtlasManagerAccessor) atlasManagerOut).getAtlases().forEach((identifier, spriteAtlasTexture) -> atlasesToRegister.add(spriteAtlasTexture));
 
 
-                DashBlockStateData blockStateData = deserialize(DashBlockStateData.class,blockstatePath,"BlockState");
+                DashBlockStateData blockStateData = deserialize(DashBlockStateData.class, blockstatePath, "BlockState");
                 LOGGER.info("      Loading BlockState Data");
-                stateLookupOut = blockStateData.toUndash(this);
+                stateLookupOut = blockStateData.toUndash(registry);
 
 
                 DashParticleData particleData = deserialize(DashParticleData.class, particlePath, "Particle");
                 LOGGER.info("      Loading Particle Data");
-                Pair<Map<Identifier, List<Sprite>>, SpriteAtlasTexture> outParticle = particleData.toUndash(this);
+                Pair<Map<Identifier, List<Sprite>>, SpriteAtlasTexture> outParticle = particleData.toUndash(registry);
                 particlesOut = outParticle.getLeft();
                 atlasesToRegister.add(outParticle.getValue());
 
@@ -150,7 +150,7 @@ public class DashCache {
 
                 DashExtraAtlasData extraAtlasdata = deserialize(DashExtraAtlasData.class, extraAtlasPath, "Extra Atlas");
                 LOGGER.info("      Loading Extra Atlas Data");
-                atlasesToRegister.addAll(extraAtlasdata.toUndash(this));
+                atlasesToRegister.addAll(extraAtlasdata.toUndash(registry));
 
                 DashFontManagerData fontData = deserialize(DashFontManagerData.class, fontPath, "Font");
                 LOGGER.info("    Loading Model Data");
