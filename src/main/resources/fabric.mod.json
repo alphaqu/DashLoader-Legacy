@@ -23,6 +23,11 @@
   "mixins": [
     "dash.mixins.json"
   ],
+  "custom": {
+    "sodium:options": {
+      "mixin.features.model": false
+    }
+  },
   "depends": {
     "fabricloader": ">=0.11.3",
     "fabric": "*",
