@@ -10,7 +10,7 @@
   "contact": {},
   "license": "MIT",
   "icon": "assets/dash/icon.png",
-  "environment": "*",
+  "environment": "client",
   "accessWidener" : "dash.accesswidener",
   "entrypoints": {
     "client": [
