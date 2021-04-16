@@ -3,7 +3,7 @@
   "id": "dash",
   "version": "${version}",
   "name": "Dash",
-  "description": "Destroying loading times one cache at a time.",
+  "description": "Loading minecraft at lightning speeds.",
   "authors": [
     "alphasucks"
   ],

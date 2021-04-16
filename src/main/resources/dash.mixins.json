@@ -52,8 +52,6 @@
     "ModelOverrideAccessor",
     "ModelOverideListAccessor"
   ],
-  "client": [
-  ],
   "injectors": {
     "defaultRequire": 1
   }
