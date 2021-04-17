@@ -1,23 +1,22 @@
 {
   "schemaVersion": 1,
-  "id": "dash",
+  "id": "dashloader",
   "version": "${version}",
-  "name": "Dash",
+  "name": "DashLoader",
   "description": "Loading minecraft at lightning speeds.",
   "authors": [
     "alphasucks"
   ],
   "contact": {},
   "license": "MIT",
-  "icon": "assets/dash/icon.png",
+  "icon": "assets/dashloader/textures/icon.png",
   "environment": "client",
-  "accessWidener" : "dash.accesswidener",
+  "accessWidener": "dash.accesswidener",
   "entrypoints": {
     "client": [
-      "net.quantumfusion.dash.client.DashClient"
+      "net.quantumfusion.dashloader.client.DashClient"
     ],
     "main": [
-      "net.quantumfusion.dash.Dash"
     ]
   },
   "mixins": [
