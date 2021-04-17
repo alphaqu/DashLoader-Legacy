@@ -1,4 +1,4 @@
-package net.quantumfusion.dash.font;
+package net.quantumfusion.dash.cache.font;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;

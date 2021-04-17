@@ -42,7 +42,12 @@ import static net.quantumfusion.dash.Dash.*;
 
 public class DashCache {
     public static final Logger LOGGER = LogManager.getLogger();
+
+    public static final int totalTasks = 15;
+    public static int tasksComplete = 0;
+    public static String task = "Starting DashCache";
     public DashCacheState state;
+
     //output
     public SpriteAtlasManager atlasManagerOut;
     public Object2IntMap<BlockState> stateLookupOut;
@@ -94,22 +99,31 @@ public class DashCache {
     }
 
     public void serialize() {
+        tasksComplete++;
         DashRegistry registry = new DashRegistry(this);
-        LOGGER.info("Mapping BakedModelAtlas");
+        logAndTask("Mapping BakedModelAtlas");
         serializeObject(new DashSpriteAtlasManager(atlasManager, atlasData, registry), atlasPath, "BakedModelAtlas");
-        LOGGER.info("Mapping Blockstates");
+        logAndTask("Mapping Blockstates");
         serializeObject(new DashBlockStateData(stateLookup, registry), blockstatePath, "BlockState");
-        LOGGER.info("Mapping Models");
+        logAndTask("Mapping Models");
         serializeObject(new DashModelData(models, registry), modelPath, "Model");
-        LOGGER.info("Mapping Particles");
+        logAndTask("Mapping Particles");
         serializeObject(new DashParticleData(particleSprites, particleAtlas, registry), particlePath, "Particle");
-        LOGGER.info("Mapping Fonts");
+        logAndTask("Mapping Fonts");
         serializeObject(DashFontManagerData.toDash(fonts, registry), fontPath, "Font");
-        LOGGER.info("Mapping Extra Atlases");
+        logAndTask("Mapping Extra Atlases");
+        tasksComplete++;
         DashExtraAtlasData extraAtlasData = new DashExtraAtlasData();
         this.extraAtlases.forEach(spriteAtlasTexture -> extraAtlasData.addAtlas(spriteAtlasTexture, registry));
         serializeObject(extraAtlasData, extraAtlasPath, "Extra Atlas");
         serializeObject(registry, registryPath, "Registry");
+        task = "Caching is now complete.";
+    }
+
+    private void logAndTask(String s) {
+        LOGGER.info(s);
+        tasksComplete++;
+        task = s;
     }
 
 
@@ -187,6 +201,8 @@ public class DashCache {
 
     private <C> void serializeObject(C clazz, Path path, String name) {
         try {
+            tasksComplete++;
+            task = "Serializing " + name;
             LOGGER.info("  Starting " + name + " Serialization.");
             StreamOutput output = StreamOutput.create(Files.newOutputStream(path, StandardOpenOption.CREATE, StandardOpenOption.WRITE));
             //noinspection unchecked
@@ -224,9 +240,9 @@ public class DashCache {
     public void destroyCache(Exception exception) {
         LOGGER.error("DashCache failed, destroying cache and requesting recache. Slow start predicted.");
         exception.printStackTrace();
-//        if (!atlasPath.toFile().delete() || !modelPath.toFile().delete() || !registryPath.toFile().delete()|| !blockstatePath.toFile().delete() || !extraAtlasPath.toFile().delete()|| !particlePath.toFile().delete()) {
-//            LOGGER.fatal("DashCache removal failed, Closing because of corruption chance, please delete the cache manually or reinstall DashLoader.");
-//        }
+        if (!atlasPath.toFile().delete() || !modelPath.toFile().delete() || !registryPath.toFile().delete() || !blockstatePath.toFile().delete() || !extraAtlasPath.toFile().delete() || !particlePath.toFile().delete()) {
+            LOGGER.fatal("DashCache removal failed, Closing because of corruption chance, please delete the cache manually or reinstall DashLoader.");
+        }
     }
 
 }

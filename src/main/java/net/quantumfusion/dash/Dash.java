@@ -9,8 +9,6 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.render.model.*;
-import net.minecraft.client.texture.NativeImage;
-import net.minecraft.util.Identifier;
 import net.quantumfusion.dash.cache.DashCache;
 import net.quantumfusion.dash.cache.DashRegistry;
 import net.quantumfusion.dash.cache.atlas.DashExtraAtlasData;
@@ -22,14 +20,12 @@ import net.quantumfusion.dash.cache.font.fonts.DashBlankFont;
 import net.quantumfusion.dash.cache.font.fonts.DashUnicodeFont;
 import net.quantumfusion.dash.cache.misc.DashParticleData;
 import net.quantumfusion.dash.cache.models.*;
-import net.quantumfusion.dash.misc.DashParticleTextureData;
 import net.quantumfusion.dash.misc.DashSplashTextData;
 import net.quantumfusion.dash.util.TimeHelper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import sun.misc.Unsafe;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -57,13 +53,13 @@ public class Dash implements ModInitializer {
 
     public static DashCache loader = new DashCache();
 
-    public static Path registryPath = config.resolve("dash/registry.activej");
-    public static Path blockstatePath = config.resolve("dash/blockstate-mappings.activej");
-    public static Path modelPath = config.resolve("dash/model-mappings.activej");
-    public static Path atlasPath = config.resolve("dash/atlas-mappings.activej");
-    public static Path particlePath = config.resolve("dash/particle-mappings.activej");
-    public static Path fontPath = config.resolve("dash/font-mappings.activej");
-    public static Path extraAtlasPath = config.resolve("dash/extraatlas-mappings.activej");
+    public static final Path registryPath = config.resolve("dash/registry.activej");
+    public static final Path blockstatePath = config.resolve("dash/blockstate-mappings.activej");
+    public static final Path modelPath = config.resolve("dash/model-mappings.activej");
+    public static final Path atlasPath = config.resolve("dash/atlas-mappings.activej");
+    public static final Path particlePath = config.resolve("dash/particle-mappings.activej");
+    public static final Path fontPath = config.resolve("dash/font-mappings.activej");
+    public static final Path extraAtlasPath = config.resolve("dash/extraatlas-mappings.activej");
 
     public static Unsafe getUnsafe() {
         Field f = null;

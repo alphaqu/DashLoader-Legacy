@@ -2,7 +2,7 @@ package net.quantumfusion.dash.mixin;
 
 import net.minecraft.client.font.FontManager;
 import net.minecraft.resource.ResourceReloadListener;
-import net.quantumfusion.dash.font.FastFontManager;
+import net.quantumfusion.dash.cache.font.FastFontManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
