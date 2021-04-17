@@ -9,6 +9,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.font.Font;
 import net.minecraft.client.font.RenderableGlyph;
 import net.minecraft.client.texture.NativeImage;
+import net.minecraft.client.texture.TextureUtil;
 import net.quantumfusion.dashloader.mixin.BitmapFontAccessor;
 import net.quantumfusion.dashloader.mixin.BitmapFontGlyphAccessor;
 import org.jetbrains.annotations.Nullable;

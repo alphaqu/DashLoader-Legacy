@@ -1,7 +1,7 @@
 package net.quantumfusion.dashloader.cache;
 
 public enum DashCachePaths {
-    BAKEDMODELMANAGER,
+    MODEL,
     REGISTRY,
     BLOCKSTATES,
     ATLAS,

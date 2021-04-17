@@ -64,7 +64,7 @@ public class DashLoader {
     private static DashLoader instance;
 
     public final HashMap<SpriteAtlasTexture, DashSpriteAtlasTextureData> atlasData = new HashMap<>();
-    public final Object2ObjectMap<Class<?>, BinarySerializer> serializers = new Object2ObjectOpenHashMap<>();
+    private final Object2ObjectMap<Class<?>, BinarySerializer> serializers = new Object2ObjectOpenHashMap<>();
     public final HashMap<Class<? extends BakedModel>, DashModel> modelMappings = new HashMap<>();
     private final List<SpriteAtlasTexture> atlasesToRegister;
     private final Map<DashCachePaths, Path> paths = new HashMap<>();
@@ -94,7 +94,6 @@ public class DashLoader {
         LOGGER.info("Creating DashLoader Instance");
         extraAtlases = new ArrayList<>();
         atlasesToRegister = new ArrayList<>();
-        initPaths();
     }
 
     public void reload() {
@@ -172,7 +171,7 @@ public class DashLoader {
         serializeObject(new DashBlockStateData(stateLookup, registry), paths.get(DashCachePaths.BLOCKSTATES), "BlockState");
 
         logAndTask("Mapping Models");
-        serializeObject(new DashModelData(models, registry), paths.get(DashCachePaths.BAKEDMODELMANAGER), "Model");
+        serializeObject(new DashModelData(models, registry), paths.get(DashCachePaths.MODEL), "Model");
 
         logAndTask("Mapping Particles");
         serializeObject(new DashParticleData(particleSprites, particleAtlas, registry), paths.get(DashCachePaths.PARTICLE), "Particle");
@@ -223,7 +222,7 @@ public class DashLoader {
                 particlesOut = outParticle.getLeft();
                 atlasesToRegister.add(outParticle.getValue());
 
-                DashModelData modelData = deserialize(DashModelData.class, paths.get(DashCachePaths.BAKEDMODELMANAGER), "Model");
+                DashModelData modelData = deserialize(DashModelData.class, paths.get(DashCachePaths.MODEL), "Model");
                 LOGGER.info("    Loading Model Data");
                 modelsOut = modelData.toUndash(registry);
 
@@ -346,7 +345,7 @@ public class DashLoader {
     private void initPaths() {
         paths.put(DashCachePaths.REGISTRY, config.resolve("quantumfusion/dashloader/registry.activej"));
         paths.put(DashCachePaths.BLOCKSTATES, config.resolve("quantumfusion/dashloader/blockstate-mappings.activej"));
-        paths.put(DashCachePaths.BAKEDMODELMANAGER, config.resolve("quantumfusion/dashloader/model-mappings.activej"));
+        paths.put(DashCachePaths.MODEL, config.resolve("quantumfusion/dashloader/model-mappings.activej"));
         paths.put(DashCachePaths.ATLAS, config.resolve("quantumfusion/dashloader/atlas-mappings.activej"));
         paths.put(DashCachePaths.PARTICLE, config.resolve("quantumfusion/dashloader/particle-mappings.activej"));
         paths.put(DashCachePaths.FONT, config.resolve("quantumfusion/dashloader/font-mappings.activej"));
@@ -367,7 +366,7 @@ public class DashLoader {
 
         serializers.put(DashRegistry.class,
                 SerializerBuilder.create()
-                        .withSubclasses("models", list)
+                        .withSubclasses("models", DashBasicBakedModel.class,DashBuiltinBakedModel.class,DashMultipartBakedModel.class,DashWeightedBakedModel.class)
                         .withSubclasses("fonts", DashBitmapFont.class, DashUnicodeFont.class, DashBlankFont.class)
                         .withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE)
                         .build(DashRegistry.class));

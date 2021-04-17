@@ -16,6 +16,7 @@ public abstract class MinecraftClientMixin {
             at = @At(value = "HEAD"), cancellable = true)
     private void reloadResourcesOverride(CallbackInfoReturnable<CompletableFuture<Void>> cir) {
         DashLoader.getInstance().destroyCache();
+        new DashLoader();
 
     }
 

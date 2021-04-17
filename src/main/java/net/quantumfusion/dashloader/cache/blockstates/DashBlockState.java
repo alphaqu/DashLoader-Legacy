@@ -66,7 +66,7 @@ public class DashBlockState {
             ImmutableMap.Builder<Property<?>, Comparable<?>> builder = ImmutableMap.builder();
             //TODO hardcoded, this is bad
             //above comment is correct, this is horrible
-            entriesEncoded.parallelStream().forEach(property -> {
+            entriesEncoded.forEach(property -> {
                 if (property instanceof DashBooleanProperty) {
                     MutablePair<BooleanProperty, Boolean> out = ((DashBooleanProperty) property).toUndash();
                     builder.put(out.left, out.right);
