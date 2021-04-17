@@ -18,6 +18,7 @@ import net.quantumfusion.dash.cache.font.DashFontManagerData;
 import net.quantumfusion.dash.cache.font.fonts.DashBitmapFont;
 import net.quantumfusion.dash.cache.font.fonts.DashBlankFont;
 import net.quantumfusion.dash.cache.font.fonts.DashUnicodeFont;
+import net.quantumfusion.dash.cache.misc.DashLoaderInfo;
 import net.quantumfusion.dash.cache.misc.DashParticleData;
 import net.quantumfusion.dash.cache.models.*;
 import net.quantumfusion.dash.misc.DashSplashTextData;
@@ -38,7 +39,6 @@ import java.util.HashMap;
 import java.util.List;
 
 public class Dash implements ModInitializer {
-
     public static final Logger LOGGER = LogManager.getLogger();
     public static List<String> splashText;
 
@@ -81,6 +81,7 @@ public class Dash implements ModInitializer {
 
     public static void reload() {
         caching = true;
+        DashLoaderInfo.create();
         LOGGER.info("Starting dash thread.");
         Thread dash = new Thread(() -> {
             Instant start = Instant.now();
