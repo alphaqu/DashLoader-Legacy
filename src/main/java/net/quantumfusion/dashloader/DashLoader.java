@@ -41,12 +41,9 @@ import net.quantumfusion.dashloader.util.TimeHelper;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import sun.misc.Unsafe;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Executable;
-import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -141,23 +138,6 @@ public class DashLoader {
     private void createMetadata(DashLoaderInfo data) {
         tasksComplete--;
         serializeObject(data,paths.get(DashCachePaths.DASH_INFO),"Mod Info");
-    }
-
-    public Unsafe getUnsafe() {
-        Field f = null;
-        try {
-            f = Unsafe.class.getDeclaredField("theUnsafe");
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-        }
-        assert f != null;
-        f.setAccessible(true);
-        try {
-            return (Unsafe) f.get(null);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        }
-        return null;
     }
 
     private void createDirectory() {

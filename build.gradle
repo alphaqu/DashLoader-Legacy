@@ -19,6 +19,10 @@ repositories {
         name = "Jitpack"
         url = "https://jitpack.io"
     }
+    maven {
+        name = "Auoeke's Maven"
+        url = "https://auoeke.jfrog.io/artifactory/maven"
+    }
 }
 
 dependencies {
@@ -39,6 +43,8 @@ dependencies {
     // You may need to force-disable transitiveness on them.
     // Uncomment to add Sodium to the dev environment
     // modImplementation "com.github.CaffeineMC:sodium-fabric:${project.sodium_version}"
+
+    implementation include("net.gudenau.lib:unsafe:1.4.1")
 }
 
 processResources {

@@ -3,10 +3,10 @@ package net.quantumfusion.dashloader.cache.models.components;
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import io.activej.serializer.annotations.SerializeNullable;
+import net.gudenau.lib.unsafe.Unsafe;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.json.ModelOverride;
 import net.minecraft.client.render.model.json.ModelOverrideList;
-import net.quantumfusion.dashloader.DashLoader;
 import net.quantumfusion.dashloader.cache.DashRegistry;
 import net.quantumfusion.dashloader.mixin.ModelOverideListAccessor;
 
@@ -39,18 +39,13 @@ public class DashModelOverrideList {
     }
 
     public ModelOverrideList toUndash(DashRegistry registry) {
-        try {
-            ModelOverrideList out = (ModelOverrideList) DashLoader.getInstance().getUnsafe().allocateInstance(ModelOverrideList.class);
+        ModelOverrideList out = Unsafe.allocateInstance(ModelOverrideList.class);
 
-            List<ModelOverride> overridesOut = new ArrayList<>();
-            overrides.forEach(dashModelOverride -> overridesOut.add(dashModelOverride.toUndash(registry)));
-            ((ModelOverideListAccessor) out).setOverrides(overridesOut);
-            toApply = out;
-            return out;
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        }
-        return null;
+        List<ModelOverride> overridesOut = new ArrayList<>();
+        overrides.forEach(dashModelOverride -> overridesOut.add(dashModelOverride.toUndash(registry)));
+        ((ModelOverideListAccessor) out).setOverrides(overridesOut);
+        toApply = out;
+        return out;
     }
 
     public void applyOverrides(DashRegistry registry) {
