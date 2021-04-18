@@ -24,7 +24,7 @@ public class DashBitmapFont implements DashFont {
     }
 
     public DashBitmapFont(BitmapFont bitmapFont,DashRegistry registry) {
-        this.image = registry.createFontImagePointer(bitmapFont.image);
+        this.image = registry.createImagePointer(bitmapFont.image);
         glyphs = new HashMap<>();
         bitmapFont.glyphs.forEach((integer, bitmap) -> glyphs.put(integer, new DashBitmapFontGlyph(bitmap, registry)));
     }
@@ -32,7 +32,7 @@ public class DashBitmapFont implements DashFont {
     public BitmapFont toUndash(DashRegistry registry) {
         Int2ObjectMap<BitmapFont.BitmapFontGlyph> out = new Int2ObjectOpenHashMap<>();
         glyphs.forEach((integer, bitmap) -> out.put(integer, bitmap.toUndash(registry)));
-        return new BitmapFont(registry.getFontImage(image), out);
+        return new BitmapFont(registry.getImage(image), out);
     }
 
 }

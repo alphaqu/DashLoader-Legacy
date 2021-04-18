@@ -61,7 +61,7 @@ public class DashBlockState {
         owner = registry.createIdentifierPointer(Registry.BLOCK.getId(blockState.getBlock()));
     }
 
-    public  <T extends Enum<T> & StringIdentifiable>  Pair<BlockState,Predicate<BlockState>> toUndash(DashRegistry registry) {
+    public  <T extends Enum<T> & StringIdentifiable> BlockState toUndash(DashRegistry registry) {
         try {
             ImmutableMap.Builder<Property<?>, Comparable<?>> builder = ImmutableMap.builder();
             //TODO hardcoded, this is bad
@@ -82,7 +82,7 @@ public class DashBlockState {
                 }
             });
 
-            return Pair.of(new BlockState(Registry.BLOCK.get(registry.getIdentifier(owner)), builder.build(), null), (blockState -> true));
+            return new BlockState(Registry.BLOCK.get(registry.getIdentifier(owner)), builder.build(), null);
         } catch (Exception e) {
             e.printStackTrace();
             LogManager.getLogger().error(Registry.BLOCK.get(registry.getIdentifier(owner)).getDefaultState().toString());

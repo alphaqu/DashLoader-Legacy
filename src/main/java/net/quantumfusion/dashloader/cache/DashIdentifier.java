@@ -3,6 +3,7 @@ package net.quantumfusion.dashloader.cache;
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import net.minecraft.util.Identifier;
+import net.quantumfusion.dashloader.DashLoader;
 
 public class DashIdentifier implements DashID {
     @Serialize(order = 0)
@@ -24,6 +25,7 @@ public class DashIdentifier implements DashID {
 
     @Override
     public Identifier toUndash() {
+
         return new Identifier(namespace, path);
     }
 }

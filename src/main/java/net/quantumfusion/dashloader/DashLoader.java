@@ -45,6 +45,7 @@ import sun.misc.Unsafe;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -57,15 +58,16 @@ import java.util.Map;
 
 public class DashLoader {
     public static final Logger LOGGER = LogManager.getLogger();
-    private static final Path config = FabricLoader.getInstance().getConfigDir().normalize();
-
-    public static String task = "Starting DashLoader";
     public static final int totalTasks = 17;
+    public static final double formatVersion = 0.1;
+    public static final String version = "1.0.2-alpha-devBuild0";
+    private static final Path config = FabricLoader.getInstance().getConfigDir().normalize();
+    public static String task = "Starting DashLoader";
     private static DashLoader instance;
 
     public final HashMap<SpriteAtlasTexture, DashSpriteAtlasTextureData> atlasData = new HashMap<>();
-    private final Object2ObjectMap<Class<?>, BinarySerializer> serializers = new Object2ObjectOpenHashMap<>();
     public final HashMap<Class<? extends BakedModel>, DashModel> modelMappings = new HashMap<>();
+    private final Object2ObjectMap<Class<?>, BinarySerializer> serializers = new Object2ObjectOpenHashMap<>();
     private final List<SpriteAtlasTexture> atlasesToRegister;
     private final Map<DashCachePaths, Path> paths = new HashMap<>();
     private final List<SpriteAtlasTexture> extraAtlases;
@@ -96,8 +98,11 @@ public class DashLoader {
         atlasesToRegister = new ArrayList<>();
     }
 
+    public static DashLoader getInstance() {
+        return instance;
+    }
+
     public void reload() {
-        DashLoaderInfo.create();
         LOGGER.info("Starting dash thread.");
         Thread dash = new Thread(() -> {
             Instant start = Instant.now();
@@ -105,13 +110,37 @@ public class DashLoader {
             initModelMappings();
             initSerializers();
             createDirectory();
-            LOGGER.info("Starting Dash init");
-            loadDashCache();
+            LOGGER.info("Checking for Mod Change.");
+            DashLoaderInfo newData = DashLoaderInfo.create();
+            boolean reload = true;
+            try {
+                DashLoaderInfo old = deserialize(DashLoaderInfo.class, paths.get(DashCachePaths.DASH_INFO), "Mod Info");
+                reload = !newData.equals(old);
+            } catch (Exception ignored) {}
+            if (paths.values().stream().allMatch(path -> path.toFile().exists())) {
+                if (reload) {
+                    LOGGER.warn("DashLoader detected mod change, Recache requested.");
+                    createMetadata(newData);
+                    destroyCache();
+                    state = DashCacheState.EMPTY;
+                } else {
+                    loadDashCache();
+                }
+            } else {
+                LOGGER.warn("DashLoader files missing, Cache creation is appending and slow start predicted.");
+                createMetadata(newData);
+                state = DashCacheState.EMPTY;
+            }
             Instant stop = Instant.now();
-            LOGGER.info("Loaded cache in " + TimeHelper.getDecimalMs(start, stop) + "ms");
+            LOGGER.info("Loaded cache in " + TimeHelper.getDecimalMs(start, stop) + "s");
         });
         dash.setName("dash-manager");
         dash.start();
+    }
+
+    private void createMetadata(DashLoaderInfo data) {
+        tasksComplete--;
+        serializeObject(data,paths.get(DashCachePaths.DASH_INFO),"Mod Info");
     }
 
     public Unsafe getUnsafe() {
@@ -139,7 +168,6 @@ public class DashLoader {
         extraAtlases.add(atlas);
     }
 
-
     public void addBakedModelAssets(SpriteAtlasManager atlasManager,
                                     Object2IntMap<BlockState> stateLookup,
                                     Map<Identifier, BakedModel> models) {
@@ -162,6 +190,7 @@ public class DashLoader {
     }
 
     public void saveDashCache() {
+        initPaths();
         tasksComplete++;
         DashRegistry registry = new DashRegistry(this);
         logAndTask("Mapping Atlas");
@@ -191,62 +220,56 @@ public class DashLoader {
         task = "Caching is now complete.";
     }
 
-
     public void loadDashCache() {
+        LOGGER.info("Starting DashLoader Deserialization");
         state = DashCacheState.LOADING;
-        if (paths.values().stream().allMatch(path -> path.toFile().exists())) {
-            try {
-                DashRegistry registry = deserialize(DashRegistry.class, paths.get(DashCachePaths.REGISTRY), "Registry");
-                LOGGER.info("      Loading Registry");
-                registry.toUndash();
+        try {
+            DashRegistry registry = deserialize(DashRegistry.class, paths.get(DashCachePaths.REGISTRY), "Registry");
+            LOGGER.info("      Loading Registry");
+            registry.toUndash();
 
-                DashSplashTextData splashTextOut = deserialize(DashSplashTextData.class, paths.get(DashCachePaths.SPLASH_TEXT), "Splash Text");
-                LOGGER.info("      Loading Splash Text");
-                this.splashTextOut = splashTextOut.splashList;
-
-
-                DashSpriteAtlasManager atlas = deserialize(DashSpriteAtlasManager.class, paths.get(DashCachePaths.ATLAS), "BakedModel Atlas");
-                LOGGER.info("      Loading BakedModel Atlas");
-                atlasManagerOut = atlas.toUndash(registry);
-                ((SpriteAtlasManagerAccessor) atlasManagerOut).getAtlases().forEach((identifier, spriteAtlasTexture) -> atlasesToRegister.add(spriteAtlasTexture));
+            DashSplashTextData splashTextOut = deserialize(DashSplashTextData.class, paths.get(DashCachePaths.SPLASH_TEXT), "Splash Text");
+            LOGGER.info("      Loading Splash Text");
+            this.splashTextOut = splashTextOut.splashList;
 
 
-                DashBlockStateData blockStateData = deserialize(DashBlockStateData.class, paths.get(DashCachePaths.BLOCKSTATES), "BlockState");
-                LOGGER.info("      Loading BlockState Data");
-                stateLookupOut = blockStateData.toUndash(registry);
+            DashSpriteAtlasManager atlas = deserialize(DashSpriteAtlasManager.class, paths.get(DashCachePaths.ATLAS), "BakedModel Atlas");
+            LOGGER.info("      Loading BakedModel Atlas");
+            atlasManagerOut = atlas.toUndash(registry);
+            ((SpriteAtlasManagerAccessor) atlasManagerOut).getAtlases().forEach((identifier, spriteAtlasTexture) -> atlasesToRegister.add(spriteAtlasTexture));
 
 
-                DashParticleData particleData = deserialize(DashParticleData.class, paths.get(DashCachePaths.PARTICLE), "Particle");
-                LOGGER.info("      Loading Particle Data");
-                Pair<Map<Identifier, List<Sprite>>, SpriteAtlasTexture> outParticle = particleData.toUndash(registry);
-                particlesOut = outParticle.getLeft();
-                atlasesToRegister.add(outParticle.getValue());
+            DashBlockStateData blockStateData = deserialize(DashBlockStateData.class, paths.get(DashCachePaths.BLOCKSTATES), "BlockState");
+            LOGGER.info("      Loading BlockState Data");
+            stateLookupOut = blockStateData.toUndash(registry);
 
-                DashModelData modelData = deserialize(DashModelData.class, paths.get(DashCachePaths.MODEL), "Model");
-                LOGGER.info("    Loading Model Data");
-                modelsOut = modelData.toUndash(registry);
 
-                DashExtraAtlasData extraAtlasdata = deserialize(DashExtraAtlasData.class, paths.get(DashCachePaths.EXTRA_ATLAS), "Extra Atlas");
-                LOGGER.info("      Loading Extra Atlas Data");
-                atlasesToRegister.addAll(extraAtlasdata.toUndash(registry));
+            DashParticleData particleData = deserialize(DashParticleData.class, paths.get(DashCachePaths.PARTICLE), "Particle");
+            LOGGER.info("      Loading Particle Data");
+            Pair<Map<Identifier, List<Sprite>>, SpriteAtlasTexture> outParticle = particleData.toUndash(registry);
+            particlesOut = outParticle.getLeft();
+            atlasesToRegister.add(outParticle.getValue());
 
-                DashFontManagerData fontData = deserialize(DashFontManagerData.class, paths.get(DashCachePaths.FONT), "Font");
-                LOGGER.info("    Loading Model Data");
-                fontsOut = fontData.toUndash(registry);
+            DashModelData modelData = deserialize(DashModelData.class, paths.get(DashCachePaths.MODEL), "Model");
+            LOGGER.info("    Loading Model Data");
+            modelsOut = modelData.toUndash(registry);
 
-                LOGGER.info("    Loaded DashLoader");
-                stateLookupOut = new Object2IntOpenHashMap<>();
-                state = DashCacheState.LOADED;
-            } catch (Exception e) {
-                destroyCache(e);
-                state = DashCacheState.CRASHED;
-            }
-        } else {
-            LOGGER.warn("DashLoader files missing, Cache creation is appending and slow start predicted.");
-            state = DashCacheState.EMPTY;
+            DashExtraAtlasData extraAtlasdata = deserialize(DashExtraAtlasData.class, paths.get(DashCachePaths.EXTRA_ATLAS), "Extra Atlas");
+            LOGGER.info("      Loading Extra Atlas Data");
+            atlasesToRegister.addAll(extraAtlasdata.toUndash(registry));
+
+            DashFontManagerData fontData = deserialize(DashFontManagerData.class, paths.get(DashCachePaths.FONT), "Font");
+            LOGGER.info("    Loading Model Data");
+            fontsOut = fontData.toUndash(registry);
+
+            LOGGER.info("    Loaded DashLoader");
+            stateLookupOut = new Object2IntOpenHashMap<>();
+            state = DashCacheState.LOADED;
+        } catch (Exception e) {
+            destroyCache(e);
+            state = DashCacheState.CRASHED;
         }
     }
-
 
     public void applyDashCache(TextureManager textureManager) {
         //register textures
@@ -267,7 +290,6 @@ public class DashLoader {
             textureManager.registerTexture(id, spriteAtlasTexture);
         });
     }
-
 
     private <T> T deserialize(Class<T> clazz, Path path, String name) {
         try {
@@ -332,17 +354,12 @@ public class DashLoader {
         return file;
     }
 
-
-    public static DashLoader getInstance() {
-        return instance;
-    }
-
-
     /**
      * <h1>Init below</h1>
      * Everything that gets called on launch here
      */
     private void initPaths() {
+        paths.clear();
         paths.put(DashCachePaths.REGISTRY, config.resolve("quantumfusion/dashloader/registry.activej"));
         paths.put(DashCachePaths.BLOCKSTATES, config.resolve("quantumfusion/dashloader/blockstate-mappings.activej"));
         paths.put(DashCachePaths.MODEL, config.resolve("quantumfusion/dashloader/model-mappings.activej"));
@@ -351,9 +368,11 @@ public class DashLoader {
         paths.put(DashCachePaths.FONT, config.resolve("quantumfusion/dashloader/font-mappings.activej"));
         paths.put(DashCachePaths.EXTRA_ATLAS, config.resolve("quantumfusion/dashloader/extraatlas-mappings.activej"));
         paths.put(DashCachePaths.SPLASH_TEXT, config.resolve("quantumfusion/dashloader/splash-text.activej"));
+        paths.put(DashCachePaths.DASH_INFO, config.resolve("quantumfusion/dashloader/metadata.activej"));
     }
 
     private void initModelMappings() {
+        modelMappings.clear();
         modelMappings.put(BasicBakedModel.class, new DashBasicBakedModel());
         modelMappings.put(BuiltinBakedModel.class, new DashBuiltinBakedModel());
         modelMappings.put(MultipartBakedModel.class, new DashMultipartBakedModel());
@@ -366,7 +385,7 @@ public class DashLoader {
 
         serializers.put(DashRegistry.class,
                 SerializerBuilder.create()
-                        .withSubclasses("models", DashBasicBakedModel.class,DashBuiltinBakedModel.class,DashMultipartBakedModel.class,DashWeightedBakedModel.class)
+                        .withSubclasses("models", DashBasicBakedModel.class, DashBuiltinBakedModel.class, DashMultipartBakedModel.class, DashWeightedBakedModel.class)
                         .withSubclasses("fonts", DashBitmapFont.class, DashUnicodeFont.class, DashBlankFont.class)
                         .withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE)
                         .build(DashRegistry.class));
@@ -408,6 +427,11 @@ public class DashLoader {
                 SerializerBuilder.create()
                         .withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE)
                         .build(DashSplashTextData.class));
+
+        serializers.put(DashLoaderInfo.class,
+                SerializerBuilder.create()
+                        .withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE)
+                        .build(DashLoaderInfo.class));
     }
 
 }

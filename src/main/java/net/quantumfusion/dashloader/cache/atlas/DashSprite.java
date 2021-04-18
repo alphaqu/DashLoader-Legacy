@@ -44,7 +44,7 @@ public class DashSprite {
     @Serialize(order = 12)
     public final int frameTicks;
     @Serialize(order = 13)
-    public List<DashImage> images;
+    public List<Integer> images;
 
 
     public DashSprite(@Deserialize("info") DashSpriteInfo info,
@@ -60,7 +60,7 @@ public class DashSprite {
                       @Deserialize("vMax") float vMax,
                       @Deserialize("frameIndex") int frameIndex,
                       @Deserialize("frameTicks") int frameTicks,
-                      @Deserialize("images") List<DashImage> images
+                      @Deserialize("images") List<Integer> images
                       ) {
         this.info = info;
         this.animationMetadata = animationMetadata;
@@ -83,7 +83,7 @@ public class DashSprite {
         info = new DashSpriteInfo(spriteAccess.getInfo(),registry);
         animationMetadata = new DashAnimationResourceMetadata(spriteAccess.getAnimationMetadata());
         images = new ArrayList<>();
-        Arrays.stream(spriteAccess.getImages()).forEach(nativeImage -> images.add(new DashImage(nativeImage)));
+        Arrays.stream(spriteAccess.getImages()).forEach(nativeImage -> images.add(registry.createImagePointer(nativeImage)));
         frameXs = spriteAccess.getFrameXs();
         frameYs = spriteAccess.getFrameYs();
         Sprite.Interpolation interpolation = spriteAccess.getInterpolation();
@@ -109,7 +109,7 @@ public class DashSprite {
             spriteAccessor.setInfo(info.toUndash(registry));
             spriteAccessor.setAnimationMetadata(animationMetadata.toUndash());
             ArrayList<NativeImage> imagesOut = new ArrayList<>();
-            images.forEach(dashImage -> imagesOut.add(dashImage.toUndash()));
+            images.forEach(dashImage -> imagesOut.add(registry.getImage(dashImage)));
             spriteAccessor.setImages(imagesOut.toArray(new NativeImage[0]));
             spriteAccessor.setFrameXs(frameXs);
             spriteAccessor.setFrameYs(frameYs);

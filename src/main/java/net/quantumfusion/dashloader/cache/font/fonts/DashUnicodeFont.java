@@ -29,14 +29,14 @@ public class DashUnicodeFont implements DashFont {
 
     public DashUnicodeFont(UnicodeFont font, DashRegistry registry) {
         images = new HashMap<>();
-        font.images.forEach((identifier, nativeImage) -> images.put(registry.createIdentifierPointer(identifier), registry.createFontImagePointer(nativeImage)));
+        font.images.forEach((identifier, nativeImage) -> images.put(registry.createIdentifierPointer(identifier), registry.createImagePointer(nativeImage)));
         this.sizes = font.sizes;
     }
 
 
     public UnicodeFont toUndash(DashRegistry registry) {
         Map<Identifier, NativeImage> out = new HashMap<>();
-        images.entrySet().parallelStream().forEach((entry) -> out.put(registry.getIdentifier(entry.getKey()), registry.getFontImage(entry.getValue())));
+        images.entrySet().parallelStream().forEach((entry) -> out.put(registry.getIdentifier(entry.getKey()), registry.getImage(entry.getValue())));
         return new UnicodeFont(out, sizes);
     }
 }

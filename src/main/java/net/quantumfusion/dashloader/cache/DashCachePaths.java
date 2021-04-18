@@ -8,5 +8,6 @@ public enum DashCachePaths {
     PARTICLE,
     FONT,
     EXTRA_ATLAS,
-    SPLASH_TEXT
+    SPLASH_TEXT,
+    DASH_INFO
 }

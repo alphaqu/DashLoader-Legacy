@@ -21,7 +21,6 @@ import net.quantumfusion.dashloader.cache.font.fonts.*;
 import net.quantumfusion.dashloader.cache.models.DashModel;
 import net.quantumfusion.dashloader.cache.models.DashModelIdentifier;
 import net.quantumfusion.dashloader.cache.models.ModelStage;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -69,7 +68,7 @@ public class DashRegistry {
     @Serialize(order = 5)
     @SerializeNullable(path = {0})
     @SerializeNullable(path = {1})
-    public Map<Integer, DashImage> fontImages;
+    public Map<Integer, DashImage> images;
 
     DashLoader loader;
     public Map<Integer, BlockState> blockstatesOut;
@@ -77,20 +76,20 @@ public class DashRegistry {
     public Map<Integer, Identifier> identifiersOut;
     public Map<Integer, BakedModel> modelsOut;
     public Map<Integer, Font> fontsOut;
-    public Map<Integer, NativeImage> fontImagesOut;
+    public Map<Integer, NativeImage> imagesOut;
 
     public DashRegistry(@Deserialize("blockstates") Map<Integer, DashBlockState> blockstates,
                         @Deserialize("sprites") Map<Integer, DashSprite> sprites,
                         @Deserialize("identifiers") Map<Integer, DashID> identifiers,
                         @Deserialize("models") Map<Integer, DashModel> models,
                         @Deserialize("fonts") Map<Integer, DashFont> fonts,
-                        @Deserialize("fontImages") Map<Integer, DashImage> fontImages) {
+                        @Deserialize("images") Map<Integer, DashImage> images) {
         this.blockstates = blockstates;
         this.sprites = sprites;
         this.identifiers = identifiers;
         this.models = models;
         this.fonts = fonts;
-        this.fontImages = fontImages;
+        this.images = images;
     }
 
     public DashRegistry(DashLoader loader) {
@@ -99,7 +98,7 @@ public class DashRegistry {
         identifiers = new HashMap<>();
         models = new HashMap<>();
         fonts = new HashMap<>();
-        fontImages = new HashMap<>();
+        images = new HashMap<>();
         this.loader = loader;
     }
 
@@ -152,10 +151,10 @@ public class DashRegistry {
         return hash;
     }
 
-    public int createFontImagePointer(NativeImage image) {
+    public int createImagePointer(NativeImage image) {
         final int hash = image.hashCode();
-        if (fontImages.get(hash) == null) {
-            fontImages.put(hash, new DashImage(image));
+        if (images.get(hash) == null) {
+            images.put(hash, new DashImage(image));
         }
         return hash;
     }
@@ -234,15 +233,15 @@ public class DashRegistry {
         return font;
     }
 
-    public NativeImage getFontImage(Integer pointer) {
-        if (fontsOut == null) {
-            throw new DashException("FontImages not deserialized");
+    public NativeImage getImage(Integer pointer) {
+        if (imagesOut == null) {
+            throw new DashException("NativeImages not deserialized");
         }
-        NativeImage fontImage = fontImagesOut.get(pointer);
-        if (fontImage == null) {
-            DashLoader.LOGGER.error("FontImage not found in data. PINTR: " + pointer);
+        NativeImage image = imagesOut.get(pointer);
+        if (image == null) {
+            DashLoader.LOGGER.error("NativeImage not found in data. PINTR: " + pointer);
         }
-        return fontImage;
+        return image;
     }
 
     public void toUndash() {
@@ -251,30 +250,24 @@ public class DashRegistry {
         blockstatesOut = new ConcurrentHashMap<>();
         predicateOut = new ConcurrentHashMap<>();
         identifiersOut = new ConcurrentHashMap<>();
-        fontImagesOut = new ConcurrentHashMap<>();
+        imagesOut = new ConcurrentHashMap<>();
         modelsOut = new ConcurrentHashMap<>();
         fontsOut = new ConcurrentHashMap<>();
         logger.info("Loading Identifiers");
         identifiers.entrySet().parallelStream().forEach(identifierEntry -> identifiersOut.put(identifierEntry.getKey(), identifierEntry.getValue().toUndash()));
         identifiers = null;
 
+        logger.info("Loading Images");
+        images.entrySet().parallelStream().forEach(fontEntry -> imagesOut.put(fontEntry.getKey(), fontEntry.getValue().toUndash()));
+        images = null;
+
         logger.info("Loading Blockstates");
-        blockstates.entrySet().parallelStream().forEach(blockstateEntry -> {
-            final Pair<BlockState, Predicate<BlockState>> out = blockstateEntry.getValue().toUndash(this);
-            final Integer key = blockstateEntry.getKey();
-            blockstatesOut.put(key, out.getKey());
-            predicateOut.put(key, out.getValue());
-        });
+        blockstates.entrySet().parallelStream().forEach(blockstateEntry -> blockstatesOut.put(blockstateEntry.getKey(), blockstateEntry.getValue().toUndash(this)));
         blockstates = null;
 
         logger.info("Loading Sprites");
         sprites.entrySet().parallelStream().forEach(spriteEntry -> spritesOut.put(spriteEntry.getKey(), spriteEntry.getValue().toUndash(this)));
         sprites = null;
-
-
-        logger.info("Loading FontImage");
-        fontImages.entrySet().parallelStream().forEach(fontEntry -> fontImagesOut.put(fontEntry.getKey(), fontEntry.getValue().toUndash()));
-        fontImages = null;
 
         logger.info("Loading Fonts");
         fonts.entrySet().parallelStream().forEach(fontEntry -> fontsOut.put(fontEntry.getKey(), fontEntry.getValue().toUndash(this)));
