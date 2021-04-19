@@ -13,4 +13,7 @@ public interface BlockModelsAccessor {
 
     @Accessor
     Map<BlockState, BakedModel> getModels();
+
+    @Accessor
+    void setModels(Map<BlockState, BakedModel> models);
 }

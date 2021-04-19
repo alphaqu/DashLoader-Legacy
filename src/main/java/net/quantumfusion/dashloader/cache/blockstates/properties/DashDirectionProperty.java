@@ -25,6 +25,7 @@ public class DashDirectionProperty implements DashProperty {
         this.direction = direction.getId();
     }
 
+    @Override
     public MutablePair<DirectionProperty, Direction> toUndash() {
         MutablePair<DirectionProperty, Direction> out = new MutablePair<>();
         out.setLeft(DirectionProperty.of(name, Direction.values()));

@@ -50,7 +50,10 @@
     "VoxelShapeAccessor",
     "WeightedBakedModelAccessor",
     "WeightedBakedModelEntryAccessor",
-    "WeightedPickerEntryAccessor"
+    "WeightedPickerEntryAccessor",
+
+    "SuffixArrayMixin",
+    "LanguageMixin"
   ],
   "injectors": {
     "defaultRequire": 1

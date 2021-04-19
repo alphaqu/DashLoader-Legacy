@@ -25,6 +25,7 @@ public class DashBooleanProperty implements DashProperty {
         this.value = value;
     }
 
+    @Override
     public MutablePair<BooleanProperty, Boolean> toUndash() {
         MutablePair<BooleanProperty, Boolean> out = new MutablePair<>();
         out.setLeft(BooleanProperty.of(name));

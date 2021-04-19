@@ -3,7 +3,7 @@ package net.quantumfusion.dashloader.mixin;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.texture.NativeImage;
-import org.lwjgl.opengl.GL11C;
+import org.lwjgl.opengl.*;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -35,19 +35,18 @@ public abstract class NativeImageMixin {
             at = @At(value = "HEAD"), cancellable = true)
     private void fastUpload(int level, int xOffset, int yOffset, int unpackSkipPixels, int unpackSkipRows, int width, int height, boolean blur, boolean clamp, boolean mipmap, boolean close, CallbackInfo ci) {
         RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
-        this.checkAllocated();
+        checkAllocated();
         setTextureFilter(blur, mipmap);
         setTextureClamp(clamp);
-        if (width == this.getWidth()) {
+        if (width == getWidth()) {
             GlStateManager.pixelStore(3314, 0);
         } else {
-            GlStateManager.pixelStore(3314, this.getWidth());
+            GlStateManager.pixelStore(3314, getWidth());
         }
-
         GlStateManager.pixelStore(3316, unpackSkipPixels);
         GlStateManager.pixelStore(3315, unpackSkipRows);
-        this.format.setUnpackAlignment();
-        GL11C.nglTexSubImage2D(3553, level, xOffset, yOffset, width, height,  this.format.getPixelDataFormat(), 5121, pointer);
+        format.setUnpackAlignment();
+        GL11C.glTexSubImage2D(3553, level, xOffset, yOffset, width, height,  format.getPixelDataFormat(), 5121, pointer);
         if (close) {
             this.close();
         }

@@ -1,6 +1,7 @@
 package net.quantumfusion.dashloader.mixin;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.client.render.block.BlockModels;
@@ -12,6 +13,7 @@ import net.minecraft.client.texture.TextureManager;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.profiler.Profiler;
+import net.minecraft.util.registry.Registry;
 import net.quantumfusion.dashloader.DashLoader;
 import net.quantumfusion.dashloader.cache.DashCacheState;
 import org.jetbrains.annotations.Nullable;
@@ -23,7 +25,11 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import static net.minecraft.client.render.block.BlockModels.getModelId;
 
 @Mixin(BakedModelManager.class)
 public class BakedModelManagerOverride {
@@ -81,6 +87,8 @@ public class BakedModelManagerOverride {
             this.models = modelLoader.getBakedModelMap();
             this.stateLookup = modelLoader.getStateLookup();
             loader.addBakedModelAssets(atlasManager, stateLookup, models);
+            this.missingModel = this.models.get(ModelLoader.MISSING);
+            this.blockModelCache.reload();
 
         } else {
             //cache go brr
@@ -88,10 +96,14 @@ public class BakedModelManagerOverride {
             this.atlasManager = loader.atlasManagerOut;
             this.models = loader.modelsOut;
             this.stateLookup = loader.stateLookupOut;
+            this.missingModel = this.models.get(ModelLoader.MISSING);
+            Map<BlockState, BakedModel> modelsOut = new ConcurrentHashMap<>();
+            Registry.BLOCK.stream().parallel().forEach(block ->
+                    block.getStateManager().getStates().parallelStream().forEach((blockState) ->
+                            modelsOut.put(blockState, ((BakedModelManager) (Object) this).getModel(getModelId(blockState)))));
+            ((BlockModelsAccessor)blockModelCache).setModels(modelsOut);
         }
-        this.missingModel = this.models.get(ModelLoader.MISSING);
         profiler.swap("cache");
-        this.blockModelCache.reload();
         profiler.pop();
         profiler.endTick();
         ci.cancel();

@@ -35,6 +35,7 @@ public class DashIntProperty implements DashProperty {
         this.value = Integer.parseInt(value);
     }
 
+    @Override
     public MutablePair<IntProperty, Integer> toUndash() {
         MutablePair<IntProperty, Integer> out = new MutablePair<>();
         int lowest = -1;

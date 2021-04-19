@@ -95,23 +95,22 @@ public class UnicodeFont implements Font {
         this.images.values().forEach(NativeImage::close);
     }
 
-    private Identifier getImageId(int codePoint) {
-        String id = Integer.toHexString((codePoint & (~0xFF)) >> 8);
-        return (new Identifier("textures/font/unicode_page_" + (id.length() == 1 ? 0 + id : id) + ".png"));
+    private Identifier getImageId(final int codePoint) {
+        final String id = Integer.toHexString((codePoint & (~0xFF)) >> 8);
+        return new Identifier("textures/font/unicode_page_" + (id.length() == 1 ? 0 + id : id) + ".png");
     }
 
     @Nullable
-    public RenderableGlyph getGlyph(int codePoint) {
+    public RenderableGlyph getGlyph(final int codePoint) {
         if (codePoint >= 0 && codePoint <= 65535) {
-            byte b = this.sizes[codePoint];
+            final byte b = sizes[codePoint];
             if (b != 0) {
-                NativeImage nativeImage = this.images.computeIfAbsent(this.getImageId(codePoint), this::getGlyphImage);
+                final NativeImage nativeImage = images.computeIfAbsent(getImageId(codePoint), this::getGlyphImage);
                 if (nativeImage != null) {
-                    int i = getStart(b);
-                    return new UnicodeTextureGlyph(codePoint % 16 * 16 + i, (codePoint & 255) / 16 * 16, getEnd(b) - i, 16, nativeImage);
+                    final int i = getStart(b);
+                    return new UnicodeTextureGlyph(codePoint % 16 * 16 + i, (codePoint & 255), getEnd(b) - i, 16, nativeImage);
                 }
             }
-
         }
         return null;
     }
@@ -129,9 +128,9 @@ public class UnicodeFont implements Font {
     }
 
     @Nullable
-    private NativeImage getGlyphImage(Identifier glyphId) {
+    private NativeImage getGlyphImage(final Identifier glyphId) {
         try {
-            Resource resource = this.resourceManager.getResource(glyphId);
+            final Resource resource = resourceManager.getResource(glyphId);
             NativeImage var4;
             try {
                 var4 = NativeImage.read(NativeImage.Format.ABGR, resource.getInputStream());
