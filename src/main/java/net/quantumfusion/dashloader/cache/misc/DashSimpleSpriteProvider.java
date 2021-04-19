@@ -2,9 +2,9 @@ package net.quantumfusion.dashloader.cache.misc;
 
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
+import net.gudenau.lib.unsafe.Unsafe;
 import net.minecraft.client.particle.ParticleManager;
 import net.minecraft.client.texture.Sprite;
-import net.quantumfusion.dashloader.DashLoader;
 import net.quantumfusion.dashloader.cache.DashRegistry;
 import net.quantumfusion.dashloader.mixin.ParticleManagerSimpleSpriteProviderAccessor;
 
@@ -25,12 +25,7 @@ public class DashSimpleSpriteProvider {
     }
 
     public ParticleManager.SimpleSpriteProvider toUndash(DashRegistry registry) {
-        ParticleManager.SimpleSpriteProvider out = null;
-        try {
-            out = (ParticleManager.SimpleSpriteProvider) DashLoader.getInstance().getUnsafe().allocateInstance(ParticleManager.SimpleSpriteProvider.class);
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        }
+        ParticleManager.SimpleSpriteProvider out = Unsafe.allocateInstance(ParticleManager.SimpleSpriteProvider.class);
         List<Sprite> spritesOut = new ArrayList<>();
         sprites.forEach(integer -> spritesOut.add(registry.getSprite(integer)));
         out.setSprites(spritesOut);

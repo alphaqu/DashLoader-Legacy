@@ -4,11 +4,11 @@ import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import io.activej.serializer.annotations.SerializeNullable;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenCustomHashMap;
+import net.gudenau.lib.unsafe.Unsafe;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.MultipartBakedModel;
 import net.minecraft.util.Util;
-import net.quantumfusion.dashloader.DashLoader;
 import net.quantumfusion.dashloader.cache.DashRegistry;
 import net.quantumfusion.dashloader.mixin.MultipartBakedModelAccessor;
 import org.apache.commons.lang3.tuple.Pair;
@@ -53,18 +53,12 @@ public class DashMultipartBakedModel implements DashModel, DashBakedModel {
 
     @Override
     public BakedModel toUndash(DashRegistry registry) {
-
-        try {
-            MultipartBakedModel model = (MultipartBakedModel) DashLoader.getInstance().getUnsafe().allocateInstance(MultipartBakedModel.class);
-            Map<BlockState, BitSet> stateCacheOut = new Object2ObjectOpenCustomHashMap<>(Util.identityHashStrategy());
-            stateCache.forEach((blockstatePointer, bitSet) -> stateCacheOut.put(registry.getBlockstate(blockstatePointer), BitSet.valueOf(bitSet)));
-            ((MultipartBakedModelAccessor) model).setStateCache(stateCacheOut);
-            toApply = model;
-            return model;
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        }
-        return null;
+        MultipartBakedModel model = Unsafe.allocateInstance(MultipartBakedModel.class);
+        Map<BlockState, BitSet> stateCacheOut = new Object2ObjectOpenCustomHashMap<>(Util.identityHashStrategy());
+        stateCache.forEach((blockstatePointer, bitSet) -> stateCacheOut.put(registry.getBlockstate(blockstatePointer), BitSet.valueOf(bitSet)));
+        ((MultipartBakedModelAccessor) model).setStateCache(stateCacheOut);
+        toApply = model;
+        return model;
     }
 
     @Override

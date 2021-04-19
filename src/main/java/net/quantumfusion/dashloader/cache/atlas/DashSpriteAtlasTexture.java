@@ -3,6 +3,7 @@ package net.quantumfusion.dashloader.cache.atlas;
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import io.activej.serializer.annotations.SerializeNullable;
+import net.gudenau.lib.unsafe.Unsafe;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.util.Identifier;
@@ -71,28 +72,23 @@ public class DashSpriteAtlasTexture {
     }
 
     public SpriteAtlasTexture toUndash(DashRegistry registry) {
-        try {
-            SpriteAtlasTexture spriteAtlasTexture = (SpriteAtlasTexture) DashLoader.getInstance().getUnsafe().allocateInstance(SpriteAtlasTexture.class);
-            AbstractTextureAccessor access = ((AbstractTextureAccessor) spriteAtlasTexture);
-            access.setBilinear(bilinear);
-            access.setMipmap(mipmap);
-            SpriteAtlasTextureAccessor spriteAtlasTextureAccessor = ((SpriteAtlasTextureAccessor) spriteAtlasTexture);
-            Map<Identifier, Sprite> out = new HashMap<>();
-            sprites.forEach((dashIdentifier, spritePointer) -> out.put(registry.getIdentifier(dashIdentifier), loadSprite(spritePointer,registry,spriteAtlasTexture)));
-            Set<Identifier> outLoad = new HashSet<>();
-            List<Sprite> outAnimatedSprites = new ArrayList<>();
-            animatedSprites.forEach(spritePointer -> outAnimatedSprites.add(loadSprite(spritePointer,registry,spriteAtlasTexture)));
-            spriteAtlasTextureAccessor.setAnimatedSprites(outAnimatedSprites);
-            spriteAtlasTextureAccessor.setSpritesToLoad(outLoad);
-            spriteAtlasTextureAccessor.setSprites(out);
-            spriteAtlasTextureAccessor.setId(registry.getIdentifier(id));
-            spriteAtlasTextureAccessor.setMaxTextureSize(maxTextureSize);
-            DashLoader.getInstance().atlasData.put(spriteAtlasTexture, data);
-            return spriteAtlasTexture;
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        }
-        return null;
+        SpriteAtlasTexture spriteAtlasTexture = Unsafe.allocateInstance(SpriteAtlasTexture.class);
+        AbstractTextureAccessor access = ((AbstractTextureAccessor) spriteAtlasTexture);
+        access.setBilinear(bilinear);
+        access.setMipmap(mipmap);
+        SpriteAtlasTextureAccessor spriteAtlasTextureAccessor = ((SpriteAtlasTextureAccessor) spriteAtlasTexture);
+        Map<Identifier, Sprite> out = new HashMap<>();
+        sprites.forEach((dashIdentifier, spritePointer) -> out.put(registry.getIdentifier(dashIdentifier), loadSprite(spritePointer,registry,spriteAtlasTexture)));
+        Set<Identifier> outLoad = new HashSet<>();
+        List<Sprite> outAnimatedSprites = new ArrayList<>();
+        animatedSprites.forEach(spritePointer -> outAnimatedSprites.add(loadSprite(spritePointer,registry,spriteAtlasTexture)));
+        spriteAtlasTextureAccessor.setAnimatedSprites(outAnimatedSprites);
+        spriteAtlasTextureAccessor.setSpritesToLoad(outLoad);
+        spriteAtlasTextureAccessor.setSprites(out);
+        spriteAtlasTextureAccessor.setId(registry.getIdentifier(id));
+        spriteAtlasTextureAccessor.setMaxTextureSize(maxTextureSize);
+        DashLoader.getInstance().atlasData.put(spriteAtlasTexture, data);
+        return spriteAtlasTexture;
     }
 
     private Sprite loadSprite(int spritePointer, DashRegistry registry, SpriteAtlasTexture spriteAtlasTexture) {

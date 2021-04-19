@@ -3,9 +3,9 @@ package net.quantumfusion.dashloader.cache.atlas;
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import io.activej.serializer.annotations.SerializeNullable;
+import net.gudenau.lib.unsafe.Unsafe;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.Sprite;
-import net.quantumfusion.dashloader.DashLoader;
 import net.quantumfusion.dashloader.cache.DashRegistry;
 import net.quantumfusion.dashloader.mixin.SpriteAccessor;
 import org.jetbrains.annotations.Nullable;
@@ -103,34 +103,29 @@ public class DashSprite {
     }
 
     public Sprite toUndash(DashRegistry registry) {
-        try {
-            Sprite out = (Sprite) DashLoader.getInstance().getUnsafe().allocateInstance(Sprite.class);
-            SpriteAccessor spriteAccessor = ((SpriteAccessor) out);
-            spriteAccessor.setInfo(info.toUndash(registry));
-            spriteAccessor.setAnimationMetadata(animationMetadata.toUndash());
-            ArrayList<NativeImage> imagesOut = new ArrayList<>();
-            images.forEach(dashImage -> imagesOut.add(registry.getImage(dashImage)));
-            spriteAccessor.setImages(imagesOut.toArray(new NativeImage[0]));
-            spriteAccessor.setFrameXs(frameXs);
-            spriteAccessor.setFrameYs(frameYs);
-            if (interpolation != null) {
-                spriteAccessor.setInterpolation(interpolation.toUndash(out));
-            } else {
-                spriteAccessor.setInterpolation(null);
-            }
-            spriteAccessor.setX(x);
-            spriteAccessor.setY(y);
-            spriteAccessor.setUMin(uMin);
-            spriteAccessor.setUMax(uMax);
-            spriteAccessor.setVMin(vMin);
-            spriteAccessor.setVMax(vMax);
-            spriteAccessor.setFrameIndex(frameIndex);
-            spriteAccessor.setFrameTicks(frameTicks);
-            return out;
-        } catch (InstantiationException e) {
-            e.printStackTrace();
+        Sprite out = Unsafe.allocateInstance(Sprite.class);
+        SpriteAccessor spriteAccessor = ((SpriteAccessor) out);
+        spriteAccessor.setInfo(info.toUndash(registry));
+        spriteAccessor.setAnimationMetadata(animationMetadata.toUndash());
+        ArrayList<NativeImage> imagesOut = new ArrayList<>();
+        images.forEach(dashImage -> imagesOut.add(registry.getImage(dashImage)));
+        spriteAccessor.setImages(imagesOut.toArray(new NativeImage[0]));
+        spriteAccessor.setFrameXs(frameXs);
+        spriteAccessor.setFrameYs(frameYs);
+        if (interpolation != null) {
+            spriteAccessor.setInterpolation(interpolation.toUndash(out));
+        } else {
+            spriteAccessor.setInterpolation(null);
         }
-        return null;
+        spriteAccessor.setX(x);
+        spriteAccessor.setY(y);
+        spriteAccessor.setUMin(uMin);
+        spriteAccessor.setUMax(uMax);
+        spriteAccessor.setVMin(vMin);
+        spriteAccessor.setVMax(vMax);
+        spriteAccessor.setFrameIndex(frameIndex);
+        spriteAccessor.setFrameTicks(frameTicks);
+        return out;
     }
 
 
