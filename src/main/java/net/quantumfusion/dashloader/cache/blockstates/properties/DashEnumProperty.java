@@ -6,27 +6,21 @@ import net.minecraft.state.property.EnumProperty;
 import net.minecraft.util.StringIdentifiable;
 import org.apache.commons.lang3.tuple.MutablePair;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class DashEnumProperty implements DashProperty {
 
+    private static final Map<String, Class> cache = new ConcurrentHashMap<>();
+
     @Serialize(order = 0)
-    public String value;
-
+    public final String value;
     @Serialize(order = 1)
-    public List<String> values;
-
+    public final List<String> values;
     @Serialize(order = 2)
-    public String className;
-
+    public final String className;
     @Serialize(order = 3)
-    public String name;
-
-    private Map<String, Class> cache = new HashMap<>();
-
+    public final String name;
 
     public DashEnumProperty(@Deserialize("value") String value,
                             @Deserialize("values") List<String> values,
@@ -49,20 +43,20 @@ public class DashEnumProperty implements DashProperty {
     @Override
     public <T extends Enum<T> & StringIdentifiable> MutablePair<EnumProperty<T>, Enum<T>> toUndash() {
         final MutablePair<EnumProperty<T>, Enum<T>> out = new MutablePair<>();
-        Class<T> type = getClass(className);
-        out.setLeft(EnumProperty.of(name, type));
+        final Class<T> type = getClass(className);
+        out.setLeft(EnumProperty.of(name, type, Arrays.asList(type.getEnumConstants())));
         out.setRight(Enum.valueOf(type, value));
         return out;
     }
 
-    private Class getClass(String className) {
-        Class clz = cache.get(className);
-        if (clz != null) return clz;
+    private Class getClass(final String className) {
+        final Class closs = cache.get(className);
+        if (closs != null) return closs;
         try {
-            clz = Class.forName(className);
+            final Class clz = Class.forName(className);
             cache.put(className, clz);
-        } catch (Exception ignored) {
-        }
-        return clz;
+            return clz;
+        } catch (Exception ignored) { }
+        return null;
     }
 }

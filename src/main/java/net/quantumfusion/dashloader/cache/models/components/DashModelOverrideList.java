@@ -7,6 +7,7 @@ import net.gudenau.lib.unsafe.Unsafe;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.json.ModelOverride;
 import net.minecraft.client.render.model.json.ModelOverrideList;
+import net.quantumfusion.dashloader.DashLoader;
 import net.quantumfusion.dashloader.cache.DashRegistry;
 import net.quantumfusion.dashloader.mixin.ModelOverideListAccessor;
 
@@ -34,7 +35,7 @@ public class DashModelOverrideList {
         ModelOverideListAccessor access = ((ModelOverideListAccessor) modelOverrideList);
         List<BakedModel> models =  access.getModels();
 
-        models.forEach(bakedModel -> bakedModels.add(registry.createModelPointer(bakedModel)));
+        models.forEach(bakedModel -> bakedModels.add(registry.createModelPointer(bakedModel, DashLoader.getInstance().multipartData.get(bakedModel))));
         access.getOverrides().forEach(modelOverride -> overrides.add(new DashModelOverride(modelOverride,registry)));
     }
 

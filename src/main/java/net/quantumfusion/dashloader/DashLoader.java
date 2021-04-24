@@ -10,6 +10,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.font.Font;
 import net.minecraft.client.particle.ParticleManager;
@@ -21,6 +22,7 @@ import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.texture.TextureManager;
 import net.minecraft.client.texture.TextureUtil;
+import net.minecraft.state.StateManager;
 import net.minecraft.util.Identifier;
 import net.quantumfusion.dashloader.cache.DashCachePaths;
 import net.quantumfusion.dashloader.cache.DashCacheState;
@@ -60,15 +62,17 @@ import java.util.Map;
 public class DashLoader {
     public static final Logger LOGGER = LogManager.getLogger();
     public static final int totalTasks = 17;
-    public static final double formatVersion = 0.1;
+    public static final double formatVersion = 0.2;
     public static final String version = "1.0.2-alpha-devBuild0";
     private static final Path config = FabricLoader.getInstance().getConfigDir().normalize();
     public static String task = "Starting DashLoader";
     private static DashLoader instance;
 
     public final HashMap<Class<? extends BakedModel>, DashModelFactory> modelMappings = new HashMap<>();
+
     public final HashMap<SpriteAtlasTexture, DashSpriteAtlasTextureData> atlasData = new HashMap<>();
-    public final HashMap<MultipartBakedModel, List<MultipartModelSelector>> multipartData = new HashMap<>();
+    public final HashMap<MultipartBakedModel, Pair<List<MultipartModelSelector>, StateManager<Block, BlockState>>> multipartData = new HashMap<>();
+
     private final Object2ObjectMap<Class<?>, BinarySerializer> serializers = new Object2ObjectOpenHashMap<>();
     private final List<SpriteAtlasTexture> atlasesToRegister;
     private final Map<DashCachePaths, Path> paths = new HashMap<>();
@@ -114,8 +118,10 @@ public class DashLoader {
             DashLoaderInfo newData = DashLoaderInfo.create();
             boolean reload = true;
             try {
-                DashLoaderInfo old = deserialize(DashLoaderInfo.class, paths.get(DashCachePaths.DASH_INFO), "Mod Info");
-                reload = !newData.equals(old);
+                if (paths.get(DashCachePaths.DASH_INFO).toFile().exists()) {
+                    DashLoaderInfo old = deserialize(DashLoaderInfo.class, paths.get(DashCachePaths.DASH_INFO), "Mod Info");
+                    reload = !newData.equals(old);
+                }
             } catch (Exception ignored) {
             }
             if (paths.values().stream().allMatch(path -> path.toFile().exists())) {
@@ -369,57 +375,43 @@ public class DashLoader {
 
     private void initSerializers() {
         ArrayList<Class<?>> list = new ArrayList<>();
+        Object2ObjectMap<Class<?>, SerializerBuilder> serializersOut = new Object2ObjectOpenHashMap<>();
         modelMappings.values().forEach(dashModel -> list.add(dashModel.getClass()));
-
-        serializers.put(DashRegistry.class,
+        serializersOut.put(DashRegistry.class,
                 SerializerBuilder.create()
                         .withSubclasses("models", DashBasicBakedModel.class, DashBuiltinBakedModel.class, DashMultipartBakedModel.class, DashWeightedBakedModel.class)
                         .withSubclasses("fonts", DashBitmapFont.class, DashUnicodeFont.class, DashBlankFont.class)
-                        .withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE)
-                        .build(DashRegistry.class));
+                        .withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE));
+
+        serializersOut.put(DashModelData.class,
+                SerializerBuilder.create().withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE));
+
+        serializersOut.put(DashSpriteAtlasManager.class,
+                SerializerBuilder.create().withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE));
+
+        serializersOut.put(DashBlockStateData.class,
+                SerializerBuilder.create().withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE));
 
 
-        serializers.put(DashModelData.class,
-                SerializerBuilder.create()
-                        .withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE)
-                        .build(DashModelData.class));
+        serializersOut.put(DashParticleData.class,
+                SerializerBuilder.create().withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE));
 
-        serializers.put(DashSpriteAtlasManager.class,
-                SerializerBuilder.create()
-                        .withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE)
-                        .build(DashSpriteAtlasManager.class));
+        serializersOut.put(DashExtraAtlasData.class,
+                SerializerBuilder.create().withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE));
 
-        serializers.put(DashBlockStateData.class,
-                SerializerBuilder.create()
-                        .withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE)
-                        .build(DashBlockStateData.class));
+        serializersOut.put(DashFontManagerData.class,
+                SerializerBuilder.create().withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE));
 
+        serializersOut.put(DashSplashTextData.class,
+                SerializerBuilder.create().withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE));
 
-        serializers.put(DashParticleData.class,
-                SerializerBuilder.create()
-                        .withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE)
-                        .build(DashParticleData.class));
+        serializersOut.put(DashLoaderInfo.class,
+                SerializerBuilder.create().withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE));
 
-        serializers.put(DashExtraAtlasData.class,
-                SerializerBuilder.create()
-                        .withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE)
-                        .build(DashExtraAtlasData.class));
-
-        serializers.put(DashFontManagerData.class,
-                SerializerBuilder.create()
-                        .withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE)
-                        .build(DashFontManagerData.class));
-
-
-        serializers.put(DashSplashTextData.class,
-                SerializerBuilder.create()
-                        .withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE)
-                        .build(DashSplashTextData.class));
-
-        serializers.put(DashLoaderInfo.class,
-                SerializerBuilder.create()
-                        .withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE)
-                        .build(DashLoaderInfo.class));
+        serializersOut.entrySet().parallelStream().forEach(classSerializerBuilderEntry -> {
+            final Class<?> key = classSerializerBuilderEntry.getKey();
+            serializers.put(key,classSerializerBuilderEntry.getValue().build(key));
+        });
     }
 
 

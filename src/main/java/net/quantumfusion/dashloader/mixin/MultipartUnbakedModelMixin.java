@@ -1,12 +1,16 @@
 package net.quantumfusion.dashloader.mixin;
 
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.client.render.model.*;
 import net.minecraft.client.render.model.json.MultipartModelComponent;
 import net.minecraft.client.render.model.json.MultipartModelSelector;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.util.SpriteIdentifier;
+import net.minecraft.state.StateManager;
 import net.minecraft.util.Identifier;
 import net.quantumfusion.dashloader.DashLoader;
+import org.apache.commons.lang3.tuple.Pair;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -27,6 +31,8 @@ public class MultipartUnbakedModelMixin {
     @Final
     private List<MultipartModelComponent> components;
 
+    @Shadow @Final private StateManager<Block, BlockState> stateFactory;
+
     @Inject(method = "bake(Lnet/minecraft/client/render/model/ModelLoader;Ljava/util/function/Function;Lnet/minecraft/client/render/model/ModelBakeSettings;Lnet/minecraft/util/Identifier;)Lnet/minecraft/client/render/model/BakedModel;",
             at = @At(value = "RETURN"),
             locals = LocalCapture.CAPTURE_FAILSOFT,
@@ -35,7 +41,7 @@ public class MultipartUnbakedModelMixin {
         MultipartBakedModel bakedModel = (MultipartBakedModel) builder.build();
         List<MultipartModelSelector> outSelectors = new ArrayList<>();
         components.forEach(multipartModelComponent -> outSelectors.add(((MultipartModelComponentAccessor)multipartModelComponent).getSelector()));
-        DashLoader.getInstance().multipartData.put(bakedModel, outSelectors);
+        DashLoader.getInstance().multipartData.put(bakedModel, Pair.of(outSelectors,stateFactory));
         cir.setReturnValue(bakedModel);
     }
 

@@ -13,6 +13,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.registry.Registry;
 import net.quantumfusion.dashloader.cache.DashRegistry;
 import net.quantumfusion.dashloader.cache.blockstates.properties.*;
+import net.quantumfusion.dashloader.cache.models.predicates.PredicateHelper;
 import net.quantumfusion.dashloader.mixin.StateAccessor;
 
 import java.util.ArrayList;
@@ -21,7 +22,7 @@ import java.util.List;
 public class DashBlockState {
 
     @Serialize(order = 0)
-    public Integer owner;
+    public final Integer owner;
 
     @Serialize(order = 1)
     @SerializeNullable()
@@ -31,7 +32,7 @@ public class DashBlockState {
             DashEnumProperty.class,
             DashIntProperty.class
     })
-    public List<DashProperty> entriesEncoded;
+    public final List<DashProperty> entriesEncoded;
 
 
     public DashBlockState(@Deserialize("owner") Integer owner,
@@ -40,24 +41,14 @@ public class DashBlockState {
         this.entriesEncoded = entriesEncoded;
     }
 
-    public <T extends Enum<T> & StringIdentifiable> DashBlockState(BlockState blockState, DashRegistry registry) {
+    public DashBlockState(BlockState blockState, DashRegistry registry) {
         StateAccessor<Block, BlockState> accessState = ((StateAccessor<Block, BlockState>) blockState);
         entriesEncoded = new ArrayList<>();
-        accessState.getEntries().forEach((property, comparable) -> {
-            if (property instanceof BooleanProperty) {
-                entriesEncoded.add(new DashBooleanProperty((BooleanProperty) property, (Boolean) comparable));
-            } else if (property instanceof DirectionProperty) {
-                entriesEncoded.add(new DashDirectionProperty((DirectionProperty) property, (Direction) comparable));
-            } else if (property instanceof EnumProperty) {
-                entriesEncoded.add(new DashEnumProperty((EnumProperty<T>) property, (Enum<T>) comparable));
-            } else if (property instanceof IntProperty) {
-                entriesEncoded.add(new DashIntProperty((IntProperty) property, comparable.toString()));
-            }
-        });
+        accessState.getEntries().forEach((property, comparable) -> entriesEncoded.add(PredicateHelper.getProperty(property,comparable)));
         owner = registry.createIdentifierPointer(Registry.BLOCK.getId(blockState.getBlock()));
     }
 
-    public BlockState toUndash(DashRegistry registry) {
+    public BlockState toUndash(final DashRegistry registry) {
         ImmutableMap.Builder<Property<?>, Comparable<?>> builder = ImmutableMap.builder();
         entriesEncoded.forEach(property -> builder.put(property.toUndash()));
         return new BlockState(Registry.BLOCK.get(registry.getIdentifier(owner)), builder.build(), null);

@@ -6,6 +6,7 @@
   "mixins": [
     "AbstractBlockStateAccessor",
     "AbstractTextureAccessor",
+    "AndMultipartModelSelectorAccessor",
     "AnimationResourceMetadataAccessor",
     "BakedModelManagerOverride",
     "BasicBakedModelAccessor",
@@ -13,10 +14,11 @@
     "BitmapFontGlyphAccessor",
     "BlockModelsAccessor",
     "BuiltinBakedModelAccessor",
+    "IdentifierAccessor",
     "FontManagerAccessor",
     "FontManagerOverride",
     "JsonUnbakedModelAccessor",
-
+    "LanguageMixin",
     "MainMixin",
     "MinecraftClientMixin",
     "MipmapHelperMixin",
@@ -25,14 +27,14 @@
     "ModelOverideListAccessor",
     "ModelOverrideAccessor",
     "MultipartBakedModelAccessor",
-    "ParticleManagerMixin",
-    "TitleScreenMixin",
-    "MultipartUnbakedModelMixin",
     "MultipartModelComponentAccessor",
-
+    "MultipartUnbakedModelMixin",
+    "OrMultipartModelSelectorAccessor",
+    "ParticleManagerMixin",
     "ParticleManagerSimpleSpriteProviderAccessor",
     "ParticleTextureDataAccessor",
     "ReloadableResourceManagerImplMixin",
+    "SimpleMultipartModelSelectorAccessor",
     "SoundManagerMixin",
     "SplashScreenMixin",
     "SplashTextResourceSupplierMixin",
@@ -47,15 +49,14 @@
     "SpriteInterpolationAccessor",
     "SpriteInterpolationMixin",
     "StateAccessor",
+    "SuffixArrayMixin",
+    "TitleScreenMixin",
     "UnicodeTextureFontAccessor",
     "UnicodeTextureFontOverride",
     "VoxelShapeAccessor",
     "WeightedBakedModelAccessor",
     "WeightedBakedModelEntryAccessor",
-    "WeightedPickerEntryAccessor",
-
-    "SuffixArrayMixin",
-    "LanguageMixin"
+    "WeightedPickerEntryAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

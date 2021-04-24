@@ -4,13 +4,16 @@ import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import io.activej.serializer.annotations.SerializeNullable;
 import io.activej.serializer.annotations.SerializeSubclasses;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.font.BlankFont;
 import net.minecraft.client.font.Font;
 import net.minecraft.client.render.model.BakedModel;
+import net.minecraft.client.render.model.json.MultipartModelSelector;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.util.ModelIdentifier;
+import net.minecraft.state.StateManager;
 import net.minecraft.util.Identifier;
 import net.quantumfusion.dashloader.DashException;
 import net.quantumfusion.dashloader.DashLoader;
@@ -22,8 +25,10 @@ import net.quantumfusion.dashloader.cache.models.DashModel;
 import net.quantumfusion.dashloader.cache.models.DashModelIdentifier;
 import net.quantumfusion.dashloader.cache.models.ModelStage;
 import net.quantumfusion.dashloader.cache.models.factory.DashModelFactory;
+import net.quantumfusion.dashloader.cache.models.predicates.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -71,6 +76,17 @@ public class DashRegistry {
     @SerializeNullable(path = {1})
     public Map<Integer, DashImage> images;
 
+
+    @Serialize(order = 6)
+    @SerializeNullable(path = {0})
+    @SerializeSubclasses(path = {1}, value = {
+            DashAndPredicate.class,
+            DashSimplePredicate.class,
+            DashOrPredicate.class,
+            DashStaticPredicate.class
+    })
+    public Map<Integer, DashPredicate>predicates;
+
     DashLoader loader;
     public Map<Integer, BlockState> blockstatesOut;
     public Map<Integer, Predicate<BlockState>> predicateOut;
@@ -84,13 +100,15 @@ public class DashRegistry {
                         @Deserialize("identifiers") Map<Integer, DashID> identifiers,
                         @Deserialize("models") Map<Integer, DashModel> models,
                         @Deserialize("fonts") Map<Integer, DashFont> fonts,
-                        @Deserialize("images") Map<Integer, DashImage> images) {
+                        @Deserialize("images") Map<Integer, DashImage> images,
+                        @Deserialize("predicates")  Map<Integer, DashPredicate> predicates) {
         this.blockstates = blockstates;
         this.sprites = sprites;
         this.identifiers = identifiers;
         this.models = models;
         this.fonts = fonts;
         this.images = images;
+        this.predicates = predicates;
     }
 
     public DashRegistry(DashLoader loader) {
@@ -99,6 +117,7 @@ public class DashRegistry {
         identifiers = new HashMap<>();
         models = new HashMap<>();
         fonts = new HashMap<>();
+        predicates = new HashMap<>();
         images = new HashMap<>();
         this.loader = loader;
     }
@@ -112,7 +131,7 @@ public class DashRegistry {
         return hash;
     }
 
-    public Integer createModelPointer(BakedModel bakedModel) {
+    public <K> Integer createModelPointer(BakedModel bakedModel,@Nullable K var) {
         if (bakedModel == null) {
             return null;
         }
@@ -120,7 +139,7 @@ public class DashRegistry {
         if (models.get(hash) == null) {
             DashModelFactory model = loader.modelMappings.get(bakedModel.getClass());
             if (model != null) {
-                models.put(hash, model.toDash(bakedModel, this));
+                models.put(hash, model.toDash(bakedModel, this, var));
             } else {
                 if (bakedModel.getClass().getName().contains("wraith")) {
                     DashLoader.LOGGER.error("DH mods dont work with dash because DH is lazy, spam bot him at DH#9367");
@@ -156,6 +175,14 @@ public class DashRegistry {
         final int hash = image.hashCode();
         if (images.get(hash) == null) {
             images.put(hash, new DashImage(image));
+        }
+        return hash;
+    }
+
+    public int createPredicatePointer(MultipartModelSelector selector, StateManager<Block, BlockState> stateManager) {
+        final int hash = selector.hashCode();
+        if (predicates.get(hash) == null) {
+            predicates.put(hash, PredicateHelper.getPredicate(selector,stateManager));
         }
         return hash;
     }
@@ -245,6 +272,17 @@ public class DashRegistry {
         return image;
     }
 
+    public Predicate<BlockState> getPredicate(Integer pointer) {
+        if (predicateOut == null) {
+            throw new DashException("Predicates not deserialized");
+        }
+        Predicate<BlockState> predicate = predicateOut.get(pointer);
+        if (predicate == null) {
+            DashLoader.LOGGER.error("Predicate not found in data. PINTR: " + pointer);
+        }
+        return predicate;
+    }
+
     public void toUndash() {
         Logger logger = LogManager.getLogger();
         spritesOut = new ConcurrentHashMap<>();
@@ -269,6 +307,10 @@ public class DashRegistry {
         logger.info("Loading Sprites");
         sprites.entrySet().parallelStream().forEach(spriteEntry -> spritesOut.put(spriteEntry.getKey(), spriteEntry.getValue().toUndash(this)));
         sprites = null;
+
+        logger.info("Loading Predicates");
+        predicates.entrySet().parallelStream().forEach(predicateEntry -> predicateOut.put(predicateEntry.getKey(), predicateEntry.getValue().toUndash()));
+        predicates = null;
 
         logger.info("Loading Fonts");
         fonts.entrySet().parallelStream().forEach(fontEntry -> fontsOut.put(fontEntry.getKey(), fontEntry.getValue().toUndash(this)));

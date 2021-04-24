@@ -53,10 +53,6 @@ public class DashBuiltinBakedModel implements DashModel,DashBakedModel {
         itemPropertyOverrides.applyOverrides(registry);
     }
 
-    @Override
-    public DashModel toDash(BakedModel model, DashRegistry registry) {
-        return new DashBuiltinBakedModel((BuiltinBakedModel) model,registry);
-    }
 
     @Override
     public ModelStage getStage() {

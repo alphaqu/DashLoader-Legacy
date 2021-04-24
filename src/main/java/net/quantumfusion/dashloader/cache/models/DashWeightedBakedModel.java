@@ -38,10 +38,6 @@ public class DashWeightedBakedModel implements DashModel, DashBakedModel {
         return new WeightedBakedModel(modelsOut);
     }
 
-    @Override
-    public DashModel toDash(BakedModel model, DashRegistry registry) {
-        return new DashWeightedBakedModel((WeightedBakedModel) model, registry);
-    }
 
     @Override
     public ModelStage getStage() {

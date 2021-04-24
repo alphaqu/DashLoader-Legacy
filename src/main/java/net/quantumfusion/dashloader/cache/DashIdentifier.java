@@ -2,8 +2,10 @@ package net.quantumfusion.dashloader.cache;
 
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
+import net.gudenau.lib.unsafe.Unsafe;
 import net.minecraft.util.Identifier;
 import net.quantumfusion.dashloader.DashLoader;
+import net.quantumfusion.dashloader.mixin.IdentifierAccessor;
 
 public class DashIdentifier implements DashID {
     @Serialize(order = 0)
@@ -23,9 +25,13 @@ public class DashIdentifier implements DashID {
         this.path = identifier.getPath();
     }
 
+    private static final Class<Identifier> identifierClass = Identifier.class;
     @Override
     public Identifier toUndash() {
-
-        return new Identifier(namespace, path);
+        final Identifier identifier = Unsafe.allocateInstance(identifierClass);
+        final IdentifierAccessor access = ((IdentifierAccessor)identifier);
+        access.setNamespace(namespace);
+        access.setPath(path);
+        return identifier;
     }
 }

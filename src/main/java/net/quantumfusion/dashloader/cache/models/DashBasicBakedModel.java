@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class DashBasicBakedModel implements DashModel,DashBakedModel {
+public class DashBasicBakedModel implements DashModel, DashBakedModel {
     @Serialize(order = 0)
     public List<DashBakedQuad> quads;
     @Serialize(order = 1)
@@ -106,11 +106,6 @@ public class DashBasicBakedModel implements DashModel,DashBakedModel {
     @Override
     public void apply(DashRegistry registry) {
         itemPropertyOverrides.applyOverrides(registry);
-    }
-
-    @Override
-    public DashModel toDash(BakedModel model, DashRegistry registry) {
-        return new DashBasicBakedModel((BasicBakedModel) model,registry);
     }
 
 

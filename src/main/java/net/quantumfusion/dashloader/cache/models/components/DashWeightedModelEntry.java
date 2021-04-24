@@ -2,7 +2,9 @@ package net.quantumfusion.dashloader.cache.models.components;
 
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
+import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.WeightedBakedModel;
+import net.quantumfusion.dashloader.DashLoader;
 import net.quantumfusion.dashloader.cache.DashRegistry;
 import net.quantumfusion.dashloader.mixin.WeightedBakedModelEntryAccessor;
 import net.quantumfusion.dashloader.mixin.WeightedPickerEntryAccessor;
@@ -21,7 +23,8 @@ public class DashWeightedModelEntry {
     }
 
     public DashWeightedModelEntry(WeightedBakedModel.Entry entry, DashRegistry registry) {
-        model = registry.createModelPointer(((WeightedBakedModelEntryAccessor) entry).getModel());
+        final BakedModel model = ((WeightedBakedModelEntryAccessor) entry).getModel();
+        this.model = registry.createModelPointer(model, DashLoader.getInstance().multipartData.get(model));
         weight = ((WeightedPickerEntryAccessor) entry).getWeight();
     }
 
