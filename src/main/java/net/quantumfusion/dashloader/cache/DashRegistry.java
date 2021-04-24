@@ -21,6 +21,7 @@ import net.quantumfusion.dashloader.cache.font.fonts.*;
 import net.quantumfusion.dashloader.cache.models.DashModel;
 import net.quantumfusion.dashloader.cache.models.DashModelIdentifier;
 import net.quantumfusion.dashloader.cache.models.ModelStage;
+import net.quantumfusion.dashloader.cache.models.factory.DashModelFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -117,7 +118,7 @@ public class DashRegistry {
         }
         final int hash = bakedModel.hashCode();
         if (models.get(hash) == null) {
-            DashModel model = loader.modelMappings.get(bakedModel.getClass());
+            DashModelFactory model = loader.modelMappings.get(bakedModel.getClass());
             if (model != null) {
                 models.put(hash, model.toDash(bakedModel, this));
             } else {

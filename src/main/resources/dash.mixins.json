@@ -27,6 +27,8 @@
     "MultipartBakedModelAccessor",
     "ParticleManagerMixin",
     "TitleScreenMixin",
+    "MultipartUnbakedModelMixin",
+    "MultipartModelComponentAccessor",
 
     "ParticleManagerSimpleSpriteProviderAccessor",
     "ParticleTextureDataAccessor",

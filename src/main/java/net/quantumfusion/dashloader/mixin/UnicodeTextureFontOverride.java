@@ -23,16 +23,12 @@ public class UnicodeTextureFontOverride {
     @Final
     private Identifier sizes;
 
-    @Shadow
-    @Final
-    private String template;
 
     @Inject(method = "load(Lnet/minecraft/resource/ResourceManager;)Lnet/minecraft/client/font/Font;",
             at = @At(value = "HEAD"),
             cancellable = true)
     private void fastLoad(ResourceManager manager, CallbackInfoReturnable<Font> cir) {
         try {
-            System.out.println(sizes);
             Resource resource = MinecraftClient.getInstance().getResourceManager().getResource(this.sizes);
             UnicodeFont var5;
             try {
