@@ -1,5 +1,6 @@
 package net.quantumfusion.dashloader.client;
 
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.hud.BackgroundHelper;
 import net.minecraft.client.gui.screen.Screen;
@@ -8,6 +9,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.quantumfusion.dashloader.DashLoader;
+import net.quantumfusion.dashloader.cache.DashCacheState;
 
 public class DashWindow extends Screen {
     private static final Identifier LOGO = new Identifier("dashloader:textures/icon.png");
@@ -36,7 +38,11 @@ public class DashWindow extends Screen {
         if (progress == 1) {
             framesLeftToEnd--;
             if (framesLeftToEnd <= 0) {
-                client.openScreen(new TitleScreen());
+                if (MinecraftClient.getInstance().world != null) {
+                    client.openScreen(null);
+                } else {
+                    client.openScreen(new TitleScreen());
+                }
             }
         }
         if (!started) {
@@ -74,5 +80,11 @@ public class DashWindow extends Screen {
 //        this.client.getTextureManager().bindTexture(LOGO);
 //        drawTexture(matrices, (screenWidth / 2) - 100,(screenHeight / 2) - 100, 200,200, 0, 0, 800, 800, 800, 800);
 
+    }
+
+
+    @Override
+    public boolean shouldCloseOnEsc() {
+        return false;
     }
 }

@@ -62,23 +62,25 @@ import java.util.Map;
 public class DashLoader {
     public static final Logger LOGGER = LogManager.getLogger();
     public static final int totalTasks = 17;
-    public static final double formatVersion = 0.2;
-    public static final String version = "1.0.2-alpha-devBuild0";
+    public static final double formatVersion = 0.3;
+    public static final String version = FabricLoader.getInstance().getModContainer("dashloader").get().getMetadata().getVersion().getFriendlyString();
     private static final Path config = FabricLoader.getInstance().getConfigDir().normalize();
     public static String task = "Starting DashLoader";
     private static DashLoader instance;
+    public int tasksComplete = 0;
+    public DashCacheState state;
+
+
 
     public final HashMap<Class<? extends BakedModel>, DashModelFactory> modelMappings = new HashMap<>();
 
     public final HashMap<SpriteAtlasTexture, DashSpriteAtlasTextureData> atlasData = new HashMap<>();
     public final HashMap<MultipartBakedModel, Pair<List<MultipartModelSelector>, StateManager<Block, BlockState>>> multipartData = new HashMap<>();
 
-    private final Object2ObjectMap<Class<?>, BinarySerializer> serializers = new Object2ObjectOpenHashMap<>();
+    private  Object2ObjectMap<Class<?>, BinarySerializer> serializers = new Object2ObjectOpenHashMap<>();
     private final List<SpriteAtlasTexture> atlasesToRegister;
     private final Map<DashCachePaths, Path> paths = new HashMap<>();
     private final List<SpriteAtlasTexture> extraAtlases;
-    public int tasksComplete = 0;
-    public DashCacheState state;
     //output
     public SpriteAtlasManager atlasManagerOut;
     public Object2IntMap<BlockState> stateLookupOut;
@@ -124,22 +126,22 @@ public class DashLoader {
                 }
             } catch (Exception ignored) {
             }
-            if (paths.values().stream().allMatch(path -> path.toFile().exists())) {
-                if (reload) {
-                    LOGGER.warn("DashLoader detected mod change, Recache requested.");
-                    createMetadata(newData);
-                    destroyCache();
-                    state = DashCacheState.EMPTY;
-                } else {
-                    loadDashCache();
-                }
-            } else {
-                LOGGER.warn("DashLoader files missing, Cache creation is appending and slow start predicted.");
-                createMetadata(newData);
+            if (reload) {
+                destroyCache();
+                LOGGER.warn("DashLoader detected mod change, Recache requested.");
                 state = DashCacheState.EMPTY;
+            } else {
+                if (paths.values().stream().allMatch(path -> path.toFile().exists())) {
+                    loadDashCache();
+                } else {
+                    destroyCache();
+                    LOGGER.warn("DashLoader files missing, Cache creation is appending and slow start predicted.");
+                    state = DashCacheState.EMPTY;
+                }
             }
-            Instant stop = Instant.now();
-            LOGGER.info("Loaded cache in " + TimeHelper.getDecimalMs(start, stop) + "s");
+            newData = DashLoaderInfo.create();
+            createMetadata(newData);
+            LOGGER.info("Loaded cache in " + TimeHelper.getDecimalMs(start, Instant.now()) + "s");
         });
         dash.setName("dash-manager");
         dash.start();
@@ -180,7 +182,11 @@ public class DashLoader {
     }
 
     public void saveDashCache() {
+        Instant start = Instant.now();
         initPaths();
+        initModelMappings();
+        initSerializers();
+        createDirectory();
         tasksComplete++;
         DashRegistry registry = new DashRegistry(this);
         logAndTask("Mapping Atlas");
@@ -208,6 +214,7 @@ public class DashLoader {
         serializeObject(extraAtlasData, paths.get(DashCachePaths.EXTRA_ATLAS), "Extra Atlas");
         serializeObject(registry, paths.get(DashCachePaths.REGISTRY), "Registry");
         task = "Caching is now complete.";
+        LOGGER.info("Created cache in " + TimeHelper.getDecimalMs(start, Instant.now()) + "s");
     }
 
     public void loadDashCache() {
@@ -299,32 +306,41 @@ public class DashLoader {
 
     private <T> void serializeObject(T clazz, Path path, String name) {
         try {
-            tasksComplete++;
             task = "Serializing " + name;
             LOGGER.info("  Starting " + name + " Serialization.");
             StreamOutput output = StreamOutput.create(Files.newOutputStream(path, StandardOpenOption.CREATE, StandardOpenOption.WRITE));
             //noinspection unchecked
             output.serialize(serializers.get(clazz.getClass()), clazz);
             output.close();
-
             LOGGER.info("    Finished " + name + " Serialization.");
         } catch (IOException e) {
+            LOGGER.fatal("Serializers: " + serializers.size());
+            serializers.forEach((aClass, binarySerializer) -> LOGGER.fatal("Class: " + aClass + " Serializer: " + binarySerializer));
             e.printStackTrace();
         }
+        tasksComplete++;
     }
 
+    private static final boolean debug = true;
+
     public void destroyCache(Exception exception) {
-        LOGGER.error("DashLoader failed, destroying cache and requesting recache. Slow start predicted.");
-        exception.printStackTrace();
-        if (!paths.values().stream().allMatch((path -> path.toFile().delete()))) {
-            LOGGER.fatal("DashLoader removal failed, Closing because of corruption chance, please delete the cache manually or reinstall DashLoader.");
+        if (!debug) {
+            LOGGER.error("DashLoader failed, destroying cache and requesting recache. Slow start predicted.");
+            exception.printStackTrace();
+            if (!paths.values().stream().allMatch((path -> path.toFile().delete()))) {
+                LOGGER.fatal("DashLoader removal failed, Closing because of corruption chance, please delete the cache manually or reinstall DashLoader.");
+            }
+        } else {
+            exception.printStackTrace();
         }
     }
 
     public void destroyCache() {
-        LOGGER.error("DashLoader failed, destroying cache and requesting recache. Slow start predicted.");
-        if (!paths.values().stream().allMatch((path -> path.toFile().delete()))) {
-            LOGGER.fatal("DashLoader removal failed, Closing because of corruption chance, please delete the cache manually or reinstall DashLoader.");
+        if (!debug) {
+            LOGGER.error("DashLoader failed, destroying cache and requesting recache. Slow start predicted.");
+            if (!paths.values().stream().allMatch((path -> path.toFile().delete()))) {
+                LOGGER.fatal("DashLoader removal failed, Closing because of corruption chance, please delete the cache manually or reinstall DashLoader.");
+            }
         }
     }
 
@@ -368,12 +384,15 @@ public class DashLoader {
     private void initModelMappings() {
         modelMappings.clear();
         addModelType(new DashBasicBakedModelFactory());
-        addModelType(new DashBuiltInBakedModel());
+        addModelType(new DashBuiltInBakedModelFactory());
         addModelType(new DashMultipartBakedModelFactory());
         addModelType(new DashWeightedBakedModelFactory());
+        FabricLoader.getInstance().getAllMods().forEach(modContainer -> modContainer.getMetadata().getCustomValue("dashmodel"));
     }
 
     private void initSerializers() {
+        LOGGER.info("Started Serializer Creation");
+        serializers = new Object2ObjectOpenHashMap<>();
         ArrayList<Class<?>> list = new ArrayList<>();
         Object2ObjectMap<Class<?>, SerializerBuilder> serializersOut = new Object2ObjectOpenHashMap<>();
         modelMappings.values().forEach(dashModel -> list.add(dashModel.getClass()));
@@ -412,6 +431,8 @@ public class DashLoader {
             final Class<?> key = classSerializerBuilderEntry.getKey();
             serializers.put(key,classSerializerBuilderEntry.getValue().build(key));
         });
+        while (serializersOut.size() > serializers.size()) { }
+        LOGGER.info("Created Serializers");
     }
 
 

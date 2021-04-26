@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class DashBasicBakedModel implements DashModel, DashBakedModel {
+public class DashBasicBakedModel implements DashModel {
     @Serialize(order = 0)
     public List<DashBakedQuad> quads;
     @Serialize(order = 1)

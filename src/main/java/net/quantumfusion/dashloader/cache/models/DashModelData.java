@@ -10,12 +10,15 @@ import net.minecraft.client.render.model.MultipartBakedModel;
 import net.minecraft.client.render.model.json.MultipartModelSelector;
 import net.minecraft.state.StateManager;
 import net.minecraft.util.Identifier;
+import net.quantumfusion.dashloader.DashLoader;
 import net.quantumfusion.dashloader.cache.DashRegistry;
 import org.apache.commons.lang3.tuple.Pair;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class DashModelData {
 
@@ -37,6 +40,12 @@ public class DashModelData {
                 this.models.put(registry.createIdentifierPointer(identifier), registry.createModelPointer(bakedModel,multipartData.get(bakedModel)));
             }
         });
+        List<String> unsupportedModels = new ArrayList<>();
+        registry.modelsFailed.forEach((aClass, integer) -> {
+            unsupportedModels.add(aClass.getName());
+        });
+        unsupportedModels.stream().sorted().collect(Collectors.toList()).forEach(s -> DashLoader.LOGGER.warn("Model unsupported: " + s));
+        DashLoader.LOGGER.warn("Models failed: " + registry.modelsFailed.size());
     }
 
 

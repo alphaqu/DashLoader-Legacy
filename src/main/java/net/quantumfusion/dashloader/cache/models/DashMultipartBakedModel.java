@@ -23,7 +23,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import java.util.*;
 import java.util.function.Predicate;
 
-public class DashMultipartBakedModel implements DashModel, DashBakedModel {
+public class DashMultipartBakedModel implements DashModel {
 
     //identifier baked model
     @Serialize(order = 0)

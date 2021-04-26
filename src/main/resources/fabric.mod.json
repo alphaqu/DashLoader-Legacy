@@ -3,9 +3,9 @@
   "id": "dashloader",
   "version": "${version}",
   "name": "DashLoader",
-  "description": "Loading minecraft at lightning speeds.",
+  "description": "Launch at the speed of light.",
   "authors": [
-    "alphasucks"
+    "The QuantumFusion Team"
   ],
   "contact": {},
   "license": "MIT",
@@ -25,11 +25,14 @@
   "custom": {
     "sodium:options": {
       "mixin.features.model": false
-    }
+    },
+    "dashloader:custommodel": [
+      "net.quantumfusion.dashloader.test.CustomBakedModelFactory"
+    ]
   },
   "depends": {
     "fabricloader": ">=0.11.3",
-    "fabric": "*",
+    "fabric": ">=0.33.0",
     "minecraft": ">=1.16"
   }
 }

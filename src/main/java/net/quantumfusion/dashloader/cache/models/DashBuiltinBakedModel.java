@@ -10,7 +10,7 @@ import net.quantumfusion.dashloader.cache.models.components.DashModelOverrideLis
 import net.quantumfusion.dashloader.cache.models.components.DashModelTransformation;
 import net.quantumfusion.dashloader.mixin.BuiltinBakedModelAccessor;
 
-public class DashBuiltinBakedModel implements DashModel,DashBakedModel {
+public class DashBuiltinBakedModel implements DashModel {
     @Serialize(order = 0)
     public DashModelTransformation transformation;
     @Serialize(order = 1)

@@ -11,7 +11,7 @@ import net.quantumfusion.dashloader.mixin.WeightedBakedModelAccessor;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DashWeightedBakedModel implements DashModel, DashBakedModel {
+public class DashWeightedBakedModel implements DashModel {
 
     @Serialize(order = 0)
     public List<DashWeightedModelEntry> models;

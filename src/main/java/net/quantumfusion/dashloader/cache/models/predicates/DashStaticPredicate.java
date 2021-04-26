@@ -4,10 +4,11 @@ import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.render.model.json.MultipartModelSelector;
+import net.quantumfusion.dashloader.cache.DashRegistry;
 
 import java.util.function.Predicate;
 
-public class DashStaticPredicate implements  DashPredicate{
+public class DashStaticPredicate implements DashPredicate{
 
     @Serialize(order = 0)
     public boolean value;
@@ -22,7 +23,8 @@ public class DashStaticPredicate implements  DashPredicate{
     }
 
     @Override
-    public Predicate<BlockState> toUndash() {
+    public Predicate<BlockState> toUndash(DashRegistry registry) {
         return (blockState) -> value;
     }
+
 }

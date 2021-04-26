@@ -10,13 +10,13 @@ import net.minecraft.block.BlockState;
 import net.minecraft.client.render.model.json.SimpleMultipartModelSelector;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Property;
+import net.quantumfusion.dashloader.DashLoader;
+import net.quantumfusion.dashloader.cache.DashRegistry;
 import net.quantumfusion.dashloader.cache.blockstates.properties.*;
 import net.quantumfusion.dashloader.mixin.SimpleMultipartModelSelectorAccessor;
+import org.apache.commons.lang3.tuple.Pair;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -25,25 +25,19 @@ public class DashSimplePredicate implements DashPredicate {
 
     @Serialize(order = 0)
     @SerializeNullable()
-    @SerializeSubclasses(path = {0}, value = {
-            DashBooleanProperty.class,
-            DashDirectionProperty.class,
-            DashEnumProperty.class,
-            DashIntProperty.class
-    })
-    public List<DashProperty> property;
+    public Map<Integer,Integer> property;
 
     @Serialize(order = 1)
     public boolean negate;
 
-    public DashSimplePredicate(@Deserialize("property") List<DashProperty> property,
+    public DashSimplePredicate(@Deserialize("property") Map<Integer,Integer> property,
                                @Deserialize("negate") boolean negate) {
         this.property = property;
         this.negate = negate;
     }
 
 
-    public DashSimplePredicate(SimpleMultipartModelSelector simpleMultipartModelSelector, StateManager<Block, BlockState> stateManager) {
+    public DashSimplePredicate(SimpleMultipartModelSelector simpleMultipartModelSelector, StateManager<Block, BlockState> stateManager,DashRegistry registry) {
         SimpleMultipartModelSelectorAccessor access = ((SimpleMultipartModelSelectorAccessor) simpleMultipartModelSelector);
         Property<?> stateManagerProperty = stateManager.getProperty(access.getKey());
         if (stateManagerProperty == null) {
@@ -55,29 +49,31 @@ public class DashSimplePredicate implements DashPredicate {
                 string = string.substring(1);
             }
             List<String> list = VALUE_SPLITTER.splitToList(string);
+            property = new HashMap<>();
             if (list.size() == 1) {
-                property = new ArrayList<>();
-                property.add(createPredicateInfo(stateManager, stateManagerProperty, string));
+                Pair<Integer,Integer> predic = createPredicateInfo(stateManager, stateManagerProperty, string,registry);
+                property.put(predic.getLeft(),predic.getRight());
             } else {
-                property = list.stream().map((stringx) -> createPredicateInfo(stateManager, stateManagerProperty, stringx)).collect(Collectors.toList());
+                List<Pair<Integer,Integer>> predic = list.stream().map((stringx) -> createPredicateInfo(stateManager, stateManagerProperty, stringx,registry)).collect(Collectors.toList());
+                predic.forEach(integerIntegerPair -> property.put(integerIntegerPair.getLeft(),integerIntegerPair.getRight()));
             }
         }
     }
 
 
-    private DashProperty createPredicateInfo(StateManager<Block, BlockState> stateFactory, Property<?> property, String valueString) {
+    private Pair<Integer,Integer> createPredicateInfo(StateManager<Block, BlockState> stateFactory, Property<?> property, String valueString,DashRegistry registry) {
         Optional<?> optional = property.parse(valueString);
         if (!optional.isPresent()) {
             throw new RuntimeException(String.format("Unknown value '%s' '%s'", valueString, stateFactory.getOwner().toString()));
         } else {
-            return PredicateHelper.getProperty(property, (Comparable<?>) optional.get());
+            return registry.createPropertyPointer(property, (Comparable<?>) optional.get());
         }
     }
 
     @Override
-    public Predicate<BlockState> toUndash() {
+    public Predicate<BlockState> toUndash(DashRegistry registry) {
         List<Map.Entry<? extends Property<?>, ? extends Comparable<?>>> out = new ArrayList<>();
-        property.forEach(dashProperty -> out.add(dashProperty.toUndash()));
+        property.forEach((propertyPointer, valuePointer) -> out.add(registry.getProperty(propertyPointer,valuePointer)));
         Predicate<BlockState> outPredicate;
         if (out.size() == 1) {
             outPredicate = createPredicate(out.get(0).getKey(), out.get(0).getValue());

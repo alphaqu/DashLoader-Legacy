@@ -20,11 +20,11 @@ public class DashModelEntry {
     @Serialize(order = 1)
     @SerializeNullable()
     @SerializeSubclasses(extraSubclassesId = "models")
-    public DashBakedModel dashBakedModel;
+    public DashModel dashBakedModel;
 
 
     public DashModelEntry(@Deserialize("identifier") DashID identifier,
-                          @Deserialize("dashBakedModel") DashBakedModel dashBakedModel) {
+                          @Deserialize("dashBakedModel") DashModel dashBakedModel) {
         this.identifier = identifier;
         this.dashBakedModel = dashBakedModel;
     }
