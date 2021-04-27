@@ -7,7 +7,11 @@
   "authors": [
     "The QuantumFusion Team"
   ],
-  "contact": {},
+  "contact": {
+    "homepage": "https://www.curseforge.com/minecraft/mc-mods/dashloader",
+    "issues": "https://github.com/alphaqu/DashLoader/issues",
+    "sources": "https://github.com/alphaqu/DashLoader"
+  },
   "license": "MIT",
   "icon": "assets/dashloader/textures/icon.png",
   "environment": "client",
