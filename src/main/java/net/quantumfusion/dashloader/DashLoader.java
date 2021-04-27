@@ -12,6 +12,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.Font;
 import net.minecraft.client.particle.ParticleManager;
 import net.minecraft.client.render.model.BakedModel;
@@ -40,9 +41,7 @@ import net.quantumfusion.dashloader.cache.misc.DashParticleData;
 import net.quantumfusion.dashloader.cache.models.*;
 import net.quantumfusion.dashloader.cache.models.factory.*;
 import net.quantumfusion.dashloader.misc.DashSplashTextData;
-import net.quantumfusion.dashloader.mixin.AbstractTextureAccessor;
-import net.quantumfusion.dashloader.mixin.SpriteAtlasManagerAccessor;
-import net.quantumfusion.dashloader.mixin.SpriteAtlasTextureAccessor;
+import net.quantumfusion.dashloader.mixin.*;
 import net.quantumfusion.dashloader.util.TimeHelper;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
@@ -58,6 +57,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class DashLoader {
     public static final Logger LOGGER = LogManager.getLogger();
@@ -94,7 +94,6 @@ public class DashLoader {
     private Map<Identifier, ParticleManager.SimpleSpriteProvider> particleSprites;
     private SpriteAtlasTexture particleAtlas;
     private List<String> splashText;
-    private Map<Identifier, List<Font>> fonts;
 
 
     public DashLoader() {
@@ -173,10 +172,6 @@ public class DashLoader {
         particleAtlas = atlas;
     }
 
-    public void addFontAssets(Map<Identifier, List<Font>> fonts) {
-        this.fonts = fonts;
-    }
-
     public void addSplashTextAssets(List<String> splashText) {
         this.splashText = splashText;
     }
@@ -202,6 +197,9 @@ public class DashLoader {
         serializeObject(new DashParticleData(particleSprites, particleAtlas, registry), paths.get(DashCachePaths.PARTICLE), "Particle");
 
         logAndTask("Mapping Fonts");
+
+        Map<Identifier, List<Font>> fonts = new ConcurrentHashMap<>();
+        ((FontManagerAccessor)((MinecraftClientAccessor)MinecraftClient.getInstance()).getFontManager()).getFontStorages().forEach((identifier, fontStorage) -> fonts.put(identifier, ((FontStorageAccessor)fontStorage).getFonts()));
         serializeObject(DashFontManagerData.toDash(fonts, registry), paths.get(DashCachePaths.FONT), "Font");
 
         logAndTask("Mapping Splash Text");
@@ -278,13 +276,13 @@ public class DashLoader {
             final int width = data.width;
             final int maxLevel = data.maxLevel;
             final int height = data.height;
-            LOGGER.info("Allocated: {}x{}x{} {}-atlas", width, height, maxLevel, id);
             TextureUtil.allocate(glId, maxLevel, width, height);
             ((AbstractTextureAccessor) spriteAtlasTexture).setGlId(glId);
             //ding dong lwjgl here are their styles
             ((SpriteAtlasTextureAccessor) spriteAtlasTexture).getSprites().forEach((identifier1, sprite) -> sprite.upload());
             //helu textures here are the atlases
             textureManager.registerTexture(id, spriteAtlasTexture);
+            LOGGER.info("Allocated: {}x{}x{} {}-atlas", width, height, maxLevel, id);
         });
     }
 

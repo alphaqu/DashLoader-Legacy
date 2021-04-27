@@ -1,11 +1,19 @@
 package net.quantumfusion.dashloader.mixin;
 
+import net.minecraft.client.font.BitmapFont;
 import net.minecraft.client.texture.NativeImage;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.gen.Invoker;
 
-@Mixin(targets = "net.minecraft.client.font.BitmapFont$BitmapFontGlyph")
+@Mixin(BitmapFont.BitmapFontGlyph.class)
 public interface BitmapFontGlyphAccessor {
+
+
+    @Invoker("<init>")
+    static BitmapFont.BitmapFontGlyph init(float scaleFactor, NativeImage image, int x, int y, int width, int height, int advance, int ascent) {
+        throw new AssertionError();
+    };
 
     @Accessor("image")
     NativeImage getImageD();

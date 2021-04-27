@@ -7,8 +7,10 @@ import io.activej.serializer.annotations.SerializeSubclasses;
 import it.unimi.dsi.fastutil.ints.IntLists;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.client.font.BitmapFont;
 import net.minecraft.client.font.BlankFont;
 import net.minecraft.client.font.Font;
+import net.minecraft.client.font.UnicodeTextureFont;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.json.MultipartModelSelector;
 import net.minecraft.client.texture.NativeImage;
@@ -235,12 +237,10 @@ public class DashRegistry {
     public int createFontPointer(Font font) {
         final int hash = font.hashCode();
         if (fonts.get(hash) == null) {
-            if (font instanceof UnicodeFont) {
-                fonts.put(hash, new DashUnicodeFont((UnicodeFont) font, this));
+            if (font instanceof UnicodeTextureFont) {
+                fonts.put(hash, new DashUnicodeFont((UnicodeTextureFont) font, this));
             } else if (font instanceof BitmapFont) {
                 fonts.put(hash, new DashBitmapFont((BitmapFont) font, this));
-            } else if (font instanceof net.minecraft.client.font.BitmapFont) {
-                fonts.put(hash, new DashBitmapFont(new BitmapFont((net.minecraft.client.font.BitmapFont) font), this));
             } else if (font instanceof BlankFont) {
                 fonts.put(hash, new DashBlankFont());
             } else {

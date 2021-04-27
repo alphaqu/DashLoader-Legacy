@@ -12,9 +12,6 @@ import java.util.Map;
 @Mixin(UnicodeTextureFont.class)
 public interface UnicodeTextureFontAccessor {
 
-    @Accessor("resourceManager")
-    ResourceManager getResourceManager();
-
     @Accessor("sizes")
     byte[] getSizes();
 
@@ -23,4 +20,16 @@ public interface UnicodeTextureFontAccessor {
 
     @Accessor("images")
     Map<Identifier, NativeImage> getImages();
+
+    @Accessor("sizes")
+    void setSizes(byte[] sizes);
+
+    @Accessor("template")
+    void setTemplate(String template);
+
+    @Accessor
+    void setResourceManager(ResourceManager resourceManager);
+
+    @Accessor("images")
+    void setImages(Map<Identifier, NativeImage> images);
 }

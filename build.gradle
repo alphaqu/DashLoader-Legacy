@@ -11,7 +11,7 @@ version = project.mod_version
 group = project.maven_group
 
 minecraft {
-    accessWidener =  file("src/main/resources/dash.accesswidener")
+    accessWidener =  file("src/main/resources/dashloader.accesswidener")
 }
 
 repositories {

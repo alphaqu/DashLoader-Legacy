@@ -6,13 +6,18 @@ import net.minecraft.client.font.RenderableGlyph;
 import net.minecraft.client.texture.NativeImage;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(BitmapFont.class)
 public interface BitmapFontAccessor {
 
+    @Invoker("<init>")
+    static BitmapFont init(NativeImage image, Int2ObjectMap<BitmapFont.BitmapFontGlyph> glyphs) {
+        throw new AssertionError();
+    };
 
     @Accessor("glyphs")
-    Int2ObjectMap<RenderableGlyph> getGlyphs();
+    Int2ObjectMap<BitmapFont.BitmapFontGlyph> getGlyphs();
 
     @Accessor("image")
     NativeImage getImage();

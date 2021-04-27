@@ -2,3 +2,4 @@ accessWidener v1 named
 accessible class net/minecraft/client/texture/Sprite$Interpolation
 accessible class net/minecraft/client/render/model/WeightedBakedModel$Entry
 accessible class net/minecraft/client/particle/ParticleManager$SimpleSpriteProvider
+accessible class net/minecraft/client/font/BitmapFont$BitmapFontGlyph

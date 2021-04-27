@@ -2,7 +2,9 @@ package net.quantumfusion.dashloader.cache.font.fonts;
 
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
+import net.minecraft.client.font.BitmapFont;
 import net.quantumfusion.dashloader.cache.DashRegistry;
+import net.quantumfusion.dashloader.mixin.BitmapFontGlyphAccessor;
 
 public class DashBitmapFontGlyph {
     @Serialize(order = 0)
@@ -42,17 +44,18 @@ public class DashBitmapFontGlyph {
     }
 
     public DashBitmapFontGlyph(BitmapFont.BitmapFontGlyph bitmapFontGlyph, DashRegistry registry) {
-        this.scaleFactor = bitmapFontGlyph.scaleFactor;
-        this.image = registry.createImagePointer(bitmapFontGlyph.image);
-        this.x = bitmapFontGlyph.x;
-        this.y = bitmapFontGlyph.y;
-        this.width = bitmapFontGlyph.width;
-        this.height = bitmapFontGlyph.height;
-        this.advance = bitmapFontGlyph.advance;
-        this.ascent = bitmapFontGlyph.ascent;
+        BitmapFontGlyphAccessor font = ((BitmapFontGlyphAccessor)(Object)bitmapFontGlyph);
+        this.scaleFactor = font.getScaleFactorD();
+        this.image = registry.createImagePointer(font.getImageD());
+        this.x = font.getXD();
+        this.y = font.getXD();
+        this.width = font.getWidthD();
+        this.height = font.getHeightD();
+        this.advance = font.getAdvanceD();
+        this.ascent = font.getAscentD();
     }
 
     public BitmapFont.BitmapFontGlyph toUndash(DashRegistry registry) {
-        return new BitmapFont.BitmapFontGlyph(scaleFactor, registry.getImage(image), x, y, width, height, advance, ascent);
+        return BitmapFontGlyphAccessor.init(scaleFactor, registry.getImage(image), x, y, width, height, advance, ascent);
     }
 }

@@ -11,7 +11,7 @@
   "license": "MIT",
   "icon": "assets/dashloader/textures/icon.png",
   "environment": "client",
-  "accessWidener": "dash.accesswidener",
+  "accessWidener": "dashloader.accesswidener",
   "entrypoints": {
     "client": [
       "net.quantumfusion.dashloader.client.DashClient"
@@ -20,7 +20,7 @@
     ]
   },
   "mixins": [
-    "dash.mixins.json"
+    "dashloader.mixins.json"
   ],
   "custom": {
     "sodium:options": {
