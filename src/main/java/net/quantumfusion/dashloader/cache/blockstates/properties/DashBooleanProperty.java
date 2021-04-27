@@ -3,7 +3,6 @@ package net.quantumfusion.dashloader.cache.blockstates.properties;
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import net.minecraft.state.property.BooleanProperty;
-import net.minecraft.state.property.Properties;
 
 
 import java.util.Objects;
