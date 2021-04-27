@@ -22,6 +22,13 @@ public class ReloadableResourceManagerImplMixin {
             at = @At(value = "HEAD"),
             cancellable = true)
     private void waitForDash(Executor prepareExecutor, Executor applyExecutor, CompletableFuture<Unit> initialStage, List<ResourcePack> packs, CallbackInfoReturnable<ResourceReloadMonitor> cir) {
-        DashLoader.getInstance().reload();
+        while (DashLoader.getInstance().state == DashCacheState.LOADING) {
+            try {
+                System.out.println("Waiting for dash???");
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

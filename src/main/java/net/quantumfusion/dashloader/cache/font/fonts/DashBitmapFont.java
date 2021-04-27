@@ -10,6 +10,7 @@ import net.quantumfusion.dashloader.cache.DashRegistry;
 import net.quantumfusion.dashloader.mixin.BitmapFontAccessor;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class DashBitmapFont implements DashFont {
     @Serialize(order = 0)
@@ -17,10 +18,10 @@ public class DashBitmapFont implements DashFont {
     @Serialize(order = 1)
     @SerializeNullable(path = {0})
     @SerializeNullable(path = {1})
-    public HashMap<Integer, DashBitmapFontGlyph> glyphs;
+    public Map<Integer, DashBitmapFontGlyph> glyphs;
 
     public DashBitmapFont(@Deserialize("image") Integer image,
-                          @Deserialize("glyphs") HashMap<Integer, DashBitmapFontGlyph> glyphs) {
+                          @Deserialize("glyphs") Map<Integer, DashBitmapFontGlyph> glyphs) {
         this.image = image;
         this.glyphs = glyphs;
     }
@@ -34,7 +35,7 @@ public class DashBitmapFont implements DashFont {
 
     public BitmapFont toUndash(DashRegistry registry) {
         Int2ObjectMap<BitmapFont.BitmapFontGlyph> out = new Int2ObjectOpenHashMap<>();
-        glyphs.forEach((integer, bitmap) -> out.put(integer, bitmap.toUndash(registry)));
+        glyphs.forEach((integer, bitmap) -> out.put((int) integer, bitmap.toUndash(registry)));
         return BitmapFontAccessor.init(registry.getImage(image), out);
     }
 

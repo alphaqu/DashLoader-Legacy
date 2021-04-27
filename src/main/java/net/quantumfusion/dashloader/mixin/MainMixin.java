@@ -13,6 +13,8 @@ public class MainMixin {
     @Inject(method = "main([Ljava/lang/String;)V",
             at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;beginInitialization()V", shift = At.Shift.AFTER), cancellable = true)
     private static void main(String[] args, CallbackInfo ci) {
-        new DashLoader();
+        DashLoader loader = new DashLoader();
+        loader.reload();
+
     }
 }

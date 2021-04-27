@@ -23,7 +23,6 @@
     "MinecraftClientMixin",
     "MipmapHelperMixin",
     "ModelIdentifierMixin",
-    "ModelLoaderAccessor",
     "ModelOverideListAccessor",
     "ModelOverrideAccessor",
     "MultipartBakedModelAccessor",
@@ -57,7 +56,9 @@
     "VoxelShapeAccessor",
     "WeightedBakedModelAccessor",
     "WeightedBakedModelEntryAccessor",
-    "WeightedPickerEntryAccessor"
+    "WeightedPickerEntryAccessor",
+
+    "UnicodeTextureFontMixin"
   ],
   "injectors": {
     "defaultRequire": 1

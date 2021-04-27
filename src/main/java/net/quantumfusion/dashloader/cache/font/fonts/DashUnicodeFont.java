@@ -47,7 +47,7 @@ public class DashUnicodeFont implements DashFont {
 
     public UnicodeTextureFont toUndash(DashRegistry registry) {
         Map<Identifier, NativeImage> out = new HashMap<>();
-        images.entrySet().parallelStream().forEach((entry) -> out.put(registry.getIdentifier(entry.getKey()), registry.getImage(entry.getValue())));
+        images.forEach((key, value) -> out.put(registry.getIdentifier(key), registry.getImage(value)));
         UnicodeTextureFont font = Unsafe.allocateInstance(UnicodeTextureFont.class);
         UnicodeTextureFontAccessor accessor = ((UnicodeTextureFontAccessor) font);
         accessor.setSizes(sizes);

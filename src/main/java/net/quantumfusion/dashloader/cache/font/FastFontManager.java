@@ -1,13 +1,17 @@
 package net.quantumfusion.dashloader.cache.font;
 
 import com.google.common.collect.Lists;
-import net.minecraft.client.font.Font;
-import net.minecraft.client.font.FontStorage;
-import net.minecraft.client.font.UnicodeTextureFont;
+import com.google.common.collect.Sets;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
+import net.minecraft.client.font.*;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.resource.ResourceReloadListener;
 import net.minecraft.resource.SinglePreparationResourceReloadListener;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.profiler.Profiler;
 import net.quantumfusion.dashloader.DashLoader;
 import net.quantumfusion.dashloader.mixin.FontManagerAccessor;
@@ -15,8 +19,11 @@ import net.quantumfusion.dashloader.mixin.UnicodeTextureFontAccessor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Stream;
 
 public class FastFontManager {
 
@@ -36,20 +43,22 @@ public class FastFontManager {
         protected void apply(Map<Identifier, List<Font>> map, ResourceManager resourceManager, Profiler profiler) {
             profiler.startTick();
             profiler.push("closing");
-            fontManager.getFontStorages().values().forEach(FontStorage::close);
-            fontManager.getFontStorages().clear();
+            final Map<Identifier, FontStorage> fontStorages = fontManager.getFontStorages();
+            fontStorages.values().forEach(FontStorage::close);
+            fontStorages.clear();
             profiler.swap("reloading");
             map.forEach((identifier, list) -> {
                 FontStorage fontStorage = new FontStorage(fontManager.getTextureManager(), identifier);
                 fontStorage.setFonts(Lists.reverse(list));
-                fontManager.getFontStorages().put(identifier, fontStorage);
+                System.out.println(identifier);
+                fontStorages.put(identifier, fontStorage);
             });
             profiler.pop();
             profiler.endTick();
         }
 
         public String getName() {
-            return "DashFontManager";
+            return "FontManager";
         }
     };
 

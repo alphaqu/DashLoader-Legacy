@@ -8,9 +8,9 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 public interface IdentifierAccessor {
 
 
-    @Accessor
+    @Accessor("namespace")
     void setNamespace(String namespace);
 
-    @Accessor
+    @Accessor("path")
     void setPath(String path);
 }

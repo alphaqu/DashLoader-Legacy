@@ -110,37 +110,37 @@ public class DashLoader {
     public void reload() {
         LOGGER.info("Starting dash thread.");
         Instant start = Instant.now();
-        initPaths();
-        initModelMappings();
-        initSerializers();
-        createDirectory();
-        LOGGER.info("Checking for Mod Change.");
-        DashLoaderInfo newData = DashLoaderInfo.create();
-        boolean reload = true;
-        try {
-            if (paths.get(DashCachePaths.DASH_INFO).toFile().exists()) {
-                DashLoaderInfo old = deserialize(DashLoaderInfo.class, paths.get(DashCachePaths.DASH_INFO), "Mod Info");
-                reload = !newData.equals(old);
-            }
-        } catch (Exception ignored) {
-        }
-        if (reload) {
-            destroyCache();
-            LOGGER.warn("DashLoader detected mod change, Recache requested.");
-            state = DashCacheState.EMPTY;
-        } else {
-            if (paths.values().stream().allMatch(path -> path.toFile().exists())) {
-                loadDashCache();
-            } else {
-                destroyCache();
-                LOGGER.warn("DashLoader files missing, Cache creation is appending and slow start predicted.");
-                state = DashCacheState.EMPTY;
-            }
-        }
-        newData = DashLoaderInfo.create();
-        createMetadata(newData);
-        LOGGER.info("Loaded cache in " + TimeHelper.getDecimalMs(start, Instant.now()) + "s");
         Thread dash = new Thread(() -> {
+            initPaths();
+            initModelMappings();
+            initSerializers();
+            createDirectory();
+            LOGGER.info("Checking for Mod Change.");
+            DashLoaderInfo newData = DashLoaderInfo.create();
+            boolean reload = true;
+            try {
+                if (paths.get(DashCachePaths.DASH_INFO).toFile().exists()) {
+                    DashLoaderInfo old = deserialize(DashLoaderInfo.class, paths.get(DashCachePaths.DASH_INFO), "Mod Info");
+                    reload = !newData.equals(old);
+                }
+            } catch (Exception ignored) {
+            }
+            if (reload) {
+                destroyCache();
+                LOGGER.warn("DashLoader detected mod change, Recache requested.");
+                state = DashCacheState.EMPTY;
+            } else {
+                if (paths.values().stream().allMatch(path -> path.toFile().exists())) {
+                    loadDashCache();
+                } else {
+                    destroyCache();
+                    LOGGER.warn("DashLoader files missing, Cache creation is appending and slow start predicted.");
+                    state = DashCacheState.EMPTY;
+                }
+            }
+            newData = DashLoaderInfo.create();
+            createMetadata(newData);
+            LOGGER.info("Loaded cache in " + TimeHelper.getDecimalMs(start, Instant.now()) + "s");
         });
         dash.setName("dash-manager");
         dash.start();
@@ -223,6 +223,7 @@ public class DashLoader {
             LOGGER.info("      Loading Registry");
             registry.toUndash();
 
+
             DashSplashTextData splashTextOut = deserialize(DashSplashTextData.class, paths.get(DashCachePaths.SPLASH_TEXT), "Splash Text");
             LOGGER.info("      Loading Splash Text");
             this.splashTextOut = splashTextOut.splashList;
@@ -254,8 +255,10 @@ public class DashLoader {
             atlasesToRegister.addAll(extraAtlasdata.toUndash(registry));
 
             DashFontManagerData fontData = deserialize(DashFontManagerData.class, paths.get(DashCachePaths.FONT), "Font");
-            LOGGER.info("    Loading Model Data");
             fontsOut = fontData.toUndash(registry);
+            LOGGER.info("    Loading Model Data");
+
+
 
             LOGGER.info("    Loaded DashLoader");
             stateLookupOut = new Object2IntOpenHashMap<>();
