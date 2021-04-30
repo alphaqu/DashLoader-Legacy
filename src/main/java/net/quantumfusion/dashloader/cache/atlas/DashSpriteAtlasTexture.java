@@ -17,16 +17,16 @@ import java.util.*;
 
 public class DashSpriteAtlasTexture {
     @Serialize(order = 0)
-    public List<Integer> animatedSprites;
+    public List<Long> animatedSprites;
 
     @Serialize(order = 1)
     @SerializeNullable()
     @SerializeNullable(path = {1})
     @SerializeNullable(path = {0})
-    public Map<Integer, Integer> sprites;
+    public Map<Long, Long> sprites;
 
     @Serialize(order = 2)
-    public final Integer id;
+    public final Long id;
     @Serialize(order = 3)
     public final int maxTextureSize;
 
@@ -40,9 +40,9 @@ public class DashSpriteAtlasTexture {
 
 
 
-    public DashSpriteAtlasTexture(@Deserialize("animatedSprites") List<Integer> animatedSprites,
-                                  @Deserialize("sprites") Map<Integer, Integer> sprites,
-                                  @Deserialize("id") Integer id,
+    public DashSpriteAtlasTexture(@Deserialize("animatedSprites") List<Long> animatedSprites,
+                                  @Deserialize("sprites") Map<Long, Long> sprites,
+                                  @Deserialize("id") Long id,
                                   @Deserialize("maxTextureSize") int maxTextureSize,
                                   @Deserialize("bilinear") boolean bilinear,
                                   @Deserialize("mipmap") boolean mipmap,
@@ -91,7 +91,7 @@ public class DashSpriteAtlasTexture {
         return spriteAtlasTexture;
     }
 
-    private Sprite loadSprite(int spritePointer, DashRegistry registry, SpriteAtlasTexture spriteAtlasTexture) {
+    private Sprite loadSprite(Long spritePointer, DashRegistry registry, SpriteAtlasTexture spriteAtlasTexture) {
         Sprite sprite =  registry.getSprite(spritePointer);
         ((SpriteAccessor)sprite).setAtlas(spriteAtlasTexture);
         return sprite;

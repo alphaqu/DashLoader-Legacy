@@ -26,15 +26,15 @@ import java.util.stream.Collectors;
 public class DashBlockState {
 
     @Serialize(order = 0)
-    public final Integer owner;
+    public final Long owner;
 
     @Serialize(order = 1)
     @SerializeNullable()
-    public final HashMap<Integer,Integer> entriesEncoded;
+    public final HashMap<Long,Long> entriesEncoded;
 
 
-    public DashBlockState(@Deserialize("owner") Integer owner,
-                          @Deserialize("entriesEncoded") HashMap<Integer,Integer> entriesEncoded) {
+    public DashBlockState(@Deserialize("owner") Long owner,
+                          @Deserialize("entriesEncoded") HashMap<Long,Long> entriesEncoded) {
         this.owner = owner;
         this.entriesEncoded = entriesEncoded;
     }
@@ -43,7 +43,7 @@ public class DashBlockState {
         StateAccessor<Block, BlockState> accessState = ((StateAccessor<Block, BlockState>) blockState);
         entriesEncoded = new HashMap<>();
         accessState.getEntries().forEach((property, comparable) -> {
-            final Pair<Integer, Integer> propertyPointer = registry.createPropertyPointer(property, comparable);
+            final Pair<Long, Long> propertyPointer = registry.createPropertyPointer(property, comparable);
             entriesEncoded.put(propertyPointer.getLeft(),propertyPointer.getRight());
         });
         owner = registry.createIdentifierPointer(Registry.BLOCK.getId(blockState.getBlock()));

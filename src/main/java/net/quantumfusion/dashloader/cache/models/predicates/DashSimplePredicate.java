@@ -25,12 +25,12 @@ public class DashSimplePredicate implements DashPredicate {
 
     @Serialize(order = 0)
     @SerializeNullable()
-    public Map<Integer,Integer> property;
+    public Map<Long,Long> property;
 
     @Serialize(order = 1)
     public boolean negate;
 
-    public DashSimplePredicate(@Deserialize("property") Map<Integer,Integer> property,
+    public DashSimplePredicate(@Deserialize("property") Map<Long,Long> property,
                                @Deserialize("negate") boolean negate) {
         this.property = property;
         this.negate = negate;
@@ -51,17 +51,17 @@ public class DashSimplePredicate implements DashPredicate {
             List<String> list = VALUE_SPLITTER.splitToList(string);
             property = new HashMap<>();
             if (list.size() == 1) {
-                Pair<Integer,Integer> predic = createPredicateInfo(stateManager, stateManagerProperty, string,registry);
+                Pair<Long,Long> predic = createPredicateInfo(stateManager, stateManagerProperty, string,registry);
                 property.put(predic.getLeft(),predic.getRight());
             } else {
-                List<Pair<Integer,Integer>> predic = list.stream().map((stringx) -> createPredicateInfo(stateManager, stateManagerProperty, stringx,registry)).collect(Collectors.toList());
+                List<Pair<Long,Long>> predic = list.stream().map((stringx) -> createPredicateInfo(stateManager, stateManagerProperty, stringx,registry)).collect(Collectors.toList());
                 predic.forEach(integerIntegerPair -> property.put(integerIntegerPair.getLeft(),integerIntegerPair.getRight()));
             }
         }
     }
 
 
-    private Pair<Integer,Integer> createPredicateInfo(StateManager<Block, BlockState> stateFactory, Property<?> property, String valueString,DashRegistry registry) {
+    private Pair<Long,Long> createPredicateInfo(StateManager<Block, BlockState> stateFactory, Property<?> property, String valueString,DashRegistry registry) {
         Optional<?> optional = property.parse(valueString);
         if (!optional.isPresent()) {
             throw new RuntimeException(String.format("Unknown value '%s' '%s'", valueString, stateFactory.getOwner().toString()));

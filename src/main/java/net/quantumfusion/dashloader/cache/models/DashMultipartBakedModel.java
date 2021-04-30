@@ -30,18 +30,18 @@ public class DashMultipartBakedModel implements DashModel {
     @SerializeNullable()
     @SerializeNullable(path = {0})
     @SerializeNullable(path = {1})
-    public HashMap<Integer, Integer> components;
+    public HashMap<Long, Long> components;
 
     @Serialize(order = 1)
     @SerializeNullable()
     @SerializeNullable(path = {0})
     @SerializeNullable(path = {1})
-    public Map<Integer, byte[]> stateCache;
+    public Map<Long, byte[]> stateCache;
 
     MultipartBakedModel toApply;
 
-    public DashMultipartBakedModel(@Deserialize("components")  HashMap<Integer, Integer>  components,
-                                   @Deserialize("stateCache") Map<Integer, byte[]> stateCache) {
+    public DashMultipartBakedModel(@Deserialize("components")  HashMap<Long, Long>  components,
+                                   @Deserialize("stateCache") Map<Long, byte[]> stateCache) {
         this.components = components;
         this.stateCache = stateCache;
     }

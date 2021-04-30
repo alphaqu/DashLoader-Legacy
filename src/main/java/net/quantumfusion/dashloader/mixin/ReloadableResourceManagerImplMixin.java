@@ -24,8 +24,8 @@ public class ReloadableResourceManagerImplMixin {
     private void waitForDash(Executor prepareExecutor, Executor applyExecutor, CompletableFuture<Unit> initialStage, List<ResourcePack> packs, CallbackInfoReturnable<ResourceReloadMonitor> cir) {
         while (DashLoader.getInstance().state == DashCacheState.LOADING) {
             try {
-                System.out.println("Waiting for dash???");
-                Thread.sleep(100);
+                System.out.println("Waiting for dash");
+                Thread.sleep(1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

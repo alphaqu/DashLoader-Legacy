@@ -14,16 +14,16 @@ import java.util.Map;
 public class DashModelOverride {
 
     @Serialize(order = 0)
-    public final Integer modelId;
+    public final Long modelId;
 
     @Serialize(order = 1)
     @SerializeNullable()
     @SerializeNullable(path = {0})
     @SerializeNullable(path = {1})
-    public final Map<Integer, Float> predicateToThresholds;
+    public final Map<Long, Float> predicateToThresholds;
 
-    public DashModelOverride(@Deserialize("modelId") Integer modelId,
-                             @Deserialize("predicateToThresholds") Map<Integer, Float> predicateToThresholds
+    public DashModelOverride(@Deserialize("modelId") Long modelId,
+                             @Deserialize("predicateToThresholds") Map<Long, Float> predicateToThresholds
     ) {
         this.modelId = modelId;
         this.predicateToThresholds = predicateToThresholds;

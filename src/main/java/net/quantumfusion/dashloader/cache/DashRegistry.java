@@ -33,6 +33,7 @@ import net.quantumfusion.dashloader.cache.models.DashModelIdentifier;
 import net.quantumfusion.dashloader.cache.models.ModelStage;
 import net.quantumfusion.dashloader.cache.models.factory.DashModelFactory;
 import net.quantumfusion.dashloader.cache.models.predicates.*;
+import net.quantumfusion.dashloader.mixin.NativeImageAccessor;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -48,15 +49,15 @@ public class DashRegistry {
     @Serialize(order = 0)
     @SerializeNullable(path = {1})
     @SerializeNullable(path = {0})
-    public Map<Integer, DashBlockState> blockstates;
+    public Map<Long, DashBlockState> blockstates;
 
 
     @Serialize(order = 1)
     @SerializeNullable(path = {1})
     @SerializeNullable(path = {0})
-    public Map<Integer, DashSprite> sprites;
+    public Map<Long, DashSprite> sprites;
 
-    public Map<Integer, Sprite> spritesOut;
+    public Map<Long, Sprite> spritesOut;
 
 
     @Serialize(order = 2)
@@ -65,23 +66,23 @@ public class DashRegistry {
             DashModelIdentifier.class
     })
     @SerializeNullable(path = {0})
-    public Map<Integer, DashID> identifiers;
+    public Map<Long, DashID> identifiers;
 
 
     @Serialize(order = 3)
     @SerializeNullable(path = {0})
     @SerializeSubclasses(path = {1}, extraSubclassesId = "models")
-    public Map<Integer, DashModel> models;
+    public Map<Long, DashModel> models;
 
     @Serialize(order = 4)
     @SerializeNullable(path = {0})
     @SerializeSubclasses(path = {1}, extraSubclassesId = "fonts")
-    public Map<Integer, DashFont> fonts;
+    public Map<Long, DashFont> fonts;
 
     @Serialize(order = 5)
     @SerializeNullable(path = {0})
     @SerializeNullable(path = {1})
-    public Map<Integer, DashImage> images;
+    public Map<Long, DashImage> images;
 
 
 
@@ -95,7 +96,7 @@ public class DashRegistry {
             DashOrPredicate.class,
             DashStaticPredicate.class
     })
-    public Map<Integer, DashPredicate> predicates;
+    public Map<Long, DashPredicate> predicates;
 
 
 
@@ -107,7 +108,7 @@ public class DashRegistry {
             DashDirectionProperty.class,
             DashIntProperty.class
     })
-    public Map<Integer, DashProperty> properties;
+    public Map<Long, DashProperty> properties;
 
 
     @Serialize(order = 8)
@@ -118,31 +119,31 @@ public class DashRegistry {
             DashDirectionValue.class,
             DashIntValue.class
     })
-    public Map<Integer, DashPropertyValue> propertyValues;
+    public Map<Long, DashPropertyValue> propertyValues;
 
     public List<Integer> failedPredicates = Collections.synchronizedList(new ArrayList<>());
 
 
     public Map<Class, Integer> modelsFailed = new ConcurrentHashMap<>();
-    public Map<Integer, BlockState> blockstatesOut;
-    public Map<Integer, Predicate<BlockState>> predicateOut;
-    public Map<Integer, Identifier> identifiersOut;
-    public Map<Integer, BakedModel> modelsOut;
-    public Map<Integer, Font> fontsOut;
-    public Map<Integer, NativeImage> imagesOut;
-    public Map<Integer, Property<?>> propertiesOut;
-    public Map<Integer, Comparable<?>> propertyValuesOut;
+    public Map<Long, BlockState> blockstatesOut;
+    public Map<Long, Predicate<BlockState>> predicateOut;
+    public Map<Long, Identifier> identifiersOut;
+    public Map<Long, BakedModel> modelsOut;
+    public Map<Long, Font> fontsOut;
+    public Map<Long, NativeImage> imagesOut;
+    public Map<Long, Property<?>> propertiesOut;
+    public Map<Long, Comparable<?>> propertyValuesOut;
     DashLoader loader;
 
-    public DashRegistry(@Deserialize("blockstates") Map<Integer, DashBlockState> blockstates,
-                        @Deserialize("sprites") Map<Integer, DashSprite> sprites,
-                        @Deserialize("identifiers") Map<Integer, DashID> identifiers,
-                        @Deserialize("models") Map<Integer, DashModel> models,
-                        @Deserialize("fonts") Map<Integer, DashFont> fonts,
-                        @Deserialize("images") Map<Integer, DashImage> images,
-                        @Deserialize("predicates") Map<Integer, DashPredicate> predicates,
-                        @Deserialize("properties") Map<Integer, DashProperty> properties,
-                        @Deserialize("propertyValues") Map<Integer, DashPropertyValue> propertyValues) {
+    public DashRegistry(@Deserialize("blockstates") Map<Long, DashBlockState> blockstates,
+                        @Deserialize("sprites") Map<Long, DashSprite> sprites,
+                        @Deserialize("identifiers") Map<Long, DashID> identifiers,
+                        @Deserialize("models") Map<Long, DashModel> models,
+                        @Deserialize("fonts") Map<Long, DashFont> fonts,
+                        @Deserialize("images") Map<Long, DashImage> images,
+                        @Deserialize("predicates") Map<Long, DashPredicate> predicates,
+                        @Deserialize("properties") Map<Long, DashProperty> properties,
+                        @Deserialize("propertyValues") Map<Long, DashPropertyValue> propertyValues) {
         this.blockstates = blockstates;
         this.sprites = sprites;
         this.identifiers = identifiers;
@@ -168,19 +169,19 @@ public class DashRegistry {
     }
 
 
-    public int createBlockStatePointer(BlockState blockState) {
-        final int hash = blockState.hashCode();
+    public long createBlockStatePointer(BlockState blockState) {
+        final long hash = blockState.hashCode();
         if (blockstates.get(hash) == null) {
             blockstates.put(hash, new DashBlockState(blockState, this));
         }
         return hash;
     }
 
-    public <K> Integer createModelPointer(BakedModel bakedModel, @Nullable K var) {
+    public <K> Long createModelPointer(BakedModel bakedModel, @Nullable K var) {
         if (bakedModel == null) {
             return null;
         }
-        final int hash = bakedModel.hashCode();
+        final long hash = bakedModel.hashCode();
         if (models.get(hash) == null) {
             DashModelFactory model = loader.modelMappings.get(bakedModel.getClass());
             if (model != null) {
@@ -198,16 +199,16 @@ public class DashRegistry {
         return hash;
     }
 
-    public int createSpritePointer(Sprite sprite) {
-        final int hash = sprite.hashCode();
+    public long createSpritePointer(Sprite sprite) {
+        final long hash = sprite.hashCode();
         if (sprites.get(hash) == null) {
             sprites.put(hash, new DashSprite(sprite, this));
         }
         return hash;
     }
 
-    public int createIdentifierPointer(Identifier identifier) {
-        final int hash = identifier.hashCode();
+    public long createIdentifierPointer(Identifier identifier) {
+        final long hash = identifier.hashCode();
         if (identifiers.get(hash) == null) {
             if (identifier instanceof ModelIdentifier) {
                 identifiers.put(hash, new DashModelIdentifier((ModelIdentifier) identifier));
@@ -218,29 +219,29 @@ public class DashRegistry {
         return hash;
     }
 
-    public int createImagePointer(NativeImage image) {
-        final int hash = image.hashCode();
+    public long createImagePointer(NativeImage image) {
+        final long hash = ((NativeImageAccessor)(Object)image).getPointer();
         if (images.get(hash) == null) {
             images.put(hash, new DashImage(image));
         }
         return hash;
     }
 
-    public int createPredicatePointer(MultipartModelSelector selector, StateManager<Block, BlockState> stateManager) {
-        final int hash = selector.hashCode();
+    public long createPredicatePointer(MultipartModelSelector selector, StateManager<Block, BlockState> stateManager) {
+        final long hash = selector.hashCode();
         if (predicates.get(hash) == null) {
             predicates.put(hash, PredicateHelper.getPredicate(selector, stateManager,this));
         }
         return hash;
     }
 
-    public int createFontPointer(Font font) {
-        final int hash = font.hashCode();
+    public long createFontPointer(Font font) {
+        final long hash = font.hashCode();
         if (fonts.get(hash) == null) {
-            if (font instanceof UnicodeTextureFont) {
-                fonts.put(hash, new DashUnicodeFont((UnicodeTextureFont) font, this));
-            } else if (font instanceof BitmapFont) {
+            if (font instanceof BitmapFont) {
                 fonts.put(hash, new DashBitmapFont((BitmapFont) font, this));
+            } else if (font instanceof UnicodeTextureFont) {
+                fonts.put(hash, new DashUnicodeFont((UnicodeTextureFont) font, this));
             } else if (font instanceof BlankFont) {
                 fonts.put(hash, new DashBlankFont());
             } else {
@@ -250,16 +251,16 @@ public class DashRegistry {
         return hash;
     }
 
-    public Pair<Integer,Integer> createPropertyPointer(Property<?> property, Comparable<?> value) {
-        final int hashV = value.hashCode();
-        final int hashP = property.hashCode();
+    public Pair<Long,Long> createPropertyPointer(Property<?> property, Comparable<?> value) {
+        final long hashV = value.hashCode();
+        final long hashP = property.hashCode();
         propertyValues.putIfAbsent(hashV,PredicateHelper.getPropertyValue(value,hashP));
         properties.putIfAbsent(hashP,PredicateHelper.getProperty(property));
         return Pair.of(hashP,hashV);
     }
 
 
-    public BlockState getBlockstate(Integer pointer) {
+    public BlockState getBlockstate(Long pointer) {
         if (blockstatesOut == null) {
             throw new DashException("BlockStates not deserialized");
         }
@@ -270,7 +271,7 @@ public class DashRegistry {
         return blockstate;
     }
 
-    public Sprite getSprite(Integer pointer) {
+    public Sprite getSprite(Long pointer) {
         if (spritesOut == null) {
             throw new DashException("Sprites not deserialized");
         }
@@ -281,7 +282,7 @@ public class DashRegistry {
         return sprite;
     }
 
-    public Identifier getIdentifier(Integer pointer) {
+    public Identifier getIdentifier(Long pointer) {
         if (identifiersOut == null) {
             throw new DashException("Identifiers not deserialized");
         }
@@ -292,7 +293,7 @@ public class DashRegistry {
         return identifier;
     }
 
-    public BakedModel getModel(Integer pointer) {
+    public BakedModel getModel(Long pointer) {
         if (modelsOut == null) {
             throw new DashException("Models not deserialized");
         }
@@ -303,7 +304,7 @@ public class DashRegistry {
         return bakedModel;
     }
 
-    public Font getFont(Integer pointer) {
+    public Font getFont(Long pointer) {
         if (fontsOut == null) {
             throw new DashException("Fonts not deserialized");
         }
@@ -314,7 +315,7 @@ public class DashRegistry {
         return font;
     }
 
-    public NativeImage getImage(Integer pointer) {
+    public NativeImage getImage(Long pointer) {
         if (imagesOut == null) {
             throw new DashException("NativeImages not deserialized");
         }
@@ -325,7 +326,7 @@ public class DashRegistry {
         return image;
     }
 
-    public Predicate<BlockState> getPredicate(Integer pointer) {
+    public Predicate<BlockState> getPredicate(Long pointer) {
         if (predicateOut == null) {
             throw new DashException("Predicates not deserialized");
         }
@@ -336,7 +337,7 @@ public class DashRegistry {
         return predicateOut.get(pointer);
     }
 
-    public Pair<Property<?>, Comparable<?>> getProperty(int propertyPointer, int valuePointer) {
+    public Pair<Property<?>, Comparable<?>> getProperty(Long propertyPointer, Long valuePointer) {
         if (propertiesOut == null) {
             throw new DashException("Properties not deserialized");
         }

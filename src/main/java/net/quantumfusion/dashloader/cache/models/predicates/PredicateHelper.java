@@ -31,7 +31,7 @@ public class PredicateHelper {
     }
 
 
-    public static <T extends Enum<T> & StringIdentifiable> DashPropertyValue getPropertyValue(Comparable<?> value,int hashP) {
+    public static <T extends Enum<T> & StringIdentifiable> DashPropertyValue getPropertyValue(Comparable<?> value,long hashP) {
         if (value instanceof Boolean) {
             return new DashBooleanValue((Boolean) value);
         } else if (value instanceof Direction) {

@@ -19,12 +19,12 @@ public class DashModelOverrideList {
     public List<DashModelOverride> overrides;
     @Serialize(order = 1)
     @SerializeNullable(path = {0})
-    public List<Integer> bakedModels;
+    public List<Long> bakedModels;
 
     ModelOverrideList toApply;
 
     public DashModelOverrideList(@Deserialize("overrides")List<DashModelOverride> overrides,
-                                 @Deserialize("bakedModels")List<Integer> bakedModels) {
+                                 @Deserialize("bakedModels")List<Long> bakedModels) {
         this.overrides = overrides;
         this.bakedModels = bakedModels;
     }

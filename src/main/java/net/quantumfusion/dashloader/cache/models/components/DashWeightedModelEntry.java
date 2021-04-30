@@ -11,12 +11,12 @@ import net.quantumfusion.dashloader.mixin.WeightedPickerEntryAccessor;
 
 public class DashWeightedModelEntry {
     @Serialize(order = 0)
-    public Integer model;
+    public Long model;
 
     @Serialize(order = 1)
     public int weight;
 
-    public DashWeightedModelEntry(@Deserialize("model") Integer model,
+    public DashWeightedModelEntry(@Deserialize("model") Long model,
                                   @Deserialize("weight")int weight) {
         this.model = model;
         this.weight = weight;

@@ -18,7 +18,7 @@ public class DashUnicodeFont implements DashFont {
     @SerializeNullable()
     @SerializeNullable(path = {1})
     @SerializeNullable(path = {0})
-    public final Map<Integer, Integer> images;
+    public final Map<Long, Long> images;
 
     @Serialize(order = 1)
     public final byte[] sizes;
@@ -28,7 +28,7 @@ public class DashUnicodeFont implements DashFont {
 
 
 
-    public DashUnicodeFont(@Deserialize("images") Map<Integer, Integer> images,
+    public DashUnicodeFont(@Deserialize("images") Map<Long, Long> images,
                            @Deserialize("sizes") byte[] sizes,
                            @Deserialize("template") String template) {
         this.images = images;

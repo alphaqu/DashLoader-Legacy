@@ -15,6 +15,5 @@ public class MainMixin {
     private static void main(String[] args, CallbackInfo ci) {
         DashLoader loader = new DashLoader();
         loader.reload();
-
     }
 }

@@ -57,8 +57,8 @@
     "WeightedBakedModelAccessor",
     "WeightedBakedModelEntryAccessor",
     "WeightedPickerEntryAccessor",
+    "NativeImageAccessor"
 
-    "UnicodeTextureFontMixin"
   ],
   "injectors": {
     "defaultRequire": 1

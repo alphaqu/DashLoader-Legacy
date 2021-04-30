@@ -44,7 +44,7 @@ public class DashSprite {
     @Serialize(order = 12)
     public final int frameTicks;
     @Serialize(order = 13)
-    public List<Integer> images;
+    public List<Long> images;
 
 
     public DashSprite(@Deserialize("info") DashSpriteInfo info,
@@ -60,7 +60,7 @@ public class DashSprite {
                       @Deserialize("vMax") float vMax,
                       @Deserialize("frameIndex") int frameIndex,
                       @Deserialize("frameTicks") int frameTicks,
-                      @Deserialize("images") List<Integer> images
+                      @Deserialize("images") List<Long> images
                       ) {
         this.info = info;
         this.animationMetadata = animationMetadata;

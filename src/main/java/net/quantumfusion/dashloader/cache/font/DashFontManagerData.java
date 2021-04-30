@@ -18,20 +18,20 @@ public class DashFontManagerData {
     @SerializeNullable(path = {0})
     @SerializeNullable(path = {1})
     @SerializeNullable(path = {1, 0})
-    public Map<Integer, List<Integer>> fontMap;
+    public Map<Long, List<Long>> fontMap;
 
-    public DashFontManagerData(@Deserialize("fontMap") Map<Integer, List<Integer>> fontMap) {
+    public DashFontManagerData(@Deserialize("fontMap") Map<Long, List<Long>> fontMap) {
         this.fontMap = fontMap;
     }
 
-    public static DashFontManagerData toDash(Map<Identifier, List<Font>> fonts, DashRegistry registry){
-        Map<Integer, List<Integer>> fontMapOut = new HashMap<>();
+    public DashFontManagerData(Map<Identifier, List<Font>> fonts, DashRegistry registry){
+        fontMap = new HashMap<>();
         fonts.forEach((identifier, fonts1) -> {
-            List<Integer> fontsOut = new ArrayList<>();
+            List<Long> fontsOut = new ArrayList<>();
             fonts1.forEach(font -> fontsOut.add(registry.createFontPointer(font)));
-            fontMapOut.put(registry.createIdentifierPointer(identifier),fontsOut);
+            fontMap.put(registry.createIdentifierPointer(identifier),fontsOut);
         });
-        return new DashFontManagerData(fontMapOut);
+
     }
 
     public Map<Identifier, List<Font>> toUndash(DashRegistry registry) {

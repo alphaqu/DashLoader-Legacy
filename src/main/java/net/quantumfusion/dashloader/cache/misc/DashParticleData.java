@@ -23,12 +23,12 @@ public class DashParticleData {
     @Serialize(order = 0)
     @SerializeNullable(path = {0})
     @SerializeNullable(path = {1})
-    public Map<Integer, List<Integer>> particles;
+    public Map<Long, List<Long>> particles;
 
     @Serialize(order = 1)
     public DashSpriteAtlasTexture spriteAtlasTexture;
 
-    public DashParticleData(@Deserialize("particles") Map<Integer, List<Integer>> particles) {
+    public DashParticleData(@Deserialize("particles") Map<Long, List<Long>> particles) {
         this.particles = particles;
     }
 
@@ -36,7 +36,7 @@ public class DashParticleData {
         this.particles = new HashMap<>();
         spriteAtlasTexture = new DashSpriteAtlasTexture(texture, DashLoader.getInstance().atlasData.get(texture), registry);
         particles.forEach((identifier, simpleSpriteProvider) -> {
-            List<Integer> out = new ArrayList<>();
+            List<Long> out = new ArrayList<>();
             ((ParticleManagerSimpleSpriteProviderAccessor) simpleSpriteProvider).getSprites().forEach(sprite -> out.add(registry.createSpritePointer(sprite)));
             this.particles.put(registry.createIdentifierPointer(identifier), out);
         });

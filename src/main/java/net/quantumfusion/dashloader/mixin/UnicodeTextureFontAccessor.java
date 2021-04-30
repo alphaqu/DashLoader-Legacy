@@ -12,24 +12,24 @@ import java.util.Map;
 @Mixin(UnicodeTextureFont.class)
 public interface UnicodeTextureFontAccessor {
 
-    @Accessor("sizes")
+    @Accessor
     byte[] getSizes();
 
-    @Accessor("template")
+    @Accessor
     String getTemplate();
 
-    @Accessor("images")
+    @Accessor
     Map<Identifier, NativeImage> getImages();
 
-    @Accessor("sizes")
+    @Accessor
     void setSizes(byte[] sizes);
 
-    @Accessor("template")
+    @Accessor
     void setTemplate(String template);
 
     @Accessor
     void setResourceManager(ResourceManager resourceManager);
 
-    @Accessor("images")
+    @Accessor
     void setImages(Map<Identifier, NativeImage> images);
 }

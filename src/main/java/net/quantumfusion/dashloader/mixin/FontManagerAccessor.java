@@ -18,4 +18,8 @@ public interface FontManagerAccessor {
 
     @Accessor("fontStorages")
     Map<Identifier, FontStorage> getFontStorages();
+
+    @Accessor("fontStorages")
+    void setFontStorages(Map<Identifier, FontStorage> storage);
+
 }

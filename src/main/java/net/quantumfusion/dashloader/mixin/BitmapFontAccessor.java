@@ -16,10 +16,10 @@ public interface BitmapFontAccessor {
         throw new AssertionError();
     };
 
-    @Accessor("glyphs")
+    @Accessor
     Int2ObjectMap<BitmapFont.BitmapFontGlyph> getGlyphs();
 
-    @Accessor("image")
+    @Accessor
     NativeImage getImage();
 
 }

@@ -14,13 +14,13 @@ import java.util.Map;
 
 public class DashBitmapFont implements DashFont {
     @Serialize(order = 0)
-    public final Integer image;
+    public final Long image;
     @Serialize(order = 1)
     @SerializeNullable(path = {0})
     @SerializeNullable(path = {1})
     public Map<Integer, DashBitmapFontGlyph> glyphs;
 
-    public DashBitmapFont(@Deserialize("image") Integer image,
+    public DashBitmapFont(@Deserialize("image") Long image,
                           @Deserialize("glyphs") Map<Integer, DashBitmapFontGlyph> glyphs) {
         this.image = image;
         this.glyphs = glyphs;

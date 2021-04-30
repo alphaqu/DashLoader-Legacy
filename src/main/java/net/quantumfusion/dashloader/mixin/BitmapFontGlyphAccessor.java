@@ -15,28 +15,28 @@ public interface BitmapFontGlyphAccessor {
         throw new AssertionError();
     };
 
-    @Accessor("image")
-    NativeImage getImageD();
+    @Accessor
+    NativeImage getImage();
 
     @Accessor("x")
-    int getXD();
+    int getX();
 
     @Accessor("y")
-    int getYD();
+    int getY();
 
-    @Accessor("scaleFactor")
-    float getScaleFactorD();
+    @Accessor
+    float getScaleFactor();
 
 
-    @Accessor("width")
-    int getWidthD();
+    @Accessor
+    int getWidth();
 
-    @Accessor("height")
-    int getHeightD();
+    @Accessor
+    int getHeight();
 
-    @Accessor("advance")
-    int getAdvanceD();
+    @Accessor
+    int getAdvance();
 
-    @Accessor("ascent")
-    int getAscentD();
+    @Accessor
+    int getAscent();
 }

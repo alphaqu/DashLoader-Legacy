@@ -24,10 +24,9 @@ public class FontManagerOverride {
 
     @Inject(method = "getResourceReloadListener()Lnet/minecraft/resource/ResourceReloadListener;",
             at = @At(value = "HEAD"), cancellable = true)
-    private void override(CallbackInfoReturnable<ResourceReloadListener> cir) {
+    private void Override(CallbackInfoReturnable<ResourceReloadListener> cir) {
         final DashLoader instance = DashLoader.getInstance();
-        System.out.println(instance.state);
-        if (instance.state == DashCacheState.LOADED) {
+        if (instance.state == DashCacheState.LOADED && instance.fontsOut != null) {
             DashLoader.LOGGER.info("Replacing Fonts");
             cir.setReturnValue(new FastFontManager((FontManagerAccessor)this).resourceReloadListener);
             cir.cancel();

@@ -9,7 +9,7 @@ import net.quantumfusion.dashloader.mixin.SpriteInfoAccessor;
 
 public class DashSpriteInfo {
     @Serialize(order = 0)
-    public final Integer id;
+    public final Long id;
     @Serialize(order = 1)
     public final int width;
     @Serialize(order = 2)
@@ -17,7 +17,7 @@ public class DashSpriteInfo {
     @Serialize(order = 3)
     public final DashAnimationResourceMetadata animationData;
 
-    public DashSpriteInfo(@Deserialize("id") Integer id,
+    public DashSpriteInfo(@Deserialize("id") Long id,
                           @Deserialize("width") int width,
                           @Deserialize("height") int height,
                           @Deserialize("animationData") DashAnimationResourceMetadata animationData) {

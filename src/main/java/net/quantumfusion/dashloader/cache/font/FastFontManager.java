@@ -30,27 +30,25 @@ public class FastFontManager {
     private final FontManagerAccessor fontManager;
     public final ResourceReloadListener resourceReloadListener = new SinglePreparationResourceReloadListener<Map<Identifier, List<Font>>>() {
         protected Map<Identifier, List<Font>> prepare(ResourceManager resourceManager, Profiler profiler) {
-            final Map<Identifier, List<Font>> fontsOut = DashLoader.getInstance().fontsOut;
+            Map<Identifier, List<Font>> fontsOut = DashLoader.getInstance().fontsOut;
             fontsOut.forEach((identifier, list) -> list.forEach(font -> {
                         if (font instanceof UnicodeTextureFont) {
                             ((UnicodeTextureFontAccessor) font).setResourceManager(resourceManager);
                         }
-                    }
-            ));
+                    }));
             return fontsOut;
         }
 
         protected void apply(Map<Identifier, List<Font>> map, ResourceManager resourceManager, Profiler profiler) {
             profiler.startTick();
             profiler.push("closing");
-            final Map<Identifier, FontStorage> fontStorages = fontManager.getFontStorages();
+            Map<Identifier, FontStorage> fontStorages = fontManager.getFontStorages();
             fontStorages.values().forEach(FontStorage::close);
             fontStorages.clear();
             profiler.swap("reloading");
             map.forEach((identifier, list) -> {
                 FontStorage fontStorage = new FontStorage(fontManager.getTextureManager(), identifier);
                 fontStorage.setFonts(Lists.reverse(list));
-                System.out.println(identifier);
                 fontStorages.put(identifier, fontStorage);
             });
             profiler.pop();

@@ -109,6 +109,7 @@ public class DashLoader {
 
     public void reload() {
         LOGGER.info("Starting dash thread.");
+        state = DashCacheState.LOADING;
         Instant start = Instant.now();
         Thread dash = new Thread(() -> {
             initPaths();
@@ -197,10 +198,9 @@ public class DashLoader {
         serializeObject(new DashParticleData(particleSprites, particleAtlas, registry), paths.get(DashCachePaths.PARTICLE), "Particle");
 
         logAndTask("Mapping Fonts");
-
-        Map<Identifier, List<Font>> fonts = new ConcurrentHashMap<>();
+        Map<Identifier, List<Font>> fonts = new HashMap<>();
         ((FontManagerAccessor)((MinecraftClientAccessor)MinecraftClient.getInstance()).getFontManager()).getFontStorages().forEach((identifier, fontStorage) -> fonts.put(identifier, ((FontStorageAccessor)fontStorage).getFonts()));
-        serializeObject(DashFontManagerData.toDash(fonts, registry), paths.get(DashCachePaths.FONT), "Font");
+        serializeObject(new DashFontManagerData(fonts, registry), paths.get(DashCachePaths.FONT), "Font");
 
         logAndTask("Mapping Splash Text");
         serializeObject(new DashSplashTextData(splashText), paths.get(DashCachePaths.SPLASH_TEXT), "Splash Text");
@@ -217,7 +217,6 @@ public class DashLoader {
 
     public void loadDashCache() {
         LOGGER.info("Starting DashLoader Deserialization");
-        state = DashCacheState.LOADING;
         try {
             DashRegistry registry = deserialize(DashRegistry.class, paths.get(DashCachePaths.REGISTRY), "Registry");
             LOGGER.info("      Loading Registry");
@@ -255,10 +254,8 @@ public class DashLoader {
             atlasesToRegister.addAll(extraAtlasdata.toUndash(registry));
 
             DashFontManagerData fontData = deserialize(DashFontManagerData.class, paths.get(DashCachePaths.FONT), "Font");
+            LOGGER.info("      Loading Font Data");
             fontsOut = fontData.toUndash(registry);
-            LOGGER.info("    Loading Model Data");
-
-
 
             LOGGER.info("    Loaded DashLoader");
             stateLookupOut = new Object2IntOpenHashMap<>();
@@ -274,8 +271,8 @@ public class DashLoader {
         atlasesToRegister.forEach((spriteAtlasTexture) -> {
             //atlas registration
             final DashSpriteAtlasTextureData data = atlasData.get(spriteAtlasTexture);
-            final int glId = TextureUtil.generateId();
             final Identifier id = spriteAtlasTexture.getId();
+            final int glId = TextureUtil.generateId();
             final int width = data.width;
             final int maxLevel = data.maxLevel;
             final int height = data.height;
@@ -322,7 +319,7 @@ public class DashLoader {
         tasksComplete++;
     }
 
-    private static final boolean debug = true;
+    private static final boolean debug = false;
 
     public void destroyCache(Exception exception) {
         if (!debug) {

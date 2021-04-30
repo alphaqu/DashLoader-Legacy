@@ -10,7 +10,7 @@ public class DashBitmapFontGlyph {
     @Serialize(order = 0)
     public final float scaleFactor;
     @Serialize(order = 1)
-    public final Integer image;
+    public final Long image;
     @Serialize(order = 2)
     public final int x;
     @Serialize(order = 3)
@@ -25,7 +25,7 @@ public class DashBitmapFontGlyph {
     public final int ascent;
 
     public DashBitmapFontGlyph(@Deserialize("scaleFactor") float scaleFactor,
-                               @Deserialize("image") Integer image,
+                               @Deserialize("image") Long image,
                                @Deserialize("x") int x,
                                @Deserialize("y") int y,
                                @Deserialize("width") int width,
@@ -45,14 +45,14 @@ public class DashBitmapFontGlyph {
 
     public DashBitmapFontGlyph(BitmapFont.BitmapFontGlyph bitmapFontGlyph, DashRegistry registry) {
         BitmapFontGlyphAccessor font = ((BitmapFontGlyphAccessor)(Object)bitmapFontGlyph);
-        this.scaleFactor = font.getScaleFactorD();
-        this.image = registry.createImagePointer(font.getImageD());
-        this.x = font.getXD();
-        this.y = font.getXD();
-        this.width = font.getWidthD();
-        this.height = font.getHeightD();
-        this.advance = font.getAdvanceD();
-        this.ascent = font.getAscentD();
+        this.scaleFactor = font.getScaleFactor();
+        this.image = registry.createImagePointer(font.getImage());
+        this.x = font.getX();
+        this.y = font.getY();
+        this.width = font.getWidth();
+        this.height = font.getHeight();
+        this.advance = font.getAdvance();
+        this.ascent = font.getAscent();
     }
 
     public BitmapFont.BitmapFontGlyph toUndash(DashRegistry registry) {
