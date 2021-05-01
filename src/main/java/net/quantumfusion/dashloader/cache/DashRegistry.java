@@ -84,10 +84,6 @@ public class DashRegistry {
     @SerializeNullable(path = {1})
     public Map<Long, DashImage> images;
 
-
-
-
-
     @Serialize(order = 6)
     @SerializeNullable(path = {0})
     @SerializeSubclasses(path = {1}, value = {

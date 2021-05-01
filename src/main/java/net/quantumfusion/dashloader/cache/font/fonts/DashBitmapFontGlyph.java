@@ -8,21 +8,21 @@ import net.quantumfusion.dashloader.mixin.BitmapFontGlyphAccessor;
 
 public class DashBitmapFontGlyph {
     @Serialize(order = 0)
-    public final float scaleFactor;
+    public float scaleFactor;
     @Serialize(order = 1)
-    public final Long image;
+    public Long image;
     @Serialize(order = 2)
-    public final int x;
+    public int x;
     @Serialize(order = 3)
-    public final int y;
+    public int y;
     @Serialize(order = 4)
-    public final int width;
+    public int width;
     @Serialize(order = 5)
-    public final int height;
+    public int height;
     @Serialize(order = 6)
-    public final int advance;
+    public int advance;
     @Serialize(order = 7)
-    public final int ascent;
+    public int ascent;
 
     public DashBitmapFontGlyph(@Deserialize("scaleFactor") float scaleFactor,
                                @Deserialize("image") Long image,
@@ -45,14 +45,14 @@ public class DashBitmapFontGlyph {
 
     public DashBitmapFontGlyph(BitmapFont.BitmapFontGlyph bitmapFontGlyph, DashRegistry registry) {
         BitmapFontGlyphAccessor font = ((BitmapFontGlyphAccessor)(Object)bitmapFontGlyph);
-        this.scaleFactor = font.getScaleFactor();
-        this.image = registry.createImagePointer(font.getImage());
-        this.x = font.getX();
-        this.y = font.getY();
-        this.width = font.getWidth();
-        this.height = font.getHeight();
-        this.advance = font.getAdvance();
-        this.ascent = font.getAscent();
+        scaleFactor = font.getScaleFactor();
+        image = registry.createImagePointer(font.getImage());
+        x = font.getX();
+        y = font.getY();
+        width = font.getWidth();
+        height = font.getHeight();
+        advance = font.getAdvance();
+        ascent = font.getAscent();
     }
 
     public BitmapFont.BitmapFontGlyph toUndash(DashRegistry registry) {

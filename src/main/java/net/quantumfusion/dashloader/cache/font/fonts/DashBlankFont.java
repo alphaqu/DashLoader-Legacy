@@ -6,9 +6,6 @@ import net.quantumfusion.dashloader.cache.DashRegistry;
 
 public class DashBlankFont implements DashFont{
 
-    public DashBlankFont() {
-    }
-
     @Override
     public Font toUndash(DashRegistry registry) {
         return new BlankFont();

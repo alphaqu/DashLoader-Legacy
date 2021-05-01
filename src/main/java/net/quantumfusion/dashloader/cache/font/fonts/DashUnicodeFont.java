@@ -16,8 +16,8 @@ import java.util.Map;
 public class DashUnicodeFont implements DashFont {
     @Serialize(order = 0)
     @SerializeNullable()
-    @SerializeNullable(path = {1})
     @SerializeNullable(path = {0})
+    @SerializeNullable(path = {1})
     public final Map<Long, Long> images;
 
     @Serialize(order = 1)

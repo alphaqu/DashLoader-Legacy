@@ -14,12 +14,14 @@
     "BitmapFontGlyphAccessor",
     "BlockModelsAccessor",
     "BuiltinBakedModelAccessor",
-    "IdentifierAccessor",
     "FontManagerAccessor",
     "FontManagerOverride",
+    "FontStorageAccessor",
+    "IdentifierAccessor",
     "JsonUnbakedModelAccessor",
     "LanguageMixin",
     "MainMixin",
+    "MinecraftClientAccessor",
     "MinecraftClientMixin",
     "MipmapHelperMixin",
     "ModelIdentifierMixin",
@@ -28,6 +30,7 @@
     "MultipartBakedModelAccessor",
     "MultipartModelComponentAccessor",
     "MultipartUnbakedModelMixin",
+    "NativeImageAccessor",
     "OrMultipartModelSelectorAccessor",
     "ParticleManagerMixin",
     "ParticleManagerSimpleSpriteProviderAccessor",
@@ -51,14 +54,10 @@
     "SuffixArrayMixin",
     "TitleScreenMixin",
     "UnicodeTextureFontAccessor",
-    "MinecraftClientAccessor",
-    "FontStorageAccessor",
     "VoxelShapeAccessor",
     "WeightedBakedModelAccessor",
     "WeightedBakedModelEntryAccessor",
-    "WeightedPickerEntryAccessor",
-    "NativeImageAccessor"
-
+    "WeightedPickerEntryAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

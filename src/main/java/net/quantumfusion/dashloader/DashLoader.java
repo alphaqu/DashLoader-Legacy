@@ -12,7 +12,6 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.Font;
 import net.minecraft.client.particle.ParticleManager;
 import net.minecraft.client.render.model.BakedModel;
@@ -41,7 +40,9 @@ import net.quantumfusion.dashloader.cache.misc.DashParticleData;
 import net.quantumfusion.dashloader.cache.models.*;
 import net.quantumfusion.dashloader.cache.models.factory.*;
 import net.quantumfusion.dashloader.misc.DashSplashTextData;
-import net.quantumfusion.dashloader.mixin.*;
+import net.quantumfusion.dashloader.mixin.AbstractTextureAccessor;
+import net.quantumfusion.dashloader.mixin.SpriteAtlasManagerAccessor;
+import net.quantumfusion.dashloader.mixin.SpriteAtlasTextureAccessor;
 import net.quantumfusion.dashloader.util.TimeHelper;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
@@ -57,7 +58,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class DashLoader {
     public static final Logger LOGGER = LogManager.getLogger();
@@ -70,14 +70,14 @@ public class DashLoader {
     public int tasksComplete = 0;
     public DashCacheState state;
 
-
+    public Map<Identifier, List<Font>> fonts = new HashMap<>();
 
     public final HashMap<Class<? extends BakedModel>, DashModelFactory> modelMappings = new HashMap<>();
 
     public final HashMap<SpriteAtlasTexture, DashSpriteAtlasTextureData> atlasData = new HashMap<>();
     public final HashMap<MultipartBakedModel, Pair<List<MultipartModelSelector>, StateManager<Block, BlockState>>> multipartData = new HashMap<>();
 
-    private  Object2ObjectMap<Class<?>, BinarySerializer> serializers = new Object2ObjectOpenHashMap<>();
+    private Object2ObjectMap<Class<?>, BinarySerializer> serializers = new Object2ObjectOpenHashMap<>();
     private final List<SpriteAtlasTexture> atlasesToRegister;
     private final Map<DashCachePaths, Path> paths = new HashMap<>();
     private final List<SpriteAtlasTexture> extraAtlases;
@@ -198,8 +198,6 @@ public class DashLoader {
         serializeObject(new DashParticleData(particleSprites, particleAtlas, registry), paths.get(DashCachePaths.PARTICLE), "Particle");
 
         logAndTask("Mapping Fonts");
-        Map<Identifier, List<Font>> fonts = new HashMap<>();
-        ((FontManagerAccessor)((MinecraftClientAccessor)MinecraftClient.getInstance()).getFontManager()).getFontStorages().forEach((identifier, fontStorage) -> fonts.put(identifier, ((FontStorageAccessor)fontStorage).getFonts()));
         serializeObject(new DashFontManagerData(fonts, registry), paths.get(DashCachePaths.FONT), "Font");
 
         logAndTask("Mapping Splash Text");
@@ -427,9 +425,10 @@ public class DashLoader {
 
         serializersOut.entrySet().parallelStream().forEach(classSerializerBuilderEntry -> {
             final Class<?> key = classSerializerBuilderEntry.getKey();
-            serializers.put(key,classSerializerBuilderEntry.getValue().build(key));
+            serializers.put(key, classSerializerBuilderEntry.getValue().build(key));
         });
-        while (serializersOut.size() > serializers.size()) { }
+        while (serializersOut.size() > serializers.size()) {
+        }
         LOGGER.info("Created Serializers");
     }
 

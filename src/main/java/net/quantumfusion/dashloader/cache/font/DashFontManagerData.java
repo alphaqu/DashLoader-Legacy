@@ -15,6 +15,7 @@ import java.util.Map;
 public class DashFontManagerData {
 
     @Serialize(order = 0)
+    @SerializeNullable()
     @SerializeNullable(path = {0})
     @SerializeNullable(path = {1})
     @SerializeNullable(path = {1, 0})
@@ -24,11 +25,11 @@ public class DashFontManagerData {
         this.fontMap = fontMap;
     }
 
-    public DashFontManagerData(Map<Identifier, List<Font>> fonts, DashRegistry registry){
+    public DashFontManagerData(Map<Identifier, List<Font>> fontList, DashRegistry registry){
         fontMap = new HashMap<>();
-        fonts.forEach((identifier, fonts1) -> {
+        fontList.forEach((identifier, fonts) -> {
             List<Long> fontsOut = new ArrayList<>();
-            fonts1.forEach(font -> fontsOut.add(registry.createFontPointer(font)));
+            fonts.forEach(font -> fontsOut.add(registry.createFontPointer(font)));
             fontMap.put(registry.createIdentifierPointer(identifier),fontsOut);
         });
 
@@ -36,10 +37,10 @@ public class DashFontManagerData {
 
     public Map<Identifier, List<Font>> toUndash(DashRegistry registry) {
         Map<Identifier, List<Font>> out = new HashMap<>();
-        fontMap.forEach((integer, integers) -> {
+        fontMap.forEach((identifier, fontPointers) -> {
             List<Font> fontsOut = new ArrayList<>();
-            integers.forEach(integer1 -> fontsOut.add(registry.getFont(integer1)));
-            out.put(registry.getIdentifier(integer),fontsOut);
+            fontPointers.forEach(fontPointer -> fontsOut.add(registry.getFont(fontPointer)));
+            out.put(registry.getIdentifier(identifier),fontsOut);
         });
         return out;
     }
