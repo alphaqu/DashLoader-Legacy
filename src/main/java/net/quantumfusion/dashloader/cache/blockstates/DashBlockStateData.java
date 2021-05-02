@@ -10,6 +10,7 @@ import net.quantumfusion.dashloader.cache.DashRegistry;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class DashBlockStateData {
 
@@ -28,9 +29,9 @@ public class DashBlockStateData {
     }
 
     public Object2IntMap<BlockState> toUndash(DashRegistry registry) {
-        Object2IntMap<BlockState> stateLookupOut = new Object2IntOpenHashMap<>();
-        blockstates.forEach((dashBlockState, integer) -> stateLookupOut.put(registry.getBlockstate(dashBlockState), integer));
-        return stateLookupOut;
+        ConcurrentHashMap<BlockState, Integer> stateLookupOut = new ConcurrentHashMap<>();
+        blockstates.entrySet().parallelStream().forEach((entry) -> stateLookupOut.put(registry.getBlockstate(entry.getKey()), entry.getValue()));
+        return new Object2IntOpenHashMap<>(stateLookupOut);
     }
 
 }

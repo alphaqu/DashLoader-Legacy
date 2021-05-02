@@ -3,6 +3,7 @@ package net.quantumfusion.dashloader;
 import io.activej.serializer.BinarySerializer;
 import io.activej.serializer.CompatibilityLevel;
 import io.activej.serializer.SerializerBuilder;
+import io.activej.serializer.StringFormat;
 import io.activej.serializer.stream.StreamInput;
 import io.activej.serializer.stream.StreamOutput;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
@@ -27,10 +28,19 @@ import net.minecraft.util.Identifier;
 import net.quantumfusion.dashloader.cache.DashCachePaths;
 import net.quantumfusion.dashloader.cache.DashCacheState;
 import net.quantumfusion.dashloader.cache.DashRegistry;
+import net.quantumfusion.dashloader.cache.MappingData;
 import net.quantumfusion.dashloader.cache.atlas.DashExtraAtlasData;
-import net.quantumfusion.dashloader.cache.atlas.DashSpriteAtlasManager;
+import net.quantumfusion.dashloader.cache.atlas.DashSpriteAtlasData;
 import net.quantumfusion.dashloader.cache.atlas.DashSpriteAtlasTextureData;
 import net.quantumfusion.dashloader.cache.blockstates.DashBlockStateData;
+import net.quantumfusion.dashloader.cache.blockstates.properties.DashBooleanProperty;
+import net.quantumfusion.dashloader.cache.blockstates.properties.DashDirectionProperty;
+import net.quantumfusion.dashloader.cache.blockstates.properties.DashEnumProperty;
+import net.quantumfusion.dashloader.cache.blockstates.properties.DashIntProperty;
+import net.quantumfusion.dashloader.cache.blockstates.properties.value.DashBooleanValue;
+import net.quantumfusion.dashloader.cache.blockstates.properties.value.DashDirectionValue;
+import net.quantumfusion.dashloader.cache.blockstates.properties.value.DashEnumValue;
+import net.quantumfusion.dashloader.cache.blockstates.properties.value.DashIntValue;
 import net.quantumfusion.dashloader.cache.font.DashFontManagerData;
 import net.quantumfusion.dashloader.cache.font.fonts.DashBitmapFont;
 import net.quantumfusion.dashloader.cache.font.fonts.DashBlankFont;
@@ -39,10 +49,14 @@ import net.quantumfusion.dashloader.cache.misc.DashLoaderInfo;
 import net.quantumfusion.dashloader.cache.misc.DashParticleData;
 import net.quantumfusion.dashloader.cache.models.*;
 import net.quantumfusion.dashloader.cache.models.factory.*;
+import net.quantumfusion.dashloader.cache.models.predicates.DashAndPredicate;
+import net.quantumfusion.dashloader.cache.models.predicates.DashOrPredicate;
+import net.quantumfusion.dashloader.cache.models.predicates.DashSimplePredicate;
+import net.quantumfusion.dashloader.cache.models.predicates.DashStaticPredicate;
 import net.quantumfusion.dashloader.misc.DashSplashTextData;
 import net.quantumfusion.dashloader.mixin.AbstractTextureAccessor;
-import net.quantumfusion.dashloader.mixin.SpriteAtlasManagerAccessor;
 import net.quantumfusion.dashloader.mixin.SpriteAtlasTextureAccessor;
+import net.quantumfusion.dashloader.util.TextureHelper;
 import net.quantumfusion.dashloader.util.TimeHelper;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
@@ -61,40 +75,58 @@ import java.util.Map;
 
 public class DashLoader {
     public static final Logger LOGGER = LogManager.getLogger();
-    public static final int totalTasks = 17;
-    public static final double formatVersion = 0.3;
+    public static final int totalTasks = 11;
+    public static final double formatVersion = 0.4;
     public static final String version = FabricLoader.getInstance().getModContainer("dashloader").get().getMetadata().getVersion().getFriendlyString();
     private static final Path config = FabricLoader.getInstance().getConfigDir().normalize();
+    private static final boolean debug = FabricLoader.getInstance().isDevelopmentEnvironment();
     public static String task = "Starting DashLoader";
     private static DashLoader instance;
-    public int tasksComplete = 0;
-    public DashCacheState state;
-
-    public Map<Identifier, List<Font>> fonts = new HashMap<>();
-
     public final HashMap<Class<? extends BakedModel>, DashModelFactory> modelMappings = new HashMap<>();
-
     public final HashMap<SpriteAtlasTexture, DashSpriteAtlasTextureData> atlasData = new HashMap<>();
     public final HashMap<MultipartBakedModel, Pair<List<MultipartModelSelector>, StateManager<Block, BlockState>>> multipartData = new HashMap<>();
-
-    private Object2ObjectMap<Class<?>, BinarySerializer> serializers = new Object2ObjectOpenHashMap<>();
     private final List<SpriteAtlasTexture> atlasesToRegister;
     private final Map<DashCachePaths, Path> paths = new HashMap<>();
     private final List<SpriteAtlasTexture> extraAtlases;
+    public int tasksComplete = 0;
+    public DashCacheState state;
+    public Map<Identifier, List<Font>> fonts = new HashMap<>();
     //output
-    public SpriteAtlasManager atlasManagerOut;
-    public Object2IntMap<BlockState> stateLookupOut;
-    public Map<Identifier, BakedModel> modelsOut;
-    public Map<Identifier, List<Sprite>> particlesOut;
-    public Map<Identifier, List<Font>> fontsOut;
-    public List<String> splashTextOut;
+    private Object2IntMap<BlockState> stateLookupOut;
+    private MappingData mappings = new MappingData();
+
+
+    public SpriteAtlasManager getAtlasManagerOut() {
+        return mappings.atlasManagerOut;
+    }
+
+    public Object2IntMap<BlockState> getStateLookupOut() {
+        return stateLookupOut;
+    }
+
+    public Map<Identifier, BakedModel> getModelsOut() {
+        return mappings.modelsOut;
+    }
+
+    public Map<Identifier, List<Sprite>> getParticlesOut() {
+        return mappings.particlesOut;
+    }
+
+    public Map<Identifier, List<Font>> getFontsOut() {
+        return mappings.fontsOut;
+    }
+
+    public List<String> getSplashTextOut() {
+        return mappings.splashTextOut;
+    }
+
+    private Object2ObjectMap<Class<?>, BinarySerializer> serializers = new Object2ObjectOpenHashMap<>();
     private SpriteAtlasManager atlasManager;
     private Object2IntMap<BlockState> stateLookup;
     private Map<Identifier, BakedModel> models;
     private Map<Identifier, ParticleManager.SimpleSpriteProvider> particleSprites;
     private SpriteAtlasTexture particleAtlas;
     private List<String> splashText;
-
 
     public DashLoader() {
         instance = this;
@@ -109,6 +141,9 @@ public class DashLoader {
 
     public void reload() {
         LOGGER.info("Starting dash thread.");
+        if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
+            LOGGER.warn("Dashloader launched in dev.");
+        }
         state = DashCacheState.LOADING;
         Instant start = Instant.now();
         Thread dash = new Thread(() -> {
@@ -185,29 +220,32 @@ public class DashLoader {
         createDirectory();
         tasksComplete++;
         DashRegistry registry = new DashRegistry(this);
+        MappingData mappings = new MappingData();
         logAndTask("Mapping Atlas");
-        serializeObject(new DashSpriteAtlasManager(atlasManager, atlasData, registry), paths.get(DashCachePaths.ATLAS), "Atlas");
+        mappings.setSpriteAtlasData(new DashSpriteAtlasData(atlasManager, atlasData, registry));
 
         logAndTask("Mapping Blockstates");
-        serializeObject(new DashBlockStateData(stateLookup, registry), paths.get(DashCachePaths.BLOCKSTATES), "BlockState");
+        mappings.setBlockStateData(new DashBlockStateData(stateLookup, registry));
 
         logAndTask("Mapping Models");
-        serializeObject(new DashModelData(models, multipartData, registry), paths.get(DashCachePaths.MODEL), "Model");
+        mappings.setModelData(new DashModelData(models, multipartData, registry));
 
         logAndTask("Mapping Particles");
-        serializeObject(new DashParticleData(particleSprites, particleAtlas, registry), paths.get(DashCachePaths.PARTICLE), "Particle");
+        mappings.setParticleData(new DashParticleData(particleSprites, particleAtlas, registry));
 
         logAndTask("Mapping Fonts");
-        serializeObject(new DashFontManagerData(fonts, registry), paths.get(DashCachePaths.FONT), "Font");
+        mappings.setFontManagerData(new DashFontManagerData(fonts, registry));
 
         logAndTask("Mapping Splash Text");
-        serializeObject(new DashSplashTextData(splashText), paths.get(DashCachePaths.SPLASH_TEXT), "Splash Text");
+        mappings.setSplashTextData(new DashSplashTextData(splashText));
 
         logAndTask("Mapping Extra Atlases");
         tasksComplete++;
         DashExtraAtlasData extraAtlasData = new DashExtraAtlasData();
         this.extraAtlases.forEach(spriteAtlasTexture -> extraAtlasData.addAtlas(spriteAtlasTexture, registry));
-        serializeObject(extraAtlasData, paths.get(DashCachePaths.EXTRA_ATLAS), "Extra Atlas");
+        mappings.setExtraAtlasData(extraAtlasData);
+
+        serializeObject(mappings, paths.get(DashCachePaths.MAPPINGS), "Mappings");
         serializeObject(registry, paths.get(DashCachePaths.REGISTRY), "Registry");
         task = "Caching is now complete.";
         LOGGER.info("Created cache in " + TimeHelper.getDecimalMs(start, Instant.now()) + "s");
@@ -220,40 +258,9 @@ public class DashLoader {
             LOGGER.info("      Loading Registry");
             registry.toUndash();
 
-
-            DashSplashTextData splashTextOut = deserialize(DashSplashTextData.class, paths.get(DashCachePaths.SPLASH_TEXT), "Splash Text");
-            LOGGER.info("      Loading Splash Text");
-            this.splashTextOut = splashTextOut.splashList;
-
-
-            DashSpriteAtlasManager atlas = deserialize(DashSpriteAtlasManager.class, paths.get(DashCachePaths.ATLAS), "BakedModel Atlas");
-            LOGGER.info("      Loading BakedModel Atlas");
-            atlasManagerOut = atlas.toUndash(registry);
-            ((SpriteAtlasManagerAccessor) atlasManagerOut).getAtlases().forEach((identifier, spriteAtlasTexture) -> atlasesToRegister.add(spriteAtlasTexture));
-
-
-            DashBlockStateData blockStateData = deserialize(DashBlockStateData.class, paths.get(DashCachePaths.BLOCKSTATES), "BlockState");
-            LOGGER.info("      Loading BlockState Data");
-            stateLookupOut = blockStateData.toUndash(registry);
-
-
-            DashParticleData particleData = deserialize(DashParticleData.class, paths.get(DashCachePaths.PARTICLE), "Particle");
-            LOGGER.info("      Loading Particle Data");
-            Pair<Map<Identifier, List<Sprite>>, SpriteAtlasTexture> outParticle = particleData.toUndash(registry);
-            particlesOut = outParticle.getLeft();
-            atlasesToRegister.add(outParticle.getValue());
-
-            DashModelData modelData = deserialize(DashModelData.class, paths.get(DashCachePaths.MODEL), "Model");
-            LOGGER.info("    Loading Model Data");
-            modelsOut = modelData.toUndash(registry);
-
-            DashExtraAtlasData extraAtlasdata = deserialize(DashExtraAtlasData.class, paths.get(DashCachePaths.EXTRA_ATLAS), "Extra Atlas");
-            LOGGER.info("      Loading Extra Atlas Data");
-            atlasesToRegister.addAll(extraAtlasdata.toUndash(registry));
-
-            DashFontManagerData fontData = deserialize(DashFontManagerData.class, paths.get(DashCachePaths.FONT), "Font");
-            LOGGER.info("      Loading Font Data");
-            fontsOut = fontData.toUndash(registry);
+            mappings = deserialize(MappingData.class, paths.get(DashCachePaths.MAPPINGS), "Mappings");
+            LOGGER.info("      Loading Mappings");
+            atlasesToRegister.addAll(mappings.toUndash(registry));
 
             LOGGER.info("    Loaded DashLoader");
             stateLookupOut = new Object2IntOpenHashMap<>();
@@ -317,8 +324,6 @@ public class DashLoader {
         tasksComplete++;
     }
 
-    private static final boolean debug = false;
-
     public void destroyCache(Exception exception) {
         if (!debug) {
             LOGGER.error("DashLoader failed, destroying cache and requesting recache. Slow start predicted.");
@@ -363,13 +368,7 @@ public class DashLoader {
     private void initPaths() {
         paths.clear();
         paths.put(DashCachePaths.REGISTRY, config.resolve("quantumfusion/dashloader/registry.activej"));
-        paths.put(DashCachePaths.BLOCKSTATES, config.resolve("quantumfusion/dashloader/blockstate-mappings.activej"));
-        paths.put(DashCachePaths.MODEL, config.resolve("quantumfusion/dashloader/model-mappings.activej"));
-        paths.put(DashCachePaths.ATLAS, config.resolve("quantumfusion/dashloader/atlas-mappings.activej"));
-        paths.put(DashCachePaths.PARTICLE, config.resolve("quantumfusion/dashloader/particle-mappings.activej"));
-        paths.put(DashCachePaths.FONT, config.resolve("quantumfusion/dashloader/font-mappings.activej"));
-        paths.put(DashCachePaths.EXTRA_ATLAS, config.resolve("quantumfusion/dashloader/extraatlas-mappings.activej"));
-        paths.put(DashCachePaths.SPLASH_TEXT, config.resolve("quantumfusion/dashloader/splash-text.activej"));
+        paths.put(DashCachePaths.MAPPINGS, config.resolve("quantumfusion/dashloader/mappings.activej"));
         paths.put(DashCachePaths.DASH_INFO, config.resolve("quantumfusion/dashloader/metadata.activej"));
     }
 
@@ -389,46 +388,22 @@ public class DashLoader {
     private void initSerializers() {
         LOGGER.info("Started Serializer Creation");
         serializers = new Object2ObjectOpenHashMap<>();
-        ArrayList<Class<?>> list = new ArrayList<>();
-        Object2ObjectMap<Class<?>, SerializerBuilder> serializersOut = new Object2ObjectOpenHashMap<>();
-        modelMappings.values().forEach(dashModel -> list.add(dashModel.getClass()));
-        serializersOut.put(DashRegistry.class,
+        List<Class<?>> modelTypes = new ArrayList<>();
+        modelMappings.values().forEach(dashModel -> modelTypes.add(dashModel.getDashModelType()));
+
+        HashMap<Class<?>,SerializerBuilder> serializerBuilders = new HashMap<>();
+        serializerBuilders.put(DashRegistry.class,
                 SerializerBuilder.create()
-                        .withSubclasses("models", DashBasicBakedModel.class, DashBuiltinBakedModel.class, DashMultipartBakedModel.class, DashWeightedBakedModel.class)
+                        .withSubclasses("models", DashBasicBakedModel.class, DashWeightedBakedModel.class, DashMultipartBakedModel.class, DashBuiltinBakedModel.class)
                         .withSubclasses("fonts", DashBitmapFont.class, DashUnicodeFont.class, DashBlankFont.class)
+                        .withSubclasses("predicates", DashAndPredicate.class, DashSimplePredicate.class, DashOrPredicate.class, DashStaticPredicate.class)
+                        .withSubclasses("properties", DashBooleanProperty.class, DashEnumProperty.class, DashDirectionProperty.class, DashIntProperty.class)
+                        .withSubclasses("values", DashBooleanValue.class, DashEnumValue.class, DashDirectionValue.class, DashIntValue.class)
                         .withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE));
 
-        serializersOut.put(DashModelData.class,
-                SerializerBuilder.create().withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE));
-
-        serializersOut.put(DashSpriteAtlasManager.class,
-                SerializerBuilder.create().withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE));
-
-        serializersOut.put(DashBlockStateData.class,
-                SerializerBuilder.create().withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE));
-
-
-        serializersOut.put(DashParticleData.class,
-                SerializerBuilder.create().withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE));
-
-        serializersOut.put(DashExtraAtlasData.class,
-                SerializerBuilder.create().withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE));
-
-        serializersOut.put(DashFontManagerData.class,
-                SerializerBuilder.create().withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE));
-
-        serializersOut.put(DashSplashTextData.class,
-                SerializerBuilder.create().withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE));
-
-        serializersOut.put(DashLoaderInfo.class,
-                SerializerBuilder.create().withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE));
-
-        serializersOut.entrySet().parallelStream().forEach(classSerializerBuilderEntry -> {
-            final Class<?> key = classSerializerBuilderEntry.getKey();
-            serializers.put(key, classSerializerBuilderEntry.getValue().build(key));
-        });
-        while (serializersOut.size() > serializers.size()) {
-        }
+        serializerBuilders.put(MappingData.class, SerializerBuilder.create().withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE));
+        serializerBuilders.put(DashLoaderInfo.class, SerializerBuilder.create().withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE));
+        serializerBuilders.entrySet().parallelStream().forEach(entry -> serializers.put(entry.getKey(),entry.getValue().build(entry.getKey())));
         LOGGER.info("Created Serializers");
     }
 

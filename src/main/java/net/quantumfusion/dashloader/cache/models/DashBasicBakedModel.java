@@ -83,23 +83,16 @@ public class DashBasicBakedModel implements DashModel {
 
 
     @Override
-    public BakedModel toUndash(DashRegistry registry) {
-        Sprite sprite = registry.getSprite(spritePointer);
-        List<BakedQuad> quadsOut = new ArrayList<>();
-        Map<Direction, List<BakedQuad>> faceQuadsOut = new HashMap<>();
-
+    public BakedModel toUndash(final DashRegistry registry) {
+        final Sprite sprite = registry.getSprite(spritePointer);
+        final List<BakedQuad> quadsOut = new ArrayList<>();
+        final Map<Direction, List<BakedQuad>> faceQuadsOut = new HashMap<>();
         quads.forEach(dashBakedQuad -> quadsOut.add(dashBakedQuad.toUndash(sprite)));
-
-        faceQuads.entrySet().forEach(entry -> {
-            DashDirection dashDirection = entry.getKey();
-            List<DashBakedQuad> dashBakedQuads = entry.getValue();
+        faceQuads.forEach((dashDirection, dashBakedQuads) -> {
             List<BakedQuad> out = new ArrayList<>();
-            for (DashBakedQuad dashBakedQuad : dashBakedQuads) {
-                out.add(dashBakedQuad.toUndash(sprite));
-            }
+            dashBakedQuads.forEach(dashBakedQuad -> out.add(dashBakedQuad.toUndash(sprite)));
             faceQuadsOut.put(dashDirection.toUndash(), out);
         });
-
         return new BasicBakedModel(quadsOut, faceQuadsOut, usesAo, isSideLit, hasDepth, sprite, transformation.toUndash(), itemPropertyOverrides.toUndash(registry));
     }
 

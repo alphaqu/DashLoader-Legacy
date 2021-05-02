@@ -1,7 +1,6 @@
 package net.quantumfusion.dashloader.mixin;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.client.render.block.BlockModels;
@@ -25,7 +24,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -93,9 +91,9 @@ public class BakedModelManagerOverride {
         } else {
             //cache go brr
             loader.applyDashCache(textureManager);
-            this.atlasManager = loader.atlasManagerOut;
-            this.models = loader.modelsOut;
-            this.stateLookup = loader.stateLookupOut;
+            this.atlasManager = loader.getAtlasManagerOut();
+            this.models = loader.getModelsOut();
+            this.stateLookup = loader.getStateLookupOut();
             this.missingModel = this.models.get(ModelLoader.MISSING);
             Map<BlockState, BakedModel> modelsOut = new ConcurrentHashMap<>();
             Registry.BLOCK.stream().parallel().forEach(block ->

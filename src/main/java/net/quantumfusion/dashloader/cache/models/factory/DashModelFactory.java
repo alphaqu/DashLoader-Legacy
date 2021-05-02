@@ -9,6 +9,7 @@ public interface DashModelFactory {
 
     <K>  DashModel toDash(BakedModel model, DashRegistry registry, K var1);
     Class<? extends BakedModel> getModelType();
+    Class<? extends DashModel> getDashModelType();
 
 
 

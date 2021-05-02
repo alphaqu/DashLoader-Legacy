@@ -3,22 +3,14 @@ package net.quantumfusion.dashloader.cache.atlas;
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import net.minecraft.client.texture.NativeImage;
-import org.apache.commons.io.IOUtils;
-import org.jetbrains.annotations.Nullable;
+import net.quantumfusion.dashloader.mixin.NativeImageAccessor;
 import org.lwjgl.stb.STBImage;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
-import java.nio.channels.Channels;
-import java.nio.channels.ReadableByteChannel;
-
-import static net.minecraft.client.texture.NativeImage.Format.*;
 
 public class DashImage {
 
@@ -37,42 +29,36 @@ public class DashImage {
         this.image = image;
     }
 
-    public ByteBuffer readAllToByteBuffer(InputStream inputStream) throws IOException {
-        ByteBuffer byteBuffer2 = MemoryUtil.memAlloc(image.length + 64);
-        while (Channels.newChannel(inputStream).read(byteBuffer2) != -1) {
-            if (byteBuffer2.remaining() == 0) {
-                byteBuffer2 = MemoryUtil.memRealloc(byteBuffer2, byteBuffer2.capacity());
-            }
+    public NativeImage read() throws IOException {
+        MemoryStack memoryStack = MemoryStack.stackPush();
+        IntBuffer x = memoryStack.mallocInt(1);
+        IntBuffer y = memoryStack.mallocInt(1);
+        IntBuffer channels = memoryStack.mallocInt(1);
+        ByteBuffer buf = ByteBuffer.allocateDirect(image.length);
+        buf.put(image, 0, image.length);
+        buf.flip();
+        ByteBuffer imageBuffer = STBImage.stbi_load_from_memory(buf, x, y, channels, 4);
+        if (imageBuffer == null) {
+            throw new IOException("Could not load image: " + STBImage.stbi_failure_reason());
         }
-
-        return byteBuffer2;
+        NativeImage imageOut = NativeImageAccessor.init(NativeImage.Format.ABGR, x.get(0), y.get(0), true, MemoryUtil.memAddress(imageBuffer));
+        try {
+            memoryStack.close();
+        } catch (Throwable t) {
+            Throwable throwable = null;
+            throwable.addSuppressed(t);
+        }
+        return imageOut;
     }
 
     public NativeImage toUndash() {
         try {
-            ByteBuffer byteBuffer = null;
-            BufferedInputStream inputStream = new BufferedInputStream(new ByteArrayInputStream(image));
-            try {
-                byteBuffer = MemoryUtil.memAlloc(image.length + 128);
-                final ReadableByteChannel readableByteChannel = Channels.newChannel(inputStream);
-                while (readableByteChannel.read(byteBuffer) != -1) {
-                    if (byteBuffer.remaining() == 0) {
-                        byteBuffer = MemoryUtil.memRealloc(byteBuffer, byteBuffer.capacity());
-                    }
-                }
-                byteBuffer.rewind();
-                return NativeImage.read(NativeImage.Format.ABGR, byteBuffer);
-            } finally {
-                MemoryUtil.memFree(byteBuffer);
-                IOUtils.closeQuietly(inputStream);
-            }
+            return read();
         } catch (IOException e) {
             e.printStackTrace();
         }
         return null;
     }
-
-
 
 
 }

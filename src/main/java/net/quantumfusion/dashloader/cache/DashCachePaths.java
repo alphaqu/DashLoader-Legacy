@@ -1,13 +1,7 @@
 package net.quantumfusion.dashloader.cache;
 
 public enum DashCachePaths {
-    MODEL,
+    MAPPINGS,
     REGISTRY,
-    BLOCKSTATES,
-    ATLAS,
-    PARTICLE,
-    FONT,
-    EXTRA_ATLAS,
-    SPLASH_TEXT,
     DASH_INFO
 }

@@ -45,7 +45,7 @@ public class DashAnimationResourceMetadata {
     }
 
     public AnimationResourceMetadata toUndash() {
-        ArrayList<AnimationFrameResourceMetadata> framesOut = new ArrayList<>();
+        final List<AnimationFrameResourceMetadata> framesOut = new ArrayList<>();
         frames.forEach(dashAnimationFrameResourceMetadata -> framesOut.add(dashAnimationFrameResourceMetadata.toUndash()));
         return new AnimationResourceMetadata(framesOut, width, height, defaultFrameTime, interpolate);
     }

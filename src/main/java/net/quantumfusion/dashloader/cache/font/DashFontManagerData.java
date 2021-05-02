@@ -6,6 +6,7 @@ import io.activej.serializer.annotations.SerializeNullable;
 import net.minecraft.client.font.Font;
 import net.minecraft.util.Identifier;
 import net.quantumfusion.dashloader.cache.DashRegistry;
+import net.quantumfusion.dashloader.util.Dashable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,7 +35,6 @@ public class DashFontManagerData {
         });
 
     }
-
     public Map<Identifier, List<Font>> toUndash(DashRegistry registry) {
         Map<Identifier, List<Font>> out = new HashMap<>();
         fontMap.forEach((identifier, fontPointers) -> {

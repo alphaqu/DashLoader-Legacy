@@ -5,11 +5,12 @@ import io.activej.serializer.annotations.Serialize;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.quantumfusion.dashloader.DashLoader;
 import net.quantumfusion.dashloader.cache.DashRegistry;
+import net.quantumfusion.dashloader.util.Dashable;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class DashExtraAtlasData {
+public class DashExtraAtlasData  {
     @Serialize(order = 0)
     public List<DashSpriteAtlasTexture> extraAtlases;
 
@@ -26,6 +27,7 @@ public class DashExtraAtlasData {
     public void addAtlas(SpriteAtlasTexture atlas,DashRegistry registry) {
         extraAtlases.add(new DashSpriteAtlasTexture(atlas, DashLoader.getInstance().atlasData.get(atlas), registry));
     }
+
 
     public List<SpriteAtlasTexture> toUndash(DashRegistry registry) {
         List<SpriteAtlasTexture> out = new ArrayList<>();

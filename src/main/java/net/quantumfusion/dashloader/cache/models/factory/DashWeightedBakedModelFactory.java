@@ -17,4 +17,9 @@ public class DashWeightedBakedModelFactory implements DashModelFactory {
     public Class<? extends BakedModel> getModelType() {
         return WeightedBakedModel.class;
     }
+
+    @Override
+    public Class<? extends DashModel> getDashModelType() {
+        return DashWeightedBakedModel.class;
+    }
 }

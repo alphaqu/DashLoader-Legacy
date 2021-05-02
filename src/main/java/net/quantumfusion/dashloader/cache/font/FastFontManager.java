@@ -2,24 +2,17 @@ package net.quantumfusion.dashloader.cache.font;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import it.unimi.dsi.fastutil.ints.IntArrayList;
-import it.unimi.dsi.fastutil.ints.IntList;
-import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
-import it.unimi.dsi.fastutil.ints.IntSet;
 import net.minecraft.client.font.*;
-import net.minecraft.client.texture.TextureManager;
 import net.minecraft.resource.Resource;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.resource.ResourceReloadListener;
 import net.minecraft.resource.SinglePreparationResourceReloadListener;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.profiler.Profiler;
 import net.quantumfusion.dashloader.DashLoader;
 import net.quantumfusion.dashloader.cache.DashCacheState;
@@ -31,7 +24,6 @@ import org.apache.logging.log4j.Logger;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.stream.Stream;
 
 public class FastFontManager {
 
@@ -40,7 +32,7 @@ public class FastFontManager {
 
     public final ResourceReloadListener resourceReloadListener = new SinglePreparationResourceReloadListener<Map<Identifier, List<Font>>>() {
         protected Map<Identifier, List<Font>> prepare(ResourceManager resourceManager, Profiler profiler) {
-            final Map<Identifier, List<Font>> fontsOut = DashLoader.getInstance().fontsOut;
+            final Map<Identifier, List<Font>> fontsOut = DashLoader.getInstance().getFontsOut();
             if (fontsOut != null && DashLoader.getInstance().state == DashCacheState.LOADED) {
                 fontsOut.forEach((identifier, list) -> list.forEach(font -> {
                             if (font instanceof UnicodeTextureFont) {

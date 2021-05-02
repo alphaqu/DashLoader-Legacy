@@ -4,6 +4,7 @@ import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.BuiltinBakedModel;
 import net.minecraft.client.render.model.MultipartBakedModel;
 import net.quantumfusion.dashloader.cache.DashRegistry;
+import net.quantumfusion.dashloader.cache.models.DashBasicBakedModel;
 import net.quantumfusion.dashloader.cache.models.DashBuiltinBakedModel;
 import net.quantumfusion.dashloader.cache.models.DashModel;
 
@@ -16,5 +17,10 @@ public class DashBuiltInBakedModelFactory implements DashModelFactory{
     @Override
     public Class<? extends BakedModel> getModelType() {
         return BuiltinBakedModel.class;
+    }
+
+    @Override
+    public Class<? extends DashModel> getDashModelType() {
+        return DashBuiltinBakedModel.class;
     }
 }

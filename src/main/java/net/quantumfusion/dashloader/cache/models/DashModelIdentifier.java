@@ -1,19 +1,29 @@
 package net.quantumfusion.dashloader.cache.models;
 
 
+import io.activej.serializer.StringFormat;
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
+import io.activej.serializer.annotations.SerializeStringFormat;
+import net.gudenau.lib.unsafe.Unsafe;
 import net.minecraft.client.util.ModelIdentifier;
 import net.minecraft.util.Identifier;
 import net.quantumfusion.dashloader.cache.DashID;
+import net.quantumfusion.dashloader.mixin.IdentifierAccessor;
+import net.quantumfusion.dashloader.mixin.ModelIdentifierAccessor;
 
 
 public class DashModelIdentifier implements DashID {
     @Serialize(order = 0)
+    @SerializeStringFormat(StringFormat.UTF8)
     public String namespace;
+
     @Serialize(order = 1)
+    @SerializeStringFormat(StringFormat.UTF8)
     public String path;
+
     @Serialize(order = 2)
+    @SerializeStringFormat(StringFormat.UTF8)
     public String variant;
 
 
@@ -31,8 +41,15 @@ public class DashModelIdentifier implements DashID {
         this.variant = identifier.getVariant();
     }
 
+    private static final Class<ModelIdentifier> cls = ModelIdentifier.class;
+
     @Override
     public Identifier toUndash() {
-        return new ModelIdentifier(new Identifier(namespace, path), variant);
+        ModelIdentifier identifier = Unsafe.allocateInstance(cls);
+        ((ModelIdentifierAccessor)identifier).setVariant(variant);
+        final IdentifierAccessor identifier1 = (IdentifierAccessor) identifier;
+        identifier1.setNamespace(namespace);
+        identifier1.setPath(path);
+        return identifier;
     }
 }

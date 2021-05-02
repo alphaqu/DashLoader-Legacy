@@ -24,4 +24,10 @@ public class DashMultipartBakedModelFactory implements DashModelFactory{
     public Class<? extends BakedModel> getModelType() {
         return MultipartBakedModel.class;
     }
+
+
+    @Override
+    public Class<? extends DashModel> getDashModelType() {
+        return DashMultipartBakedModel.class;
+    }
 }

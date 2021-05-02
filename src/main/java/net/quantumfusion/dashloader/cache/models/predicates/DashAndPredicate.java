@@ -19,12 +19,7 @@ import java.util.stream.Collectors;
 public class DashAndPredicate implements DashPredicate {
     @Serialize(order = 0)
     @SerializeNullable()
-    @SerializeSubclasses(path = {0}, value = {
-            DashAndPredicate.class,
-            DashSimplePredicate.class,
-            DashOrPredicate.class,
-            DashStaticPredicate.class
-    })
+    @SerializeSubclasses(path = {0}, extraSubclassesId = "predicates")
     public List<DashPredicate> selectors;
 
     public DashAndPredicate(@Deserialize("selectors") List<DashPredicate> selectors) {

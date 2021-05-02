@@ -11,6 +11,7 @@ import net.quantumfusion.dashloader.DashLoader;
 import net.quantumfusion.dashloader.cache.DashRegistry;
 import net.quantumfusion.dashloader.cache.atlas.DashSpriteAtlasTexture;
 import net.quantumfusion.dashloader.mixin.ParticleManagerSimpleSpriteProviderAccessor;
+import net.quantumfusion.dashloader.util.Dashable;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
@@ -18,7 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class DashParticleData {
+public class DashParticleData  {
 
     @Serialize(order = 0)
     @SerializeNullable(path = {0})
@@ -41,6 +42,7 @@ public class DashParticleData {
             this.particles.put(registry.createIdentifierPointer(identifier), out);
         });
     }
+
 
     public Pair<Map<Identifier, List<Sprite>>,SpriteAtlasTexture> toUndash(DashRegistry registry) {
         Map<Identifier, List<Sprite>> out = new HashMap<>();

@@ -4,7 +4,6 @@ import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import io.activej.serializer.annotations.SerializeNullable;
 import io.activej.serializer.annotations.SerializeSubclasses;
-import it.unimi.dsi.fastutil.ints.IntLists;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.font.BitmapFont;
@@ -17,22 +16,24 @@ import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.util.ModelIdentifier;
 import net.minecraft.state.StateManager;
-import net.minecraft.state.property.EnumProperty;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.Identifier;
-import net.quantumfusion.dashloader.DashException;
 import net.quantumfusion.dashloader.DashLoader;
 import net.quantumfusion.dashloader.cache.atlas.DashImage;
 import net.quantumfusion.dashloader.cache.atlas.DashSprite;
 import net.quantumfusion.dashloader.cache.blockstates.DashBlockState;
-import net.quantumfusion.dashloader.cache.blockstates.properties.*;
-import net.quantumfusion.dashloader.cache.blockstates.properties.value.*;
-import net.quantumfusion.dashloader.cache.font.fonts.*;
+import net.quantumfusion.dashloader.cache.blockstates.properties.DashProperty;
+import net.quantumfusion.dashloader.cache.blockstates.properties.value.DashPropertyValue;
+import net.quantumfusion.dashloader.cache.font.fonts.DashBitmapFont;
+import net.quantumfusion.dashloader.cache.font.fonts.DashBlankFont;
+import net.quantumfusion.dashloader.cache.font.fonts.DashFont;
+import net.quantumfusion.dashloader.cache.font.fonts.DashUnicodeFont;
 import net.quantumfusion.dashloader.cache.models.DashModel;
 import net.quantumfusion.dashloader.cache.models.DashModelIdentifier;
 import net.quantumfusion.dashloader.cache.models.ModelStage;
 import net.quantumfusion.dashloader.cache.models.factory.DashModelFactory;
-import net.quantumfusion.dashloader.cache.models.predicates.*;
+import net.quantumfusion.dashloader.cache.models.predicates.DashPredicate;
+import net.quantumfusion.dashloader.cache.models.predicates.PredicateHelper;
 import net.quantumfusion.dashloader.mixin.NativeImageAccessor;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
@@ -57,8 +58,6 @@ public class DashRegistry {
     @SerializeNullable(path = {0})
     public Map<Long, DashSprite> sprites;
 
-    public Map<Long, Sprite> spritesOut;
-
 
     @Serialize(order = 2)
     @SerializeSubclasses(path = {1}, value = {
@@ -67,7 +66,6 @@ public class DashRegistry {
     })
     @SerializeNullable(path = {0})
     public Map<Long, DashID> identifiers;
-
 
     @Serialize(order = 3)
     @SerializeNullable(path = {0})
@@ -86,35 +84,19 @@ public class DashRegistry {
 
     @Serialize(order = 6)
     @SerializeNullable(path = {0})
-    @SerializeSubclasses(path = {1}, value = {
-            DashAndPredicate.class,
-            DashSimplePredicate.class,
-            DashOrPredicate.class,
-            DashStaticPredicate.class
-    })
+    @SerializeSubclasses(path = {1}, extraSubclassesId = "predicates")
     public Map<Long, DashPredicate> predicates;
-
 
 
     @Serialize(order = 7)
     @SerializeNullable(path = {0})
-    @SerializeSubclasses(path = {1}, value = {
-            DashBooleanProperty.class,
-            DashEnumProperty.class,
-            DashDirectionProperty.class,
-            DashIntProperty.class
-    })
+    @SerializeSubclasses(path = {1}, extraSubclassesId = "properties")
     public Map<Long, DashProperty> properties;
 
 
     @Serialize(order = 8)
     @SerializeNullable(path = {0})
-    @SerializeSubclasses(path = {1}, value = {
-            DashBooleanValue.class,
-            DashEnumValue.class,
-            DashDirectionValue.class,
-            DashIntValue.class
-    })
+    @SerializeSubclasses(path = {1}, extraSubclassesId = "values")
     public Map<Long, DashPropertyValue> propertyValues;
 
     public List<Integer> failedPredicates = Collections.synchronizedList(new ArrayList<>());
@@ -125,6 +107,7 @@ public class DashRegistry {
     public Map<Long, Predicate<BlockState>> predicateOut;
     public Map<Long, Identifier> identifiersOut;
     public Map<Long, BakedModel> modelsOut;
+    public Map<Long, Sprite> spritesOut;
     public Map<Long, Font> fontsOut;
     public Map<Long, NativeImage> imagesOut;
     public Map<Long, Property<?>> propertiesOut;
@@ -173,7 +156,7 @@ public class DashRegistry {
         return hash;
     }
 
-    public <K> Long createModelPointer(BakedModel bakedModel, @Nullable K var) {
+    public final <K> Long createModelPointer(final BakedModel bakedModel, @Nullable K var) {
         if (bakedModel == null) {
             return null;
         }
@@ -195,7 +178,7 @@ public class DashRegistry {
         return hash;
     }
 
-    public long createSpritePointer(Sprite sprite) {
+    public final long createSpritePointer(final Sprite sprite) {
         final long hash = sprite.hashCode();
         if (sprites.get(hash) == null) {
             sprites.put(hash, new DashSprite(sprite, this));
@@ -203,7 +186,7 @@ public class DashRegistry {
         return hash;
     }
 
-    public long createIdentifierPointer(Identifier identifier) {
+    public final long createIdentifierPointer(final Identifier identifier) {
         final long hash = identifier.hashCode();
         if (identifiers.get(hash) == null) {
             if (identifier instanceof ModelIdentifier) {
@@ -215,23 +198,23 @@ public class DashRegistry {
         return hash;
     }
 
-    public long createImagePointer(NativeImage image) {
-        final long hash = ((NativeImageAccessor)(Object)image).getPointer();
+    public final long createImagePointer(final NativeImage image) {
+        final long hash = ((NativeImageAccessor) (Object) image).getPointer();
         if (images.get(hash) == null) {
             images.put(hash, new DashImage(image));
         }
         return hash;
     }
 
-    public long createPredicatePointer(MultipartModelSelector selector, StateManager<Block, BlockState> stateManager) {
+    public final long createPredicatePointer(final MultipartModelSelector selector, final StateManager<Block, BlockState> stateManager) {
         final long hash = selector.hashCode();
         if (predicates.get(hash) == null) {
-            predicates.put(hash, PredicateHelper.getPredicate(selector, stateManager,this));
+            predicates.put(hash, PredicateHelper.getPredicate(selector, stateManager, this));
         }
         return hash;
     }
 
-    public long createFontPointer(Font font) {
+    public final long createFontPointer(final Font font) {
         final long hash = font.hashCode();
         if (fonts.get(hash) == null) {
             if (font instanceof BitmapFont) {
@@ -247,101 +230,78 @@ public class DashRegistry {
         return hash;
     }
 
-    public Pair<Long,Long> createPropertyPointer(Property<?> property, Comparable<?> value) {
+    public final Pair<Long, Long> createPropertyPointer(final Property<?> property, final Comparable<?> value) {
         final long hashV = value.hashCode();
         final long hashP = property.hashCode();
-        propertyValues.putIfAbsent(hashV,PredicateHelper.getPropertyValue(value,hashP));
-        properties.putIfAbsent(hashP,PredicateHelper.getProperty(property));
-        return Pair.of(hashP,hashV);
+        propertyValues.putIfAbsent(hashV, PredicateHelper.getPropertyValue(value, hashP));
+        properties.putIfAbsent(hashP, PredicateHelper.getProperty(property));
+        return Pair.of(hashP, hashV);
     }
 
 
-    public BlockState getBlockstate(Long pointer) {
-        if (blockstatesOut == null) {
-            throw new DashException("BlockStates not deserialized");
-        }
-        BlockState blockstate = blockstatesOut.get(pointer);
+    public final BlockState getBlockstate(final Long pointer) {
+        final BlockState blockstate = blockstatesOut.get(pointer);
         if (blockstate == null) {
             DashLoader.LOGGER.error("Blockstate not found in data. PINTR: " + pointer);
         }
         return blockstate;
     }
 
-    public Sprite getSprite(Long pointer) {
-        if (spritesOut == null) {
-            throw new DashException("Sprites not deserialized");
-        }
-        Sprite sprite = spritesOut.get(pointer);
+    public final Sprite getSprite(final Long pointer) {
+        final Sprite sprite = spritesOut.get(pointer);
         if (sprite == null) {
             DashLoader.LOGGER.error("Sprite not found in data. PINTR: " + pointer);
         }
         return sprite;
     }
 
-    public Identifier getIdentifier(Long pointer) {
-        if (identifiersOut == null) {
-            throw new DashException("Identifiers not deserialized");
-        }
-        Identifier identifier = identifiersOut.get(pointer);
+    public final Identifier getIdentifier(final Long pointer) {
+        final Identifier identifier = identifiersOut.get(pointer);
         if (identifier == null) {
             DashLoader.LOGGER.error("Identifier not found in data. PINTR: " + pointer);
         }
         return identifier;
     }
 
-    public BakedModel getModel(Long pointer) {
-        if (modelsOut == null) {
-            throw new DashException("Models not deserialized");
-        }
-        BakedModel bakedModel = modelsOut.get(pointer);
+    public final BakedModel getModel(final Long pointer) {
+        final BakedModel bakedModel = modelsOut.get(pointer);
         if (bakedModel == null) {
             DashLoader.LOGGER.error("Model not found in data. PINTR: " + pointer);
         }
         return bakedModel;
     }
 
-    public Font getFont(Long pointer) {
-        if (fontsOut == null) {
-            throw new DashException("Fonts not deserialized");
-        }
-        Font font = fontsOut.get(pointer);
+    public final Font getFont(final Long pointer) {
+        final Font font = fontsOut.get(pointer);
         if (font == null) {
             DashLoader.LOGGER.error("Font not found in data. PINTR: " + pointer);
         }
         return font;
     }
 
-    public NativeImage getImage(Long pointer) {
-        if (imagesOut == null) {
-            throw new DashException("NativeImages not deserialized");
-        }
-        NativeImage image = imagesOut.get(pointer);
+    public final NativeImage getImage(final Long pointer) {
+        final NativeImage image = imagesOut.get(pointer);
         if (image == null) {
             DashLoader.LOGGER.error("NativeImage not found in data. PINTR: " + pointer);
         }
         return image;
     }
 
-    public Predicate<BlockState> getPredicate(Long pointer) {
-        if (predicateOut == null) {
-            throw new DashException("Predicates not deserialized");
-        }
-        Predicate<BlockState> predicate = predicateOut.get(pointer);
+    public final Predicate<BlockState> getPredicate(final Long pointer) {
+        final Predicate<BlockState> predicate = predicateOut.get(pointer);
         if (predicate == null) {
             DashLoader.LOGGER.error("Predicate not found in data. PINTR: " + pointer);
         }
         return predicateOut.get(pointer);
     }
 
-    public Pair<Property<?>, Comparable<?>> getProperty(Long propertyPointer, Long valuePointer) {
-        if (propertiesOut == null) {
-            throw new DashException("Properties not deserialized");
+    public final Pair<Property<?>, Comparable<?>> getProperty(final Long propertyPointer, final Long valuePointer) {
+        final Property<?> property = propertiesOut.get(propertyPointer);
+        final Comparable<?> value = propertyValuesOut.get(valuePointer);
+        if (property == null && value == null) {
+            DashLoader.LOGGER.error("Property not found in data. PINTR: " + propertyPointer + "/" + valuePointer);
         }
-        Property<?> property = propertiesOut.get(propertyPointer);
-        if (property == null) { DashLoader.LOGGER.error("Property not found in data. PINTR: " + propertyPointer); }
-        Comparable<?> value = propertyValuesOut.get(valuePointer);
-        if (value == null) { DashLoader.LOGGER.error("PropertyValue not found in data. PINTR: " + valuePointer); }
-        return Pair.of(property,value);
+        return Pair.of(property, value);
     }
 
     public void toUndash() {
@@ -360,12 +320,12 @@ public class DashRegistry {
         identifiers = null;
 
         logger.info("Loading Images");
-        images.entrySet().parallelStream().forEach(fontEntry -> imagesOut.put(fontEntry.getKey(), fontEntry.getValue().toUndash()));
+        images.entrySet().parallelStream().forEach(imageEntry -> imagesOut.put(imageEntry.getKey(), imageEntry.getValue().toUndash()));
         images = null;
 
         logger.info("Loading Properties");
-        properties.entrySet().parallelStream().forEach(entry -> propertiesOut.put(entry.getKey(),entry.getValue().toUndash()));
-        propertyValues.entrySet().parallelStream().forEach(entry -> propertyValuesOut.put(entry.getKey(),entry.getValue().toUndash(this)));
+        properties.entrySet().parallelStream().forEach(entry -> propertiesOut.put(entry.getKey(), entry.getValue().toUndash()));
+        propertyValues.entrySet().parallelStream().forEach(entry -> propertyValuesOut.put(entry.getKey(), entry.getValue().toUndash(this)));
         properties = null;
         propertyValues = null;
 
