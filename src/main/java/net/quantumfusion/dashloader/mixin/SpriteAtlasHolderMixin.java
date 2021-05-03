@@ -18,7 +18,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(SpriteAtlasHolder.class)
 public class SpriteAtlasHolderMixin {
 
-    @Shadow @Final private SpriteAtlasTexture atlas;
+    @Shadow
+    @Final
+    private SpriteAtlasTexture atlas;
 
     @Inject(method = "prepare(Lnet/minecraft/resource/ResourceManager;Lnet/minecraft/util/profiler/Profiler;)Lnet/minecraft/client/texture/SpriteAtlasTexture$Data;",
             at = @At(value = "HEAD"), cancellable = true)

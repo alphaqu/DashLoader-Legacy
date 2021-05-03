@@ -61,7 +61,7 @@ public class DashSprite {
                       @Deserialize("frameIndex") int frameIndex,
                       @Deserialize("frameTicks") int frameTicks,
                       @Deserialize("images") List<Long> images
-                      ) {
+    ) {
         this.info = info;
         this.animationMetadata = animationMetadata;
         this.images = images;
@@ -80,7 +80,7 @@ public class DashSprite {
 
     public DashSprite(Sprite sprite, DashRegistry registry) {
         SpriteAccessor spriteAccess = ((SpriteAccessor) sprite);
-        info = new DashSpriteInfo(spriteAccess.getInfo(),registry);
+        info = new DashSpriteInfo(spriteAccess.getInfo(), registry);
         animationMetadata = new DashAnimationResourceMetadata(spriteAccess.getAnimationMetadata());
         images = new ArrayList<>();
         Arrays.stream(spriteAccess.getImages()).forEach(nativeImage -> images.add(registry.createImagePointer(nativeImage)));

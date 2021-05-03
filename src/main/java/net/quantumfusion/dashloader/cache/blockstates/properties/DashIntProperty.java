@@ -3,11 +3,6 @@ package net.quantumfusion.dashloader.cache.blockstates.properties;
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import net.minecraft.state.property.IntProperty;
-import net.minecraft.state.property.Property;
-import net.quantumfusion.dashloader.cache.blockstates.properties.value.DashIntValue;
-import net.quantumfusion.dashloader.cache.blockstates.properties.value.DashPropertyValue;
-import org.apache.commons.lang3.tuple.MutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +18,7 @@ public class DashIntProperty implements DashProperty {
 
 
     public DashIntProperty(@Deserialize("values") List<Integer> values,
-                           @Deserialize("name")   String name) {
+                           @Deserialize("name") String name) {
         this.values = values;
         this.name = name;
     }

@@ -3,7 +3,6 @@ package net.quantumfusion.dashloader.cache.font.fonts;
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import io.activej.serializer.annotations.SerializeNullable;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.client.font.BitmapFont;
 import net.quantumfusion.dashloader.cache.DashRegistry;
@@ -30,7 +29,7 @@ public class DashBitmapFont implements DashFont {
         BitmapFontAccessor font = ((BitmapFontAccessor) bitmapFont);
         image = registry.createImagePointer(font.getImage());
         glyphs = new HashMap<>();
-        font.getGlyphs().forEach((integer, bitmapFontGlyph) -> glyphs.put(integer,new DashBitmapFontGlyph(bitmapFontGlyph,registry)));
+        font.getGlyphs().forEach((integer, bitmapFontGlyph) -> glyphs.put(integer, new DashBitmapFontGlyph(bitmapFontGlyph, registry)));
     }
 
     public BitmapFont toUndash(DashRegistry registry) {

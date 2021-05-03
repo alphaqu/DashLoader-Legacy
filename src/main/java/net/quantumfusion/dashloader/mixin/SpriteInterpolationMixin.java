@@ -29,6 +29,6 @@ public class SpriteInterpolationMixin implements SpriteInterpolationDuck {
 
     @Override
     public void interpolation(Sprite owner) {
-       field_21757 = owner;
+        field_21757 = owner;
     }
 }

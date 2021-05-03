@@ -33,7 +33,7 @@ public class DashSpriteInterpolation {
         List<NativeImage> nativeImages = new ArrayList<>();
         images.forEach(dashImage -> nativeImages.add(dashImage.toUndash()));
         spriteInterpolationAccessor.setImages(nativeImages.toArray(new NativeImage[0]));
-        ((SpriteInterpolationDuck)(Object)spriteInterpolation).interpolation(owner);
+        ((SpriteInterpolationDuck) (Object) spriteInterpolation).interpolation(owner);
         return spriteInterpolation;
     }
 }

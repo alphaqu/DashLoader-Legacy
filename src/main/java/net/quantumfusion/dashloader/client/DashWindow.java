@@ -9,7 +9,6 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.quantumfusion.dashloader.DashLoader;
-import net.quantumfusion.dashloader.cache.DashCacheState;
 
 public class DashWindow extends Screen {
     private static final Identifier LOGO = new Identifier("dashloader:textures/icon.png");

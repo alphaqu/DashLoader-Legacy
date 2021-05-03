@@ -5,7 +5,10 @@ import net.quantumfusion.dashloader.cache.DashRegistry;
 
 public interface DashModel {
     BakedModel toUndash(DashRegistry registry);
-    default void apply(DashRegistry registry){};
+
+    default void apply(DashRegistry registry) {
+    }
+
     ModelStage getStage();
 
 }

@@ -7,8 +7,9 @@ import java.util.concurrent.RecursiveTask;
 public class UndashTask<K> extends RecursiveTask<K> {
 
     Dashable dashable;
+
     public UndashTask(Dashable dashable) {
-        this.dashable =  dashable;
+        this.dashable = dashable;
     }
 
     @Override

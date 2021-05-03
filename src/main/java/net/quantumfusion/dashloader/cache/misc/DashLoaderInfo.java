@@ -15,7 +15,6 @@ public class DashLoaderInfo {
     public double dashFormatVersion;
 
 
-
     public DashLoaderInfo(@Deserialize("modInfo") long modInfo,
                           @Deserialize("dashFormatVersion") double dashFormatVersion) {
         this.modInfo = modInfo;

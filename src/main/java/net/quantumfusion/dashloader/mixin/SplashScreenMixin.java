@@ -19,9 +19,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(SplashScreen.class)
 public class SplashScreenMixin {
 
-    @Shadow @Final private MinecraftClient client;
+    @Shadow
+    @Final
+    private MinecraftClient client;
 
-    @Shadow private float progress;
+    @Shadow
+    private float progress;
 
     @Inject(method = "render(Lnet/minecraft/client/util/math/MatrixStack;IIF)V",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/resource/ResourceReloadMonitor;throwExceptions()V", shift = At.Shift.BEFORE), cancellable = true)

@@ -13,11 +13,11 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.List;
 
-public class DashMultipartBakedModelFactory implements DashModelFactory{
+public class DashMultipartBakedModelFactory implements DashModelFactory {
     @Override
-    public<K> DashModel toDash(BakedModel model, DashRegistry registry, K var1) {
+    public <K> DashModel toDash(BakedModel model, DashRegistry registry, K var1) {
         //noinspection unchecked
-        return new DashMultipartBakedModel((MultipartBakedModel) model,registry, (Pair<List<MultipartModelSelector>, StateManager<Block, BlockState>>) var1);
+        return new DashMultipartBakedModel((MultipartBakedModel) model, registry, (Pair<List<MultipartModelSelector>, StateManager<Block, BlockState>>) var1);
     }
 
     @Override

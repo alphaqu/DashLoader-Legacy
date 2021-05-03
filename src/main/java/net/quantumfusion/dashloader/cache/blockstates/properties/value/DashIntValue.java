@@ -4,7 +4,7 @@ import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import net.quantumfusion.dashloader.cache.DashRegistry;
 
-public class DashIntValue implements DashPropertyValue{
+public class DashIntValue implements DashPropertyValue {
     @Serialize(order = 0)
     public Integer value;
 

@@ -27,7 +27,6 @@ public class DashUnicodeFont implements DashFont {
     public final String template;
 
 
-
     public DashUnicodeFont(@Deserialize("images") Map<Long, Long> images,
                            @Deserialize("sizes") byte[] sizes,
                            @Deserialize("template") String template) {

@@ -11,9 +11,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(ModelIdentifier.class)
 public abstract class ModelIdentifierMixin {
 
-    @Shadow @Final private String variant;
+    @Shadow
+    @Final
+    private String variant;
 
-    @Shadow public abstract boolean equals(Object object);
+    @Shadow
+    public abstract boolean equals(Object object);
 
     @Inject(method = "equals(Ljava/lang/Object;)Z",
             at = @At(value = "HEAD"), cancellable = true)

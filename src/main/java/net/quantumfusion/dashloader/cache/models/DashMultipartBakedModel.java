@@ -3,7 +3,6 @@ package net.quantumfusion.dashloader.cache.models;
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import io.activej.serializer.annotations.SerializeNullable;
-import io.activej.serializer.annotations.SerializeSubclasses;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenCustomHashMap;
 import net.gudenau.lib.unsafe.Unsafe;
 import net.minecraft.block.Block;
@@ -14,9 +13,7 @@ import net.minecraft.client.render.model.json.MultipartModelSelector;
 import net.minecraft.state.StateManager;
 import net.minecraft.util.Util;
 import net.quantumfusion.dashloader.DashLoader;
-import net.quantumfusion.dashloader.cache.DashIdentifier;
 import net.quantumfusion.dashloader.cache.DashRegistry;
-import net.quantumfusion.dashloader.cache.models.predicates.*;
 import net.quantumfusion.dashloader.mixin.MultipartBakedModelAccessor;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -40,7 +37,7 @@ public class DashMultipartBakedModel implements DashModel {
 
     MultipartBakedModel toApply;
 
-    public DashMultipartBakedModel(@Deserialize("components")  HashMap<Long, Long>  components,
+    public DashMultipartBakedModel(@Deserialize("components") HashMap<Long, Long> components,
                                    @Deserialize("stateCache") Map<Long, byte[]> stateCache) {
         this.components = components;
         this.stateCache = stateCache;
@@ -55,12 +52,13 @@ public class DashMultipartBakedModel implements DashModel {
         stateCache = new HashMap<>();
         List<Pair<Predicate<BlockState>, BakedModel>> accessComponents = access.getComponents();
         for (int i = 0; i < accessComponents.size(); i++) {
-            final BakedModel right =  accessComponents.get(i).getRight();
-            components.put(registry.createPredicatePointer(selectors.getKey().get(i),selectors.getValue()), registry.createModelPointer(right, DashLoader.getInstance().multipartData.get(right)));
+            final BakedModel right = accessComponents.get(i).getRight();
+            components.put(registry.createPredicatePointer(selectors.getKey().get(i), selectors.getValue()), registry.createModelPointer(right, DashLoader.getInstance().multipartData.get(right)));
         }
         access.getStateCache().forEach((blockState, bitSet) -> stateCache.put(registry.createBlockStatePointer(blockState), bitSet.toByteArray()));
 
     }
+
     private static final Class<MultipartBakedModel> cls = MultipartBakedModel.class;
 
     @Override

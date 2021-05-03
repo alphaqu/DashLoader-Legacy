@@ -44,7 +44,9 @@ public abstract class ParticleManagerMixin {
     @Final
     private SpriteAtlasTexture particleAtlasTexture;
 
-    @Shadow @Final private Map<ParticleTextureSheet, Queue<Particle>> particles;
+    @Shadow
+    @Final
+    private Map<ParticleTextureSheet, Queue<Particle>> particles;
 
     @Inject(method = "reload(Lnet/minecraft/resource/ResourceReloadListener$Synchronizer;Lnet/minecraft/resource/ResourceManager;Lnet/minecraft/util/profiler/Profiler;Lnet/minecraft/util/profiler/Profiler;Ljava/util/concurrent/Executor;Ljava/util/concurrent/Executor;)Ljava/util/concurrent/CompletableFuture;",
             at = @At(value = "HEAD"), cancellable = true)
@@ -60,38 +62,38 @@ public abstract class ParticleManagerMixin {
             CompletableFuture<?> var10000 = CompletableFuture.allOf(completableFutures).thenApplyAsync((void_)
                     -> {
                 prepareProfiler.startTick();
-                    prepareProfiler.push("stitching");
-                    SpriteAtlasTexture.Data data = this.particleAtlasTexture.stitch(manager, map.values().stream().flatMap(Collection::stream), prepareProfiler, 0);
-                    prepareProfiler.pop();
-                    prepareProfiler.endTick();
-                    return data;
+                prepareProfiler.push("stitching");
+                SpriteAtlasTexture.Data data = this.particleAtlasTexture.stitch(manager, map.values().stream().flatMap(Collection::stream), prepareProfiler, 0);
+                prepareProfiler.pop();
+                prepareProfiler.endTick();
+                return data;
             }, prepareExecutor);
             cir.setReturnValue(var10000.thenCompose(synchronizer::whenPrepared).thenAcceptAsync((data) -> {
-                    LogManager.getLogger().info("Particle Apply");
-                    this.particles.clear();
-                    applyProfiler.startTick();
-                    applyProfiler.push("upload");
-                    this.particleAtlasTexture.upload((SpriteAtlasTexture.Data) data);
-                    applyProfiler.swap("bindSpriteSets");
-                    Sprite sprite = this.particleAtlasTexture.getSprite(MissingSprite.getMissingSpriteId());
-                    map.forEach((identifier, spritesAssets) -> {
-                        ImmutableList<Sprite> spriteList;
-                        if (spritesAssets.isEmpty()) {
-                            spriteList = ImmutableList.of(sprite);
-                        } else {
-                            Stream<Identifier> spriteStream = spritesAssets.stream();
-                            SpriteAtlasTexture spriteAtlasTexture = this.particleAtlasTexture;
-                            spriteList = spriteStream.map(spriteAtlasTexture::getSprite).collect(ImmutableList.toImmutableList());
-                        }
-                        ImmutableList<Sprite> immutableList = spriteList;
-                        ((ParticleManagerSimpleSpriteProviderAccessor) this.spriteAwareFactories.get(identifier)).setSprites(immutableList);
-                    });
+                LogManager.getLogger().info("Particle Apply");
+                this.particles.clear();
+                applyProfiler.startTick();
+                applyProfiler.push("upload");
+                this.particleAtlasTexture.upload((SpriteAtlasTexture.Data) data);
+                applyProfiler.swap("bindSpriteSets");
+                Sprite sprite = this.particleAtlasTexture.getSprite(MissingSprite.getMissingSpriteId());
+                map.forEach((identifier, spritesAssets) -> {
+                    ImmutableList<Sprite> spriteList;
+                    if (spritesAssets.isEmpty()) {
+                        spriteList = ImmutableList.of(sprite);
+                    } else {
+                        Stream<Identifier> spriteStream = spritesAssets.stream();
+                        SpriteAtlasTexture spriteAtlasTexture = this.particleAtlasTexture;
+                        spriteList = spriteStream.map(spriteAtlasTexture::getSprite).collect(ImmutableList.toImmutableList());
+                    }
+                    ImmutableList<Sprite> immutableList = spriteList;
+                    ((ParticleManagerSimpleSpriteProviderAccessor) this.spriteAwareFactories.get(identifier)).setSprites(immutableList);
+                });
 
 
                 DashLoader.getInstance().addParticleManagerAssets(spriteAwareFactories, particleAtlasTexture);
 
-                    applyProfiler.pop();
-                    applyProfiler.endTick();
+                applyProfiler.pop();
+                applyProfiler.endTick();
             }, applyExecutor));
         }
         cir.cancel();

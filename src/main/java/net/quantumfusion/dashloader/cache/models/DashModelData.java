@@ -12,14 +12,12 @@ import net.minecraft.state.StateManager;
 import net.minecraft.util.Identifier;
 import net.quantumfusion.dashloader.DashLoader;
 import net.quantumfusion.dashloader.cache.DashRegistry;
-import net.quantumfusion.dashloader.util.Dashable;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class DashModelData {
@@ -39,7 +37,7 @@ public class DashModelData {
         this.models = new HashMap<>();
         models.forEach((identifier, bakedModel) -> {
             if (bakedModel != null) {
-                this.models.put(registry.createIdentifierPointer(identifier), registry.createModelPointer(bakedModel,multipartData.get(bakedModel)));
+                this.models.put(registry.createIdentifierPointer(identifier), registry.createModelPointer(bakedModel, multipartData.get(bakedModel)));
             }
         });
         List<String> unsupportedModels = new ArrayList<>();
@@ -51,10 +49,9 @@ public class DashModelData {
     }
 
 
-
     public Map<Identifier, BakedModel> toUndash(final DashRegistry registry) {
         final HashMap<Identifier, BakedModel> out = new HashMap<>();
-        models.forEach((identifier,bakedModel) -> out.put(registry.getIdentifier(identifier), registry.getModel(bakedModel)));
+        models.forEach((identifier, bakedModel) -> out.put(registry.getIdentifier(identifier), registry.getModel(bakedModel)));
         return out;
     }
 

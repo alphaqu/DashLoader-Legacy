@@ -99,7 +99,7 @@ public class BakedModelManagerOverride {
             Registry.BLOCK.stream().parallel().forEach(block ->
                     block.getStateManager().getStates().parallelStream().forEach((blockState) ->
                             modelsOut.put(blockState, ((BakedModelManager) (Object) this).getModel(getModelId(blockState)))));
-            ((BlockModelsAccessor)blockModelCache).setModels(modelsOut);
+            ((BlockModelsAccessor) blockModelCache).setModels(modelsOut);
         }
         profiler.swap("cache");
         profiler.pop();

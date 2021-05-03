@@ -14,10 +14,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(SpriteAtlasTexture.class)
 public class SpriteAtlasTextureMixin {
 
-    @Shadow @Final private static Logger LOGGER;
+    @Shadow
+    @Final
+    private static Logger LOGGER;
 
     @Inject(method = "upload(Lnet/minecraft/client/texture/SpriteAtlasTexture$Data;)V",
-    at = @At(value = "HEAD"))
+            at = @At(value = "HEAD"))
     private void saveAtlasInfo(SpriteAtlasTexture.Data data, CallbackInfo ci) {
         DashLoader.getInstance().atlasData.put((SpriteAtlasTexture) (Object) this, new DashSpriteAtlasTextureData(data));
     }

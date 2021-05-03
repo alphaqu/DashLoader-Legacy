@@ -31,7 +31,9 @@ public class MultipartUnbakedModelMixin {
     @Final
     private List<MultipartModelComponent> components;
 
-    @Shadow @Final private StateManager<Block, BlockState> stateFactory;
+    @Shadow
+    @Final
+    private StateManager<Block, BlockState> stateFactory;
 
     @Inject(method = "bake(Lnet/minecraft/client/render/model/ModelLoader;Ljava/util/function/Function;Lnet/minecraft/client/render/model/ModelBakeSettings;Lnet/minecraft/util/Identifier;)Lnet/minecraft/client/render/model/BakedModel;",
             at = @At(value = "RETURN"),
@@ -40,8 +42,8 @@ public class MultipartUnbakedModelMixin {
     private void addPredicateInfo(ModelLoader loader, Function<SpriteIdentifier, Sprite> textureGetter, ModelBakeSettings rotationContainer, Identifier modelId, CallbackInfoReturnable<BakedModel> cir, MultipartBakedModel.Builder builder) {
         MultipartBakedModel bakedModel = (MultipartBakedModel) builder.build();
         List<MultipartModelSelector> outSelectors = new ArrayList<>();
-        components.forEach(multipartModelComponent -> outSelectors.add(((MultipartModelComponentAccessor)multipartModelComponent).getSelector()));
-        DashLoader.getInstance().multipartData.put(bakedModel, Pair.of(outSelectors,stateFactory));
+        components.forEach(multipartModelComponent -> outSelectors.add(((MultipartModelComponentAccessor) multipartModelComponent).getSelector()));
+        DashLoader.getInstance().multipartData.put(bakedModel, Pair.of(outSelectors, stateFactory));
         cir.setReturnValue(bakedModel);
     }
 

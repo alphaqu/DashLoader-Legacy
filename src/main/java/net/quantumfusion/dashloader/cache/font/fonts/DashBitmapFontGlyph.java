@@ -44,7 +44,7 @@ public class DashBitmapFontGlyph {
     }
 
     public DashBitmapFontGlyph(BitmapFont.BitmapFontGlyph bitmapFontGlyph, DashRegistry registry) {
-        BitmapFontGlyphAccessor font = ((BitmapFontGlyphAccessor)(Object)bitmapFontGlyph);
+        BitmapFontGlyphAccessor font = ((BitmapFontGlyphAccessor) (Object) bitmapFontGlyph);
         scaleFactor = font.getScaleFactor();
         image = registry.createImagePointer(font.getImage());
         x = font.getX();

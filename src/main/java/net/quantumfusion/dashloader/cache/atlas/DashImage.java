@@ -15,19 +15,22 @@ import java.nio.IntBuffer;
 public class DashImage {
 
     @Serialize(order = 0)
-    public byte[] image;
+    public final byte[] image;
 
     public DashImage(NativeImage image) {
+        byte[] image1 = null;
         try {
-            this.image = image.getBytes();
+            image1 = image.getBytes();
         } catch (IOException e) {
             e.printStackTrace();
         }
+        this.image = image1;
     }
 
     public DashImage(@Deserialize("image") byte[] image) {
         this.image = image;
     }
+
 
     public NativeImage read() throws IOException {
         MemoryStack memoryStack = MemoryStack.stackPush();
@@ -35,7 +38,7 @@ public class DashImage {
         IntBuffer y = memoryStack.mallocInt(1);
         IntBuffer channels = memoryStack.mallocInt(1);
         ByteBuffer buf = ByteBuffer.allocateDirect(image.length);
-        buf.put(image, 0, image.length);
+        buf.put(image);
         buf.flip();
         ByteBuffer imageBuffer = STBImage.stbi_load_from_memory(buf, x, y, channels, 4);
         if (imageBuffer == null) {

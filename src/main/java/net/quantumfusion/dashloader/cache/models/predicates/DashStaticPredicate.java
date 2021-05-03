@@ -8,7 +8,7 @@ import net.quantumfusion.dashloader.cache.DashRegistry;
 
 import java.util.function.Predicate;
 
-public class DashStaticPredicate implements DashPredicate{
+public class DashStaticPredicate implements DashPredicate {
 
     @Serialize(order = 0)
     public boolean value;

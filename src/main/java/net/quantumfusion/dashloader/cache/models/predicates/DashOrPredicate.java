@@ -19,17 +19,17 @@ import java.util.stream.Collectors;
 public class DashOrPredicate implements DashPredicate {
     @Serialize(order = 0)
     @SerializeNullable()
-    @SerializeSubclasses(path = {0},  extraSubclassesId = "predicates")
+    @SerializeSubclasses(path = {0}, extraSubclassesId = "predicates")
     public List<DashPredicate> selectors;
 
     public DashOrPredicate(@Deserialize("selectors") List<DashPredicate> selectors) {
         this.selectors = selectors;
     }
 
-    public DashOrPredicate(OrMultipartModelSelector selector, StateManager<Block, BlockState> stateManager,DashRegistry registry) {
+    public DashOrPredicate(OrMultipartModelSelector selector, StateManager<Block, BlockState> stateManager, DashRegistry registry) {
         OrMultipartModelSelectorAccessor access = ((OrMultipartModelSelectorAccessor) selector);
         selectors = new ArrayList<>();
-        access.getSelectors().forEach(selector1 -> selectors.add(PredicateHelper.getPredicate(selector1,stateManager,registry)));
+        access.getSelectors().forEach(selector1 -> selectors.add(PredicateHelper.getPredicate(selector1, stateManager, registry)));
     }
 
     @Override

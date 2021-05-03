@@ -108,7 +108,7 @@ public class MappingData {
     public List<SpriteAtlasTexture> toUndash(DashRegistry registry) {
         List<SpriteAtlasTexture> atlasesToRegister = new ArrayList<>();
         List<Runnable> tasks = new ArrayList<>();
-        tasks.add(() -> splashTextOut = splashTextData.toUndash(registry));
+        tasks.add(() -> splashTextOut = splashTextData.toUndash());
 
         tasks.add(() -> {
             atlasManagerOut = spriteAtlasData.toUndash(registry);

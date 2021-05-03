@@ -23,8 +23,8 @@ public class DashModelOverrideList {
 
     ModelOverrideList toApply;
 
-    public DashModelOverrideList(@Deserialize("overrides")List<DashModelOverride> overrides,
-                                 @Deserialize("bakedModels")List<Long> bakedModels) {
+    public DashModelOverrideList(@Deserialize("overrides") List<DashModelOverride> overrides,
+                                 @Deserialize("bakedModels") List<Long> bakedModels) {
         this.overrides = overrides;
         this.bakedModels = bakedModels;
     }
@@ -33,10 +33,10 @@ public class DashModelOverrideList {
         overrides = new ArrayList<>();
         bakedModels = new ArrayList<>();
         ModelOverideListAccessor access = ((ModelOverideListAccessor) modelOverrideList);
-        List<BakedModel> models =  access.getModels();
+        List<BakedModel> models = access.getModels();
 
         models.forEach(bakedModel -> bakedModels.add(registry.createModelPointer(bakedModel, DashLoader.getInstance().multipartData.get(bakedModel))));
-        access.getOverrides().forEach(modelOverride -> overrides.add(new DashModelOverride(modelOverride,registry)));
+        access.getOverrides().forEach(modelOverride -> overrides.add(new DashModelOverride(modelOverride, registry)));
     }
 
     public ModelOverrideList toUndash(DashRegistry registry) {

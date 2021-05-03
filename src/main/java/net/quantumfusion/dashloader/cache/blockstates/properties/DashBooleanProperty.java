@@ -4,7 +4,6 @@ import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import net.minecraft.state.property.BooleanProperty;
 
-
 import java.util.Objects;
 
 public class DashBooleanProperty implements DashProperty {

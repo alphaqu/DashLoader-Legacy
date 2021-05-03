@@ -306,6 +306,7 @@ public class DashRegistry {
 
     public void toUndash() {
         Logger logger = LogManager.getLogger();
+
         spritesOut = new ConcurrentHashMap<>();
         blockstatesOut = new ConcurrentHashMap<>();
         predicateOut = new ConcurrentHashMap<>();
@@ -315,40 +316,41 @@ public class DashRegistry {
         fontsOut = new ConcurrentHashMap<>();
         propertiesOut = new ConcurrentHashMap<>();
         propertyValuesOut = new ConcurrentHashMap<>();
-        logger.info("Loading Identifiers");
+
+        logger.info("[1/11] Loading Identifiers");
         identifiers.entrySet().parallelStream().forEach(identifierEntry -> identifiersOut.put(identifierEntry.getKey(), identifierEntry.getValue().toUndash()));
         identifiers = null;
 
-        logger.info("Loading Images");
+        logger.info("[2/11] Loading Images");
         images.entrySet().parallelStream().forEach(imageEntry -> imagesOut.put(imageEntry.getKey(), imageEntry.getValue().toUndash()));
         images = null;
 
-        logger.info("Loading Properties");
+        logger.info("[3/11] Loading Properties");
         properties.entrySet().parallelStream().forEach(entry -> propertiesOut.put(entry.getKey(), entry.getValue().toUndash()));
         propertyValues.entrySet().parallelStream().forEach(entry -> propertyValuesOut.put(entry.getKey(), entry.getValue().toUndash(this)));
         properties = null;
         propertyValues = null;
 
-        logger.info("Loading Blockstates");
+        logger.info("[4/11] Loading Blockstates");
         blockstates.entrySet().parallelStream().forEach(blockstateEntry -> blockstatesOut.put(blockstateEntry.getKey(), blockstateEntry.getValue().toUndash(this)));
         blockstates = null;
 
-        logger.info("Loading Predicates");
+        logger.info("[5/11] Loading Predicates");
         predicates.entrySet().parallelStream().forEach(predicateEntry -> {
             predicateOut.put(predicateEntry.getKey(), predicateEntry.getValue().toUndash(this));
         });
         predicates = null;
 
-        logger.info("Loading Sprites");
+        logger.info("[6/11] Loading Sprites");
         sprites.entrySet().parallelStream().forEach(spriteEntry -> spritesOut.put(spriteEntry.getKey(), spriteEntry.getValue().toUndash(this)));
         sprites = null;
 
 
-        logger.info("Loading Fonts");
+        logger.info("[7/11] Loading Fonts");
         fonts.entrySet().parallelStream().forEach(fontEntry -> fontsOut.put(fontEntry.getKey(), fontEntry.getValue().toUndash(this)));
         fonts = null;
 
-        logger.info("Loading Simple Models");
+        logger.info("[8/11] Loading Simple Models");
         models.entrySet().parallelStream().forEach(modelEntry -> {
             final DashModel value = modelEntry.getValue();
             if (value.getStage() == ModelStage.SIMPLE) {
@@ -356,7 +358,7 @@ public class DashRegistry {
             }
         });
 
-        logger.info("Loading Intermediate Models");
+        logger.info("[9/11] Loading Intermediate Models");
         models.entrySet().parallelStream().forEach(modelEntry -> {
             final DashModel value = modelEntry.getValue();
             if (value.getStage() == ModelStage.INTERMEDIATE) {
@@ -364,7 +366,7 @@ public class DashRegistry {
             }
         });
 
-        logger.info("Loading Advanced Models");
+        logger.info("[10/11] Loading Advanced Models");
         models.entrySet().parallelStream().forEach(modelEntry -> {
             final DashModel value = modelEntry.getValue();
             if (value.getStage() == ModelStage.ADVANCED) {
@@ -372,8 +374,8 @@ public class DashRegistry {
             }
         });
 
-        logger.info("Applying Model Overrides");
-        models.forEach((key, value) -> value.apply(this));
+        logger.info("[11/11] Applying Model Overrides");
+        models.values().forEach((model) -> model.apply(this));
         models = null;
     }
 

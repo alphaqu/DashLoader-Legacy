@@ -17,7 +17,7 @@ public class DashWeightedModelEntry {
     public int weight;
 
     public DashWeightedModelEntry(@Deserialize("model") Long model,
-                                  @Deserialize("weight")int weight) {
+                                  @Deserialize("weight") int weight) {
         this.model = model;
         this.weight = weight;
     }

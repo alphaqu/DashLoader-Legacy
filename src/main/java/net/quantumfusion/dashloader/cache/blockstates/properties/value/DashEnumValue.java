@@ -5,7 +5,7 @@ import io.activej.serializer.annotations.Serialize;
 import net.quantumfusion.dashloader.cache.DashRegistry;
 import net.quantumfusion.dashloader.cache.blockstates.properties.DashEnumProperty;
 
-public class DashEnumValue implements DashPropertyValue{
+public class DashEnumValue implements DashPropertyValue {
     @Serialize(order = 0)
     public final String value;
 
@@ -21,6 +21,6 @@ public class DashEnumValue implements DashPropertyValue{
 
     @Override
     public <K extends Comparable> K toUndash(DashRegistry registry) {
-        return (K) Enum.valueOf(((Class)((DashEnumProperty)registry.properties.get(enumPointer)).type),value);
+        return (K) Enum.valueOf(((Class) ((DashEnumProperty) registry.properties.get(enumPointer)).type), value);
     }
 }

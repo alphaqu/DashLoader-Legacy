@@ -17,7 +17,7 @@ import net.quantumfusion.dashloader.cache.blockstates.properties.value.*;
 public class PredicateHelper {
 
 
-    public static <T extends Enum<T> & StringIdentifiable>  DashProperty getProperty(Property<?> property) {
+    public static <T extends Enum<T> & StringIdentifiable> DashProperty getProperty(Property<?> property) {
         if (property instanceof BooleanProperty) {
             return new DashBooleanProperty((BooleanProperty) property);
         } else if (property instanceof DirectionProperty) {
@@ -31,15 +31,15 @@ public class PredicateHelper {
     }
 
 
-    public static <T extends Enum<T> & StringIdentifiable> DashPropertyValue getPropertyValue(Comparable<?> value,long hashP) {
+    public static <T extends Enum<T> & StringIdentifiable> DashPropertyValue getPropertyValue(Comparable<?> value, long hashP) {
         if (value instanceof Boolean) {
             return new DashBooleanValue((Boolean) value);
         } else if (value instanceof Direction) {
-            return new DashDirectionValue((Direction)value);
+            return new DashDirectionValue((Direction) value);
         } else if (value instanceof Integer) {
             return new DashIntValue((Integer) value);
         } else if (value instanceof Enum) {
-            return new DashEnumValue(((Enum) value).name(),hashP);
+            return new DashEnumValue(((Enum) value).name(), hashP);
         } else {
             System.out.println(value.getClass() + " / " + value);
         }
@@ -47,14 +47,14 @@ public class PredicateHelper {
     }
 
     @SuppressWarnings("unchecked")
-    public static <P extends DashPredicate> P getPredicate(MultipartModelSelector selector, StateManager<Block, BlockState> stateManager,DashRegistry registry) {
+    public static <P extends DashPredicate> P getPredicate(MultipartModelSelector selector, StateManager<Block, BlockState> stateManager, DashRegistry registry) {
         if (selector instanceof SimpleMultipartModelSelector) {
-            return (P) new DashSimplePredicate((SimpleMultipartModelSelector) selector,stateManager, registry);
+            return (P) new DashSimplePredicate((SimpleMultipartModelSelector) selector, stateManager, registry);
         } else if (selector instanceof AndMultipartModelSelector) {
-            return (P) new DashAndPredicate((AndMultipartModelSelector) selector,stateManager,registry);
+            return (P) new DashAndPredicate((AndMultipartModelSelector) selector, stateManager, registry);
         } else if (selector instanceof OrMultipartModelSelector) {
-            return (P) new DashOrPredicate((OrMultipartModelSelector) selector,stateManager,registry);
-        } else if(selector != null){
+            return (P) new DashOrPredicate((OrMultipartModelSelector) selector, stateManager, registry);
+        } else if (selector != null) {
             return (P) new DashStaticPredicate(selector);
         } else {
             System.out.println(selector.getClass() + " / " + selector);

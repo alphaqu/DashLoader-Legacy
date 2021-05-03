@@ -3,7 +3,6 @@ package net.quantumfusion.dashloader;
 import io.activej.serializer.BinarySerializer;
 import io.activej.serializer.CompatibilityLevel;
 import io.activej.serializer.SerializerBuilder;
-import io.activej.serializer.StringFormat;
 import io.activej.serializer.stream.StreamInput;
 import io.activej.serializer.stream.StreamOutput;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
@@ -56,17 +55,18 @@ import net.quantumfusion.dashloader.cache.models.predicates.DashStaticPredicate;
 import net.quantumfusion.dashloader.misc.DashSplashTextData;
 import net.quantumfusion.dashloader.mixin.AbstractTextureAccessor;
 import net.quantumfusion.dashloader.mixin.SpriteAtlasTextureAccessor;
-import net.quantumfusion.dashloader.util.TextureHelper;
 import net.quantumfusion.dashloader.util.TimeHelper;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -76,7 +76,7 @@ import java.util.Map;
 public class DashLoader {
     public static final Logger LOGGER = LogManager.getLogger();
     public static final int totalTasks = 11;
-    public static final double formatVersion = 0.4;
+    public static final double formatVersion = 0.5;
     public static final String version = FabricLoader.getInstance().getModContainer("dashloader").get().getMetadata().getVersion().getFriendlyString();
     private static final Path config = FabricLoader.getInstance().getConfigDir().normalize();
     private static final boolean debug = FabricLoader.getInstance().isDevelopmentEnvironment();
@@ -151,7 +151,7 @@ public class DashLoader {
             initModelMappings();
             initSerializers();
             createDirectory();
-            LOGGER.info("Checking for Mod Change.");
+            LOGGER.info("[4/4]Checking for Mod Change.");
             DashLoaderInfo newData = DashLoaderInfo.create();
             boolean reload = true;
             try {
@@ -176,7 +176,7 @@ public class DashLoader {
             }
             newData = DashLoaderInfo.create();
             createMetadata(newData);
-            LOGGER.info("Loaded cache in " + TimeHelper.getDecimalMs(start, Instant.now()) + "s");
+            LOGGER.info("Loaded cache in " + TimeHelper.getDecimalS(start, Instant.now()) + "s");
         });
         dash.setName("dash-manager");
         dash.start();
@@ -248,7 +248,7 @@ public class DashLoader {
         serializeObject(mappings, paths.get(DashCachePaths.MAPPINGS), "Mappings");
         serializeObject(registry, paths.get(DashCachePaths.REGISTRY), "Registry");
         task = "Caching is now complete.";
-        LOGGER.info("Created cache in " + TimeHelper.getDecimalMs(start, Instant.now()) + "s");
+        LOGGER.info("Created cache in " + TimeHelper.getDecimalS(start, Instant.now()) + "s");
     }
 
     public void loadDashCache() {
@@ -295,7 +295,7 @@ public class DashLoader {
         try {
             LOGGER.info("  Starting " + name + " Deserialization.");
             //noinspection unchecked
-            T out = (T) StreamInput.create(Files.newInputStream(path)).deserialize(serializers.get(clazz));
+            T out = (T) StreamInput.create(new BufferedInputStream(Files.newInputStream(path))).deserialize(serializers.get(clazz));
             if (out == null) {
                 throw new DashException(name + " Deserialization failed");
             }
@@ -366,10 +366,12 @@ public class DashLoader {
      * Everything that gets called on launch here
      */
     private void initPaths() {
+        Instant start = Instant.now();
         paths.clear();
         paths.put(DashCachePaths.REGISTRY, config.resolve("quantumfusion/dashloader/registry.activej"));
         paths.put(DashCachePaths.MAPPINGS, config.resolve("quantumfusion/dashloader/mappings.activej"));
         paths.put(DashCachePaths.DASH_INFO, config.resolve("quantumfusion/dashloader/metadata.activej"));
+        LOGGER.info("[1/4][" + Duration.between(start, Instant.now()).toMillis() + "ms] Created Paths.");
     }
 
     private void addModelType(DashModelFactory factory) {
@@ -377,21 +379,25 @@ public class DashLoader {
     }
 
     private void initModelMappings() {
+        Instant start = Instant.now();
         modelMappings.clear();
         addModelType(new DashBasicBakedModelFactory());
         addModelType(new DashBuiltInBakedModelFactory());
         addModelType(new DashMultipartBakedModelFactory());
         addModelType(new DashWeightedBakedModelFactory());
         FabricLoader.getInstance().getAllMods().forEach(modContainer -> modContainer.getMetadata().getCustomValue("dashmodel"));
+        LOGGER.info("[2/4][" + Duration.between(start, Instant.now()).toMillis() + "ms] Created Model Mappings.");
     }
 
     private void initSerializers() {
-        LOGGER.info("Started Serializer Creation");
+        Instant start = Instant.now();
+        Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
+        System.out.println(Thread.currentThread().getContextClassLoader().getClass());
         serializers = new Object2ObjectOpenHashMap<>();
         List<Class<?>> modelTypes = new ArrayList<>();
         modelMappings.values().forEach(dashModel -> modelTypes.add(dashModel.getDashModelType()));
 
-        HashMap<Class<?>,SerializerBuilder> serializerBuilders = new HashMap<>();
+        HashMap<Class<?>, SerializerBuilder> serializerBuilders = new HashMap<>();
         serializerBuilders.put(DashRegistry.class,
                 SerializerBuilder.create()
                         .withSubclasses("models", DashBasicBakedModel.class, DashWeightedBakedModel.class, DashMultipartBakedModel.class, DashBuiltinBakedModel.class)
@@ -400,11 +406,10 @@ public class DashLoader {
                         .withSubclasses("properties", DashBooleanProperty.class, DashEnumProperty.class, DashDirectionProperty.class, DashIntProperty.class)
                         .withSubclasses("values", DashBooleanValue.class, DashEnumValue.class, DashDirectionValue.class, DashIntValue.class)
                         .withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE));
-
         serializerBuilders.put(MappingData.class, SerializerBuilder.create().withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE));
         serializerBuilders.put(DashLoaderInfo.class, SerializerBuilder.create().withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE));
-        serializerBuilders.entrySet().parallelStream().forEach(entry -> serializers.put(entry.getKey(),entry.getValue().build(entry.getKey())));
-        LOGGER.info("Created Serializers");
+        serializerBuilders.entrySet().parallelStream().forEach(entry -> serializers.put(entry.getKey(), entry.getValue().build(entry.getKey())));
+        LOGGER.info("[3/4][" + Duration.between(start, Instant.now()).toMillis() + "ms] Created Serializers.");
     }
 
 

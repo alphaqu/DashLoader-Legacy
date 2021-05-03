@@ -13,7 +13,7 @@ public interface BitmapFontGlyphAccessor {
     @Invoker("<init>")
     static BitmapFont.BitmapFontGlyph init(float scaleFactor, NativeImage image, int x, int y, int width, int height, int advance, int ascent) {
         throw new AssertionError();
-    };
+    }
 
     @Accessor
     NativeImage getImage();

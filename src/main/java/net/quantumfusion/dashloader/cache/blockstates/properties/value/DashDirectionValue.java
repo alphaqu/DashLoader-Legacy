@@ -5,7 +5,7 @@ import io.activej.serializer.annotations.Serialize;
 import net.minecraft.util.math.Direction;
 import net.quantumfusion.dashloader.cache.DashRegistry;
 
-public class DashDirectionValue implements DashPropertyValue{
+public class DashDirectionValue implements DashPropertyValue {
     @Serialize(order = 0)
     public Integer direction;
 

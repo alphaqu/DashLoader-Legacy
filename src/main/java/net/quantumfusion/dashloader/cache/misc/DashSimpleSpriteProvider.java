@@ -15,13 +15,13 @@ public class DashSimpleSpriteProvider {
     @Serialize(order = 0)
     public List<Long> sprites;
 
-    public DashSimpleSpriteProvider(@Deserialize("sprites")  List<Long> sprites) {
+    public DashSimpleSpriteProvider(@Deserialize("sprites") List<Long> sprites) {
         this.sprites = sprites;
     }
 
-    public DashSimpleSpriteProvider(ParticleManager.SimpleSpriteProvider simpleSpriteProvider,DashRegistry registry) {
+    public DashSimpleSpriteProvider(ParticleManager.SimpleSpriteProvider simpleSpriteProvider, DashRegistry registry) {
         sprites = new ArrayList<>();
-        ((ParticleManagerSimpleSpriteProviderAccessor)simpleSpriteProvider).getSprites().forEach(sprite -> sprites.add(registry.createSpritePointer(sprite)));
+        ((ParticleManagerSimpleSpriteProviderAccessor) simpleSpriteProvider).getSprites().forEach(sprite -> sprites.add(registry.createSpritePointer(sprite)));
     }
 
     public ParticleManager.SimpleSpriteProvider toUndash(DashRegistry registry) {
