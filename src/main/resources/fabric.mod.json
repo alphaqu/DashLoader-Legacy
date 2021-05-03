@@ -12,15 +12,13 @@
     "issues": "https://github.com/alphaqu/DashLoader/issues",
     "sources": "https://github.com/alphaqu/DashLoader"
   },
-  "license": "MIT",
+  "license": "LGPLv2.1",
   "icon": "assets/dashloader/textures/icon.png",
   "environment": "client",
   "accessWidener": "dashloader.accesswidener",
   "entrypoints": {
     "client": [
       "net.quantumfusion.dashloader.client.DashClient"
-    ],
-    "main": [
     ]
   },
   "mixins": [
