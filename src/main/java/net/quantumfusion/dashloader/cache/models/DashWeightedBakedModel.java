@@ -16,11 +16,6 @@ public class DashWeightedBakedModel implements DashModel {
     @Serialize(order = 0)
     public List<DashWeightedModelEntry> models;
 
-    WeightedBakedModel toApply;
-
-    public DashWeightedBakedModel() {
-    }
-
     public DashWeightedBakedModel(@Deserialize("models") List<DashWeightedModelEntry> models) {
         this.models = models;
     }
@@ -38,9 +33,8 @@ public class DashWeightedBakedModel implements DashModel {
         return new WeightedBakedModel(modelsOut);
     }
 
-
     @Override
-    public ModelStage getStage() {
-        return ModelStage.INTERMEDIATE;
+    public int getStage() {
+        return 1;
     }
 }

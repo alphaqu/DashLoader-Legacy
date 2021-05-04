@@ -30,7 +30,6 @@ import net.quantumfusion.dashloader.cache.font.fonts.DashFont;
 import net.quantumfusion.dashloader.cache.font.fonts.DashUnicodeFont;
 import net.quantumfusion.dashloader.cache.models.DashModel;
 import net.quantumfusion.dashloader.cache.models.DashModelIdentifier;
-import net.quantumfusion.dashloader.cache.models.ModelStage;
 import net.quantumfusion.dashloader.cache.models.factory.DashModelFactory;
 import net.quantumfusion.dashloader.cache.models.predicates.DashPredicate;
 import net.quantumfusion.dashloader.cache.models.predicates.PredicateHelper;
@@ -317,64 +316,71 @@ public class DashRegistry {
         propertiesOut = new ConcurrentHashMap<>();
         propertyValuesOut = new ConcurrentHashMap<>();
 
-        logger.info("[1/11] Loading Identifiers");
+        logger.info("[1/9] Loading Identifiers");
         identifiers.entrySet().parallelStream().forEach(identifierEntry -> identifiersOut.put(identifierEntry.getKey(), identifierEntry.getValue().toUndash()));
         identifiers = null;
 
-        logger.info("[2/11] Loading Images");
+        logger.info("[2/9] Loading Images");
         images.entrySet().parallelStream().forEach(imageEntry -> imagesOut.put(imageEntry.getKey(), imageEntry.getValue().toUndash()));
         images = null;
 
-        logger.info("[3/11] Loading Properties");
+        logger.info("[3/9] Loading Properties");
         properties.entrySet().parallelStream().forEach(entry -> propertiesOut.put(entry.getKey(), entry.getValue().toUndash()));
         propertyValues.entrySet().parallelStream().forEach(entry -> propertyValuesOut.put(entry.getKey(), entry.getValue().toUndash(this)));
         properties = null;
         propertyValues = null;
 
-        logger.info("[4/11] Loading Blockstates");
+        logger.info("[4/9] Loading Blockstates");
         blockstates.entrySet().parallelStream().forEach(blockstateEntry -> blockstatesOut.put(blockstateEntry.getKey(), blockstateEntry.getValue().toUndash(this)));
         blockstates = null;
 
-        logger.info("[5/11] Loading Predicates");
+        logger.info("[5/9] Loading Predicates");
         predicates.entrySet().parallelStream().forEach(predicateEntry -> {
             predicateOut.put(predicateEntry.getKey(), predicateEntry.getValue().toUndash(this));
         });
         predicates = null;
 
-        logger.info("[6/11] Loading Sprites");
+        logger.info("[6/9] Loading Sprites");
         sprites.entrySet().parallelStream().forEach(spriteEntry -> spritesOut.put(spriteEntry.getKey(), spriteEntry.getValue().toUndash(this)));
         sprites = null;
 
 
-        logger.info("[7/11] Loading Fonts");
+        logger.info("[7/9] Loading Fonts");
         fonts.entrySet().parallelStream().forEach(fontEntry -> fontsOut.put(fontEntry.getKey(), fontEntry.getValue().toUndash(this)));
         fonts = null;
 
-        logger.info("[8/11] Loading Simple Models");
+        logger.info("[8/9] Loading Simple Models");
+        final boolean[] continueModels = {false};
         models.entrySet().parallelStream().forEach(modelEntry -> {
             final DashModel value = modelEntry.getValue();
-            if (value.getStage() == ModelStage.SIMPLE) {
+            final int stage = value.getStage();
+            if (stage == 0) {
                 modelsOut.put(modelEntry.getKey(), value.toUndash(this));
+            } else if (stage > 0) {
+                continueModels[0] = true;
             }
         });
 
-        logger.info("[9/11] Loading Intermediate Models");
-        models.entrySet().parallelStream().forEach(modelEntry -> {
-            final DashModel value = modelEntry.getValue();
-            if (value.getStage() == ModelStage.INTERMEDIATE) {
-                modelsOut.put(modelEntry.getKey(), value.toUndash(this));
-            }
-        });
+        short stageNow = 1;
+        if (continueModels[0]) {
+            logger.info("[8.5/9] Loading Advanced Models");
+        }
+        while (continueModels[0]) {
+            continueModels[0] = false;
+            short finalStageNow = stageNow;
+            models.entrySet().parallelStream().forEach(modelEntry -> {
+                final DashModel value = modelEntry.getValue();
+                final int stage = value.getStage();
+                if (stage == finalStageNow) {
+                    modelsOut.put(modelEntry.getKey(), value.toUndash(this));
+                } else if (stage > finalStageNow) {
+                    continueModels[0] = true;
+                }
+            });
+            stageNow++;
+        }
 
-        logger.info("[10/11] Loading Advanced Models");
-        models.entrySet().parallelStream().forEach(modelEntry -> {
-            final DashModel value = modelEntry.getValue();
-            if (value.getStage() == ModelStage.ADVANCED) {
-                modelsOut.put(modelEntry.getKey(), value.toUndash(this));
-            }
-        });
-
-        logger.info("[11/11] Applying Model Overrides");
+        logger.info("[9/9] Applying Model Overrides");
         models.values().forEach((model) -> model.apply(this));
         models = null;
     }

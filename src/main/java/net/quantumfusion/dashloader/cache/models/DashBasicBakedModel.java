@@ -103,7 +103,7 @@ public class DashBasicBakedModel implements DashModel {
 
 
     @Override
-    public ModelStage getStage() {
-        return ModelStage.SIMPLE;
+    public int getStage() {
+        return 0;
     }
 }

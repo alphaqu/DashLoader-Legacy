@@ -8,8 +8,8 @@ import net.quantumfusion.dashloader.cache.DashRegistry;
 import net.quantumfusion.dashloader.mixin.SpriteAtlasManagerAccessor;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class DashSpriteAtlasData {
     @Serialize(order = 0)
@@ -19,7 +19,7 @@ public class DashSpriteAtlasData {
         this.atlases = atlases;
     }
 
-    public DashSpriteAtlasData(SpriteAtlasManager spriteAtlasManager, HashMap<SpriteAtlasTexture, DashSpriteAtlasTextureData> atlasData, DashRegistry loader) {
+    public DashSpriteAtlasData(SpriteAtlasManager spriteAtlasManager, Map<SpriteAtlasTexture, DashSpriteAtlasTextureData> atlasData, DashRegistry loader) {
         atlases = new ArrayList<>();
         ((SpriteAtlasManagerAccessor) spriteAtlasManager).getAtlases().forEach((identifier, spriteAtlasTexture) -> atlases.add(new DashSpriteAtlasTexture(spriteAtlasTexture, atlasData.get(spriteAtlasTexture), loader)));
 

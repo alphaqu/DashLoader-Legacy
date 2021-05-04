@@ -87,7 +87,7 @@ public class DashMultipartBakedModel implements DashModel {
     }
 
     @Override
-    public ModelStage getStage() {
-        return ModelStage.ADVANCED;
+    public int getStage() {
+        return 2;
     }
 }

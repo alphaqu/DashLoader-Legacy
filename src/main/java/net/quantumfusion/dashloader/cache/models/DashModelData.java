@@ -33,7 +33,7 @@ public class DashModelData {
         this.models = models;
     }
 
-    public DashModelData(Map<Identifier, BakedModel> models, HashMap<MultipartBakedModel, Pair<List<MultipartModelSelector>, StateManager<Block, BlockState>>> multipartData, DashRegistry registry) {
+    public DashModelData(Map<Identifier, BakedModel> models, Map<MultipartBakedModel, Pair<List<MultipartModelSelector>, StateManager<Block, BlockState>>> multipartData, DashRegistry registry) {
         this.models = new HashMap<>();
         models.forEach((identifier, bakedModel) -> {
             if (bakedModel != null) {

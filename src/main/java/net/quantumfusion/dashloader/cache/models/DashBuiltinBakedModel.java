@@ -20,10 +20,11 @@ public class DashBuiltinBakedModel implements DashModel {
     @Serialize(order = 3)
     public boolean sideLit;
 
-    public DashBuiltinBakedModel(@Deserialize("transformation") DashModelTransformation transformation,
-                                 @Deserialize("itemPropertyOverrides") DashModelOverrideList itemPropertyOverrides,
-                                 @Deserialize("spritePointer") Long spritePointer,
-                                 @Deserialize("sideLit") boolean sideLit) {
+    public DashBuiltinBakedModel(
+            @Deserialize("transformation") DashModelTransformation transformation,
+            @Deserialize("itemPropertyOverrides") DashModelOverrideList itemPropertyOverrides,
+            @Deserialize("spritePointer") Long spritePointer,
+            @Deserialize("sideLit") boolean sideLit) {
         this.transformation = transformation;
         this.itemPropertyOverrides = itemPropertyOverrides;
         this.spritePointer = spritePointer;
@@ -55,7 +56,7 @@ public class DashBuiltinBakedModel implements DashModel {
 
 
     @Override
-    public ModelStage getStage() {
-        return ModelStage.SIMPLE;
+    public int getStage() {
+        return 0;
     }
 }

@@ -8,6 +8,16 @@ import net.quantumfusion.dashloader.cache.models.DashModel;
 
 public class DashBasicBakedModelFactory implements DashModelFactory {
 
+
+    /**
+     * Creates the model to be stored.
+     *
+     * @param model
+     * @param registry The registry
+     * @param var1     An extra variable
+     * @param <K>      An extra variable
+     * @return A serializable model.
+     */
     @Override
     public <K> DashModel toDash(BakedModel model, DashRegistry registry, K var1) {
         return new DashBasicBakedModel((BasicBakedModel) model, registry);

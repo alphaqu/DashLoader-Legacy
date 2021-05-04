@@ -10,6 +10,9 @@ import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.metadata.CustomValue;
+import net.fabricmc.loader.api.metadata.ModMetadata;
+import net.gudenau.lib.unsafe.Unsafe;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.font.Font;
@@ -46,7 +49,7 @@ import net.quantumfusion.dashloader.cache.font.fonts.DashBlankFont;
 import net.quantumfusion.dashloader.cache.font.fonts.DashUnicodeFont;
 import net.quantumfusion.dashloader.cache.misc.DashLoaderInfo;
 import net.quantumfusion.dashloader.cache.misc.DashParticleData;
-import net.quantumfusion.dashloader.cache.models.*;
+import net.quantumfusion.dashloader.cache.models.DashModelData;
 import net.quantumfusion.dashloader.cache.models.factory.*;
 import net.quantumfusion.dashloader.cache.models.predicates.DashAndPredicate;
 import net.quantumfusion.dashloader.cache.models.predicates.DashOrPredicate;
@@ -68,10 +71,8 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class DashLoader {
     public static final Logger LOGGER = LogManager.getLogger();
@@ -82,9 +83,9 @@ public class DashLoader {
     private static final boolean debug = FabricLoader.getInstance().isDevelopmentEnvironment();
     public static String task = "Starting DashLoader";
     private static DashLoader instance;
-    public final HashMap<Class<? extends BakedModel>, DashModelFactory> modelMappings = new HashMap<>();
-    public final HashMap<SpriteAtlasTexture, DashSpriteAtlasTextureData> atlasData = new HashMap<>();
-    public final HashMap<MultipartBakedModel, Pair<List<MultipartModelSelector>, StateManager<Block, BlockState>>> multipartData = new HashMap<>();
+    public final Map<Class<? extends BakedModel>, DashModelFactory> modelMappings = new ConcurrentHashMap<>();
+    public final Map<SpriteAtlasTexture, DashSpriteAtlasTextureData> atlasData = new HashMap<>();
+    public final Map<MultipartBakedModel, Pair<List<MultipartModelSelector>, StateManager<Block, BlockState>>> multipartData = new HashMap<>();
     private final List<SpriteAtlasTexture> atlasesToRegister;
     private final Map<DashCachePaths, Path> paths = new HashMap<>();
     private final List<SpriteAtlasTexture> extraAtlases;
@@ -94,7 +95,23 @@ public class DashLoader {
     //output
     private Object2IntMap<BlockState> stateLookupOut;
     private MappingData mappings = new MappingData();
+    private Object2ObjectMap<Class<?>, BinarySerializer> serializers = new Object2ObjectOpenHashMap<>();
+    private SpriteAtlasManager atlasManager;
+    private Object2IntMap<BlockState> stateLookup;
+    private Map<Identifier, BakedModel> models;
+    private Map<Identifier, ParticleManager.SimpleSpriteProvider> particleSprites;
+    private SpriteAtlasTexture particleAtlas;
+    private List<String> splashText;
+    public DashLoader() {
+        instance = this;
+        LOGGER.info("Creating DashLoader Instance");
+        extraAtlases = new ArrayList<>();
+        atlasesToRegister = new ArrayList<>();
+    }
 
+    public static DashLoader getInstance() {
+        return instance;
+    }
 
     public SpriteAtlasManager getAtlasManagerOut() {
         return mappings.atlasManagerOut;
@@ -120,25 +137,6 @@ public class DashLoader {
         return mappings.splashTextOut;
     }
 
-    private Object2ObjectMap<Class<?>, BinarySerializer> serializers = new Object2ObjectOpenHashMap<>();
-    private SpriteAtlasManager atlasManager;
-    private Object2IntMap<BlockState> stateLookup;
-    private Map<Identifier, BakedModel> models;
-    private Map<Identifier, ParticleManager.SimpleSpriteProvider> particleSprites;
-    private SpriteAtlasTexture particleAtlas;
-    private List<String> splashText;
-
-    public DashLoader() {
-        instance = this;
-        LOGGER.info("Creating DashLoader Instance");
-        extraAtlases = new ArrayList<>();
-        atlasesToRegister = new ArrayList<>();
-    }
-
-    public static DashLoader getInstance() {
-        return instance;
-    }
-
     public void reload() {
         LOGGER.info("Starting dash thread.");
         if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
@@ -151,7 +149,7 @@ public class DashLoader {
             initModelMappings();
             initSerializers();
             createDirectory();
-            LOGGER.info("[4/4]Checking for Mod Change.");
+            LOGGER.info("[4/4] Checking for Mod Change.");
             DashLoaderInfo newData = DashLoaderInfo.create();
             boolean reload = true;
             try {
@@ -371,7 +369,7 @@ public class DashLoader {
         paths.put(DashCachePaths.REGISTRY, config.resolve("quantumfusion/dashloader/registry.activej"));
         paths.put(DashCachePaths.MAPPINGS, config.resolve("quantumfusion/dashloader/mappings.activej"));
         paths.put(DashCachePaths.DASH_INFO, config.resolve("quantumfusion/dashloader/metadata.activej"));
-        LOGGER.info("[1/4][" + Duration.between(start, Instant.now()).toMillis() + "ms] Created Paths.");
+        LOGGER.info("[1/4] [" + Duration.between(start, Instant.now()).toMillis() + "ms] Created Paths.");
     }
 
     private void addModelType(DashModelFactory factory) {
@@ -385,22 +383,33 @@ public class DashLoader {
         addModelType(new DashBuiltInBakedModelFactory());
         addModelType(new DashMultipartBakedModelFactory());
         addModelType(new DashWeightedBakedModelFactory());
-        FabricLoader.getInstance().getAllMods().forEach(modContainer -> modContainer.getMetadata().getCustomValue("dashmodel"));
-        LOGGER.info("[2/4][" + Duration.between(start, Instant.now()).toMillis() + "ms] Created Model Mappings.");
+        FabricLoader.getInstance().getAllMods().parallelStream().forEach(modContainer -> {
+            final ModMetadata metadata = modContainer.getMetadata();
+            final CustomValue dashModelValue = metadata.getCustomValue("dashloader:customfactory");
+            if (dashModelValue != null) {
+                try {
+                    final CustomValue.CvArray values = dashModelValue.getAsArray();
+                    for (CustomValue value : values) {
+                        DashModelFactory factory = (DashModelFactory) Unsafe.allocateInstance(Class.forName(value.getAsString()));
+                        addModelType(factory);
+                        if (!metadata.getId().equals("dashloader"))
+                            LOGGER.info("Added custom model: " + factory.getModelType().getSimpleName());
+                    }
+                } catch (ClassNotFoundException e) {
+                    LOGGER.warn("ModelFactory: " + dashModelValue.getAsString() + " not found. MOD: " + metadata.getName());
+                }
+            }
+        });
+        LOGGER.info("[2/4] [" + Duration.between(start, Instant.now()).toMillis() + "ms] Created Model Mappings.");
     }
 
     private void initSerializers() {
         Instant start = Instant.now();
-        Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
-        System.out.println(Thread.currentThread().getContextClassLoader().getClass());
         serializers = new Object2ObjectOpenHashMap<>();
-        List<Class<?>> modelTypes = new ArrayList<>();
-        modelMappings.values().forEach(dashModel -> modelTypes.add(dashModel.getDashModelType()));
-
         HashMap<Class<?>, SerializerBuilder> serializerBuilders = new HashMap<>();
         serializerBuilders.put(DashRegistry.class,
                 SerializerBuilder.create()
-                        .withSubclasses("models", DashBasicBakedModel.class, DashWeightedBakedModel.class, DashMultipartBakedModel.class, DashBuiltinBakedModel.class)
+                        .withSubclasses("models", modelMappings.values().stream().map(DashModelFactory::getDashModelType).sorted(Comparator.comparing(Class::getSimpleName)).toArray(Class[]::new))
                         .withSubclasses("fonts", DashBitmapFont.class, DashUnicodeFont.class, DashBlankFont.class)
                         .withSubclasses("predicates", DashAndPredicate.class, DashSimplePredicate.class, DashOrPredicate.class, DashStaticPredicate.class)
                         .withSubclasses("properties", DashBooleanProperty.class, DashEnumProperty.class, DashDirectionProperty.class, DashIntProperty.class)
@@ -409,7 +418,7 @@ public class DashLoader {
         serializerBuilders.put(MappingData.class, SerializerBuilder.create().withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE));
         serializerBuilders.put(DashLoaderInfo.class, SerializerBuilder.create().withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE));
         serializerBuilders.entrySet().parallelStream().forEach(entry -> serializers.put(entry.getKey(), entry.getValue().build(entry.getKey())));
-        LOGGER.info("[3/4][" + Duration.between(start, Instant.now()).toMillis() + "ms] Created Serializers.");
+        LOGGER.info("[3/4] [" + Duration.between(start, Instant.now()).toMillis() + "ms] Created Serializers.");
     }
 
 

@@ -29,10 +29,7 @@
   "custom": {
     "sodium:options": {
       "mixin.features.model": false
-    },
-    "dashloader:custommodel": [
-      "net.quantumfusion.dashloader.test.CustomBakedModelFactory"
-    ]
+    }
   },
   "depends": {
     "fabricloader": ">=0.11.3",

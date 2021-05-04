@@ -9,6 +9,6 @@ public interface DashModel {
     default void apply(DashRegistry registry) {
     }
 
-    ModelStage getStage();
+    int getStage();
 
 }
