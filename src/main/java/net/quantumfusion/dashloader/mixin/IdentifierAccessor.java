@@ -13,8 +13,6 @@ public interface IdentifierAccessor {
         throw new AssertionError();
     }
 
-    @Accessor("namespace")
-    void setNamespace(String namespace);
 
     @Accessor("path")
     void setPath(String path);

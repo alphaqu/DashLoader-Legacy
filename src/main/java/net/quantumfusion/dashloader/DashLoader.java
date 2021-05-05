@@ -26,38 +26,31 @@ import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.texture.TextureManager;
 import net.minecraft.client.texture.TextureUtil;
 import net.minecraft.state.StateManager;
+import net.minecraft.state.property.Property;
 import net.minecraft.util.Identifier;
-import net.quantumfusion.dashloader.cache.DashCachePaths;
-import net.quantumfusion.dashloader.cache.DashCacheState;
-import net.quantumfusion.dashloader.cache.DashRegistry;
-import net.quantumfusion.dashloader.cache.MappingData;
-import net.quantumfusion.dashloader.cache.atlas.DashExtraAtlasData;
-import net.quantumfusion.dashloader.cache.atlas.DashSpriteAtlasData;
-import net.quantumfusion.dashloader.cache.atlas.DashSpriteAtlasTextureData;
-import net.quantumfusion.dashloader.cache.blockstates.DashBlockStateData;
-import net.quantumfusion.dashloader.cache.blockstates.properties.DashBooleanProperty;
-import net.quantumfusion.dashloader.cache.blockstates.properties.DashDirectionProperty;
-import net.quantumfusion.dashloader.cache.blockstates.properties.DashEnumProperty;
-import net.quantumfusion.dashloader.cache.blockstates.properties.DashIntProperty;
-import net.quantumfusion.dashloader.cache.blockstates.properties.value.DashBooleanValue;
-import net.quantumfusion.dashloader.cache.blockstates.properties.value.DashDirectionValue;
-import net.quantumfusion.dashloader.cache.blockstates.properties.value.DashEnumValue;
-import net.quantumfusion.dashloader.cache.blockstates.properties.value.DashIntValue;
-import net.quantumfusion.dashloader.cache.font.DashFontManagerData;
-import net.quantumfusion.dashloader.cache.font.fonts.DashBitmapFont;
-import net.quantumfusion.dashloader.cache.font.fonts.DashBlankFont;
-import net.quantumfusion.dashloader.cache.font.fonts.DashUnicodeFont;
-import net.quantumfusion.dashloader.cache.misc.DashLoaderInfo;
-import net.quantumfusion.dashloader.cache.misc.DashParticleData;
-import net.quantumfusion.dashloader.cache.models.DashModelData;
-import net.quantumfusion.dashloader.cache.models.factory.*;
-import net.quantumfusion.dashloader.cache.models.predicates.DashAndPredicate;
-import net.quantumfusion.dashloader.cache.models.predicates.DashOrPredicate;
-import net.quantumfusion.dashloader.cache.models.predicates.DashSimplePredicate;
-import net.quantumfusion.dashloader.cache.models.predicates.DashStaticPredicate;
+import net.quantumfusion.dashloader.api.models.*;
+import net.quantumfusion.dashloader.api.properties.*;
+import net.quantumfusion.dashloader.atlas.DashExtraAtlasData;
+import net.quantumfusion.dashloader.atlas.DashSpriteAtlasData;
+import net.quantumfusion.dashloader.atlas.DashSpriteAtlasTextureData;
+import net.quantumfusion.dashloader.blockstates.DashBlockStateData;
+import net.quantumfusion.dashloader.font.DashFontManagerData;
+import net.quantumfusion.dashloader.font.fonts.DashBitmapFont;
+import net.quantumfusion.dashloader.font.fonts.DashBlankFont;
+import net.quantumfusion.dashloader.font.fonts.DashUnicodeFont;
+import net.quantumfusion.dashloader.misc.DashLoaderInfo;
+import net.quantumfusion.dashloader.misc.DashParticleData;
 import net.quantumfusion.dashloader.misc.DashSplashTextData;
 import net.quantumfusion.dashloader.mixin.AbstractTextureAccessor;
 import net.quantumfusion.dashloader.mixin.SpriteAtlasTextureAccessor;
+import net.quantumfusion.dashloader.models.DashModelData;
+import net.quantumfusion.dashloader.models.predicates.DashAndPredicate;
+import net.quantumfusion.dashloader.models.predicates.DashOrPredicate;
+import net.quantumfusion.dashloader.models.predicates.DashSimplePredicate;
+import net.quantumfusion.dashloader.models.predicates.DashStaticPredicate;
+import net.quantumfusion.dashloader.util.DashCachePaths;
+import net.quantumfusion.dashloader.util.DashCacheState;
+import net.quantumfusion.dashloader.util.ThreadHelper;
 import net.quantumfusion.dashloader.util.TimeHelper;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
@@ -84,6 +77,7 @@ public class DashLoader {
     public static String task = "Starting DashLoader";
     private static DashLoader instance;
     public final Map<Class<? extends BakedModel>, DashModelFactory> modelMappings = new ConcurrentHashMap<>();
+    public final Map<Class<? extends Property<?>>, DashPropertyFactory> propertyMappings = new ConcurrentHashMap<>();
     public final Map<SpriteAtlasTexture, DashSpriteAtlasTextureData> atlasData = new HashMap<>();
     public final Map<MultipartBakedModel, Pair<List<MultipartModelSelector>, StateManager<Block, BlockState>>> multipartData = new HashMap<>();
     private final List<SpriteAtlasTexture> atlasesToRegister;
@@ -102,6 +96,7 @@ public class DashLoader {
     private Map<Identifier, ParticleManager.SimpleSpriteProvider> particleSprites;
     private SpriteAtlasTexture particleAtlas;
     private List<String> splashText;
+
     public DashLoader() {
         instance = this;
         LOGGER.info("Creating DashLoader Instance");
@@ -213,7 +208,7 @@ public class DashLoader {
     public void saveDashCache() {
         Instant start = Instant.now();
         initPaths();
-        initModelMappings();
+        ThreadHelper.exec(this::initModelMappings, this::initPropertyMappings);
         initSerializers();
         createDirectory();
         tasksComplete++;
@@ -376,6 +371,10 @@ public class DashLoader {
         modelMappings.put(factory.getModelType(), factory);
     }
 
+    private void addPropertyType(DashPropertyFactory factory) {
+        propertyMappings.put(factory.getPropertyType(), factory);
+    }
+
     private void initModelMappings() {
         Instant start = Instant.now();
         modelMappings.clear();
@@ -403,6 +402,33 @@ public class DashLoader {
         LOGGER.info("[2/4] [" + Duration.between(start, Instant.now()).toMillis() + "ms] Created Model Mappings.");
     }
 
+    private void initPropertyMappings() {
+        Instant start = Instant.now();
+        propertyMappings.clear();
+        addPropertyType(new DashBooleanPropertyFactory());
+        addPropertyType(new DashDirectionPropertyFactory());
+        addPropertyType(new DashIntPropertyFactory());
+        addPropertyType(new DashEnumPropertyFactory());
+        FabricLoader.getInstance().getAllMods().parallelStream().forEach(modContainer -> {
+            final ModMetadata metadata = modContainer.getMetadata();
+            final CustomValue dashPropertyValue = metadata.getCustomValue("dashloader:customproperty");
+            if (dashPropertyValue != null) {
+                try {
+                    final CustomValue.CvArray values = dashPropertyValue.getAsArray();
+                    for (CustomValue value : values) {
+                        DashPropertyFactory factory = (DashPropertyFactory) Unsafe.allocateInstance(Class.forName(value.getAsString()));
+                        addPropertyType(factory);
+                        if (!metadata.getId().equals("dashloader"))
+                            LOGGER.info("Added custom property: " + factory.getPropertyType().getSimpleName());
+                    }
+                } catch (ClassNotFoundException e) {
+                    LOGGER.warn("PropertyFactory: " + dashPropertyValue.getAsString() + " not found. MOD: " + metadata.getName());
+                }
+            }
+        });
+        LOGGER.info("[2/4] [" + Duration.between(start, Instant.now()).toMillis() + "ms] Created Property Mappings.");
+    }
+
     private void initSerializers() {
         Instant start = Instant.now();
         serializers = new Object2ObjectOpenHashMap<>();
@@ -412,8 +438,8 @@ public class DashLoader {
                         .withSubclasses("models", modelMappings.values().stream().map(DashModelFactory::getDashModelType).sorted(Comparator.comparing(Class::getSimpleName)).toArray(Class[]::new))
                         .withSubclasses("fonts", DashBitmapFont.class, DashUnicodeFont.class, DashBlankFont.class)
                         .withSubclasses("predicates", DashAndPredicate.class, DashSimplePredicate.class, DashOrPredicate.class, DashStaticPredicate.class)
-                        .withSubclasses("properties", DashBooleanProperty.class, DashEnumProperty.class, DashDirectionProperty.class, DashIntProperty.class)
-                        .withSubclasses("values", DashBooleanValue.class, DashEnumValue.class, DashDirectionValue.class, DashIntValue.class)
+                        .withSubclasses("properties", propertyMappings.values().stream().map(DashPropertyFactory::getDashPropertyType).sorted(Comparator.comparing(Class::getSimpleName)).toArray(Class[]::new))
+                        .withSubclasses("values", propertyMappings.values().stream().map(DashPropertyFactory::getDashPropertyValueType).sorted(Comparator.comparing(Class::getSimpleName)).toArray(Class[]::new))
                         .withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE));
         serializerBuilders.put(MappingData.class, SerializerBuilder.create().withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE));
         serializerBuilders.put(DashLoaderInfo.class, SerializerBuilder.create().withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE));

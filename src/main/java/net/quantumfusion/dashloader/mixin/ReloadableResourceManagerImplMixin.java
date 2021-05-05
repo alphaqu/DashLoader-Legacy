@@ -5,7 +5,7 @@ import net.minecraft.resource.ResourcePack;
 import net.minecraft.resource.ResourceReloadMonitor;
 import net.minecraft.util.Unit;
 import net.quantumfusion.dashloader.DashLoader;
-import net.quantumfusion.dashloader.cache.DashCacheState;
+import net.quantumfusion.dashloader.util.DashCacheState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;

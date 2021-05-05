@@ -1,19 +1,11 @@
 package net.quantumfusion.dashloader.util;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.Arrays;
 
 public class ThreadHelper {
 
-    public static void awaitTerminationAfterShutdown(ExecutorService threadPool) {
-        threadPool.shutdown();
-        try {
-            if (!threadPool.awaitTermination(60, TimeUnit.SECONDS)) {
-                threadPool.shutdownNow();
-            }
-        } catch (InterruptedException ex) {
-            threadPool.shutdownNow();
-            Thread.currentThread().interrupt();
-        }
+    public static void exec(Runnable... runnables) {
+        Arrays.stream(runnables).parallel().forEach(Runnable::run);
     }
+
 }

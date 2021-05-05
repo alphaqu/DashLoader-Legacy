@@ -14,7 +14,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.profiler.Profiler;
 import net.minecraft.util.registry.Registry;
 import net.quantumfusion.dashloader.DashLoader;
-import net.quantumfusion.dashloader.cache.DashCacheState;
+import net.quantumfusion.dashloader.util.DashCacheState;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;

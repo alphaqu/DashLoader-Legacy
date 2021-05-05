@@ -2,7 +2,7 @@ package net.quantumfusion.dashloader.mixin;
 
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.quantumfusion.dashloader.DashLoader;
-import net.quantumfusion.dashloader.cache.atlas.DashSpriteAtlasTextureData;
+import net.quantumfusion.dashloader.atlas.DashSpriteAtlasTextureData;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
