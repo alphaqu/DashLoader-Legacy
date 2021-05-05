@@ -240,10 +240,10 @@ public class DashRegistry {
             DashPropertyFactory factory = loader.propertyMappings.get(property.getClass());
             if (factory != null) {
                 if (prop) {
-                    factory.toDash(property, this, hashP);
+                    properties.put(hashP, factory.toDash(property, this, hashP));
                 }
                 if (propVal) {
-                    factory.toDash(value, this, hashP);
+                    propertyValues.put(hashV, factory.toDash(value, this, hashP));
                 }
             } else {
                 DashLoader.LOGGER.warn(property.getClass().getName() + " is not a supported property format, please contact mod developer to add support.");

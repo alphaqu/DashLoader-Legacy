@@ -141,7 +141,7 @@ public class DashLoader {
         Instant start = Instant.now();
         Thread dash = new Thread(() -> {
             initPaths();
-            initModelMappings();
+            ThreadHelper.exec(this::initModelMappings, this::initPropertyMappings);
             initSerializers();
             createDirectory();
             LOGGER.info("[4/4] Checking for Mod Change.");
@@ -372,7 +372,7 @@ public class DashLoader {
     }
 
     private void addPropertyType(DashPropertyFactory factory) {
-        propertyMappings.put(factory.getPropertyType(), factory);
+        propertyMappings.put((Class<? extends Property<?>>) factory.getPropertyType(), factory);
     }
 
     private void initModelMappings() {

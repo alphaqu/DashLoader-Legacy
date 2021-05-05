@@ -28,7 +28,7 @@ public interface DashPropertyFactory {
     /**
      * @return
      */
-    Class<? extends Property<?>> getPropertyType();
+    Class<? extends Property> getPropertyType();
 
     /**
      * @return

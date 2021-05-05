@@ -2,6 +2,7 @@ package net.quantumfusion.dashloader.api.properties;
 
 import net.minecraft.state.property.DirectionProperty;
 import net.minecraft.state.property.Property;
+import net.minecraft.util.math.Direction;
 import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.blockstates.properties.DashDirectionProperty;
 import net.quantumfusion.dashloader.blockstates.properties.DashProperty;
@@ -16,7 +17,7 @@ public class DashDirectionPropertyFactory implements DashPropertyFactory {
 
     @Override
     public <K> DashPropertyValue toDash(Comparable<?> comparable, DashRegistry registry, K var1) {
-        return new DashDirectionValue((Integer) comparable);
+        return new DashDirectionValue((Direction) comparable);
     }
 
     @Override
