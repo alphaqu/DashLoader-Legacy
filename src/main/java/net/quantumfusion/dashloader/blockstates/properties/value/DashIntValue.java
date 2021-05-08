@@ -13,7 +13,7 @@ public class DashIntValue implements DashPropertyValue {
     }
 
     @Override
-    public <K extends Comparable> K toUndash(DashRegistry registry) {
-        return (K) value;
+    public Comparable toUndash(DashRegistry registry) {
+        return value;
     }
 }

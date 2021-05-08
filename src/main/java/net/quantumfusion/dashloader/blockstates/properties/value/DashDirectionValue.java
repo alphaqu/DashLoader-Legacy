@@ -17,8 +17,9 @@ public class DashDirectionValue implements DashPropertyValue {
         this.direction = direction.getId();
     }
 
+
     @Override
-    public <K extends Comparable> K toUndash(DashRegistry registry) {
-        return (K) direction;
+    public Comparable toUndash(DashRegistry registry) {
+        return direction;
     }
 }

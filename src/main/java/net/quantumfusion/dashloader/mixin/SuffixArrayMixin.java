@@ -61,23 +61,18 @@ public abstract class SuffixArrayMixin {
             }
 
         };
-
         int k;
         for (k = 0; k < i; ++k) {
             is[k] = this.characters.getInt(k);
         }
-
         k = 1;
-
         for (int l = Math.min(i, this.maxTextLength); k * 2 < l; k *= 2) {
             int n;
             for (n = 0; n < i; ls[n] = n++) {
                 js[n] = is[n];
                 ks[n] = n + k < i ? is[n + k] : -2;
             }
-
             Arrays.parallelQuickSort(0, i, intComparator, swapper);
-
             for (n = 0; n < i; ++n) {
                 if (n > 0 && js[n] == js[n - 1] && ks[n] == ks[n - 1]) {
                     is[ls[n]] = is[ls[n - 1]];
@@ -90,13 +85,11 @@ public abstract class SuffixArrayMixin {
         IntList intList2 = this.offsetInText;
         this.suffixIndexToObjectIndex = new IntArrayList(intList.size());
         this.offsetInText = new IntArrayList(intList2.size());
-
         for (int o = 0; o < i; ++o) {
             int p = ls[o];
             this.suffixIndexToObjectIndex.add(intList.getInt(p));
             this.offsetInText.add(intList2.getInt(p));
         }
-
         if (PRINT_ARRAY) {
             this.printArray();
         }

@@ -3,7 +3,9 @@ package net.quantumfusion.dashloader.blockstates.properties;
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import net.minecraft.state.property.EnumProperty;
+import net.minecraft.state.property.Property;
 import net.minecraft.util.StringIdentifiable;
+import net.quantumfusion.dashloader.DashRegistry;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -37,7 +39,11 @@ public class DashEnumProperty implements DashProperty {
     }
 
     @Override
-    public <T extends Enum<T> & StringIdentifiable> EnumProperty<T> toUndash() {
+    public Property<?> toUndash(DashRegistry registry) {
+        return get();
+    }
+
+    public <T extends Enum<T> & StringIdentifiable> EnumProperty<T> get() {
         type = getClass(className);
         return EnumProperty.of(name, (Class<T>) type, Arrays.asList(((Class<T>) type).getEnumConstants()));
     }

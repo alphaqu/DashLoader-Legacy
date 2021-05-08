@@ -3,6 +3,7 @@ package net.quantumfusion.dashloader.common;
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import net.minecraft.util.math.Direction;
+import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.util.Dashable;
 
 public class DashDirection implements Dashable {
@@ -17,7 +18,7 @@ public class DashDirection implements Dashable {
         id = direction.getId();
     }
 
-    public Direction toUndash() {
+    public Direction toUndash(DashRegistry registry) {
         return Direction.byId(id);
     }
 }

@@ -6,8 +6,9 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.metadata.ModMetadata;
 import net.quantumfusion.dashloader.DashLoader;
+import net.quantumfusion.dashloader.util.ReloadEnum;
 
-public class DashLoaderInfo {
+public class DashMetadata {
 
     @Serialize(order = 0)
     public long modInfo;
@@ -15,8 +16,8 @@ public class DashLoaderInfo {
     public double dashFormatVersion;
 
 
-    public DashLoaderInfo(@Deserialize("modInfo") long modInfo,
-                          @Deserialize("dashFormatVersion") double dashFormatVersion) {
+    public DashMetadata(@Deserialize("modInfo") long modInfo,
+                        @Deserialize("dashFormatVersion") double dashFormatVersion) {
         this.modInfo = modInfo;
         this.dashFormatVersion = dashFormatVersion;
     }
@@ -27,7 +28,7 @@ public class DashLoaderInfo {
      *
      * @return version to compare
      */
-    public static DashLoaderInfo create() {
+    public static DashMetadata create() {
         long out = 420;
         for (ModContainer modContainer : FabricLoader.getInstance().getAllMods()) {
             if (!modContainer.getMetadata().getId().equals("dashloader")) {
@@ -35,10 +36,10 @@ public class DashLoaderInfo {
                 out += metadata.getVersion().getFriendlyString().chars().asLongStream().sum();
             }
         }
-        return new DashLoaderInfo(~out + 0x69, DashLoader.formatVersion);
+        return new DashMetadata(~out + 0x69, DashLoader.formatVersion);
     }
 
-    public boolean equals(DashLoaderInfo old) {
-        return modInfo == old.modInfo && dashFormatVersion == old.dashFormatVersion;
+    public ReloadEnum getState(DashMetadata old) {
+        return modInfo != old.modInfo ? ReloadEnum.MOD_CHANGE : dashFormatVersion != old.dashFormatVersion ? ReloadEnum.FORMAT_CHANGE : ReloadEnum.ACCEPT;
     }
 }

@@ -6,6 +6,7 @@ import io.activej.serializer.annotations.SerializeNullable;
 import net.minecraft.client.render.model.json.ModelElement;
 import net.minecraft.client.render.model.json.ModelElementFace;
 import net.minecraft.util.math.Direction;
+import net.quantumfusion.dashloader.DashRegistry;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -57,9 +58,9 @@ public class DashModelElement {
         shade = modelElement.shade;
     }
 
-    public ModelElement unDash() {
+    public ModelElement toUndash(DashRegistry registry) {
         Map<Direction, ModelElementFace> faceOut = new HashMap<>();
-        faces.forEach((s, dashModelElementFace) -> faceOut.put(Direction.byName(s), dashModelElementFace.toUndash()));
+        faces.forEach((s, dashModelElementFace) -> faceOut.put(Direction.byName(s), dashModelElementFace.toUndash(registry)));
         return new ModelElement(from.toUndash(), to.toUndash(), faceOut, rotation == null ? null : rotation.toUndash(), shade);
     }
 }

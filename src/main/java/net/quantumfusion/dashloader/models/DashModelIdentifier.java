@@ -8,6 +8,7 @@ import io.activej.serializer.annotations.SerializeFixedSize;
 import io.activej.serializer.annotations.SerializeStringFormat;
 import net.minecraft.client.util.ModelIdentifier;
 import net.minecraft.util.Identifier;
+import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.common.DashID;
 import net.quantumfusion.dashloader.mixin.ModelIdentifierAccessor;
 
@@ -31,7 +32,7 @@ public class DashModelIdentifier implements DashID {
     }
 
     @Override
-    public Identifier toUndash() {
+    public Identifier toUndash(DashRegistry registry) {
         return ModelIdentifierAccessor.init(strings);
     }
 }

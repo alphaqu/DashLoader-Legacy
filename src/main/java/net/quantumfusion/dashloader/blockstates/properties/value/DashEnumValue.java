@@ -19,7 +19,11 @@ public class DashEnumValue implements DashPropertyValue {
     }
 
     @Override
-    public <K extends Comparable> K toUndash(DashRegistry registry) {
-        return (K) Enum.valueOf(((Class) ((DashEnumProperty) registry.properties.get(enumPointer)).type), value);
+    public Enum<?> toUndash(DashRegistry registry) {
+        return get(registry);
+    }
+
+    public <T extends Enum<T>> T get(DashRegistry registry) {
+        return Enum.valueOf(((Class<T>) ((DashEnumProperty) registry.getPropertiesRaw().get(enumPointer)).type), value);
     }
 }

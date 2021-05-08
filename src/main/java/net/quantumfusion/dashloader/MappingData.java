@@ -1,7 +1,6 @@
 package net.quantumfusion.dashloader;
 
 import io.activej.serializer.annotations.Deserialize;
-import io.activej.serializer.annotations.Serialize;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.font.Font;
@@ -10,14 +9,13 @@ import net.minecraft.client.render.model.SpriteAtlasManager;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.util.Identifier;
-import net.quantumfusion.dashloader.atlas.DashExtraAtlasData;
 import net.quantumfusion.dashloader.atlas.DashSpriteAtlasData;
 import net.quantumfusion.dashloader.blockstates.DashBlockStateData;
 import net.quantumfusion.dashloader.font.DashFontManagerData;
 import net.quantumfusion.dashloader.misc.DashParticleData;
 import net.quantumfusion.dashloader.misc.DashSplashTextData;
-import net.quantumfusion.dashloader.mixin.SpriteAtlasManagerAccessor;
 import net.quantumfusion.dashloader.models.DashModelData;
+import net.quantumfusion.dashloader.util.ThreadHelper;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
@@ -32,25 +30,11 @@ public class MappingData {
     public Map<Identifier, List<Font>> fontsOut;
     public List<String> splashTextOut;
 
-    @Serialize(order = 0)
     public DashModelData modelData;
-
-    @Serialize(order = 1)
     public DashSpriteAtlasData spriteAtlasData;
-
-    @Serialize(order = 2)
     public DashBlockStateData blockStateData;
-
-    @Serialize(order = 3)
     public DashParticleData particleData;
-
-    @Serialize(order = 4)
-    public DashExtraAtlasData extraAtlasData;
-
-    @Serialize(order = 5)
     public DashFontManagerData fontManagerData;
-
-    @Serialize(order = 6)
     public DashSplashTextData splashTextData;
 
     public MappingData() {
@@ -61,7 +45,6 @@ public class MappingData {
                        @Deserialize("spriteAtlasData") DashSpriteAtlasData spriteAtlasData,
                        @Deserialize("blockStateData") DashBlockStateData blockStateData,
                        @Deserialize("particleData") DashParticleData particleData,
-                       @Deserialize("extraAtlasData") DashExtraAtlasData extraAtlasData,
                        @Deserialize("fontManagerData") DashFontManagerData fontManagerData,
                        @Deserialize("splashTextData") DashSplashTextData splashTextData
     ) {
@@ -69,7 +52,6 @@ public class MappingData {
         this.spriteAtlasData = spriteAtlasData;
         this.blockStateData = blockStateData;
         this.particleData = particleData;
-        this.extraAtlasData = extraAtlasData;
         this.fontManagerData = fontManagerData;
         this.splashTextData = splashTextData;
     }
@@ -90,10 +72,6 @@ public class MappingData {
         this.particleData = particleData;
     }
 
-    public void setExtraAtlasData(DashExtraAtlasData extraAtlasData) {
-        this.extraAtlasData = extraAtlasData;
-    }
-
     public void setFontManagerData(DashFontManagerData fontManagerData) {
         this.fontManagerData = fontManagerData;
     }
@@ -104,34 +82,26 @@ public class MappingData {
 
     public List<SpriteAtlasTexture> toUndash(DashRegistry registry) {
         List<SpriteAtlasTexture> atlasesToRegister = new ArrayList<>();
-        List<Runnable> tasks = new ArrayList<>();
-        tasks.add(() -> splashTextOut = splashTextData.toUndash());
-
-        tasks.add(() -> {
-            atlasManagerOut = spriteAtlasData.toUndash(registry);
-            atlasesToRegister.addAll((((SpriteAtlasManagerAccessor) atlasManagerOut).getAtlases().values()));
-        });
-
-        tasks.add(() -> stateLookupOut = blockStateData.toUndash(registry));
-
-        tasks.add(() -> {
-            Pair<Map<Identifier, List<Sprite>>, SpriteAtlasTexture> outParticle = particleData.toUndash(registry);
-            particlesOut = outParticle.getLeft();
-            atlasesToRegister.add(outParticle.getValue());
-        });
-
-        tasks.add(() -> modelsOut = modelData.toUndash(registry));
-
-        tasks.add(() -> atlasesToRegister.addAll(extraAtlasData.toUndash(registry)));
-
-        tasks.add(() -> fontsOut = fontManagerData.toUndash(registry));
-
-        tasks.parallelStream().forEach(Runnable::run);
+        ThreadHelper.exec(
+                () -> {
+                    final Pair<SpriteAtlasManager, List<SpriteAtlasTexture>> spriteData = spriteAtlasData.toUndash(registry);
+                    this.atlasManagerOut = spriteData.getKey();
+                    atlasesToRegister.addAll(spriteData.getValue());
+                },
+                () -> {
+                    Pair<Map<Identifier, List<Sprite>>, SpriteAtlasTexture> outParticle = particleData.toUndash(registry);
+                    particlesOut = outParticle.getLeft();
+                    atlasesToRegister.add(outParticle.getValue());
+                },
+                () -> splashTextOut = splashTextData.toUndash(),
+                () -> stateLookupOut = blockStateData.toUndash(registry),
+                () -> modelsOut = modelData.toUndash(registry),
+                () -> fontsOut = fontManagerData.toUndash(registry)
+        );
         modelData = null;
         spriteAtlasData = null;
         blockStateData = null;
         particleData = null;
-        extraAtlasData = null;
         fontManagerData = null;
         splashTextData = null;
         return atlasesToRegister;

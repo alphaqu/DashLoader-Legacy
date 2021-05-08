@@ -3,6 +3,7 @@ package net.quantumfusion.dashloader.blockstates.properties;
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import net.minecraft.state.property.IntProperty;
+import net.quantumfusion.dashloader.DashRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +31,7 @@ public class DashIntProperty implements DashProperty {
     }
 
     @Override
-    public IntProperty toUndash() {
+    public IntProperty toUndash(DashRegistry registry) {
         int lowest = -1;
         int highest = -1;
         for (Integer integer : values) {

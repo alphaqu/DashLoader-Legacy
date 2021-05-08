@@ -5,6 +5,7 @@ import io.activej.serializer.annotations.Serialize;
 import net.gudenau.lib.unsafe.Unsafe;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.Sprite;
+import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.mixin.SpriteInterpolationAccessor;
 import net.quantumfusion.dashloader.util.duck.SpriteInterpolationDuck;
 
@@ -27,11 +28,11 @@ public class DashSpriteInterpolation {
         this.images = Stream.of(images).map(DashImage::new).collect(Collectors.toList());
     }
 
-    public Sprite.Interpolation toUndash(Sprite owner) {
+    public Sprite.Interpolation toUndash(Sprite owner, DashRegistry registry) {
         Sprite.Interpolation spriteInterpolation = Unsafe.allocateInstance(Sprite.Interpolation.class);
         SpriteInterpolationAccessor spriteInterpolationAccessor = ((SpriteInterpolationAccessor) (Object) spriteInterpolation);
         List<NativeImage> nativeImages = new ArrayList<>();
-        images.forEach(dashImage -> nativeImages.add(dashImage.toUndash()));
+        images.forEach(dashImage -> nativeImages.add(dashImage.toUndash(registry)));
         spriteInterpolationAccessor.setImages(nativeImages.toArray(new NativeImage[0]));
         ((SpriteInterpolationDuck) (Object) spriteInterpolation).interpolation(owner);
         return spriteInterpolation;

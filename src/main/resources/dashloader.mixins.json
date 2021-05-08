@@ -50,6 +50,7 @@
     "SuffixArrayMixin",
     "TitleScreenMixin",
     "UnicodeTextureFontAccessor",
+    "UnicodeTextureFontMixin",
     "WeightedBakedModelAccessor",
     "WeightedBakedModelEntryAccessor",
     "WeightedPickerEntryAccessor"

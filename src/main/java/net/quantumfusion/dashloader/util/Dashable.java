@@ -1,6 +1,7 @@
 package net.quantumfusion.dashloader.util;
 
-public interface Dashable {
+import net.quantumfusion.dashloader.DashRegistry;
 
-    <K> K toUndash();
+public interface Dashable {
+    <K> K toUndash(DashRegistry registry);
 }

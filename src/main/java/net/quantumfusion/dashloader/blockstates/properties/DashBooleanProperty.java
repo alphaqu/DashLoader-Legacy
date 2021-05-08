@@ -3,6 +3,7 @@ package net.quantumfusion.dashloader.blockstates.properties;
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import net.minecraft.state.property.BooleanProperty;
+import net.quantumfusion.dashloader.DashRegistry;
 
 import java.util.Objects;
 
@@ -21,7 +22,7 @@ public class DashBooleanProperty implements DashProperty {
     }
 
     @Override
-    public BooleanProperty toUndash() {
+    public BooleanProperty toUndash(DashRegistry registry) {
         return BooleanProperty.of(name);
     }
 

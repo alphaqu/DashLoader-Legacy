@@ -4,6 +4,7 @@ import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import net.minecraft.client.render.model.BakedQuad;
 import net.minecraft.client.texture.Sprite;
+import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.common.DashDirection;
 
 public class DashBakedQuad {
@@ -15,9 +16,6 @@ public class DashBakedQuad {
     public DashDirection face;
     @Serialize(order = 3)
     public boolean shade;
-
-    //post
-
 
     public DashBakedQuad(@Deserialize("vertexData") int[] vertexData,
                          @Deserialize("colorIndex") int colorIndex,
@@ -36,7 +34,7 @@ public class DashBakedQuad {
         shade = bakedQuad.hasShade();
     }
 
-    public BakedQuad toUndash(Sprite sprite) {
-        return new BakedQuad(vertexData, colorIndex, face.toUndash(), sprite, shade);
+    public BakedQuad toUndash(Sprite sprite, DashRegistry registry) {
+        return new BakedQuad(vertexData, colorIndex, face.toUndash(registry), sprite, shade);
     }
 }

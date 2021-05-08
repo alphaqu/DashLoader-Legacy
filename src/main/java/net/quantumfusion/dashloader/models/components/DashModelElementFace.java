@@ -4,6 +4,7 @@ import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import io.activej.serializer.annotations.SerializeNullable;
 import net.minecraft.client.render.model.json.ModelElementFace;
+import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.common.DashDirection;
 import org.jetbrains.annotations.Nullable;
 
@@ -42,7 +43,7 @@ public class DashModelElementFace {
         textureId = modelElementFace.textureId;
     }
 
-    public ModelElementFace toUndash() {
-        return new ModelElementFace(cullFace == null ? null : cullFace.toUndash(), tintIndex, textureId, textureData.toUndash());
+    public ModelElementFace toUndash(DashRegistry registry) {
+        return new ModelElementFace(cullFace == null ? null : cullFace.toUndash(registry), tintIndex, textureId, textureData.toUndash());
     }
 }

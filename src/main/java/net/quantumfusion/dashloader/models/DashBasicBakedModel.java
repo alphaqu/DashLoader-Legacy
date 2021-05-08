@@ -87,11 +87,11 @@ public class DashBasicBakedModel implements DashModel {
         final Sprite sprite = registry.getSprite(spritePointer);
         final List<BakedQuad> quadsOut = new ArrayList<>();
         final Map<Direction, List<BakedQuad>> faceQuadsOut = new HashMap<>();
-        quads.forEach(dashBakedQuad -> quadsOut.add(dashBakedQuad.toUndash(sprite)));
+        quads.forEach(dashBakedQuad -> quadsOut.add(dashBakedQuad.toUndash(sprite, registry)));
         faceQuads.forEach((dashDirection, dashBakedQuads) -> {
             List<BakedQuad> out = new ArrayList<>();
-            dashBakedQuads.forEach(dashBakedQuad -> out.add(dashBakedQuad.toUndash(sprite)));
-            faceQuadsOut.put(dashDirection.toUndash(), out);
+            dashBakedQuads.forEach(dashBakedQuad -> out.add(dashBakedQuad.toUndash(sprite, registry)));
+            faceQuadsOut.put(dashDirection.toUndash(registry), out);
         });
         return new BasicBakedModel(quadsOut, faceQuadsOut, usesAo, isSideLit, hasDepth, sprite, transformation.toUndash(), itemPropertyOverrides.toUndash(registry));
     }

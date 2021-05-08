@@ -41,11 +41,11 @@ public class DashModelData {
             }
         });
         List<String> unsupportedModels = new ArrayList<>();
-        registry.modelsFailed.forEach((aClass, integer) -> {
-            unsupportedModels.add(aClass.getName());
-        });
+        registry.modelsFailed.forEach((aClass, integer) -> unsupportedModels.add(aClass.getName()));
         unsupportedModels.stream().sorted().collect(Collectors.toList()).forEach(s -> DashLoader.LOGGER.warn("Model unsupported: " + s));
-        DashLoader.LOGGER.warn("Models failed: " + registry.modelsFailed.size());
+        if (!registry.modelsFailed.isEmpty()) {
+            DashLoader.LOGGER.warn("Models failed: " + registry.modelsFailed.size());
+        }
     }
 
 

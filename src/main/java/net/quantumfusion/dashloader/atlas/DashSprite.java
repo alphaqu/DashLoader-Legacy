@@ -8,13 +8,14 @@ import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.Sprite;
 import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.mixin.SpriteAccessor;
+import net.quantumfusion.dashloader.util.Dashable;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class DashSprite {
+public class DashSprite implements Dashable {
     @Serialize(order = 0)
     public final DashSpriteInfo info;
     @Serialize(order = 1)
@@ -113,7 +114,7 @@ public class DashSprite {
         spriteAccessor.setFrameXs(frameXs);
         spriteAccessor.setFrameYs(frameYs);
         if (interpolation != null) {
-            spriteAccessor.setInterpolation(interpolation.toUndash(out));
+            spriteAccessor.setInterpolation(interpolation.toUndash(out, registry));
         } else {
             spriteAccessor.setInterpolation(null);
         }

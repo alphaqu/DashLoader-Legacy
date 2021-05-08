@@ -5,6 +5,7 @@ import io.activej.serializer.annotations.Serialize;
 import net.minecraft.state.property.DirectionProperty;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.math.Direction;
+import net.quantumfusion.dashloader.DashRegistry;
 
 import java.util.Objects;
 
@@ -24,7 +25,7 @@ public class DashDirectionProperty implements DashProperty {
     }
 
     @Override
-    public Property toUndash() {
+    public Property toUndash(DashRegistry registry) {
         return DirectionProperty.of(name, Direction.values());
     }
 

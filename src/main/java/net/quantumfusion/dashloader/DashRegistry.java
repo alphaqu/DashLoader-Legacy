@@ -1,9 +1,5 @@
 package net.quantumfusion.dashloader;
 
-import io.activej.serializer.annotations.Deserialize;
-import io.activej.serializer.annotations.Serialize;
-import io.activej.serializer.annotations.SerializeNullable;
-import io.activej.serializer.annotations.SerializeSubclasses;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.font.BitmapFont;
@@ -36,73 +32,26 @@ import net.quantumfusion.dashloader.models.DashModel;
 import net.quantumfusion.dashloader.models.DashModelIdentifier;
 import net.quantumfusion.dashloader.models.predicates.DashPredicate;
 import net.quantumfusion.dashloader.models.predicates.PredicateHelper;
+import net.quantumfusion.dashloader.registry.*;
+import net.quantumfusion.dashloader.util.ThreadHelper;
+import net.quantumfusion.dashloader.util.UndashTask;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 
 public class DashRegistry {
 
 
-    @Serialize(order = 0)
-    @SerializeNullable(path = {1})
-    @SerializeNullable(path = {0})
-    public Map<Long, DashBlockState> blockstates;
-
-
-    @Serialize(order = 1)
-    @SerializeNullable(path = {1})
-    @SerializeNullable(path = {0})
-    public Map<Long, DashSprite> sprites;
-
-
-    @Serialize(order = 2)
-    @SerializeSubclasses(path = {1}, value = {
-            DashIdentifier.class,
-            DashModelIdentifier.class
-    })
-    @SerializeNullable(path = {0})
-    public Map<Long, DashID> identifiers;
-
-    @Serialize(order = 3)
-    @SerializeNullable(path = {0})
-    @SerializeSubclasses(path = {1}, extraSubclassesId = "models")
-    public Map<Long, DashModel> models;
-
-    @Serialize(order = 4)
-    @SerializeNullable(path = {0})
-    @SerializeSubclasses(path = {1}, extraSubclassesId = "fonts")
-    public Map<Long, DashFont> fonts;
-
-    @Serialize(order = 5)
-    @SerializeNullable(path = {0})
-    @SerializeNullable(path = {1})
-    public Map<Long, DashImage> images;
-
-    @Serialize(order = 6)
-    @SerializeNullable(path = {0})
-    @SerializeSubclasses(path = {1}, extraSubclassesId = "predicates")
-    public Map<Long, DashPredicate> predicates;
-
-
-    @Serialize(order = 7)
-    @SerializeNullable(path = {0})
-    @SerializeSubclasses(path = {1}, extraSubclassesId = "properties")
-    public Map<Long, DashProperty> properties;
-
-
-    @Serialize(order = 8)
-    @SerializeNullable(path = {0})
-    @SerializeSubclasses(path = {1}, extraSubclassesId = "values")
-    public Map<Long, DashPropertyValue> propertyValues;
-
-    public List<Integer> failedPredicates = Collections.synchronizedList(new ArrayList<>());
-
-
+    private static final int totalTasks = 6;
+    private static int tasksDone = 0;
     public Map<Class, Integer> modelsFailed = new ConcurrentHashMap<>();
     public Map<Long, BlockState> blockstatesOut;
     public Map<Long, Predicate<BlockState>> predicateOut;
@@ -114,16 +63,28 @@ public class DashRegistry {
     public Map<Long, Property<?>> propertiesOut;
     public Map<Long, Comparable<?>> propertyValuesOut;
     DashLoader loader;
+    private Map<Long, DashBlockState> blockstates;
+    private Map<Long, DashSprite> sprites;
+    private Map<Long, DashID> identifiers;
+    private final Map<Long, DashModel> models;
+    private Map<Long, DashFont> fonts;
+    private Map<Long, DashImage> images;
+    private Map<Long, DashPredicate> predicates;
+    private Map<Long, DashProperty> properties;
+    private Map<Long, DashPropertyValue> propertyValues;
 
-    public DashRegistry(@Deserialize("blockstates") Map<Long, DashBlockState> blockstates,
-                        @Deserialize("sprites") Map<Long, DashSprite> sprites,
-                        @Deserialize("identifiers") Map<Long, DashID> identifiers,
-                        @Deserialize("models") Map<Long, DashModel> models,
-                        @Deserialize("fonts") Map<Long, DashFont> fonts,
-                        @Deserialize("images") Map<Long, DashImage> images,
-                        @Deserialize("predicates") Map<Long, DashPredicate> predicates,
-                        @Deserialize("properties") Map<Long, DashProperty> properties,
-                        @Deserialize("propertyValues") Map<Long, DashPropertyValue> propertyValues) {
+    private List<Map<Long, DashModel>> modelsToDeserialize;
+
+
+    public DashRegistry(Map<Long, DashBlockState> blockstates,
+                        Map<Long, DashSprite> sprites,
+                        Map<Long, DashID> identifiers,
+                        Map<Long, DashModel> models,
+                        Map<Long, DashFont> fonts,
+                        Map<Long, DashImage> images,
+                        Map<Long, DashPredicate> predicates,
+                        Map<Long, DashProperty> properties,
+                        Map<Long, DashPropertyValue> propertyValues) {
         this.blockstates = blockstates;
         this.sprites = sprites;
         this.identifiers = identifiers;
@@ -145,9 +106,99 @@ public class DashRegistry {
         images = new HashMap<>();
         properties = new HashMap<>();
         propertyValues = new HashMap<>();
+        modelsToDeserialize = new ArrayList<>();
         this.loader = loader;
     }
 
+    public RegistryBlockStateData getBlockstates() {
+        return new RegistryBlockStateData(blockstates);
+    }
+
+    public void setBlockstates(Map<Long, DashBlockState> blockstates) {
+        this.blockstates = blockstates;
+    }
+
+    public RegistrySpriteData getSprites() {
+        return new RegistrySpriteData(sprites);
+    }
+
+    public void setSprites(Map<Long, DashSprite> sprites) {
+        this.sprites = sprites;
+    }
+
+    public RegistryIdentifierData getIdentifiers() {
+        return new RegistryIdentifierData(identifiers);
+    }
+
+    public void setIdentifiers(Map<Long, DashID> identifiers) {
+        this.identifiers = identifiers;
+    }
+
+    public RegistryModelData getModels() {
+        HashMap<Integer, Map<Long, DashModel>> modelsToAdd = new HashMap<>();
+        models.forEach((aLong, dashModel) -> {
+
+            final Map<Long, DashModel> longDashModelMap = modelsToAdd.get(dashModel.getStage());
+            if (longDashModelMap == null) {
+                final HashMap<Long, DashModel> element = new HashMap<>();
+                element.put(aLong, dashModel);
+                modelsToAdd.put(dashModel.getStage(), element);
+            } else {
+                longDashModelMap.put(aLong, dashModel);
+            }
+        });
+        modelsToDeserialize = new ArrayList<>();
+        modelsToAdd.forEach(modelsToDeserialize::add);
+        return new RegistryModelData(modelsToDeserialize);
+    }
+
+    public void setModels(RegistryModelData data) {
+        modelsToDeserialize = data.models;
+    }
+
+    public RegistryFontData getFonts() {
+        return new RegistryFontData(fonts);
+    }
+
+    public void setFonts(Map<Long, DashFont> fonts) {
+        this.fonts = fonts;
+    }
+
+    public RegistryImageData getImages() {
+        return new RegistryImageData(images);
+    }
+
+    public void setImages(Map<Long, DashImage> images) {
+        this.images = images;
+    }
+
+    public RegistryPredicateData getPredicates() {
+        return new RegistryPredicateData(predicates);
+    }
+
+    public void setPredicates(Map<Long, DashPredicate> predicates) {
+        this.predicates = predicates;
+    }
+
+    public RegistryPropertyData getProperties() {
+        return new RegistryPropertyData(properties);
+    }
+
+    public void setProperties(Map<Long, DashProperty> properties) {
+        this.properties = properties;
+    }
+
+    public Map<Long, DashProperty> getPropertiesRaw() {
+        return properties;
+    }
+
+    public RegistryPropertyValueData getPropertyValues() {
+        return new RegistryPropertyValueData(propertyValues);
+    }
+
+    public void setPropertyValues(Map<Long, DashPropertyValue> propertyValues) {
+        this.propertyValues = propertyValues;
+    }
 
     public long createBlockStatePointer(BlockState blockState) {
         final long hash = blockState.hashCode();
@@ -252,7 +303,6 @@ public class DashRegistry {
         return Pair.of(hashP, hashV);
     }
 
-
     public final BlockState getBlockstate(final Long pointer) {
         final BlockState blockstate = blockstatesOut.get(pointer);
         if (blockstate == null) {
@@ -320,7 +370,6 @@ public class DashRegistry {
 
     public void toUndash() {
         Logger logger = LogManager.getLogger();
-
         spritesOut = new ConcurrentHashMap<>();
         blockstatesOut = new ConcurrentHashMap<>();
         predicateOut = new ConcurrentHashMap<>();
@@ -331,73 +380,40 @@ public class DashRegistry {
         propertiesOut = new ConcurrentHashMap<>();
         propertyValuesOut = new ConcurrentHashMap<>();
 
-        logger.info("[1/9] Loading Identifiers");
-        identifiers.entrySet().parallelStream().forEach(identifierEntry -> identifiersOut.put(identifierEntry.getKey(), identifierEntry.getValue().toUndash()));
+        log(logger, "Loading Simple Objects");
+        identifiersOut = ThreadHelper.execParallel(identifiers, this);
         identifiers = null;
-
-        logger.info("[2/9] Loading Images");
-        images.entrySet().parallelStream().forEach(imageEntry -> imagesOut.put(imageEntry.getKey(), imageEntry.getValue().toUndash()));
+        imagesOut = ThreadHelper.execParallel(images, this);
         images = null;
-
-        logger.info("[3/9] Loading Properties");
-        properties.entrySet().parallelStream().forEach(entry -> propertiesOut.put(entry.getKey(), entry.getValue().toUndash()));
-        propertyValues.entrySet().parallelStream().forEach(entry -> propertyValuesOut.put(entry.getKey(), entry.getValue().toUndash(this)));
+        propertiesOut = ThreadHelper.execParallel(properties, this);
+        propertyValuesOut = ThreadHelper.execParallel(propertyValues, this);
         properties = null;
         propertyValues = null;
 
-        logger.info("[4/9] Loading Blockstates");
-        blockstates.entrySet().parallelStream().forEach(blockstateEntry -> blockstatesOut.put(blockstateEntry.getKey(), blockstateEntry.getValue().toUndash(this)));
+        log(logger, "Loading Advanced Objects");
+        blockstatesOut = ThreadHelper.execParallel(blockstates, this);
         blockstates = null;
-
-        logger.info("[5/9] Loading Predicates");
-        predicates.entrySet().parallelStream().forEach(predicateEntry -> {
-            predicateOut.put(predicateEntry.getKey(), predicateEntry.getValue().toUndash(this));
-        });
+        predicateOut = ThreadHelper.execParallel(predicates, this);
         predicates = null;
-
-        logger.info("[6/9] Loading Sprites");
-        sprites.entrySet().parallelStream().forEach(spriteEntry -> spritesOut.put(spriteEntry.getKey(), spriteEntry.getValue().toUndash(this)));
+        spritesOut = ThreadHelper.execParallel(sprites, this);
         sprites = null;
-
-
-        logger.info("[7/9] Loading Fonts");
-        fonts.entrySet().parallelStream().forEach(fontEntry -> fontsOut.put(fontEntry.getKey(), fontEntry.getValue().toUndash(this)));
+        fontsOut = ThreadHelper.execParallel(fonts, this);
         fonts = null;
 
-        logger.info("[8/9] Loading Simple Models");
-        final boolean[] continueModels = {false};
-        models.entrySet().parallelStream().forEach(modelEntry -> {
-            final DashModel value = modelEntry.getValue();
-            final int stage = value.getStage();
-            if (stage == 0) {
-                modelsOut.put(modelEntry.getKey(), value.toUndash(this));
-            } else if (stage > 0) {
-                continueModels[0] = true;
-            }
+        final short[] currentStage = {0};
+        modelsToDeserialize.forEach(modelCategory -> {
+            log(logger, "[" + currentStage[0] + "] Loading " + modelCategory.size() + " Models");
+            modelsOut.putAll(ThreadHelper.execParallel(modelCategory, this));
+            currentStage[0]++;
         });
+        log(logger, "Applying Model Overrides");
+        modelsToDeserialize.forEach(modelcategory -> DashLoader.THREADPOOL.invoke(new UndashTask.ApplyTask(new ArrayList<>(modelcategory.values()), 100, this)));
+        modelsToDeserialize = null;
+    }
 
-        short stageNow = 1;
-        if (continueModels[0]) {
-            logger.info("[8.5/9] Loading Advanced Models");
-        }
-        while (continueModels[0]) {
-            continueModels[0] = false;
-            short finalStageNow = stageNow;
-            models.entrySet().parallelStream().forEach(modelEntry -> {
-                final DashModel value = modelEntry.getValue();
-                final int stage = value.getStage();
-                if (stage == finalStageNow) {
-                    modelsOut.put(modelEntry.getKey(), value.toUndash(this));
-                } else if (stage > finalStageNow) {
-                    continueModels[0] = true;
-                }
-            });
-            stageNow++;
-        }
-
-        logger.info("[9/9] Applying Model Overrides");
-        models.values().forEach((model) -> model.apply(this));
-        models = null;
+    private void log(Logger logger, String s) {
+        tasksDone++;
+        logger.info("[" + tasksDone + "/" + totalTasks + "] " + s);
     }
 
 }

@@ -10,11 +10,12 @@ import net.minecraft.state.property.Property;
 import net.minecraft.util.registry.Registry;
 import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.mixin.StateAccessor;
+import net.quantumfusion.dashloader.util.Dashable;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.HashMap;
 
-public class DashBlockState {
+public class DashBlockState implements Dashable {
 
     @Serialize(order = 0)
     public final Long owner;
@@ -41,6 +42,7 @@ public class DashBlockState {
     }
 
     @SuppressWarnings("unchecked")
+    @Override
     public BlockState toUndash(final DashRegistry registry) {
         //loong boi
         ImmutableMap.Builder<Property<?>, Comparable<?>> builder = ImmutableMap.builder();

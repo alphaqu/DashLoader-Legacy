@@ -1,9 +1,10 @@
 package net.quantumfusion.dashloader.blockstates.properties;
 
 import net.minecraft.state.property.Property;
-import net.minecraft.util.StringIdentifiable;
+import net.quantumfusion.dashloader.DashRegistry;
+import net.quantumfusion.dashloader.util.Dashable;
 
-public interface DashProperty {
-    <T extends Enum<T> & StringIdentifiable> Property<?> toUndash();
+public interface DashProperty extends Dashable {
+     Property<?> toUndash(DashRegistry registry);
 
 }
