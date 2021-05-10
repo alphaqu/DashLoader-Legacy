@@ -370,21 +370,13 @@ public class DashRegistry {
 
     public void toUndash() {
         Logger logger = LogManager.getLogger();
-        spritesOut = new ConcurrentHashMap<>();
-        blockstatesOut = new ConcurrentHashMap<>();
-        predicateOut = new ConcurrentHashMap<>();
-        identifiersOut = new ConcurrentHashMap<>();
-        imagesOut = new ConcurrentHashMap<>();
-        modelsOut = new ConcurrentHashMap<>();
-        fontsOut = new ConcurrentHashMap<>();
-        propertiesOut = new ConcurrentHashMap<>();
-        propertyValuesOut = new ConcurrentHashMap<>();
 
         log(logger, "Loading Simple Objects");
         identifiersOut = ThreadHelper.execParallel(identifiers, this);
         identifiers = null;
         imagesOut = ThreadHelper.execParallel(images, this);
         images = null;
+
         propertiesOut = ThreadHelper.execParallel(properties, this);
         propertyValuesOut = ThreadHelper.execParallel(propertyValues, this);
         properties = null;
@@ -400,6 +392,7 @@ public class DashRegistry {
         fontsOut = ThreadHelper.execParallel(fonts, this);
         fonts = null;
 
+        modelsOut = new ConcurrentHashMap<>(models.size());
         final short[] currentStage = {0};
         modelsToDeserialize.forEach(modelCategory -> {
             log(logger, "[" + currentStage[0] + "] Loading " + modelCategory.size() + " Models");

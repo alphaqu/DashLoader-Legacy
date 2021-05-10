@@ -89,7 +89,7 @@ public class DashSprite implements Dashable {
         frameYs = spriteAccess.getFrameYs();
         Sprite.Interpolation interpolation = spriteAccess.getInterpolation();
         if (interpolation != null) {
-            this.interpolation = new DashSpriteInterpolation(spriteAccess.getInterpolation());
+            this.interpolation = new DashSpriteInterpolation(spriteAccess.getInterpolation(), registry);
         } else {
             this.interpolation = null;
         }
@@ -103,7 +103,7 @@ public class DashSprite implements Dashable {
         frameTicks = spriteAccess.getFrameTicks();
     }
 
-    public Sprite toUndash(DashRegistry registry) {
+    public final Sprite toUndash(final DashRegistry registry) {
         Sprite out = Unsafe.allocateInstance(Sprite.class);
         SpriteAccessor spriteAccessor = ((SpriteAccessor) out);
         spriteAccessor.setInfo(info.toUndash(registry));

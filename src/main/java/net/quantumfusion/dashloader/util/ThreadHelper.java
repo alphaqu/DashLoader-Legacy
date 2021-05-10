@@ -17,7 +17,7 @@ public class ThreadHelper {
     }
 
     public static <V, D extends Dashable> Map<Long, V> execParallel(Map<Long, D> dashables, DashRegistry registry) {
-        final Map<Long, V> answerMap = new HashMap<>();
+        final Map<Long, V> answerMap = new HashMap<>(dashables.size());
         final Collection<Map.Entry<Long, V>> invoke = DashLoader.THREADPOOL.invoke(new UndashTask<>(new ArrayList<>(dashables.entrySet()), 100, registry));
         invoke.forEach((answer) -> answerMap.put(answer.getKey(), answer.getValue()));
         return answerMap;

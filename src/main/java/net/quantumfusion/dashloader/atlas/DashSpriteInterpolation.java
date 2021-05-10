@@ -10,29 +10,28 @@ import net.quantumfusion.dashloader.mixin.SpriteInterpolationAccessor;
 import net.quantumfusion.dashloader.util.duck.SpriteInterpolationDuck;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class DashSpriteInterpolation {
     @Serialize(order = 0)
-    public final List<DashImage> images;
+    public final List<Long> images;
 
-    public DashSpriteInterpolation(@Deserialize("images") List<DashImage> images) {
+    public DashSpriteInterpolation(@Deserialize("images") List<Long> images) {
         this.images = images;
     }
 
-    public DashSpriteInterpolation(Sprite.Interpolation interpolation) {
-        NativeImage[] images = ((SpriteInterpolationAccessor) (Object) interpolation).getImages();
+    public DashSpriteInterpolation(Sprite.Interpolation interpolation, DashRegistry registry) {
+        images = new ArrayList<>();
+        Arrays.stream(((SpriteInterpolationAccessor) (Object) interpolation).getImages()).forEach(nativeImage -> images.add(registry.createImagePointer(nativeImage)));
 
-        this.images = Stream.of(images).map(DashImage::new).collect(Collectors.toList());
     }
 
-    public Sprite.Interpolation toUndash(Sprite owner, DashRegistry registry) {
-        Sprite.Interpolation spriteInterpolation = Unsafe.allocateInstance(Sprite.Interpolation.class);
-        SpriteInterpolationAccessor spriteInterpolationAccessor = ((SpriteInterpolationAccessor) (Object) spriteInterpolation);
-        List<NativeImage> nativeImages = new ArrayList<>();
-        images.forEach(dashImage -> nativeImages.add(dashImage.toUndash(registry)));
+    public final Sprite.Interpolation toUndash(final Sprite owner, final DashRegistry registry) {
+        final Sprite.Interpolation spriteInterpolation = Unsafe.allocateInstance(Sprite.Interpolation.class);
+        final SpriteInterpolationAccessor spriteInterpolationAccessor = ((SpriteInterpolationAccessor) (Object) spriteInterpolation);
+        final List<NativeImage> nativeImages = new ArrayList<>();
+        images.forEach(dashImage -> nativeImages.add(registry.getImage(dashImage)));
         spriteInterpolationAccessor.setImages(nativeImages.toArray(new NativeImage[0]));
         ((SpriteInterpolationDuck) (Object) spriteInterpolation).interpolation(owner);
         return spriteInterpolation;

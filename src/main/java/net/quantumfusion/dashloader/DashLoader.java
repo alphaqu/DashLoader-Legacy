@@ -69,7 +69,7 @@ import java.util.concurrent.ForkJoinWorkerThread;
 public class DashLoader {
     public static final Logger LOGGER = LogManager.getLogger();
     public static final int totalTasks = 22;
-    public static final double formatVersion = 0.7;
+    public static final double formatVersion = 0.8;
     public static final String version = FabricLoader.getInstance().getModContainer("dashloader").get().getMetadata().getVersion().getFriendlyString();
     private static final Path config = FabricLoader.getInstance().getConfigDir().normalize();
     private static final boolean debug = FabricLoader.getInstance().isDevelopmentEnvironment();

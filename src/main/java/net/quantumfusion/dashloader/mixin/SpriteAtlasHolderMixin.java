@@ -8,6 +8,7 @@ import net.quantumfusion.dashloader.DashLoader;
 import net.quantumfusion.dashloader.util.DashCacheState;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -18,6 +19,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(SpriteAtlasHolder.class)
 public class SpriteAtlasHolderMixin {
 
+    @Mutable
     @Shadow
     @Final
     private SpriteAtlasTexture atlas;
@@ -34,7 +36,13 @@ public class SpriteAtlasHolderMixin {
     @Inject(method = "apply(Lnet/minecraft/client/texture/SpriteAtlasTexture$Data;Lnet/minecraft/resource/ResourceManager;Lnet/minecraft/util/profiler/Profiler;)V",
             at = @At(value = "HEAD"), cancellable = true)
     private void applyOverride(SpriteAtlasTexture.Data data, ResourceManager resourceManager, Profiler profiler, CallbackInfo ci) {
-        if (DashLoader.getInstance().state == DashCacheState.LOADED) {
+        final DashLoader instance = DashLoader.getInstance();
+        if (instance.state == DashCacheState.LOADED) {
+            instance.atlasesToRegister.forEach(spriteAtlasTexture -> {
+                if (atlas.getId() == spriteAtlasTexture.getId()) {
+                    atlas = spriteAtlasTexture;
+                }
+            });
             ci.cancel();
         }
     }

@@ -43,9 +43,8 @@ public class DashBlockState implements Dashable {
 
     @SuppressWarnings("unchecked")
     @Override
-    public BlockState toUndash(final DashRegistry registry) {
-        //loong boi
-        ImmutableMap.Builder<Property<?>, Comparable<?>> builder = ImmutableMap.builder();
+    public final BlockState toUndash(final DashRegistry registry) {
+        final ImmutableMap.Builder<Property<?>, Comparable<?>> builder = ImmutableMap.builder();
         entriesEncoded.forEach((propPntr, valuePntr) -> builder.put(registry.getProperty(propPntr, valuePntr)));
         return new BlockState(Registry.BLOCK.get(registry.getIdentifier(owner)), builder.build(), null);
     }

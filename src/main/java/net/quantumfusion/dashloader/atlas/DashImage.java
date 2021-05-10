@@ -40,7 +40,7 @@ public class DashImage implements Dashable {
      * @return da image
      */
     @Override
-    public NativeImage toUndash(DashRegistry registry) {
+    public final NativeImage toUndash(final DashRegistry registry) {
         final int[] x = new int[1];
         final int[] y = new int[1];
         final int[] channels_in_file = new int[1];
