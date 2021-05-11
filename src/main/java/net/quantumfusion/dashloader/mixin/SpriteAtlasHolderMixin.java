@@ -39,7 +39,7 @@ public class SpriteAtlasHolderMixin {
         final DashLoader instance = DashLoader.getInstance();
         if (instance.state == DashCacheState.LOADED) {
             instance.atlasesToRegister.forEach(spriteAtlasTexture -> {
-                if (atlas.getId() == spriteAtlasTexture.getId()) {
+                if (atlas.getId().equals(spriteAtlasTexture.getId())) {
                     atlas = spriteAtlasTexture;
                 }
             });
