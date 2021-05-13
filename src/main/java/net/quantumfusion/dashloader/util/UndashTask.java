@@ -23,10 +23,9 @@ public class UndashTask<K, D extends Dashable> extends RecursiveTask<Collection<
         this.registry = registry;
     }
 
-    public Pair<List<Map.Entry<Long, D>>, List<Map.Entry<Long, D>>> split(List<Map.Entry<Long, D>> list) {
+    public Pair<List<Map.Entry<Long, D>>, List<Map.Entry<Long, D>>> split(List<Map.Entry<Long, D>> list, int size) {
         List<Map.Entry<Long, D>> first = new ArrayList<>();
         List<Map.Entry<Long, D>> second = new ArrayList<>();
-        int size = list.size();
         final int i1 = size / 2;
         for (int i = 0; i < i1; i++)
             first.add(list.get(i));
@@ -37,32 +36,33 @@ public class UndashTask<K, D extends Dashable> extends RecursiveTask<Collection<
 
     @Override
     protected Collection<Map.Entry<Long, K>> compute() {
-        if (tasks.size() < threshold) {
+        final int size = tasks.size();
+        if (size < threshold) {
             return computeDirectly();
         } else {
-            Pair<List<Map.Entry<Long, D>>, List<Map.Entry<Long, D>>> subtask = split(tasks);
-            UndashTask<K, D> subTask1 = new UndashTask<>(subtask.getKey(), threshold, registry);
-            UndashTask<K, D> subTask2 = new UndashTask<>(subtask.getValue(), threshold, registry);
+            final Pair<List<Map.Entry<Long, D>>, List<Map.Entry<Long, D>>> subtask = split(tasks, size);
+            final UndashTask<K, D> subTask1 = new UndashTask<>(subtask.getKey(), threshold, registry);
+            final UndashTask<K, D> subTask2 = new UndashTask<>(subtask.getValue(), threshold, registry);
             invokeAll(subTask1, subTask2);
             return combine(subTask1.join(), subTask2.join());
         }
     }
 
-    public Collection<Map.Entry<Long, K>> combine(Collection<Map.Entry<Long, K>> list, Collection<Map.Entry<Long, K>> list2) {
+    public final Collection<Map.Entry<Long, K>> combine(final Collection<Map.Entry<Long, K>> list, final Collection<Map.Entry<Long, K>> list2) {
         list.addAll(list2);
         return list;
     }
 
-    protected Collection<Map.Entry<Long, K>> computeDirectly() {
-        Collection<Map.Entry<Long, K>> count = new ArrayList<>();
+    protected final Collection<Map.Entry<Long, K>> computeDirectly() {
+        final Collection<Map.Entry<Long, K>> count = new ArrayList<>();
         tasks.forEach(dashable -> count.add(Pair.of(dashable.getKey(), dashable.getValue().toUndash(registry))));
         return count;
     }
 
     public static class ApplyTask extends RecursiveAction {
-        List<DashModel> tasks;
-        int threshold;
-        DashRegistry registry;
+        final List<DashModel> tasks;
+        final int threshold;
+        final DashRegistry registry;
 
 
         public ApplyTask(List<DashModel> tasks, int threshold, DashRegistry registry) {
@@ -71,10 +71,9 @@ public class UndashTask<K, D extends Dashable> extends RecursiveTask<Collection<
             this.registry = registry;
         }
 
-        public Pair<List<DashModel>, List<DashModel>> split(List<DashModel> list) {
-            List<DashModel> first = new ArrayList<>();
-            List<DashModel> second = new ArrayList<>();
-            int size = list.size();
+        public final Pair<List<DashModel>, List<DashModel>> split(final List<DashModel> list, final int size) {
+            final List<DashModel> first = new ArrayList<>();
+            final List<DashModel> second = new ArrayList<>();
             final int i1 = size / 2;
             for (int i = 0; i < i1; i++)
                 first.add(list.get(i));
@@ -85,12 +84,13 @@ public class UndashTask<K, D extends Dashable> extends RecursiveTask<Collection<
 
         @Override
         protected void compute() {
-            if (tasks.size() < threshold) {
+            final int size = tasks.size();
+            if (size < threshold) {
                 computeDirectly();
             } else {
-                Pair<List<DashModel>, List<DashModel>> subtask = split(tasks);
-                ApplyTask subTask1 = new ApplyTask(subtask.getKey(), threshold, registry);
-                ApplyTask subTask2 = new ApplyTask(subtask.getValue(), threshold, registry);
+                final Pair<List<DashModel>, List<DashModel>> subtask = split(tasks, size);
+                final ApplyTask subTask1 = new ApplyTask(subtask.getKey(), threshold, registry);
+                final ApplyTask subTask2 = new ApplyTask(subtask.getValue(), threshold, registry);
                 invokeAll(subTask1, subTask2);
             }
         }
@@ -99,6 +99,5 @@ public class UndashTask<K, D extends Dashable> extends RecursiveTask<Collection<
             tasks.forEach(dashable -> dashable.apply(registry));
         }
     }
-
 
 }

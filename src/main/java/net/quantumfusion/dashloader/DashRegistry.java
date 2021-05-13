@@ -50,7 +50,7 @@ import java.util.function.Predicate;
 public class DashRegistry {
 
 
-    private static final int totalTasks = 6;
+    private static int totalTasks = 6;
     private static int tasksDone = 0;
     public Map<Class, Integer> modelsFailed = new ConcurrentHashMap<>();
     public Map<Long, BlockState> blockstatesOut;
@@ -370,13 +370,14 @@ public class DashRegistry {
 
     public void toUndash() {
         Logger logger = LogManager.getLogger();
-
+        totalTasks = 4 + modelsToDeserialize.size();
         log(logger, "Loading Simple Objects");
         identifiersOut = ThreadHelper.execParallel(identifiers, this);
-        identifiers = null;
         imagesOut = ThreadHelper.execParallel(images, this);
+        identifiers = null;
         images = null;
 
+        log(logger, "Loading Properties");
         propertiesOut = ThreadHelper.execParallel(properties, this);
         propertyValuesOut = ThreadHelper.execParallel(propertyValues, this);
         properties = null;
@@ -384,18 +385,18 @@ public class DashRegistry {
 
         log(logger, "Loading Advanced Objects");
         blockstatesOut = ThreadHelper.execParallel(blockstates, this);
-        blockstates = null;
         predicateOut = ThreadHelper.execParallel(predicates, this);
-        predicates = null;
         spritesOut = ThreadHelper.execParallel(sprites, this);
-        sprites = null;
         fontsOut = ThreadHelper.execParallel(fonts, this);
+        blockstates = null;
+        predicates = null;
+        sprites = null;
         fonts = null;
 
         modelsOut = new ConcurrentHashMap<>(models.size());
         final short[] currentStage = {0};
         modelsToDeserialize.forEach(modelCategory -> {
-            log(logger, "[" + currentStage[0] + "] Loading " + modelCategory.size() + " Models");
+            log(logger, "Loading " + modelCategory.size() + " Models: " + "[" + currentStage[0] + "]");
             modelsOut.putAll(ThreadHelper.execParallel(modelCategory, this));
             currentStage[0]++;
         });
