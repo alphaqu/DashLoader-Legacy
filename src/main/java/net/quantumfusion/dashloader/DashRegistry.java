@@ -2,10 +2,7 @@ package net.quantumfusion.dashloader;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.client.font.BitmapFont;
-import net.minecraft.client.font.BlankFont;
 import net.minecraft.client.font.Font;
-import net.minecraft.client.font.UnicodeTextureFont;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.json.MultipartModelSelector;
 import net.minecraft.client.texture.NativeImage;
@@ -14,8 +11,9 @@ import net.minecraft.client.util.ModelIdentifier;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.Identifier;
-import net.quantumfusion.dashloader.api.models.DashModelFactory;
-import net.quantumfusion.dashloader.api.properties.DashPropertyFactory;
+import net.quantumfusion.dashloader.api.Factory;
+import net.quantumfusion.dashloader.api.FactoryType;
+import net.quantumfusion.dashloader.api.properties.PropertyFactory;
 import net.quantumfusion.dashloader.atlas.DashImage;
 import net.quantumfusion.dashloader.atlas.DashSprite;
 import net.quantumfusion.dashloader.blockstates.DashBlockState;
@@ -23,15 +21,11 @@ import net.quantumfusion.dashloader.blockstates.properties.DashProperty;
 import net.quantumfusion.dashloader.blockstates.properties.value.DashPropertyValue;
 import net.quantumfusion.dashloader.common.DashID;
 import net.quantumfusion.dashloader.common.DashIdentifier;
-import net.quantumfusion.dashloader.font.fonts.DashBitmapFont;
-import net.quantumfusion.dashloader.font.fonts.DashBlankFont;
 import net.quantumfusion.dashloader.font.fonts.DashFont;
-import net.quantumfusion.dashloader.font.fonts.DashUnicodeFont;
 import net.quantumfusion.dashloader.mixin.NativeImageAccessor;
 import net.quantumfusion.dashloader.models.DashModel;
 import net.quantumfusion.dashloader.models.DashModelIdentifier;
 import net.quantumfusion.dashloader.models.predicates.DashPredicate;
-import net.quantumfusion.dashloader.models.predicates.PredicateHelper;
 import net.quantumfusion.dashloader.registry.*;
 import net.quantumfusion.dashloader.util.ThreadHelper;
 import net.quantumfusion.dashloader.util.UndashTask;
@@ -40,10 +34,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 
@@ -52,7 +43,8 @@ public class DashRegistry {
 
     private static int totalTasks = 6;
     private static int tasksDone = 0;
-    public Map<Class, Integer> modelsFailed = new ConcurrentHashMap<>();
+    private final Map<Long, DashModel> models;
+    public Map<Class, FactoryType> apiFailed = new ConcurrentHashMap<>();
     public Map<Long, BlockState> blockstatesOut;
     public Map<Long, Predicate<BlockState>> predicateOut;
     public Map<Long, Identifier> identifiersOut;
@@ -66,10 +58,10 @@ public class DashRegistry {
     private Map<Long, DashBlockState> blockstates;
     private Map<Long, DashSprite> sprites;
     private Map<Long, DashID> identifiers;
-    private final Map<Long, DashModel> models;
     private Map<Long, DashFont> fonts;
     private Map<Long, DashImage> images;
     private Map<Long, DashPredicate> predicates;
+
     private Map<Long, DashProperty> properties;
     private Map<Long, DashPropertyValue> propertyValues;
 
@@ -214,17 +206,11 @@ public class DashRegistry {
         }
         final long hash = bakedModel.hashCode();
         if (models.get(hash) == null) {
-            DashModelFactory model = loader.modelMappings.get(bakedModel.getClass());
+            Factory<BakedModel, DashModel> model = loader.getApi().modelMappings.get(bakedModel.getClass());
             if (model != null) {
                 models.put(hash, model.toDash(bakedModel, this, var));
             } else {
-                Integer integer = modelsFailed.get(bakedModel.getClass());
-                if (integer != null) {
-                    integer += 1;
-                } else {
-                    modelsFailed.put(bakedModel.getClass(), 0);
-
-                }
+                apiFailed.putIfAbsent(bakedModel.getClass(), FactoryType.MODEL);
             }
         }
         return hash;
@@ -261,7 +247,19 @@ public class DashRegistry {
     public final long createPredicatePointer(final MultipartModelSelector selector, final StateManager<Block, BlockState> stateManager) {
         final long hash = selector.hashCode();
         if (predicates.get(hash) == null) {
-            predicates.put(hash, PredicateHelper.getPredicate(selector, stateManager, this));
+            if (selector == MultipartModelSelector.FALSE || selector == MultipartModelSelector.TRUE) {
+                predicates.put(hash, loader.getApi().predicateMappings.get(MultipartModelSelector.class).toDash(selector, this, stateManager));
+            } else {
+                final Class<? extends MultipartModelSelector> aClass = selector.getClass();
+                Factory<MultipartModelSelector, DashPredicate> predicateFactory;
+                predicateFactory = loader.getApi().predicateMappings.get(aClass);
+                if (predicateFactory != null) {
+                    predicates.put(hash, predicateFactory.toDash(selector, this, stateManager));
+                } else {
+                    apiFailed.putIfAbsent(aClass, FactoryType.PREDICATE);
+                }
+            }
+
         }
         return hash;
     }
@@ -269,14 +267,11 @@ public class DashRegistry {
     public final long createFontPointer(final Font font) {
         final long hash = font.hashCode();
         if (fonts.get(hash) == null) {
-            if (font instanceof BitmapFont) {
-                fonts.put(hash, new DashBitmapFont((BitmapFont) font, this));
-            } else if (font instanceof UnicodeTextureFont) {
-                fonts.put(hash, new DashUnicodeFont((UnicodeTextureFont) font, this));
-            } else if (font instanceof BlankFont) {
-                fonts.put(hash, new DashBlankFont());
+            Factory<Font, DashFont> fontFactory = loader.getApi().fontMappings.get(font.getClass());
+            if (fontFactory != null) {
+                fonts.put(hash, fontFactory.toDash(font, this, null));
             } else {
-                DashLoader.LOGGER.warn(font.getClass().getName() + " is not a supported font format, please contact mod developer to add support.");
+                apiFailed.putIfAbsent(font.getClass(), FactoryType.FONT);
             }
         }
         return hash;
@@ -288,16 +283,16 @@ public class DashRegistry {
         final boolean propVal = !propertyValues.containsKey(hashV);
         final boolean prop = !properties.containsKey(hashP);
         if (propVal || prop) {
-            DashPropertyFactory factory = loader.propertyMappings.get(property.getClass());
-            if (factory != null) {
+            PropertyFactory propertyFactory = loader.getApi().propertyMappings.get(property.getClass());
+            if (propertyFactory != null) {
                 if (prop) {
-                    properties.put(hashP, factory.toDash(property, this, hashP));
+                    properties.put(hashP, propertyFactory.toDash(property, this, hashP));
                 }
                 if (propVal) {
-                    propertyValues.put(hashV, factory.toDash(value, this, hashP));
+                    propertyValues.put(hashV, propertyFactory.toDash(value, this, hashP));
                 }
             } else {
-                DashLoader.LOGGER.warn(property.getClass().getName() + " is not a supported property format, please contact mod developer to add support.");
+                apiFailed.put(property.getClass(), FactoryType.PROPERTY);
             }
         }
         return Pair.of(hashP, hashV);
@@ -410,4 +405,15 @@ public class DashRegistry {
         logger.info("[" + tasksDone + "/" + totalTasks + "] " + s);
     }
 
+    public void apiReport(Logger logger) {
+        if (apiFailed.size() != 0) {
+            logger.error("Found incompatible objects that were not able to be serialized.");
+            int[] ints = new int[1];
+            apiFailed.entrySet().stream().sorted(Comparator.comparing(e -> e.getValue().name)).forEach(entry -> {
+                ints[0]++;
+                logger.error("[" + entry.getValue().name() + "] Object: " + entry.getKey().getName());
+            });
+            logger.error("In total there are " + ints[0] + " incompatible objects. Please contact the mod developers to add support.");
+        }
+    }
 }

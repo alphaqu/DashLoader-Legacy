@@ -9,7 +9,7 @@ import net.quantumfusion.dashloader.blockstates.properties.DashProperty;
 import net.quantumfusion.dashloader.blockstates.properties.value.DashDirectionValue;
 import net.quantumfusion.dashloader.blockstates.properties.value.DashPropertyValue;
 
-public class DashDirectionPropertyFactory implements DashPropertyFactory {
+public class DirectionPropertyFactory implements PropertyFactory {
     @Override
     public <K> DashProperty toDash(Property<?> property, DashRegistry registry, K var1) {
         return new DashDirectionProperty((DirectionProperty) property);
@@ -21,17 +21,18 @@ public class DashDirectionPropertyFactory implements DashPropertyFactory {
     }
 
     @Override
-    public Class<? extends Property> getPropertyType() {
+    public Class<? extends Property<?>> getType() {
         return DirectionProperty.class;
     }
 
     @Override
-    public Class<? extends DashProperty> getDashPropertyType() {
+    public Class<? extends DashProperty> getDashType() {
         return DashDirectionProperty.class;
     }
 
     @Override
-    public Class<? extends DashPropertyValue> getDashPropertyValueType() {
+    public Class<? extends DashPropertyValue> getDashValueType() {
         return DashDirectionValue.class;
     }
+
 }

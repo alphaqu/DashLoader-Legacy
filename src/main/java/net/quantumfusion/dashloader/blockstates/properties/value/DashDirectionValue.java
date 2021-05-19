@@ -20,6 +20,6 @@ public class DashDirectionValue implements DashPropertyValue {
 
     @Override
     public Comparable toUndash(DashRegistry registry) {
-        return direction;
+        return Direction.byId(direction);
     }
 }

@@ -45,7 +45,7 @@ public class DashImage implements Dashable {
         final IntBuffer x = memoryStack.mallocInt(1);
         final IntBuffer y = memoryStack.mallocInt(1);
         final IntBuffer channels = memoryStack.mallocInt(1);
-        final ByteBuffer buf = ByteBuffer.allocateDirect(image.length);
+        final ByteBuffer buf = MemoryUtil.memAlloc(image.length);
         buf.put(image);
         buf.flip();
         final ByteBuffer imageBuffer = STBImage.stbi_load_from_memory(buf, x, y, channels, 4);

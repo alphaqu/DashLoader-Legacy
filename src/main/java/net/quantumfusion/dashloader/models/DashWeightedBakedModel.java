@@ -29,7 +29,6 @@ public class DashWeightedBakedModel implements DashModel {
     public BakedModel toUndash(DashRegistry registry) {
         List<WeightedBakedModel.Entry> modelsOut = new ArrayList<>();
         models.forEach(dashWeightedModelEntry -> modelsOut.add((dashWeightedModelEntry.toUndash(registry))));
-        new WeightedBakedModel(modelsOut);
         return new WeightedBakedModel(modelsOut);
     }
 

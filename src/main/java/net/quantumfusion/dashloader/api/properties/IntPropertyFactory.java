@@ -8,8 +8,8 @@ import net.quantumfusion.dashloader.blockstates.properties.DashProperty;
 import net.quantumfusion.dashloader.blockstates.properties.value.DashIntValue;
 import net.quantumfusion.dashloader.blockstates.properties.value.DashPropertyValue;
 
-public class DashIntPropertyFactory implements DashPropertyFactory {
-    public DashIntPropertyFactory() {
+public class IntPropertyFactory implements PropertyFactory {
+    public IntPropertyFactory() {
     }
 
     @Override
@@ -23,17 +23,18 @@ public class DashIntPropertyFactory implements DashPropertyFactory {
     }
 
     @Override
-    public Class<? extends Property> getPropertyType() {
+    public Class<? extends Property<?>> getType() {
         return IntProperty.class;
     }
 
     @Override
-    public Class<? extends DashProperty> getDashPropertyType() {
+    public Class<? extends DashProperty> getDashType() {
         return DashIntProperty.class;
     }
 
     @Override
-    public Class<? extends DashPropertyValue> getDashPropertyValueType() {
+    public Class<? extends DashPropertyValue> getDashValueType() {
         return DashIntValue.class;
     }
+
 }

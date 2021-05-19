@@ -4,5 +4,5 @@ public enum DashCacheState {
     EMPTY,
     LOADED,
     LOADING,
-    CRASHED
+    CRASHLOADER
 }

@@ -6,19 +6,20 @@ import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.models.DashModel;
 import net.quantumfusion.dashloader.models.DashWeightedBakedModel;
 
-public class DashWeightedBakedModelFactory implements DashModelFactory {
+public class WeightedBakedModelFactory implements ModelFactory {
     @Override
     public <K> DashModel toDash(BakedModel model, DashRegistry registry, K var1) {
         return new DashWeightedBakedModel((WeightedBakedModel) model, registry);
     }
 
     @Override
-    public Class<? extends BakedModel> getModelType() {
+    public Class<? extends BakedModel> getType() {
         return WeightedBakedModel.class;
     }
 
     @Override
-    public Class<? extends DashModel> getDashModelType() {
+    public Class<? extends DashModel> getDashType() {
         return DashWeightedBakedModel.class;
     }
+
 }

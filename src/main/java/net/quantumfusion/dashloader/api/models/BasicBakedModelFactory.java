@@ -6,7 +6,7 @@ import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.models.DashBasicBakedModel;
 import net.quantumfusion.dashloader.models.DashModel;
 
-public class DashBasicBakedModelFactory implements DashModelFactory {
+public class BasicBakedModelFactory implements ModelFactory {
 
 
     /**
@@ -24,12 +24,12 @@ public class DashBasicBakedModelFactory implements DashModelFactory {
     }
 
     @Override
-    public Class<? extends BakedModel> getModelType() {
+    public Class<? extends BakedModel> getType() {
         return BasicBakedModel.class;
     }
 
     @Override
-    public Class<? extends DashModel> getDashModelType() {
+    public Class<? extends DashModel> getDashType() {
         return DashBasicBakedModel.class;
     }
 

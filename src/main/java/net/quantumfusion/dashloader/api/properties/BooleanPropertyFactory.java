@@ -8,7 +8,7 @@ import net.quantumfusion.dashloader.blockstates.properties.DashProperty;
 import net.quantumfusion.dashloader.blockstates.properties.value.DashBooleanValue;
 import net.quantumfusion.dashloader.blockstates.properties.value.DashPropertyValue;
 
-public class DashBooleanPropertyFactory implements DashPropertyFactory {
+public class BooleanPropertyFactory implements PropertyFactory {
     @Override
     public <K> DashProperty toDash(Property<?> property, DashRegistry registry, K var1) {
         return new DashBooleanProperty((BooleanProperty) property);
@@ -20,17 +20,18 @@ public class DashBooleanPropertyFactory implements DashPropertyFactory {
     }
 
     @Override
-    public Class<? extends Property> getPropertyType() {
+    public Class<? extends Property<?>> getType() {
         return BooleanProperty.class;
     }
 
     @Override
-    public Class<? extends DashProperty> getDashPropertyType() {
+    public Class<? extends DashProperty> getDashType() {
         return DashBooleanProperty.class;
     }
 
     @Override
-    public Class<? extends DashPropertyValue> getDashPropertyValueType() {
+    public Class<? extends DashPropertyValue> getDashValueType() {
         return DashBooleanValue.class;
     }
+
 }

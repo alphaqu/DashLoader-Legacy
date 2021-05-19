@@ -13,7 +13,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.List;
 
-public class DashMultipartBakedModelFactory implements DashModelFactory {
+public class MultipartBakedModelFactory implements ModelFactory {
     @Override
     public <K> DashModel toDash(BakedModel model, DashRegistry registry, K var1) {
         //noinspection unchecked
@@ -21,13 +21,14 @@ public class DashMultipartBakedModelFactory implements DashModelFactory {
     }
 
     @Override
-    public Class<? extends BakedModel> getModelType() {
+    public Class<? extends BakedModel> getType() {
         return MultipartBakedModel.class;
     }
 
 
     @Override
-    public Class<? extends DashModel> getDashModelType() {
+    public Class<? extends DashModel> getDashType() {
         return DashMultipartBakedModel.class;
     }
+
 }
