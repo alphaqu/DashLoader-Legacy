@@ -6,23 +6,23 @@ import net.minecraft.client.render.model.SpriteAtlasManager;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.mixin.SpriteAtlasManagerAccessor;
+import net.quantumfusion.dashloader.util.PairMap;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class DashSpriteAtlasData {
     @Serialize(order = 0)
-    public final Map<DashSpriteAtlasTexture, Integer> atlases;
+    public final PairMap<DashSpriteAtlasTexture, Integer> atlases;
 
-    public DashSpriteAtlasData(@Deserialize("atlases") Map<DashSpriteAtlasTexture, Integer> atlases) {
+    public DashSpriteAtlasData(@Deserialize("atlases") PairMap<DashSpriteAtlasTexture, Integer> atlases) {
         this.atlases = atlases;
     }
 
     public DashSpriteAtlasData(SpriteAtlasManager spriteAtlasManager, Map<SpriteAtlasTexture, DashSpriteAtlasTextureData> atlasData, DashRegistry registry, List<SpriteAtlasTexture> extraAtlases) {
-        atlases = new HashMap<>();
+        atlases = new PairMap<>();
         ((SpriteAtlasManagerAccessor) spriteAtlasManager).getAtlases().forEach((identifier, spriteAtlasTexture) -> atlases.put(new DashSpriteAtlasTexture(spriteAtlasTexture, atlasData.get(spriteAtlasTexture), registry), 0));
         extraAtlases.forEach(spriteAtlasTexture -> atlases.put(new DashSpriteAtlasTexture(spriteAtlasTexture, atlasData.get(spriteAtlasTexture), registry), 1));
     }

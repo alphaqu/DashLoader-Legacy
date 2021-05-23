@@ -9,6 +9,7 @@ import net.minecraft.client.texture.NativeImage;
 import net.minecraft.util.Identifier;
 import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.mixin.UnicodeTextureFontAccessor;
+import net.quantumfusion.dashloader.util.PairMap;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,7 +19,7 @@ public class DashUnicodeFont implements DashFont {
     @SerializeNullable()
     @SerializeNullable(path = {0})
     @SerializeNullable(path = {1})
-    public final Map<Long, Long> images;
+    public final PairMap<Long, Long> images;
 
     @Serialize(order = 1)
     public final byte[] sizes;
@@ -27,7 +28,7 @@ public class DashUnicodeFont implements DashFont {
     public final String template;
 
 
-    public DashUnicodeFont(@Deserialize("images") Map<Long, Long> images,
+    public DashUnicodeFont(@Deserialize("images") PairMap<Long, Long> images,
                            @Deserialize("sizes") byte[] sizes,
                            @Deserialize("template") String template) {
         this.images = images;
@@ -36,7 +37,7 @@ public class DashUnicodeFont implements DashFont {
     }
 
     public DashUnicodeFont(UnicodeTextureFont rawFont, DashRegistry registry) {
-        images = new HashMap<>();
+        images = new PairMap<>();
         UnicodeTextureFontAccessor font = ((UnicodeTextureFontAccessor) rawFont);
         font.getImages().forEach((identifier, nativeImage) -> images.put(registry.createIdentifierPointer(identifier), registry.createImagePointer(nativeImage)));
         this.sizes = font.getSizes();
@@ -45,7 +46,7 @@ public class DashUnicodeFont implements DashFont {
 
 
     public UnicodeTextureFont toUndash(DashRegistry registry) {
-        Map<Identifier, NativeImage> out = new HashMap<>();
+        Map<Identifier, NativeImage> out = new HashMap<>(images.size());
         images.forEach((key, value) -> out.put(registry.getIdentifier(key), registry.getImage(value)));
         UnicodeTextureFont font = Unsafe.allocateInstance(UnicodeTextureFont.class);
         UnicodeTextureFontAccessor accessor = ((UnicodeTextureFontAccessor) font);

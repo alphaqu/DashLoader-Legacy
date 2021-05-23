@@ -29,7 +29,7 @@ public class DashAndPredicate implements DashPredicate {
     public DashAndPredicate(AndMultipartModelSelector selector, StateManager<Block, BlockState> stateManager, DashRegistry registry) {
         AndMultipartModelSelectorAccessor access = ((AndMultipartModelSelectorAccessor) selector);
         selectors = new ArrayList<>();
-        access.getSelectors().forEach(selector1 -> selectors.add(PredicateHelper.getPredicate(selector1, stateManager, registry)));
+        access.getSelectors().forEach(selector1 -> selectors.add(registry.obtainPredicate(selector1, stateManager)));
     }
 
     @Override

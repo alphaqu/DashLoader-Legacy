@@ -11,9 +11,8 @@ import net.minecraft.util.registry.Registry;
 import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.mixin.StateAccessor;
 import net.quantumfusion.dashloader.util.Dashable;
+import net.quantumfusion.dashloader.util.PairMap;
 import org.apache.commons.lang3.tuple.Pair;
-
-import java.util.HashMap;
 
 public class DashBlockState implements Dashable {
 
@@ -22,18 +21,18 @@ public class DashBlockState implements Dashable {
 
     @Serialize(order = 1)
     @SerializeNullable()
-    public final HashMap<Long, Long> entriesEncoded;
+    public final PairMap<Long, Long> entriesEncoded;
 
 
     public DashBlockState(@Deserialize("owner") Long owner,
-                          @Deserialize("entriesEncoded") HashMap<Long, Long> entriesEncoded) {
+                          @Deserialize("entriesEncoded") PairMap<Long, Long> entriesEncoded) {
         this.owner = owner;
         this.entriesEncoded = entriesEncoded;
     }
 
     public DashBlockState(BlockState blockState, DashRegistry registry) {
         StateAccessor<Block, BlockState> accessState = ((StateAccessor<Block, BlockState>) blockState);
-        entriesEncoded = new HashMap<>();
+        entriesEncoded = new PairMap<>();
         accessState.getEntries().forEach((property, comparable) -> {
             final Pair<Long, Long> propertyPointer = registry.createPropertyPointer(property, comparable);
             entriesEncoded.put(propertyPointer.getLeft(), propertyPointer.getRight());

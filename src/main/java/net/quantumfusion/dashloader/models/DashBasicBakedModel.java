@@ -14,6 +14,7 @@ import net.quantumfusion.dashloader.mixin.BasicBakedModelAccessor;
 import net.quantumfusion.dashloader.models.components.DashBakedQuad;
 import net.quantumfusion.dashloader.models.components.DashModelOverrideList;
 import net.quantumfusion.dashloader.models.components.DashModelTransformation;
+import net.quantumfusion.dashloader.util.PairMap;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,7 +28,7 @@ public class DashBasicBakedModel implements DashModel {
     @SerializeNullable()
     @SerializeNullable(path = {0})
     @SerializeNullable(path = {1})
-    public Map<DashDirection, List<DashBakedQuad>> faceQuads;
+    public PairMap<DashDirection, List<DashBakedQuad>> faceQuads;
     @Serialize(order = 2)
     public boolean usesAo;
     @Serialize(order = 3)
@@ -45,7 +46,7 @@ public class DashBasicBakedModel implements DashModel {
     }
 
     public DashBasicBakedModel(@Deserialize("quads") List<DashBakedQuad> quads,
-                               @Deserialize("faceQuads") Map<DashDirection, List<DashBakedQuad>> faceQuads,
+                               @Deserialize("faceQuads") PairMap<DashDirection, List<DashBakedQuad>> faceQuads,
                                @Deserialize("usesAo") boolean usesAo,
                                @Deserialize("hasDepth") boolean hasDepth,
                                @Deserialize("isSideLit") boolean isSideLit,
@@ -66,12 +67,13 @@ public class DashBasicBakedModel implements DashModel {
                                DashRegistry registry) {
         BasicBakedModelAccessor access = ((BasicBakedModelAccessor) basicBakedModel);
         quads = new ArrayList<>();
-        faceQuads = new HashMap<>();
         access.getQuads().forEach(bakedQuad -> quads.add(new DashBakedQuad(bakedQuad)));
-        access.getFaceQuads().forEach((direction, bakedQuads) -> {
+        final Map<Direction, List<BakedQuad>> faceQuads = access.getFaceQuads();
+        this.faceQuads = new PairMap<>(faceQuads.size());
+        faceQuads.forEach((direction, bakedQuads) -> {
             List<DashBakedQuad> out = new ArrayList<>();
             bakedQuads.forEach(bakedQuad -> out.add(new DashBakedQuad(bakedQuad)));
-            faceQuads.put(new DashDirection(direction), out);
+            this.faceQuads.put(new DashDirection(direction), out);
         });
         itemPropertyOverrides = new DashModelOverrideList(access.getItemPropertyOverrides(), registry);
         usesAo = access.getUsesAo();

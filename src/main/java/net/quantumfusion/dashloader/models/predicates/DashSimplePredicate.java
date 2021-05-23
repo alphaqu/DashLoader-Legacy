@@ -11,9 +11,13 @@ import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Property;
 import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.mixin.SimpleMultipartModelSelectorAccessor;
+import net.quantumfusion.dashloader.util.PairMap;
 import org.apache.commons.lang3.tuple.Pair;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -22,14 +26,14 @@ public class DashSimplePredicate implements DashPredicate {
 
     @Serialize(order = 0)
     @SerializeNullable()
-    public Map<Long, Long> property;
+    public PairMap<Long, Long> properties;
 
     @Serialize(order = 1)
     public boolean negate;
 
-    public DashSimplePredicate(@Deserialize("property") Map<Long, Long> property,
+    public DashSimplePredicate(@Deserialize("properties") PairMap<Long, Long> properties,
                                @Deserialize("negate") boolean negate) {
-        this.property = property;
+        this.properties = properties;
         this.negate = negate;
     }
 
@@ -38,7 +42,7 @@ public class DashSimplePredicate implements DashPredicate {
         SimpleMultipartModelSelectorAccessor access = ((SimpleMultipartModelSelectorAccessor) simpleMultipartModelSelector);
         Property<?> stateManagerProperty = stateManager.getProperty(access.getKey());
         if (stateManagerProperty == null) {
-            System.out.println("fuck");
+            System.out.println("no no no no no no no no no no no no no");
         } else {
             String string = access.getValueString();
             negate = !string.isEmpty() && string.charAt(0) == '!';
@@ -46,13 +50,13 @@ public class DashSimplePredicate implements DashPredicate {
                 string = string.substring(1);
             }
             List<String> list = VALUE_SPLITTER.splitToList(string);
-            property = new HashMap<>();
+            properties = new PairMap<>();
             if (list.size() == 1) {
-                Pair<Long, Long> predic = createPredicateInfo(stateManager, stateManagerProperty, string, registry);
-                property.put(predic.getLeft(), predic.getRight());
+                Pair<Long, Long> predicateProperty = createPredicateInfo(stateManager, stateManagerProperty, string, registry);
+                properties.put(predicateProperty.getLeft(), predicateProperty.getRight());
             } else {
-                List<Pair<Long, Long>> predic = list.stream().map((stringx) -> createPredicateInfo(stateManager, stateManagerProperty, stringx, registry)).collect(Collectors.toList());
-                predic.forEach(integerIntegerPair -> property.put(integerIntegerPair.getLeft(), integerIntegerPair.getRight()));
+                List<Pair<Long, Long>> predicateProperties = list.stream().map((stringx) -> createPredicateInfo(stateManager, stateManagerProperty, stringx, registry)).collect(Collectors.toList());
+                predicateProperties.forEach(pair -> properties.put(pair.getLeft(), pair.getRight()));
             }
         }
     }
@@ -70,12 +74,13 @@ public class DashSimplePredicate implements DashPredicate {
     @Override
     public Predicate<BlockState> toUndash(DashRegistry registry) {
         List<Map.Entry<? extends Property<?>, ? extends Comparable<?>>> out = new ArrayList<>();
-        property.forEach((propertyPointer, valuePointer) -> out.add(registry.getProperty(propertyPointer, valuePointer)));
+        properties.forEach((property, value) -> out.add(registry.getProperty(property, value)));
         Predicate<BlockState> outPredicate;
         if (out.size() == 1) {
-            outPredicate = createPredicate(out.get(0).getKey(), out.get(0).getValue());
+            final Map.Entry<? extends Property<?>, ? extends Comparable<?>> entry = out.get(0);
+            outPredicate = createPredicate(entry);
         } else {
-            List<Predicate<BlockState>> list2 = out.stream().map((entry) -> createPredicate(entry.getKey(), entry.getValue())).collect(Collectors.toList());
+            List<Predicate<BlockState>> list2 = out.stream().map(this::createPredicate).collect(Collectors.toList());
             outPredicate = (blockState) -> list2.stream().anyMatch((predicate) -> predicate.test(blockState));
 
         }
@@ -83,7 +88,9 @@ public class DashSimplePredicate implements DashPredicate {
     }
 
 
-    private Predicate<BlockState> createPredicate(Property<?> property, Comparable<?> value) {
+    private Predicate<BlockState> createPredicate(Map.Entry<? extends Property<?>, ? extends Comparable<?>> entry) {
+        final Property<?> property = entry.getKey();
+        final Comparable<?> value = entry.getValue();
         return (blockState) -> blockState.get(property).equals(value);
     }
 

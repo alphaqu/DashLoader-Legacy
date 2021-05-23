@@ -13,7 +13,7 @@ public class IntPropertyFactory implements PropertyFactory {
     }
 
     @Override
-    public <K> DashProperty toDash(Property<?> property, DashRegistry registry, K var1) {
+    public <K> DashProperty toDash(Property property, DashRegistry registry, K var1) {
         return new DashIntProperty((IntProperty) property);
     }
 

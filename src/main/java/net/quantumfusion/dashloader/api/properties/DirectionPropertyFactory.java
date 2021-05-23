@@ -10,8 +10,9 @@ import net.quantumfusion.dashloader.blockstates.properties.value.DashDirectionVa
 import net.quantumfusion.dashloader.blockstates.properties.value.DashPropertyValue;
 
 public class DirectionPropertyFactory implements PropertyFactory {
+
     @Override
-    public <K> DashProperty toDash(Property<?> property, DashRegistry registry, K var1) {
+    public <K> DashProperty toDash(Property property, DashRegistry registry, K var1) {
         return new DashDirectionProperty((DirectionProperty) property);
     }
 

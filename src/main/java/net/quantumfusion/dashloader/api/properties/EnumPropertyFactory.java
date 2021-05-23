@@ -7,12 +7,11 @@ import net.quantumfusion.dashloader.blockstates.properties.DashEnumProperty;
 import net.quantumfusion.dashloader.blockstates.properties.DashProperty;
 import net.quantumfusion.dashloader.blockstates.properties.value.DashEnumValue;
 import net.quantumfusion.dashloader.blockstates.properties.value.DashPropertyValue;
-import net.quantumfusion.dashloader.util.ClassHelper;
 
 public class EnumPropertyFactory implements PropertyFactory {
 
     @Override
-    public <K> DashProperty toDash(Property<?> property, DashRegistry registry, K var1) {
+    public <K> DashProperty toDash(Property property, DashRegistry registry, K var1) {
         return new DashEnumProperty((EnumProperty) property);
     }
 
@@ -21,12 +20,9 @@ public class EnumPropertyFactory implements PropertyFactory {
         return new DashEnumValue(((Enum) comparable).name(), (Long) var1);
     }
 
-    private static final Class<EnumProperty> enumPropertyClass = EnumProperty.class;
-
-
     @Override
-    public Class<? extends Property<?>> getType() {
-        return ClassHelper.castClass(enumPropertyClass);
+    public Class<? extends Property> getType() {
+        return EnumProperty.class;
     }
 
 

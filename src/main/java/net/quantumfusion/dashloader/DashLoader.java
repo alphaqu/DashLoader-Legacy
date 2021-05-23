@@ -6,7 +6,6 @@ import io.activej.serializer.SerializerBuilder;
 import io.activej.serializer.stream.StreamInput;
 import io.activej.serializer.stream.StreamOutput;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -55,7 +54,7 @@ import java.util.concurrent.ForkJoinWorkerThread;
 public class DashLoader {
     public static final Logger LOGGER = LogManager.getLogger();
     public static final int totalTasks = 22;
-    public static final double formatVersion = 1;
+    public static final double formatVersion = 2;
     public static final String version = FabricLoader.getInstance().getModContainer("dashloader").get().getMetadata().getVersion().getFriendlyString();
     private static final Path config = FabricLoader.getInstance().getConfigDir().normalize();
     private static final boolean debug = FabricLoader.getInstance().isDevelopmentEnvironment();
@@ -214,6 +213,7 @@ public class DashLoader {
     public void saveDashCache() {
         Instant start = Instant.now();
         initThreadPool();
+        api.initAPI();
         initSerializers();
         createDirectory();
         tasksComplete++;
@@ -280,7 +280,7 @@ public class DashLoader {
                     () -> registry.setImages(deserialize(RegistryImageData.class, DashCachePaths.REGISTRY_IMAGE.getPath(), "Registry Images").images),
                     () -> registry.setModels(deserialize(RegistryModelData.class, DashCachePaths.REGISTRY_MODEL.getPath(), "Registry Models")),
                     () -> registry.setPredicates(deserialize(RegistryPredicateData.class, DashCachePaths.REGISTRY_PREDICATE.getPath(), "Registry Predicates").predicates),
-                    () -> registry.setProperties(deserialize(RegistryPropertyData.class, DashCachePaths.REGISTRY_PROPERTY.getPath(), "Registry Properties").properties),
+                    () -> registry.setProperties(deserialize(RegistryPropertyData.class, DashCachePaths.REGISTRY_PROPERTY.getPath(), "Registry Properties").property),
                     () -> registry.setPropertyValues(deserialize(RegistryPropertyValueData.class, DashCachePaths.REGISTRY_PROPERTYVALUE.getPath(), "Registry PropertyValues").propertyValues),
                     () -> registry.setSprites(deserialize(RegistrySpriteData.class, DashCachePaths.REGISTRY_SPRITE.getPath(), "Registry Sprites").sprites)
             );
@@ -300,7 +300,7 @@ public class DashLoader {
             atlasesToRegister.addAll(mappings.toUndash(registry));
 
             LOGGER.info("    Loaded DashLoader");
-            stateLookupOut = new Object2IntOpenHashMap<>();
+            stateLookupOut = mappings.stateLookupOut;
             state = DashCacheState.LOADED;
         } catch (Exception e) {
             destroyCache(e);
@@ -410,7 +410,23 @@ public class DashLoader {
     private void initSerializers() {
         LOGGER.info("[3/4]  Started Serializer init.");
         Instant start = Instant.now();
-        final Class[] classes = new Class[]{DashMetadata.class, DashModelData.class, DashSpriteAtlasData.class, DashBlockStateData.class, DashParticleData.class, DashFontManagerData.class, DashSplashTextData.class, RegistryBlockStateData.class, RegistryIdentifierData.class, RegistryImageData.class, RegistryFontData.class, RegistryModelData.class, RegistryPredicateData.class, RegistryPropertyData.class, RegistryPropertyValueData.class, RegistrySpriteData.class};
+        final Class[] classes = new Class[]{
+                DashMetadata.class,
+                DashModelData.class,
+                DashSpriteAtlasData.class,
+                DashBlockStateData.class,
+                DashParticleData.class,
+                DashFontManagerData.class,
+                DashSplashTextData.class,
+                RegistryBlockStateData.class,
+                RegistryIdentifierData.class,
+                RegistryImageData.class,
+                RegistryFontData.class,
+                RegistryModelData.class,
+                RegistryPredicateData.class,
+                RegistryPropertyData.class,
+                RegistryPropertyValueData.class,
+                RegistrySpriteData.class};
         final Runnable[] runnables = {
                 () -> addSerializer(classes[0], SerializerBuilder.create()),
                 () -> addSerializer(classes[1], SerializerBuilder.create()),

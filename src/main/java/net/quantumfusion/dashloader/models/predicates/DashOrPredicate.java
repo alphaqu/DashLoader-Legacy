@@ -29,7 +29,7 @@ public class DashOrPredicate implements DashPredicate {
     public DashOrPredicate(OrMultipartModelSelector selector, StateManager<Block, BlockState> stateManager, DashRegistry registry) {
         OrMultipartModelSelectorAccessor access = ((OrMultipartModelSelectorAccessor) selector);
         selectors = new ArrayList<>();
-        access.getSelectors().forEach(selector1 -> selectors.add(PredicateHelper.getPredicate(selector1, stateManager, registry)));
+        access.getSelectors().forEach(selector1 -> selectors.add(registry.obtainPredicate(selector1, stateManager)));
     }
 
     @Override

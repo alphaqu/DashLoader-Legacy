@@ -12,6 +12,7 @@ import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.mixin.AbstractTextureAccessor;
 import net.quantumfusion.dashloader.mixin.SpriteAccessor;
 import net.quantumfusion.dashloader.mixin.SpriteAtlasTextureAccessor;
+import net.quantumfusion.dashloader.util.PairMap;
 
 import java.util.*;
 
@@ -23,7 +24,7 @@ public class DashSpriteAtlasTexture {
     @SerializeNullable()
     @SerializeNullable(path = {1})
     @SerializeNullable(path = {0})
-    public Map<Long, Long> sprites;
+    public PairMap<Long, Long> sprites;
 
     @Serialize(order = 2)
     public final Long id;
@@ -41,7 +42,7 @@ public class DashSpriteAtlasTexture {
 
 
     public DashSpriteAtlasTexture(@Deserialize("animatedSprites") List<Long> animatedSprites,
-                                  @Deserialize("sprites") Map<Long, Long> sprites,
+                                  @Deserialize("sprites") PairMap<Long, Long> sprites,
                                   @Deserialize("id") Long id,
                                   @Deserialize("maxTextureSize") int maxTextureSize,
                                   @Deserialize("bilinear") boolean bilinear,
@@ -62,7 +63,7 @@ public class DashSpriteAtlasTexture {
         SpriteAtlasTextureAccessor spriteTextureAccess = ((SpriteAtlasTextureAccessor) spriteAtlasTexture);
         this.data = data;
         animatedSprites = new ArrayList<>();
-        sprites = new HashMap<>();
+        sprites = new PairMap<>();
         spriteTextureAccess.getAnimatedSprites().forEach(sprite -> animatedSprites.add(registry.createSpritePointer(sprite)));
         spriteTextureAccess.getSprites().forEach((identifier, sprite) -> sprites.put(registry.createIdentifierPointer(identifier), registry.createSpritePointer(sprite)));
         id = registry.createIdentifierPointer(spriteAtlasTexture.getId());
@@ -77,7 +78,7 @@ public class DashSpriteAtlasTexture {
         access.setBilinear(bilinear);
         access.setMipmap(mipmap);
         final SpriteAtlasTextureAccessor spriteAtlasTextureAccessor = ((SpriteAtlasTextureAccessor) spriteAtlasTexture);
-        final Map<Identifier, Sprite> out = new HashMap<>();
+        final Map<Identifier, Sprite> out = new HashMap<>(sprites.size());
         sprites.forEach((dashIdentifier, spritePointer) -> out.put(registry.getIdentifier(dashIdentifier), loadSprite(spritePointer, registry, spriteAtlasTexture)));
         final Set<Identifier> outLoad = new HashSet<>();
         final List<Sprite> outAnimatedSprites = new ArrayList<>();

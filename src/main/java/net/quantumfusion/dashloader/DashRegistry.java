@@ -13,6 +13,7 @@ import net.minecraft.state.property.Property;
 import net.minecraft.util.Identifier;
 import net.quantumfusion.dashloader.api.Factory;
 import net.quantumfusion.dashloader.api.FactoryType;
+import net.quantumfusion.dashloader.api.predicates.PredicateFactory;
 import net.quantumfusion.dashloader.api.properties.PropertyFactory;
 import net.quantumfusion.dashloader.atlas.DashImage;
 import net.quantumfusion.dashloader.atlas.DashSprite;
@@ -26,6 +27,7 @@ import net.quantumfusion.dashloader.mixin.NativeImageAccessor;
 import net.quantumfusion.dashloader.models.DashModel;
 import net.quantumfusion.dashloader.models.DashModelIdentifier;
 import net.quantumfusion.dashloader.models.predicates.DashPredicate;
+import net.quantumfusion.dashloader.models.predicates.DashStaticPredicate;
 import net.quantumfusion.dashloader.registry.*;
 import net.quantumfusion.dashloader.util.ThreadHelper;
 import net.quantumfusion.dashloader.util.UndashTask;
@@ -180,10 +182,6 @@ public class DashRegistry {
         this.properties = properties;
     }
 
-    public Map<Long, DashProperty> getPropertiesRaw() {
-        return properties;
-    }
-
     public RegistryPropertyValueData getPropertyValues() {
         return new RegistryPropertyValueData(propertyValues);
     }
@@ -247,22 +245,26 @@ public class DashRegistry {
     public final long createPredicatePointer(final MultipartModelSelector selector, final StateManager<Block, BlockState> stateManager) {
         final long hash = selector.hashCode();
         if (predicates.get(hash) == null) {
-            if (selector == MultipartModelSelector.FALSE || selector == MultipartModelSelector.TRUE) {
-                predicates.put(hash, loader.getApi().predicateMappings.get(MultipartModelSelector.class).toDash(selector, this, stateManager));
-            } else {
-                final Class<? extends MultipartModelSelector> aClass = selector.getClass();
-                Factory<MultipartModelSelector, DashPredicate> predicateFactory;
-                predicateFactory = loader.getApi().predicateMappings.get(aClass);
-                if (predicateFactory != null) {
-                    predicates.put(hash, predicateFactory.toDash(selector, this, stateManager));
-                } else {
-                    apiFailed.putIfAbsent(aClass, FactoryType.PREDICATE);
-                }
-            }
-
+            predicates.put(hash, obtainPredicate(selector, stateManager));
         }
         return hash;
     }
+
+    public final DashPredicate obtainPredicate(final MultipartModelSelector selector, final StateManager<Block, BlockState> stateManager) {
+        final boolean isTrue = selector == MultipartModelSelector.TRUE;
+        if (selector == MultipartModelSelector.FALSE || isTrue) {
+            return new DashStaticPredicate(isTrue);
+        } else {
+            PredicateFactory predicateFactory = loader.getApi().predicateMappings.get(selector.getClass());
+            if (predicateFactory != null) {
+                return predicateFactory.toDash(selector, this, stateManager);
+            } else {
+                apiFailed.putIfAbsent(selector.getClass(), FactoryType.PREDICATE);
+            }
+        }
+        return null;
+    }
+
 
     public final long createFontPointer(final Font font) {
         final long hash = font.hashCode();
@@ -285,11 +287,11 @@ public class DashRegistry {
         if (propVal || prop) {
             PropertyFactory propertyFactory = loader.getApi().propertyMappings.get(property.getClass());
             if (propertyFactory != null) {
-                if (prop) {
-                    properties.put(hashP, propertyFactory.toDash(property, this, hashP));
-                }
                 if (propVal) {
                     propertyValues.put(hashV, propertyFactory.toDash(value, this, hashP));
+                }
+                if (prop) {
+                    properties.put(hashP, propertyFactory.toDash(property, this, hashP));
                 }
             } else {
                 apiFailed.put(property.getClass(), FactoryType.PROPERTY);
@@ -351,13 +353,13 @@ public class DashRegistry {
         if (predicate == null) {
             DashLoader.LOGGER.error("Predicate not found in data. PINTR: " + pointer);
         }
-        return predicateOut.get(pointer);
+        return predicate;
     }
 
     public final Pair<Property<?>, Comparable<?>> getProperty(final Long propertyPointer, final Long valuePointer) {
         final Property<?> property = propertiesOut.get(propertyPointer);
         final Comparable<?> value = propertyValuesOut.get(valuePointer);
-        if (property == null && value == null) {
+        if (property == null || value == null) {
             DashLoader.LOGGER.error("Property not found in data. PINTR: " + propertyPointer + "/" + valuePointer);
         }
         return Pair.of(property, value);

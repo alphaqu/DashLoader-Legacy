@@ -3,7 +3,6 @@ package net.quantumfusion.dashloader.blockstates.properties.value;
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import net.quantumfusion.dashloader.DashRegistry;
-import net.quantumfusion.dashloader.blockstates.properties.DashEnumProperty;
 
 public class DashEnumValue implements DashPropertyValue {
     @Serialize(order = 0)
@@ -24,6 +23,6 @@ public class DashEnumValue implements DashPropertyValue {
     }
 
     public <T extends Enum<T>> T get(DashRegistry registry) {
-        return Enum.valueOf(((Class<T>) ((DashEnumProperty) registry.getPropertiesRaw().get(enumPointer)).type), value);
+        return Enum.valueOf((Class<T>) registry.propertiesOut.get(enumPointer).getType(), value);
     }
 }

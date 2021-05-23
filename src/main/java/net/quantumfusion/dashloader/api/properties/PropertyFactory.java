@@ -8,7 +8,7 @@ import net.quantumfusion.dashloader.api.FactoryType;
 import net.quantumfusion.dashloader.blockstates.properties.DashProperty;
 import net.quantumfusion.dashloader.blockstates.properties.value.DashPropertyValue;
 
-public interface PropertyFactory extends Factory<Property<?>, DashProperty> {
+public interface PropertyFactory extends Factory<Property, DashProperty> {
     /**
      * @param property The property, should cast to your own one.
      * @param registry The registry to call values.
@@ -16,7 +16,7 @@ public interface PropertyFactory extends Factory<Property<?>, DashProperty> {
      * @param <Long>   custom value.
      * @return A new dash property
      */
-    <Long> DashProperty toDash(Property<?> property, DashRegistry registry, Long var1);
+    <Long> DashProperty toDash(Property property, DashRegistry registry, Long var1);
 
     /**
      * @param comparable

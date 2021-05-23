@@ -6,6 +6,7 @@ import io.activej.serializer.annotations.SerializeNullable;
 import net.minecraft.client.font.Font;
 import net.minecraft.util.Identifier;
 import net.quantumfusion.dashloader.DashRegistry;
+import net.quantumfusion.dashloader.util.PairMap;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,14 +20,14 @@ public class DashFontManagerData {
     @SerializeNullable(path = {0})
     @SerializeNullable(path = {1})
     @SerializeNullable(path = {1, 0})
-    public Map<Long, List<Long>> fontMap;
+    public PairMap<Long, List<Long>> fontMap;
 
-    public DashFontManagerData(@Deserialize("fontMap") Map<Long, List<Long>> fontMap) {
+    public DashFontManagerData(@Deserialize("fontMap") PairMap<Long, List<Long>> fontMap) {
         this.fontMap = fontMap;
     }
 
     public DashFontManagerData(Map<Identifier, List<Font>> fontList, DashRegistry registry) {
-        fontMap = new HashMap<>();
+        fontMap = new PairMap<>();
         fontList.forEach((identifier, fonts) -> {
             List<Long> fontsOut = new ArrayList<>();
             fonts.forEach(font -> fontsOut.add(registry.createFontPointer(font)));

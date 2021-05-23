@@ -7,6 +7,7 @@ import net.minecraft.client.render.model.json.ModelOverride;
 import net.minecraft.util.Identifier;
 import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.mixin.ModelOverrideAccessor;
+import net.quantumfusion.dashloader.util.PairMap;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,10 +21,10 @@ public class DashModelOverride {
     @SerializeNullable()
     @SerializeNullable(path = {0})
     @SerializeNullable(path = {1})
-    public final Map<Long, Float> predicateToThresholds;
+    public final PairMap<Long, Float> predicateToThresholds;
 
     public DashModelOverride(@Deserialize("modelId") Long modelId,
-                             @Deserialize("predicateToThresholds") Map<Long, Float> predicateToThresholds
+                             @Deserialize("predicateToThresholds") PairMap<Long, Float> predicateToThresholds
     ) {
         this.modelId = modelId;
         this.predicateToThresholds = predicateToThresholds;
@@ -31,7 +32,7 @@ public class DashModelOverride {
 
     public DashModelOverride(ModelOverride modelOverride, DashRegistry registry) {
         modelId = registry.createIdentifierPointer(modelOverride.getModelId());
-        predicateToThresholds = new HashMap<>();
+        predicateToThresholds = new PairMap<>();
         ((ModelOverrideAccessor) modelOverride).getPredicateToThresholdsD().forEach((identifier, aFloat) -> predicateToThresholds.put(registry.createIdentifierPointer(identifier), aFloat));
     }
 

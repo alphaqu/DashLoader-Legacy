@@ -10,19 +10,15 @@ import net.minecraft.client.render.model.json.MultipartModelSelector;
 import net.minecraft.state.property.Property;
 import net.quantumfusion.dashloader.api.fonts.BitmapFontFactory;
 import net.quantumfusion.dashloader.api.fonts.BlankFontFactory;
+import net.quantumfusion.dashloader.api.fonts.FontFactory;
 import net.quantumfusion.dashloader.api.fonts.UnicodeFontFactory;
-import net.quantumfusion.dashloader.api.models.BasicBakedModelFactory;
-import net.quantumfusion.dashloader.api.models.BuiltInBakedModelFactory;
-import net.quantumfusion.dashloader.api.models.MultipartBakedModelFactory;
-import net.quantumfusion.dashloader.api.models.WeightedBakedModelFactory;
+import net.quantumfusion.dashloader.api.models.*;
 import net.quantumfusion.dashloader.api.predicates.AndPredicateFactory;
 import net.quantumfusion.dashloader.api.predicates.OrPredicateFactory;
+import net.quantumfusion.dashloader.api.predicates.PredicateFactory;
 import net.quantumfusion.dashloader.api.predicates.SimplePredicateFactory;
-import net.quantumfusion.dashloader.api.predicates.StaticPredicate;
 import net.quantumfusion.dashloader.api.properties.*;
-import net.quantumfusion.dashloader.font.fonts.DashFont;
-import net.quantumfusion.dashloader.models.DashModel;
-import net.quantumfusion.dashloader.models.predicates.DashPredicate;
+import net.quantumfusion.dashloader.models.predicates.DashStaticPredicate;
 import net.quantumfusion.dashloader.util.ThreadHelper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -38,10 +34,11 @@ import java.util.stream.Collectors;
 
 public class DashLoaderAPI {
     public static final Logger LOGGER = LogManager.getLogger();
-    public final Map<Class<? extends BakedModel>, Factory<BakedModel, DashModel>> modelMappings;
+    public final Map<Class<? extends BakedModel>, ModelFactory> modelMappings;
     public final Map<Class<? extends Property>, PropertyFactory> propertyMappings;
-    public final Map<Class<? extends Font>, Factory<Font, DashFont>> fontMappings;
-    public final Map<Class<? extends MultipartModelSelector>, Factory<MultipartModelSelector, DashPredicate>> predicateMappings;
+    public final Map<Class<? extends Font>, FontFactory> fontMappings;
+    public final Map<Class<? extends MultipartModelSelector>, PredicateFactory> predicateMappings;
+
     public List<Class<?>> modelTypes;
     public List<Class<?>> predicateTypes;
     public List<Class<?>> fontTypes;
@@ -61,7 +58,7 @@ public class DashLoaderAPI {
         propertyValueTypes = new ArrayList<>();
     }
 
-    private void addModelType(Factory<BakedModel, DashModel> factory) {
+    private void addModelType(ModelFactory factory) {
         modelMappings.put(factory.getType(), factory);
     }
 
@@ -69,11 +66,11 @@ public class DashLoaderAPI {
         propertyMappings.put(factory.getType(), factory);
     }
 
-    private void addFontType(Factory<Font, DashFont> factory) {
+    private void addFontType(FontFactory factory) {
         fontMappings.put(factory.getType(), factory);
     }
 
-    private void addPredicateType(Factory<MultipartModelSelector, DashPredicate> factory) {
+    private void addPredicateType(PredicateFactory factory) {
         predicateMappings.put(factory.getType(), factory);
     }
 
@@ -82,6 +79,7 @@ public class DashLoaderAPI {
         propertyMappings.clear();
         fontMappings.clear();
         predicateMappings.clear();
+
         modelTypes.clear();
         predicateTypes.clear();
         fontTypes.clear();
@@ -104,7 +102,7 @@ public class DashLoaderAPI {
             addPredicateType(new AndPredicateFactory());
             addPredicateType(new OrPredicateFactory());
             addPredicateType(new SimplePredicateFactory());
-            addPredicateType(new StaticPredicate());
+            predicateTypes.add(DashStaticPredicate.class);
         }, () -> {
             addFontType(new BitmapFontFactory());
             addFontType(new BlankFontFactory());
@@ -143,15 +141,15 @@ public class DashLoaderAPI {
                     final Factory<?, ?> factory = (Factory<?, ?>) Unsafe.allocateInstance(Class.forName(value.getAsString()));
                     switch (factory.getFactoryType()) {
                         case MODEL:
-                            final Factory<BakedModel, DashModel> modelProxy = (Factory<BakedModel, DashModel>) factory;
+                            final ModelFactory modelProxy = (ModelFactory) factory;
                             addModelType(modelProxy);
                             break;
                         case PREDICATE:
-                            final Factory<MultipartModelSelector, DashPredicate> predicateProxy = (Factory<MultipartModelSelector, DashPredicate>) factory;
+                            final PredicateFactory predicateProxy = (PredicateFactory) factory;
                             addPredicateType(predicateProxy);
                             break;
                         case FONT:
-                            final Factory<Font, DashFont> fontProxy = (Factory<Font, DashFont>) factory;
+                            final FontFactory fontProxy = (FontFactory) factory;
                             addFontType(fontProxy);
                             break;
                         case PROPERTY:

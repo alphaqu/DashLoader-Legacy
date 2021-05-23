@@ -7,9 +7,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.client.font.BitmapFont;
 import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.mixin.BitmapFontAccessor;
-
-import java.util.HashMap;
-import java.util.Map;
+import net.quantumfusion.dashloader.util.PairMap;
 
 public class DashBitmapFont implements DashFont {
     @Serialize(order = 0)
@@ -17,10 +15,10 @@ public class DashBitmapFont implements DashFont {
     @Serialize(order = 1)
     @SerializeNullable(path = {0})
     @SerializeNullable(path = {1})
-    public Map<Integer, DashBitmapFontGlyph> glyphs;
+    public PairMap<Integer, DashBitmapFontGlyph> glyphs;
 
     public DashBitmapFont(@Deserialize("image") Long image,
-                          @Deserialize("glyphs") Map<Integer, DashBitmapFontGlyph> glyphs) {
+                          @Deserialize("glyphs") PairMap<Integer, DashBitmapFontGlyph> glyphs) {
         this.image = image;
         this.glyphs = glyphs;
     }
@@ -28,7 +26,7 @@ public class DashBitmapFont implements DashFont {
     public DashBitmapFont(BitmapFont bitmapFont, DashRegistry registry) {
         BitmapFontAccessor font = ((BitmapFontAccessor) bitmapFont);
         image = registry.createImagePointer(font.getImage());
-        glyphs = new HashMap<>();
+        glyphs = new PairMap<>();
         font.getGlyphs().forEach((integer, bitmapFontGlyph) -> glyphs.put(integer, new DashBitmapFontGlyph(bitmapFontGlyph, registry)));
     }
 
