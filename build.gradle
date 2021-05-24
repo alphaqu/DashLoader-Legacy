@@ -26,7 +26,7 @@ repositories {
 }
 
 dependencies {
-    modImplementation "io.activej:activej-serializer:$activej_version"
+    implementation "io.activej:activej-serializer:$activej_version"
     include "io.activej:activej-serializer:$activej_version"
     include "io.activej:activej-codegen:$activej_version"
     include "org.slf4j:slf4j-api:1.7.29"
@@ -41,7 +41,10 @@ dependencies {
 
     // Uncomment to add Sodium to the dev environment
     // modImplementation "com.github.CaffeineMC:sodium-fabric:${project.sodium_version}"
-    implementation include("net.gudenau.lib:unsafe:1.4.1")
+
+    implementation "net.gudenau.lib:unsafe:1.4.1"
+    include "net.gudenau.lib:unsafe:1.4.1"
+
 }
 
 processResources {
