@@ -448,7 +448,7 @@ public class DashLoader {
         ThreadHelper.exec(runnables);
         LOGGER.info("[3/4] [" + Duration.between(start, Instant.now()).toMillis() + "ms] Created Serializers.");
     }
-
+// le crabe 🦀
     private void addSerializer(Class<?> clazz, SerializerBuilder builder) {
         serializers.put(clazz, builder.withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE).build(clazz));
     }
