@@ -9,7 +9,6 @@ import net.minecraft.client.texture.Sprite;
 import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.mixin.SpriteAccessor;
 import net.quantumfusion.dashloader.util.Dashable;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,115 +16,70 @@ import java.util.List;
 
 public class DashSprite implements Dashable {
     @Serialize(order = 0)
-    public final DashSpriteInfo info;
-    @Serialize(order = 1)
-    public final DashAnimationResourceMetadata animationMetadata;
-    @Serialize(order = 2)
-    public final int[] frameXs;
-    @Serialize(order = 3)
-    public final int[] frameYs;
-    @Serialize(order = 4)
     @SerializeNullable
-    @Nullable
-    public final DashSpriteInterpolation interpolation;
-    @Serialize(order = 5)
+    public final DashSpriteAnimation animation;
+    @Serialize(order = 1)
     public final int x;
-    @Serialize(order = 6)
+    @Serialize(order = 2)
     public final int y;
-    @Serialize(order = 7)
+    @Serialize(order = 3)
     public final float uMin;
-    @Serialize(order = 8)
+    @Serialize(order = 4)
     public final float uMax;
-    @Serialize(order = 9)
+    @Serialize(order = 5)
     public final float vMin;
-    @Serialize(order = 10)
+    @Serialize(order = 6)
     public final float vMax;
-    @Serialize(order = 11)
-    public final int frameIndex;
-    @Serialize(order = 12)
-    public final int frameTicks;
-    @Serialize(order = 13)
+    @Serialize(order = 7)
     public List<Long> images;
 
 
-    public DashSprite(@Deserialize("info") DashSpriteInfo info,
-                      @Deserialize("animationMetadata") DashAnimationResourceMetadata animationMetadata,
-                      @Deserialize("frameXs") int[] frameXs,
-                      @Deserialize("frameYs") int[] frameYs,
-                      @Deserialize("interpolation") @Nullable DashSpriteInterpolation interpolation,
+    public DashSprite(@Deserialize("animation") DashSpriteAnimation animation,
                       @Deserialize("x") int x,
                       @Deserialize("y") int y,
                       @Deserialize("uMin") float uMin,
                       @Deserialize("uMax") float uMax,
                       @Deserialize("vMin") float vMin,
                       @Deserialize("vMax") float vMax,
-                      @Deserialize("frameIndex") int frameIndex,
-                      @Deserialize("frameTicks") int frameTicks,
                       @Deserialize("images") List<Long> images
     ) {
-        this.info = info;
-        this.animationMetadata = animationMetadata;
+        this.animation = animation;
         this.images = images;
-        this.frameXs = frameXs;
-        this.frameYs = frameYs;
-        this.interpolation = interpolation;
         this.x = x;
         this.y = y;
         this.uMin = uMin;
         this.uMax = uMax;
         this.vMin = vMin;
         this.vMax = vMax;
-        this.frameIndex = frameIndex;
-        this.frameTicks = frameTicks;
     }
 
     public DashSprite(Sprite sprite, DashRegistry registry) {
         SpriteAccessor spriteAccess = ((SpriteAccessor) sprite);
-        info = new DashSpriteInfo(spriteAccess.getInfo(), registry);
-        animationMetadata = new DashAnimationResourceMetadata(spriteAccess.getAnimationMetadata());
         images = new ArrayList<>();
         Arrays.stream(spriteAccess.getImages()).forEach(nativeImage -> images.add(registry.createImagePointer(nativeImage)));
-        frameXs = spriteAccess.getFrameXs();
-        frameYs = spriteAccess.getFrameYs();
-        Sprite.Interpolation interpolation = spriteAccess.getInterpolation();
-        if (interpolation != null) {
-            this.interpolation = new DashSpriteInterpolation(spriteAccess.getInterpolation(), registry);
-        } else {
-            this.interpolation = null;
-        }
         x = spriteAccess.getX();
         y = spriteAccess.getY();
         uMin = spriteAccess.getUMin();
         uMax = spriteAccess.getUMax();
         vMin = spriteAccess.getVMin();
         vMax = spriteAccess.getVMax();
-        frameIndex = spriteAccess.getFrameIndex();
-        frameTicks = spriteAccess.getFrameTicks();
+        final Sprite.Animation animation = spriteAccess.getAnimation();
+        this.animation = animation == null ? null : new DashSpriteAnimation(animation, registry);
     }
 
     public final Sprite toUndash(final DashRegistry registry) {
-        Sprite out = Unsafe.allocateInstance(Sprite.class);
-        SpriteAccessor spriteAccessor = ((SpriteAccessor) out);
-        spriteAccessor.setInfo(info.toUndash(registry));
-        spriteAccessor.setAnimationMetadata(animationMetadata.toUndash());
-        ArrayList<NativeImage> imagesOut = new ArrayList<>();
+        final Sprite out = Unsafe.allocateInstance(Sprite.class);
+        final SpriteAccessor spriteAccessor = ((SpriteAccessor) out);
+        final ArrayList<NativeImage> imagesOut = new ArrayList<>();
         images.forEach(dashImage -> imagesOut.add(registry.getImage(dashImage)));
         spriteAccessor.setImages(imagesOut.toArray(new NativeImage[0]));
-        spriteAccessor.setFrameXs(frameXs);
-        spriteAccessor.setFrameYs(frameYs);
-        if (interpolation != null) {
-            spriteAccessor.setInterpolation(interpolation.toUndash(out, registry));
-        } else {
-            spriteAccessor.setInterpolation(null);
-        }
         spriteAccessor.setX(x);
         spriteAccessor.setY(y);
         spriteAccessor.setUMin(uMin);
         spriteAccessor.setUMax(uMax);
         spriteAccessor.setVMin(vMin);
         spriteAccessor.setVMax(vMax);
-        spriteAccessor.setFrameIndex(frameIndex);
-        spriteAccessor.setFrameTicks(frameTicks);
+        spriteAccessor.setAnimation(animation == null ? null : animation.toUndash(out, registry));
         return out;
     }
 

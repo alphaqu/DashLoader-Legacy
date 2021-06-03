@@ -36,7 +36,7 @@ public class BakedModelManagerOverride {
     @Final
     private BlockColors colorMap;
     @Shadow
-    private int mipmap;
+    private int mipmapLevels;
     @Shadow
     @Nullable
     private SpriteAtlasManager atlasManager;
@@ -57,13 +57,13 @@ public class BakedModelManagerOverride {
     @Final
     private BlockModels blockModelCache;
 
-    @Inject(method = "prepare(Lnet/minecraft/resource/ResourceManager;Lnet/minecraft/util/profiler/Profiler;)Lnet/minecraft/client/render/model/ModelLoader;",
+    @Inject(method = "prepare",
             at = @At(value = "HEAD"), cancellable = true)
     private void prepare(ResourceManager resourceManager, Profiler profiler, CallbackInfoReturnable<ModelLoader> cir) {
         profiler.startTick();
         ModelLoader modelLoader;
         if (DashLoader.getInstance().state != DashCacheState.LOADED) {
-            modelLoader = new ModelLoader(resourceManager, this.colorMap, profiler, this.mipmap);
+            modelLoader = new ModelLoader(resourceManager, this.colorMap, profiler, this.mipmapLevels);
         } else {
             //hipidy hopedy this is now dashes property
             modelLoader = null;
@@ -73,28 +73,30 @@ public class BakedModelManagerOverride {
 
     }
 
-    @Inject(method = "apply(Lnet/minecraft/client/render/model/ModelLoader;Lnet/minecraft/resource/ResourceManager;Lnet/minecraft/util/profiler/Profiler;)V",
+    @Inject(method = "apply",
             at = @At(value = "HEAD"), cancellable = true)
     private void apply(ModelLoader modelLoader, ResourceManager resourceManager, Profiler profiler, CallbackInfo ci) {
         profiler.startTick();
         profiler.push("upload");
         DashLoader loader = DashLoader.getInstance();
         if (loader.state != DashCacheState.LOADED) {
+            DashLoader.LOGGER.info("DashLoader not loaded, Initializing minecraft ModelLoader to create assets for caching.");
             //serialization
             this.atlasManager = modelLoader.upload(this.textureManager, profiler);
             this.models = modelLoader.getBakedModelMap();
             this.stateLookup = modelLoader.getStateLookup();
             loader.addBakedModelAssets(atlasManager, stateLookup, models);
-            this.missingModel = this.models.get(ModelLoader.MISSING);
+            this.missingModel = this.models.get(ModelLoader.MISSING_ID);
             this.blockModelCache.reload();
 
         } else {
             //cache go brr
+            DashLoader.LOGGER.info("Starting apply stage.");
             loader.applyDashCache(textureManager);
             this.atlasManager = loader.getAtlasManagerOut();
             this.models = loader.getModelsOut();
             this.stateLookup = loader.getStateLookupOut();
-            this.missingModel = this.models.get(ModelLoader.MISSING);
+            this.missingModel = this.models.get(ModelLoader.MISSING_ID);
             Map<BlockState, BakedModel> modelsOut = new ConcurrentHashMap<>();
             Registry.BLOCK.stream().parallel().forEach(block ->
                     block.getStateManager().getStates().parallelStream().forEach((blockState) ->

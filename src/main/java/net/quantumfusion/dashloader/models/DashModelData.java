@@ -35,7 +35,7 @@ public class DashModelData {
         this.models = new PairMap<>(models.size());
         models.forEach((identifier, bakedModel) -> {
             if (bakedModel != null) {
-                this.models.put(registry.createIdentifierPointer(identifier), registry.createModelPointer(bakedModel, multipartData.get(bakedModel)));
+                this.models.put(registry.createIdentifierPointer(identifier), registry.createModelPointer(bakedModel));
             }
         });
     }

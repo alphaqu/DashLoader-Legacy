@@ -2,9 +2,9 @@ package net.quantumfusion.dashloader.models.components;
 
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
-import net.minecraft.client.util.math.Vector3f;
+import net.minecraft.util.math.Vec3f;
 
-public class DashVector3f {
+public class DashVec3f {
 
     @Serialize(order = 0)
     public final float x;
@@ -14,20 +14,20 @@ public class DashVector3f {
     public final float z;
 
 
-    public DashVector3f(@Deserialize("x") float x, @Deserialize("y") float y, @Deserialize("z") float z) {
+    public DashVec3f(@Deserialize("x") float x, @Deserialize("y") float y, @Deserialize("z") float z) {
         this.x = x;
         this.y = y;
         this.z = z;
     }
 
-    public DashVector3f(Vector3f vector3f) {
+    public DashVec3f(Vec3f vector3f) {
         x = vector3f.getX();
         y = vector3f.getY();
         z = vector3f.getZ();
     }
 
-    public Vector3f toUndash() {
-        return new Vector3f(x, y, z);
+    public Vec3f toUndash() {
+        return new Vec3f(x, y, z);
     }
 
 

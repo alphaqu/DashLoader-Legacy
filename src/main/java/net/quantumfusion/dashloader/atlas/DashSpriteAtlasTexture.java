@@ -17,21 +17,17 @@ import net.quantumfusion.dashloader.util.PairMap;
 import java.util.*;
 
 public class DashSpriteAtlasTexture {
+    @Serialize(order = 2)
+    public final Long id;
+    @Serialize(order = 3)
+    public final int maxTextureSize;
     @Serialize(order = 0)
-    public List<Long> animatedSprites;
-
+    public PairMap<DashSpriteAnimation, Long> animatedSprites; //sprite
     @Serialize(order = 1)
     @SerializeNullable()
     @SerializeNullable(path = {1})
     @SerializeNullable(path = {0})
     public PairMap<Long, Long> sprites;
-
-    @Serialize(order = 2)
-    public final Long id;
-
-    @Serialize(order = 3)
-    public final int maxTextureSize;
-
     @Serialize(order = 4)
     public boolean bilinear;
     @Serialize(order = 5)
@@ -41,7 +37,7 @@ public class DashSpriteAtlasTexture {
     public DashSpriteAtlasTextureData data;
 
 
-    public DashSpriteAtlasTexture(@Deserialize("animatedSprites") List<Long> animatedSprites,
+    public DashSpriteAtlasTexture(@Deserialize("animatedSprites") PairMap<DashSpriteAnimation, Long> animatedSprites,
                                   @Deserialize("sprites") PairMap<Long, Long> sprites,
                                   @Deserialize("id") Long id,
                                   @Deserialize("maxTextureSize") int maxTextureSize,
@@ -62,10 +58,16 @@ public class DashSpriteAtlasTexture {
     public DashSpriteAtlasTexture(SpriteAtlasTexture spriteAtlasTexture, DashSpriteAtlasTextureData data, DashRegistry registry) {
         SpriteAtlasTextureAccessor spriteTextureAccess = ((SpriteAtlasTextureAccessor) spriteAtlasTexture);
         this.data = data;
-        animatedSprites = new ArrayList<>();
+        animatedSprites = new PairMap<>();
         sprites = new PairMap<>();
-        spriteTextureAccess.getAnimatedSprites().forEach(sprite -> animatedSprites.add(registry.createSpritePointer(sprite)));
-        spriteTextureAccess.getSprites().forEach((identifier, sprite) -> sprites.put(registry.createIdentifierPointer(identifier), registry.createSpritePointer(sprite)));
+        spriteTextureAccess.getSprites().forEach((identifier, sprite) -> {
+            final long spritePointer = registry.createSpritePointer(sprite);
+            sprites.put(registry.createIdentifierPointer(identifier), spritePointer);
+            final Sprite.Animation animation = (Sprite.Animation) sprite.getAnimation();
+            if (animation != null) {
+                animatedSprites.put(new DashSpriteAnimation(animation, registry), spritePointer);
+            }
+        });
         id = registry.createIdentifierPointer(spriteAtlasTexture.getId());
         maxTextureSize = spriteTextureAccess.getMaxTextureSize();
         bilinear = ((AbstractTextureAccessor) spriteAtlasTexture).getBilinear();
@@ -81,8 +83,8 @@ public class DashSpriteAtlasTexture {
         final Map<Identifier, Sprite> out = new HashMap<>(sprites.size());
         sprites.forEach((dashIdentifier, spritePointer) -> out.put(registry.getIdentifier(dashIdentifier), loadSprite(spritePointer, registry, spriteAtlasTexture)));
         final Set<Identifier> outLoad = new HashSet<>();
-        final List<Sprite> outAnimatedSprites = new ArrayList<>();
-        animatedSprites.forEach(spritePointer -> outAnimatedSprites.add(loadSprite(spritePointer, registry, spriteAtlasTexture)));
+        final List<Sprite.Animation> outAnimatedSprites = new ArrayList<>();
+        animatedSprites.forEach((animation, l) -> outAnimatedSprites.add(animation.toUndash(registry.getSprite(l), registry)));
         spriteAtlasTextureAccessor.setAnimatedSprites(outAnimatedSprites);
         spriteAtlasTextureAccessor.setSpritesToLoad(outLoad);
         spriteAtlasTextureAccessor.setSprites(out);

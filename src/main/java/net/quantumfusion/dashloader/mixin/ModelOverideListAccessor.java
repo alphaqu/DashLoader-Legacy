@@ -1,32 +1,26 @@
 package net.quantumfusion.dashloader.mixin;
 
-import net.minecraft.client.render.model.BakedModel;
-import net.minecraft.client.render.model.json.ModelOverride;
 import net.minecraft.client.render.model.json.ModelOverrideList;
+import net.minecraft.util.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
-
-import java.util.List;
 
 @Mixin(ModelOverrideList.class)
 public interface ModelOverideListAccessor {
 
 
-    @Accessor("overrides")
-    List<ModelOverride> getOverrides();
+    @Accessor
+    ModelOverrideList.BakedOverride[] getOverrides();
 
-    @Accessor("overrides")
-    void setOverrides(List<ModelOverride> overrides);
+    @Accessor
+    @Mutable
+    void setOverrides(ModelOverrideList.BakedOverride[] overrides);
 
-    @Accessor("models")
-    List<BakedModel> getModels();
+    @Accessor
+    Identifier[] getConditionTypes();
 
-    @Accessor("models")
-    void setModels(List<BakedModel> models);
-
-    @Invoker("<init>")
-    static ModelOverrideList newModelOverrideList() {
-        throw new AssertionError();
-    }
+    @Accessor
+    @Mutable
+    void setConditionTypes(Identifier[] conditionTypes);
 }

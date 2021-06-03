@@ -18,7 +18,7 @@ public class ThreadHelper {
     }
 
     public static <V, D extends Dashable> Map<Long, V> execParallel(Map<Long, D> dashables, DashRegistry registry) {
-        final Map<Long, V> answerMap = new HashMap<>(dashables.size());
+        final Map<Long, V> answerMap = new HashMap<>((int) Math.ceil(dashables.size() / 0.75));
         final Collection<Map.Entry<Long, V>> invoke = DashLoader.THREADPOOL.invoke(new UndashTask<>(new ArrayList<>(dashables.entrySet()), 100, registry));
         invoke.forEach((answer) -> answerMap.put(answer.getKey(), answer.getValue()));
         return answerMap;
@@ -34,13 +34,13 @@ public class ThreadHelper {
 
     public static void sleepUntilTrue(Supplier<Boolean> supplier) {
         while (!supplier.get()) {
-            sleep(100);
+            sleep(10);
         }
     }
 
     public static void sleepUntilFalse(Supplier<Boolean> supplier) {
         while (supplier.get()) {
-            sleep(100);
+            sleep(10);
         }
     }
 

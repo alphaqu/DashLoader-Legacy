@@ -23,15 +23,16 @@ public class UndashTask<K, D extends Dashable> extends RecursiveTask<Collection<
         this.registry = registry;
     }
 
-    public Pair<List<Map.Entry<Long, D>>, List<Map.Entry<Long, D>>> split(List<Map.Entry<Long, D>> list, int size) {
-        List<Map.Entry<Long, D>> first = new ArrayList<>();
-        List<Map.Entry<Long, D>> second = new ArrayList<>();
+    public UndashTask<K, D>[] split(List<Map.Entry<Long, D>> list, int size) {
+        final int half = (int) Math.ceil(size / 2f);
+        List<Map.Entry<Long, D>> first = new ArrayList<>(half);
+        List<Map.Entry<Long, D>> second = new ArrayList<>(half);
         final int i1 = size / 2;
         for (int i = 0; i < i1; i++)
             first.add(list.get(i));
         for (int i = i1; i < size; i++)
             second.add(list.get(i));
-        return Pair.of(first, second);
+        return new UndashTask[]{new UndashTask<>(first, threshold, registry), new UndashTask<>(second, threshold, registry)};
     }
 
     @Override
@@ -40,11 +41,11 @@ public class UndashTask<K, D extends Dashable> extends RecursiveTask<Collection<
         if (size < threshold) {
             return computeDirectly();
         } else {
-            final Pair<List<Map.Entry<Long, D>>, List<Map.Entry<Long, D>>> subtask = split(tasks, size);
-            final UndashTask<K, D> subTask1 = new UndashTask<>(subtask.getKey(), threshold, registry);
-            final UndashTask<K, D> subTask2 = new UndashTask<>(subtask.getValue(), threshold, registry);
-            invokeAll(subTask1, subTask2);
-            return combine(subTask1.join(), subTask2.join());
+            final UndashTask<K, D>[] split = split(tasks, size);
+            final UndashTask<K, D> first = split[0];
+            final UndashTask<K, D> second = split[1];
+            invokeAll(first, second);
+            return combine(first.join(), second.join());
         }
     }
 
@@ -54,7 +55,7 @@ public class UndashTask<K, D extends Dashable> extends RecursiveTask<Collection<
     }
 
     protected final Collection<Map.Entry<Long, K>> computeDirectly() {
-        final Collection<Map.Entry<Long, K>> count = new ArrayList<>();
+        final Collection<Map.Entry<Long, K>> count = new ArrayList<>(tasks.size());
         tasks.forEach(dashable -> count.add(Pair.of(dashable.getKey(), dashable.getValue().toUndash(registry))));
         return count;
     }

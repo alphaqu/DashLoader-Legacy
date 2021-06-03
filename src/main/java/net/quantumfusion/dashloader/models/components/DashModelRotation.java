@@ -9,7 +9,7 @@ import net.minecraft.util.math.Direction;
 public class DashModelRotation {
 
     @Serialize(order = 0)
-    public final DashVector3f origin;
+    public final DashVec3f origin;
     @Serialize(order = 1)
     public final String axis;
     @Serialize(order = 2)
@@ -17,7 +17,7 @@ public class DashModelRotation {
     @Serialize(order = 3)
     public final boolean rescale;
 
-    public DashModelRotation(@Deserialize("origin") DashVector3f origin,
+    public DashModelRotation(@Deserialize("origin") DashVec3f origin,
                              @Deserialize("axis") String axis,
                              @Deserialize("angle") float angle,
                              @Deserialize("rescale") boolean rescale
@@ -29,7 +29,7 @@ public class DashModelRotation {
     }
 
     public DashModelRotation(ModelRotation modelRotation) {
-        origin = new DashVector3f(modelRotation.origin);
+        origin = new DashVec3f(modelRotation.origin);
         axis = modelRotation.axis.toString();
         angle = modelRotation.angle;
         rescale = modelRotation.rescale;

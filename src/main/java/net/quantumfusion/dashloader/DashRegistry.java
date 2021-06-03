@@ -34,7 +34,6 @@ import net.quantumfusion.dashloader.util.UndashTask;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -198,7 +197,7 @@ public class DashRegistry {
         return hash;
     }
 
-    public final <K> Long createModelPointer(final BakedModel bakedModel, @Nullable K var) {
+    public final <K> Long createModelPointer(final BakedModel bakedModel) {
         if (bakedModel == null) {
             return null;
         }
@@ -206,7 +205,7 @@ public class DashRegistry {
         if (models.get(hash) == null) {
             Factory<BakedModel, DashModel> model = loader.getApi().modelMappings.get(bakedModel.getClass());
             if (model != null) {
-                models.put(hash, model.toDash(bakedModel, this, var));
+                models.put(hash, model.toDash(bakedModel, this, DashLoader.getInstance().multipartData.get(bakedModel)));
             } else {
                 apiFailed.putIfAbsent(bakedModel.getClass(), FactoryType.MODEL);
             }
@@ -390,7 +389,7 @@ public class DashRegistry {
         sprites = null;
         fonts = null;
 
-        modelsOut = new ConcurrentHashMap<>(models.size());
+        modelsOut = Collections.synchronizedMap(new HashMap<>((int) Math.ceil(modelsToDeserialize.size() / 0.75)));
         final short[] currentStage = {0};
         modelsToDeserialize.forEach(modelCategory -> {
             log(logger, "Loading " + modelCategory.size() + " Models: " + "[" + currentStage[0] + "]");

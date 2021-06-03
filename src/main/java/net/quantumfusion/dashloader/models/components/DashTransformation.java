@@ -6,24 +6,24 @@ import net.minecraft.client.render.model.json.Transformation;
 
 public class DashTransformation {
     @Serialize(order = 0)
-    public final DashVector3f rotation;
+    public final DashVec3f rotation;
     @Serialize(order = 1)
-    public final DashVector3f translation;
+    public final DashVec3f translation;
     @Serialize(order = 2)
-    public final DashVector3f scale;
+    public final DashVec3f scale;
 
-    public DashTransformation(@Deserialize("rotation") DashVector3f rotation,
-                              @Deserialize("translation") DashVector3f translation,
-                              @Deserialize("scale") DashVector3f scale) {
+    public DashTransformation(@Deserialize("rotation") DashVec3f rotation,
+                              @Deserialize("translation") DashVec3f translation,
+                              @Deserialize("scale") DashVec3f scale) {
         this.rotation = rotation;
         this.translation = translation;
         this.scale = scale;
     }
 
     public DashTransformation(Transformation transformation) {
-        rotation = new DashVector3f(transformation.rotation);
-        translation = new DashVector3f(transformation.translation);
-        scale = new DashVector3f(transformation.scale);
+        rotation = new DashVec3f(transformation.rotation);
+        translation = new DashVec3f(transformation.translation);
+        scale = new DashVec3f(transformation.scale);
     }
 
     public Transformation toUndash() {

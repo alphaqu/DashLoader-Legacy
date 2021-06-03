@@ -3,11 +3,10 @@ package net.quantumfusion.dashloader.models.components;
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import net.minecraft.client.render.model.BakedModel;
-import net.minecraft.client.render.model.WeightedBakedModel;
-import net.quantumfusion.dashloader.DashLoader;
+import net.minecraft.util.collection.Weight;
+import net.minecraft.util.collection.Weighted;
 import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.mixin.WeightedBakedModelEntryAccessor;
-import net.quantumfusion.dashloader.mixin.WeightedPickerEntryAccessor;
 
 public class DashWeightedModelEntry {
     @Serialize(order = 0)
@@ -22,14 +21,13 @@ public class DashWeightedModelEntry {
         this.weight = weight;
     }
 
-    public DashWeightedModelEntry(WeightedBakedModel.Entry entry, DashRegistry registry) {
-        final BakedModel model = ((WeightedBakedModelEntryAccessor) entry).getModel();
-        this.model = registry.createModelPointer(model, DashLoader.getInstance().multipartData.get(model));
-        weight = ((WeightedPickerEntryAccessor) entry).getWeight();
+    public DashWeightedModelEntry(Weighted.Present<BakedModel> entry, DashRegistry registry) {
+        this.model = registry.createModelPointer(entry.getData());
+        weight = entry.getWeight().getValue();
     }
 
-    public WeightedBakedModel.Entry toUndash(DashRegistry registry) {
-        return new WeightedBakedModel.Entry(registry.getModel(model), weight);
+    public Weighted.Present<BakedModel> toUndash(DashRegistry registry) {
+        return WeightedBakedModelEntryAccessor.init(registry.getModel(model), Weight.of(weight));
     }
 
 

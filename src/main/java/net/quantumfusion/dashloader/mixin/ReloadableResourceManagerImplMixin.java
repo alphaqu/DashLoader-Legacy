@@ -2,7 +2,7 @@ package net.quantumfusion.dashloader.mixin;
 
 import net.minecraft.resource.ReloadableResourceManagerImpl;
 import net.minecraft.resource.ResourcePack;
-import net.minecraft.resource.ResourceReloadMonitor;
+import net.minecraft.resource.ResourceReload;
 import net.minecraft.util.Unit;
 import net.quantumfusion.dashloader.DashLoader;
 import net.quantumfusion.dashloader.util.DashCacheState;
@@ -18,10 +18,10 @@ import java.util.concurrent.Executor;
 @Mixin(ReloadableResourceManagerImpl.class)
 public class ReloadableResourceManagerImplMixin {
 
-    @Inject(method = "beginMonitoredReload(Ljava/util/concurrent/Executor;Ljava/util/concurrent/Executor;Ljava/util/concurrent/CompletableFuture;Ljava/util/List;)Lnet/minecraft/resource/ResourceReloadMonitor;",
+    @Inject(method = "reload(Ljava/util/concurrent/Executor;Ljava/util/concurrent/Executor;Ljava/util/concurrent/CompletableFuture;Ljava/util/List;)Lnet/minecraft/resource/ResourceReload;",
             at = @At(value = "HEAD"),
             cancellable = true)
-    private void waitForDash(Executor prepareExecutor, Executor applyExecutor, CompletableFuture<Unit> initialStage, List<ResourcePack> packs, CallbackInfoReturnable<ResourceReloadMonitor> cir) {
+    private void waitForDash(Executor prepareExecutor, Executor applyExecutor, CompletableFuture<Unit> initialStage, List<ResourcePack> packs, CallbackInfoReturnable<ResourceReload> cir) {
         while (DashLoader.getInstance().state == DashCacheState.LOADING) {
             try {
                 System.out.println("Waiting for dash");

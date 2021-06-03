@@ -8,6 +8,7 @@ import net.minecraft.client.render.model.json.ModelTransformation;
 import net.minecraft.client.texture.Sprite;
 import org.apache.commons.lang3.tuple.Pair;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 import java.util.BitSet;
@@ -26,26 +27,34 @@ public interface MultipartBakedModelAccessor {
 
 
     @Accessor
+    @Mutable
     void setStateCache(Map<BlockState, BitSet> stateBitSetMap);
 
     @Accessor
+    @Mutable
     void setComponents(List<Pair<Predicate<BlockState>, BakedModel>> components);
 
     @Accessor
+    @Mutable
     void setAmbientOcclusion(boolean ambientOcclusion);
 
     @Accessor
+    @Mutable
     void setDepthGui(boolean depthGui);
 
     @Accessor
+    @Mutable
     void setSideLit(boolean sideLit);
 
     @Accessor
+    @Mutable
     void setSprite(Sprite sprite);
 
     @Accessor
+    @Mutable
     void setTransformations(ModelTransformation transformations);
 
     @Accessor
+    @Mutable
     void setItemPropertyOverrides(ModelOverrideList itemPropertyOverrides);
 }

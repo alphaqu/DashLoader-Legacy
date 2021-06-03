@@ -18,7 +18,7 @@ public class DashAnimationFrameResourceMetadata {
 
     public DashAnimationFrameResourceMetadata(AnimationFrameResourceMetadata animationFrameResourceMetadata) {
         index = animationFrameResourceMetadata.getIndex();
-        time = animationFrameResourceMetadata.getTime();
+        time = animationFrameResourceMetadata.getTime(-1);
     }
 
     public AnimationFrameResourceMetadata toUndash() {

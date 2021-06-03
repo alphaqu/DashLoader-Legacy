@@ -2,8 +2,10 @@ package net.quantumfusion.dashloader.mixin;
 
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.texture.SpriteAtlasTexture;
+import net.minecraft.client.texture.TextureTickListener;
 import net.minecraft.util.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 import java.util.List;
@@ -17,30 +19,35 @@ public interface SpriteAtlasTextureAccessor {
     Map<Identifier, Sprite> getSprites();
 
     @Accessor
+    @Mutable
     void setSprites(Map<Identifier, Sprite> sprites);
 
     @Accessor
-    List<Sprite> getAnimatedSprites();
+    List<TextureTickListener> getAnimatedSprites();
 
     @Accessor
-    void setAnimatedSprites(List<Sprite> animatedSprites);
+    @Mutable
+    void setAnimatedSprites(List<Sprite.Animation> animatedSprites);
 
     @Accessor
     Set<Identifier> getSpritesToLoad();
 
     @Accessor
+    @Mutable
     void setSpritesToLoad(Set<Identifier> spritesToLoad);
 
     @Accessor
     Identifier getId();
 
     @Accessor
+    @Mutable
     void setId(Identifier id);
 
     @Accessor
     int getMaxTextureSize();
 
     @Accessor
+    @Mutable
     void setMaxTextureSize(int maxTextureSize);
 
 }

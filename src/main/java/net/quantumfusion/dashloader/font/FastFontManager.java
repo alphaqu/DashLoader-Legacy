@@ -9,8 +9,8 @@ import com.google.gson.JsonObject;
 import net.minecraft.client.font.*;
 import net.minecraft.resource.Resource;
 import net.minecraft.resource.ResourceManager;
-import net.minecraft.resource.ResourceReloadListener;
-import net.minecraft.resource.SinglePreparationResourceReloadListener;
+import net.minecraft.resource.ResourceReloader;
+import net.minecraft.resource.SinglePreparationResourceReloader;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
 import net.minecraft.util.profiler.Profiler;
@@ -32,7 +32,7 @@ public class FastFontManager {
     private final FontManagerAccessor fontManager;
     private static final Logger LOGGER = LogManager.getLogger();
 
-    public final ResourceReloadListener resourceReloadListener = new SinglePreparationResourceReloadListener<Map<Identifier, List<Font>>>() {
+    public final ResourceReloader resourceReloadListener = new SinglePreparationResourceReloader<Map<Identifier, List<Font>>>() {
         protected Map<Identifier, List<Font>> prepare(ResourceManager resourceManager, Profiler profiler) {
             final Map<Identifier, List<Font>> fontsOut = DashLoader.getInstance().getFontsOut();
             if (fontsOut != null && DashLoader.getInstance().state == DashCacheState.LOADED) {

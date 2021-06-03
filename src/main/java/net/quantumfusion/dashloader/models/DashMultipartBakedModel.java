@@ -12,7 +12,6 @@ import net.minecraft.client.render.model.MultipartBakedModel;
 import net.minecraft.client.render.model.json.MultipartModelSelector;
 import net.minecraft.state.StateManager;
 import net.minecraft.util.Util;
-import net.quantumfusion.dashloader.DashLoader;
 import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.mixin.MultipartBakedModelAccessor;
 import net.quantumfusion.dashloader.util.PairMap;
@@ -57,7 +56,7 @@ public class DashMultipartBakedModel implements DashModel {
         this.components = new PairMap<>(size);
         for (int i = 0; i < size; i++) {
             final BakedModel right = accessComponents.get(i).getRight();
-            components.put(registry.createPredicatePointer(selectors.getKey().get(i), selectors.getValue()), registry.createModelPointer(right, DashLoader.getInstance().multipartData.get(right)));
+            components.put(registry.createPredicatePointer(selectors.getKey().get(i), selectors.getValue()), registry.createModelPointer(right));
         }
         final Map<BlockState, BitSet> stateCache = access.getStateCache();
         this.stateCache = new PairMap<>(stateCache.size());

@@ -19,17 +19,14 @@ import net.quantumfusion.dashloader.api.predicates.PredicateFactory;
 import net.quantumfusion.dashloader.api.predicates.SimplePredicateFactory;
 import net.quantumfusion.dashloader.api.properties.*;
 import net.quantumfusion.dashloader.models.predicates.DashStaticPredicate;
+import net.quantumfusion.dashloader.util.ClassHelper;
 import net.quantumfusion.dashloader.util.ThreadHelper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class DashLoaderAPI {
@@ -47,15 +44,11 @@ public class DashLoaderAPI {
     public List<Class<?>> propertyValueTypes;
 
     public DashLoaderAPI() {
-        modelMappings = new ConcurrentHashMap<>();
-        propertyMappings = new ConcurrentHashMap<>();
-        predicateMappings = new ConcurrentHashMap<>();
-        fontMappings = new ConcurrentHashMap<>();
-        modelTypes = new ArrayList<>();
+        modelMappings = Collections.synchronizedMap(new HashMap<>());
+        propertyMappings = Collections.synchronizedMap(new HashMap<>());
+        predicateMappings = Collections.synchronizedMap(new HashMap<>());
+        fontMappings = Collections.synchronizedMap(new HashMap<>());
         predicateTypes = new ArrayList<>();
-        fontTypes = new ArrayList<>();
-        propertyTypes = new ArrayList<>();
-        propertyValueTypes = new ArrayList<>();
     }
 
     private void addModelType(ModelFactory factory) {
@@ -79,12 +72,7 @@ public class DashLoaderAPI {
         propertyMappings.clear();
         fontMappings.clear();
         predicateMappings.clear();
-
-        modelTypes.clear();
         predicateTypes.clear();
-        fontTypes.clear();
-        propertyTypes.clear();
-        propertyValueTypes.clear();
     }
 
     private void initNativeAPI() {
@@ -112,14 +100,18 @@ public class DashLoaderAPI {
 
     private void initTypes() {
         ThreadHelper.exec(
-                () -> modelTypes.addAll(modelMappings.values().stream().map(Factory::getDashType).sorted(Comparator.comparing(Class::getSimpleName)).collect(Collectors.toList())),
-                () -> predicateTypes.addAll(predicateMappings.values().stream().map(Factory::getDashType).sorted(Comparator.comparing(Class::getSimpleName)).collect(Collectors.toList())),
-                () -> fontTypes.addAll(fontMappings.values().stream().map(Factory::getDashType).sorted(Comparator.comparing(Class::getSimpleName)).collect(Collectors.toList())),
+                () -> modelTypes = getDashTypes(modelMappings),
+                () -> predicateTypes.addAll(getDashTypes(predicateMappings)),
+                () -> fontTypes = getDashTypes(fontMappings),
                 () -> {
-                    propertyTypes.addAll(propertyMappings.values().stream().map(Factory::getDashType).sorted(Comparator.comparing(Class::getSimpleName)).collect(Collectors.toList()));
-                    propertyValueTypes.addAll(propertyMappings.values().stream().map(PropertyFactory::getDashValueType).sorted(Comparator.comparing(Class::getSimpleName)).collect(Collectors.toList()));
+                    propertyTypes = getDashTypes(propertyMappings);
+                    propertyValueTypes = propertyMappings.values().stream().map(PropertyFactory::getDashValueType).sorted(Comparator.comparing(Class::getSimpleName)).collect(Collectors.toList());
                 }
         );
+    }
+
+    private <T, D> List<Class<?>> getDashTypes(Map<Class<? extends T>, ? extends Factory<T, D>> factory) {
+        return factory.values().stream().map(Factory::getDashType).sorted(Comparator.comparing(Class::getSimpleName)).collect(Collectors.toList());
     }
 
     public void initAPI() {
@@ -134,11 +126,13 @@ public class DashLoaderAPI {
         LOGGER.info("[" + Duration.between(start, Instant.now()).toMillis() + "ms] Initialized api.");
     }
 
+
     private void getValue(CustomValue values, ModMetadata modMetadata) {
         if (values != null) {
-            try {
-                for (CustomValue value : values.getAsArray()) {
-                    final Factory<?, ?> factory = (Factory<?, ?>) Unsafe.allocateInstance(Class.forName(value.getAsString()));
+            for (CustomValue value : values.getAsArray()) {
+                final Class<?> cls = ClassHelper.forName(value.getAsString());
+                if (cls != null) {
+                    final Factory<?, ?> factory = (Factory<?, ?>) Unsafe.allocateInstance(cls);
                     switch (factory.getFactoryType()) {
                         case MODEL:
                             final ModelFactory modelProxy = (ModelFactory) factory;
@@ -164,12 +158,11 @@ public class DashLoaderAPI {
                             continue;
                     }
                     LOGGER.info("Added custom " + factory.getFactoryType().name + ": " + factory.getType().getSimpleName());
+                } else {
+                    LOGGER.warn("Factory not found in mod: " + modMetadata.getName() + " with value: \"" + values.getAsString() + "\"");
                 }
-            } catch (ClassNotFoundException e) {
-                LOGGER.warn("Factory not found in mod: " + modMetadata.getName() + " with value: \"" + values.getAsString() + "\"");
             }
         }
     }
-
 
 }

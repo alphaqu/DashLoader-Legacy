@@ -15,7 +15,6 @@ import net.quantumfusion.dashloader.font.DashFontManagerData;
 import net.quantumfusion.dashloader.misc.DashParticleData;
 import net.quantumfusion.dashloader.misc.DashSplashTextData;
 import net.quantumfusion.dashloader.models.DashModelData;
-import net.quantumfusion.dashloader.util.ThreadHelper;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
@@ -82,22 +81,21 @@ public class MappingData {
 
     public List<SpriteAtlasTexture> toUndash(DashRegistry registry) {
         List<SpriteAtlasTexture> atlasesToRegister = new ArrayList<>();
-        ThreadHelper.exec(
-                () -> {
-                    final Pair<SpriteAtlasManager, List<SpriteAtlasTexture>> spriteData = spriteAtlasData.toUndash(registry);
-                    this.atlasManagerOut = spriteData.getKey();
-                    atlasesToRegister.addAll(spriteData.getValue());
-                },
-                () -> {
-                    Pair<Map<Identifier, List<Sprite>>, SpriteAtlasTexture> outParticle = particleData.toUndash(registry);
-                    particlesOut = outParticle.getLeft();
-                    atlasesToRegister.add(outParticle.getValue());
-                },
-                () -> splashTextOut = splashTextData.toUndash(),
-                () -> stateLookupOut = blockStateData.toUndash(registry),
-                () -> modelsOut = modelData.toUndash(registry),
-                () -> fontsOut = fontManagerData.toUndash(registry)
-        );
+
+        final Pair<SpriteAtlasManager, List<SpriteAtlasTexture>> spriteData = spriteAtlasData.toUndash(registry);
+        this.atlasManagerOut = spriteData.getKey();
+        atlasesToRegister.addAll(spriteData.getValue());
+
+
+        Pair<Map<Identifier, List<Sprite>>, SpriteAtlasTexture> outParticle = particleData.toUndash(registry);
+        particlesOut = outParticle.getLeft();
+        atlasesToRegister.add(outParticle.getValue());
+
+        splashTextOut = splashTextData.toUndash();
+        stateLookupOut = blockStateData.toUndash(registry);
+        modelsOut = modelData.toUndash(registry);
+        fontsOut = fontManagerData.toUndash(registry);
+
         modelData = null;
         spriteAtlasData = null;
         blockStateData = null;

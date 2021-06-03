@@ -14,9 +14,9 @@ import java.util.Map;
 
 public class DashModelElement {
     @Serialize(order = 0)
-    public final DashVector3f from;
+    public final DashVec3f from;
     @Serialize(order = 1)
-    public final DashVector3f to;
+    public final DashVec3f to;
 
     @Serialize(order = 2)
     @SerializeNullable()
@@ -32,8 +32,8 @@ public class DashModelElement {
     @Serialize(order = 4)
     public final boolean shade;
 
-    public DashModelElement(@Deserialize("from") DashVector3f from,
-                            @Deserialize("to") DashVector3f to,
+    public DashModelElement(@Deserialize("from") DashVec3f from,
+                            @Deserialize("to") DashVec3f to,
                             @Deserialize("faces") Map<String, DashModelElementFace> faces,
                             @Deserialize("rotation") @Nullable DashModelRotation rotation,
                             @Deserialize("shade") boolean shade) {
@@ -45,8 +45,8 @@ public class DashModelElement {
     }
 
     public DashModelElement(ModelElement modelElement) {
-        from = new DashVector3f(modelElement.from);
-        to = new DashVector3f(modelElement.to);
+        from = new DashVec3f(modelElement.from);
+        to = new DashVec3f(modelElement.to);
         HashMap<String, DashModelElementFace> face = new HashMap<>();
         modelElement.faces.forEach((direction, modelElementFace) -> face.put(direction.name(), new DashModelElementFace(modelElementFace)));
         faces = face;

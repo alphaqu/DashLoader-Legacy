@@ -4,13 +4,11 @@ import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import io.activej.serializer.annotations.SerializeNullable;
 import net.minecraft.client.render.model.json.ModelOverride;
-import net.minecraft.util.Identifier;
 import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.mixin.ModelOverrideAccessor;
-import net.quantumfusion.dashloader.util.PairMap;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DashModelOverride {
 
@@ -21,24 +19,24 @@ public class DashModelOverride {
     @SerializeNullable()
     @SerializeNullable(path = {0})
     @SerializeNullable(path = {1})
-    public final PairMap<Long, Float> predicateToThresholds;
+    public final List<DashModelOverrideCondition> conditions;
 
     public DashModelOverride(@Deserialize("modelId") Long modelId,
-                             @Deserialize("predicateToThresholds") PairMap<Long, Float> predicateToThresholds
+                             @Deserialize("conditions") List<DashModelOverrideCondition> conditions
     ) {
         this.modelId = modelId;
-        this.predicateToThresholds = predicateToThresholds;
+        this.conditions = conditions;
     }
 
     public DashModelOverride(ModelOverride modelOverride, DashRegistry registry) {
         modelId = registry.createIdentifierPointer(modelOverride.getModelId());
-        predicateToThresholds = new PairMap<>();
-        ((ModelOverrideAccessor) modelOverride).getPredicateToThresholdsD().forEach((identifier, aFloat) -> predicateToThresholds.put(registry.createIdentifierPointer(identifier), aFloat));
+        conditions = new ArrayList<>();
+        ((ModelOverrideAccessor) modelOverride).getConditions().forEach(condition -> conditions.add(new DashModelOverrideCondition(condition, registry)));
     }
 
     public ModelOverride toUndash(DashRegistry registry) {
-        Map<Identifier, Float> out = new HashMap<>();
-        predicateToThresholds.forEach((s, aFloat) -> out.put(registry.getIdentifier(s), aFloat));
+        List<ModelOverride.Condition> out = new ArrayList<>();
+        conditions.forEach(dashModelOverrideCondition -> out.add(dashModelOverrideCondition.toUndash(registry)));
         return new ModelOverride(registry.getIdentifier(modelId), out);
     }
 }

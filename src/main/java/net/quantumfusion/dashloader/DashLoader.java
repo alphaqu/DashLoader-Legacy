@@ -1,5 +1,6 @@
 package net.quantumfusion.dashloader;
 
+import com.mojang.blaze3d.platform.TextureUtil;
 import io.activej.serializer.BinarySerializer;
 import io.activej.serializer.CompatibilityLevel;
 import io.activej.serializer.SerializerBuilder;
@@ -18,7 +19,6 @@ import net.minecraft.client.render.model.json.MultipartModelSelector;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.texture.TextureManager;
-import net.minecraft.client.texture.TextureUtil;
 import net.minecraft.state.StateManager;
 import net.minecraft.util.Identifier;
 import net.quantumfusion.dashloader.api.DashLoaderAPI;
@@ -310,20 +310,23 @@ public class DashLoader {
 
     public void applyDashCache(TextureManager textureManager) {
         //register textures
+        System.out.println(atlasesToRegister.size());
         atlasesToRegister.forEach((spriteAtlasTexture) -> {
             //atlas registration
             final DashSpriteAtlasTextureData data = atlasData.get(spriteAtlasTexture);
             final Identifier id = spriteAtlasTexture.getId();
-            final int glId = TextureUtil.generateId();
+            final int glId = TextureUtil.generateTextureId();
             final int width = data.width;
             final int maxLevel = data.maxLevel;
             final int height = data.height;
-            TextureUtil.allocate(glId, maxLevel, width, height);
+            TextureUtil.prepareImage(glId, data.maxLevel, data.width, data.height);
             ((AbstractTextureAccessor) spriteAtlasTexture).setGlId(glId);
             //ding dong lwjgl here are their styles
             ((SpriteAtlasTextureAccessor) spriteAtlasTexture).getSprites().forEach((identifier1, sprite) -> sprite.upload());
             //helu textures here are the atlases
             textureManager.registerTexture(id, spriteAtlasTexture);
+            textureManager.bindTexture(id);
+            spriteAtlasTexture.setFilter(false, maxLevel > 0);
             LOGGER.info("Allocated: {}x{}x{} {}-atlas", width, height, maxLevel, id);
         });
     }
