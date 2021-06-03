@@ -6,7 +6,7 @@ import net.gudenau.lib.unsafe.Unsafe;
 import net.minecraft.client.particle.ParticleManager;
 import net.minecraft.client.texture.Sprite;
 import net.quantumfusion.dashloader.DashRegistry;
-import net.quantumfusion.dashloader.mixin.ParticleManagerSimpleSpriteProviderAccessor;
+import net.quantumfusion.dashloader.mixin.accessor.ParticleManagerSimpleSpriteProviderAccessor;
 
 import java.util.ArrayList;
 import java.util.List;

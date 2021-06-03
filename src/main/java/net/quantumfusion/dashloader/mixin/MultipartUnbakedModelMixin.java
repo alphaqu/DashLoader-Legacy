@@ -10,6 +10,7 @@ import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.state.StateManager;
 import net.minecraft.util.Identifier;
 import net.quantumfusion.dashloader.DashLoader;
+import net.quantumfusion.dashloader.mixin.accessor.MultipartModelComponentAccessor;
 import org.apache.commons.lang3.tuple.Pair;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;

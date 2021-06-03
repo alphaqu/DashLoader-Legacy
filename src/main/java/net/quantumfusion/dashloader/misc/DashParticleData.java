@@ -9,8 +9,8 @@ import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.util.Identifier;
 import net.quantumfusion.dashloader.DashLoader;
 import net.quantumfusion.dashloader.DashRegistry;
-import net.quantumfusion.dashloader.atlas.DashSpriteAtlasTexture;
-import net.quantumfusion.dashloader.mixin.ParticleManagerSimpleSpriteProviderAccessor;
+import net.quantumfusion.dashloader.image.DashSpriteAtlasTexture;
+import net.quantumfusion.dashloader.mixin.accessor.ParticleManagerSimpleSpriteProviderAccessor;
 import net.quantumfusion.dashloader.util.PairMap;
 import org.apache.commons.lang3.tuple.Pair;
 

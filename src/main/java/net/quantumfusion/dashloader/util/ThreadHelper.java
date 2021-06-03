@@ -2,6 +2,7 @@ package net.quantumfusion.dashloader.util;
 
 import net.quantumfusion.dashloader.DashLoader;
 import net.quantumfusion.dashloader.DashRegistry;
+import net.quantumfusion.dashloader.data.Dashable;
 
 import java.util.*;
 import java.util.concurrent.Executors;

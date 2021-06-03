@@ -9,12 +9,12 @@ import net.minecraft.client.render.model.SpriteAtlasManager;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.util.Identifier;
-import net.quantumfusion.dashloader.atlas.DashSpriteAtlasData;
-import net.quantumfusion.dashloader.blockstates.DashBlockStateData;
+import net.quantumfusion.dashloader.blockstate.DashBlockStateData;
 import net.quantumfusion.dashloader.font.DashFontManagerData;
+import net.quantumfusion.dashloader.image.DashSpriteAtlasData;
 import net.quantumfusion.dashloader.misc.DashParticleData;
 import net.quantumfusion.dashloader.misc.DashSplashTextData;
-import net.quantumfusion.dashloader.models.DashModelData;
+import net.quantumfusion.dashloader.model.DashModelData;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;

@@ -1,7 +1,8 @@
 package net.quantumfusion.dashloader.util;
 
 import net.quantumfusion.dashloader.DashRegistry;
-import net.quantumfusion.dashloader.models.DashModel;
+import net.quantumfusion.dashloader.data.Dashable;
+import net.quantumfusion.dashloader.model.DashModel;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
