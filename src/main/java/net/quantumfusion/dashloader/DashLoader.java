@@ -21,6 +21,7 @@ import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.texture.TextureManager;
 import net.minecraft.state.StateManager;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.profiler.Profiler;
 import net.quantumfusion.dashloader.api.DashLoaderAPI;
 import net.quantumfusion.dashloader.blockstate.DashBlockStateData;
 import net.quantumfusion.dashloader.data.registry.*;
@@ -31,6 +32,7 @@ import net.quantumfusion.dashloader.misc.DashMetadata;
 import net.quantumfusion.dashloader.misc.DashParticleData;
 import net.quantumfusion.dashloader.misc.DashSplashTextData;
 import net.quantumfusion.dashloader.mixin.accessor.AbstractTextureAccessor;
+import net.quantumfusion.dashloader.mixin.accessor.SpriteAccessor;
 import net.quantumfusion.dashloader.mixin.accessor.SpriteAtlasTextureAccessor;
 import net.quantumfusion.dashloader.model.DashModelData;
 import net.quantumfusion.dashloader.util.*;
@@ -130,7 +132,7 @@ public class DashLoader {
         }
         state = DashCacheState.LOADING;
         Instant start = Instant.now();
-        Thread dashLoaderThread = new Thread(() -> {
+//        Thread dashLoaderThread = new Thread(() -> {
             initThreadPool();
             api.initAPI();
             initSerializers();
@@ -148,26 +150,20 @@ public class DashLoader {
                 loadDashCache();
             } else {
                 switch (shouldReload) {
-                    case FORMAT_CHANGE:
-                        LOGGER.warn("DashLoader update changed format. Recache requested.");
-                        break;
-                    case MOD_CHANGE:
-                        LOGGER.warn("DashLoader detected mod change. Recache requested.");
-                        break;
-                    case MISSING_FILES:
-                        LOGGER.warn("DashLoader detected missing files. Recache requested.");
-                        break;
+                    case FORMAT_CHANGE -> LOGGER.warn("DashLoader update changed format. Recache requested.");
+                    case MOD_CHANGE -> LOGGER.warn("DashLoader detected mod change. Recache requested.");
+                    case MISSING_FILES -> LOGGER.warn("DashLoader detected missing files. Recache requested.");
                 }
                 destroyCache();
                 createMetadata(currentMetadata);
                 state = DashCacheState.EMPTY;
             }
-            shutdownThreadPool();
-            LOGGER.info("Loaded cache in " + TimeHelper.getDecimalS(start, Instant.now()) + "s");
-        });
-        dashLoaderThread.setContextClassLoader(classLoader);
-        dashLoaderThread.setName("dashloader-supervisor");
-        dashLoaderThread.start();
+        shutdownThreadPool();
+        LOGGER.info("Loaded cache in " + TimeHelper.getDecimalS(start, Instant.now()) + "s");
+//        });
+//        dashLoaderThread.setContextClassLoader(classLoader);
+//        dashLoaderThread.setName("dashloader-supervisor");
+//        dashLoaderThread.start();
     }
 
 
@@ -308,9 +304,9 @@ public class DashLoader {
         }
     }
 
-    public void applyDashCache(TextureManager textureManager) {
+    public void applyDashCache(TextureManager textureManager, Profiler profiler) {
         //register textures
-        System.out.println(atlasesToRegister.size());
+        profiler.push("atlas");
         atlasesToRegister.forEach((spriteAtlasTexture) -> {
             //atlas registration
             final DashSpriteAtlasTextureData data = atlasData.get(spriteAtlasTexture);
@@ -322,13 +318,19 @@ public class DashLoader {
             TextureUtil.prepareImage(glId, data.maxLevel, data.width, data.height);
             ((AbstractTextureAccessor) spriteAtlasTexture).setGlId(glId);
             //ding dong lwjgl here are their styles
-            ((SpriteAtlasTextureAccessor) spriteAtlasTexture).getSprites().forEach((identifier1, sprite) -> sprite.upload());
+            ((SpriteAtlasTextureAccessor) spriteAtlasTexture).getSprites().forEach((identifier1, sprite) -> {
+                final SpriteAccessor access = (SpriteAccessor) sprite;
+                access.setAtlas(spriteAtlasTexture);
+                access.setId(identifier1);
+                sprite.upload();
+            });
             //helu textures here are the atlases
             textureManager.registerTexture(id, spriteAtlasTexture);
-            textureManager.bindTexture(id);
             spriteAtlasTexture.setFilter(false, maxLevel > 0);
             LOGGER.info("Allocated: {}x{}x{} {}-atlas", width, height, maxLevel, id);
         });
+        profiler.swap("baking");
+        profiler.pop();
     }
 
     @NotNull

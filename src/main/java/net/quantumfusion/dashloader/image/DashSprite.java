@@ -23,20 +23,26 @@ public class DashSprite implements Dashable {
     @Serialize(order = 2)
     public final int y;
     @Serialize(order = 3)
-    public final float uMin;
+    public final int width;
     @Serialize(order = 4)
-    public final float uMax;
+    public final int height;
     @Serialize(order = 5)
-    public final float vMin;
+    public final float uMin;
     @Serialize(order = 6)
-    public final float vMax;
+    public final float uMax;
     @Serialize(order = 7)
+    public final float vMin;
+    @Serialize(order = 8)
+    public final float vMax;
+    @Serialize(order = 9)
     public List<Long> images;
 
 
     public DashSprite(@Deserialize("animation") DashSpriteAnimation animation,
                       @Deserialize("x") int x,
                       @Deserialize("y") int y,
+                      @Deserialize("width") int width,
+                      @Deserialize("height") int height,
                       @Deserialize("uMin") float uMin,
                       @Deserialize("uMax") float uMax,
                       @Deserialize("vMin") float vMin,
@@ -47,6 +53,8 @@ public class DashSprite implements Dashable {
         this.images = images;
         this.x = x;
         this.y = y;
+        this.width = width;
+        this.height = height;
         this.uMin = uMin;
         this.uMax = uMax;
         this.vMin = vMin;
@@ -54,16 +62,17 @@ public class DashSprite implements Dashable {
     }
 
     public DashSprite(Sprite sprite, DashRegistry registry) {
-        SpriteAccessor spriteAccess = ((SpriteAccessor) sprite);
         images = new ArrayList<>();
-        Arrays.stream(spriteAccess.getImages()).forEach(nativeImage -> images.add(registry.createImagePointer(nativeImage)));
-        x = spriteAccess.getX();
-        y = spriteAccess.getY();
-        uMin = spriteAccess.getUMin();
-        uMax = spriteAccess.getUMax();
-        vMin = spriteAccess.getVMin();
-        vMax = spriteAccess.getVMax();
-        final Sprite.Animation animation = spriteAccess.getAnimation();
+        Arrays.stream(((SpriteAccessor) sprite).getImages()).forEach(nativeImage -> images.add(registry.createImagePointer(nativeImage)));
+        x = sprite.getX();
+        y = sprite.getY();
+        width = sprite.getWidth();
+        height = sprite.getHeight();
+        uMin = sprite.getMinU();
+        uMax = sprite.getMaxU();
+        vMin = sprite.getMinV();
+        vMax = sprite.getMaxV();
+        final Sprite.Animation animation = (Sprite.Animation) sprite.getAnimation();
         this.animation = animation == null ? null : new DashSpriteAnimation(animation, registry);
     }
 
@@ -75,6 +84,8 @@ public class DashSprite implements Dashable {
         spriteAccessor.setImages(imagesOut.toArray(new NativeImage[0]));
         spriteAccessor.setX(x);
         spriteAccessor.setY(y);
+        spriteAccessor.setWidth(width);
+        spriteAccessor.setHeight(height);
         spriteAccessor.setUMin(uMin);
         spriteAccessor.setUMax(uMax);
         spriteAccessor.setVMin(vMin);

@@ -12,9 +12,7 @@ import net.minecraft.client.texture.TextureManager;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.profiler.Profiler;
-import net.minecraft.util.registry.Registry;
 import net.quantumfusion.dashloader.DashLoader;
-import net.quantumfusion.dashloader.mixin.accessor.BlockModelsAccessor;
 import net.quantumfusion.dashloader.util.DashCacheState;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
@@ -26,9 +24,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import static net.minecraft.client.render.block.BlockModels.getModelId;
 
 @Mixin(BakedModelManager.class)
 public class BakedModelManagerOverride {
@@ -76,7 +71,7 @@ public class BakedModelManagerOverride {
 
     @Inject(method = "apply",
             at = @At(value = "HEAD"), cancellable = true)
-    private void apply(ModelLoader modelLoader, ResourceManager resourceManager, Profiler profiler, CallbackInfo ci) {
+    private void applyStage(ModelLoader modelLoader, ResourceManager resourceManager, Profiler profiler, CallbackInfo ci) {
         profiler.startTick();
         profiler.push("upload");
         DashLoader loader = DashLoader.getInstance();
@@ -87,24 +82,18 @@ public class BakedModelManagerOverride {
             this.models = modelLoader.getBakedModelMap();
             this.stateLookup = modelLoader.getStateLookup();
             loader.addBakedModelAssets(atlasManager, stateLookup, models);
-            this.missingModel = this.models.get(ModelLoader.MISSING_ID);
-            this.blockModelCache.reload();
 
         } else {
             //cache go brr
             DashLoader.LOGGER.info("Starting apply stage.");
-            loader.applyDashCache(textureManager);
+            loader.applyDashCache(textureManager, profiler);
             this.atlasManager = loader.getAtlasManagerOut();
             this.models = loader.getModelsOut();
             this.stateLookup = loader.getStateLookupOut();
-            this.missingModel = this.models.get(ModelLoader.MISSING_ID);
-            Map<BlockState, BakedModel> modelsOut = new ConcurrentHashMap<>();
-            Registry.BLOCK.stream().parallel().forEach(block ->
-                    block.getStateManager().getStates().parallelStream().forEach((blockState) ->
-                            modelsOut.put(blockState, ((BakedModelManager) (Object) this).getModel(getModelId(blockState)))));
-            ((BlockModelsAccessor) blockModelCache).setModels(modelsOut);
         }
+        this.missingModel = this.models.get(ModelLoader.MISSING_ID);
         profiler.swap("cache");
+        this.blockModelCache.reload();
         profiler.pop();
         profiler.endTick();
         ci.cancel();
