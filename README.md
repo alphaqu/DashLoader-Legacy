@@ -4,7 +4,6 @@
  [![GitHub license](https://img.shields.io/github/license/alphaqu/DashLoader.svg?style=for-the-badge&logo=appveyor&logoColor=white)](https://github.com/alphaqu/DashLoader/blob/master/LICENSE)
  [![GitHub release](https://img.shields.io/github/release/alphaqu/DashLoader.svg?style=for-the-badge&logo=appveyor&logoColor=white)](https://github.com/alphaqu/DashLoader/releases/)
  [![Github all releases](https://img.shields.io/github/downloads/alphaqu/DashLoader/total.svg?style=for-the-badge&logo=appveyor&logoColor=white)](https://github.com/alphaqu/DashLoader/releases/)
-![Discord](https://img.shields.io/discord/795568028649127997?label=Discord&style=for-the-badge&logo=appveyor&logoColor=white)
 
 
 
