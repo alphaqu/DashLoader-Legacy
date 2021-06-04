@@ -13,6 +13,4 @@ public interface Factory<T, D> {
     default FactoryType getFactoryType() {
         return FactoryType.DEFAULT;
     }
-
-    ;
 }

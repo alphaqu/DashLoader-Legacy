@@ -53,29 +53,42 @@ import java.util.concurrent.ForkJoinWorkerThread;
 
 public class DashLoader {
     public static final Logger LOGGER = LogManager.getLogger();
+
+    // TODO: config
     public static final int totalTasks = 22;
     public static final double formatVersion = 2;
-    public static final String version = FabricLoader.getInstance().getModContainer("dashloader").get().getMetadata().getVersion().getFriendlyString();
-    private static final Path config = FabricLoader.getInstance().getConfigDir().normalize();
-    private static final boolean debug = FabricLoader.getInstance().isDevelopmentEnvironment();
-    public static ForkJoinPool THREADPOOL;
+
+
+    public static final String VERSION;
+    public static final Path CONFIG;
+    private static final boolean IS_DEV;
+
+
+
+
+    public static ForkJoinPool THREAD_POOL;
     public static String task = "Starting DashLoader";
-    private static DashLoader instance;
     public final Map<SpriteAtlasTexture, DashSpriteAtlasTextureData> atlasData = new HashMap<>();
     public final Map<MultipartBakedModel, Pair<List<MultipartModelSelector>, StateManager<Block, BlockState>>> multipartData = new HashMap<>();
     public final List<SpriteAtlasTexture> atlasesToRegister;
     private final ClassLoader classLoader;
     private final List<SpriteAtlasTexture> extraAtlases;
+
+    @SuppressWarnings("rawtypes")
     private final ConcurrentHashMap<Class<?>, BinarySerializer> serializers = new ConcurrentHashMap<>();
+
     public int tasksComplete = 0;
     public DashCacheState state;
     public Map<Identifier, List<Font>> fonts = new HashMap<>();
-    private DashLoaderAPI api;
+
+    public final DashLoaderAPI api;
     //output
-    private Object2IntMap<BlockState> stateLookupOut;
+
     private MappingData mappings = new MappingData();
     private SpriteAtlasManager atlasManager;
     private Object2IntMap<BlockState> stateLookup;
+    private Object2IntMap<BlockState> stateLookupOut;
+
     private Map<Identifier, BakedModel> models;
     private Map<Identifier, ParticleManager.SimpleSpriteProvider> particleSprites;
     private SpriteAtlasTexture particleAtlas;
@@ -91,92 +104,82 @@ public class DashLoader {
         LOGGER.info("Created DashLoader with classloader: " + classLoader.getClass().getSimpleName());
     }
 
-    public static Path getConfig() {
-        return config;
+    static {
+        var loader = FabricLoader.getInstance();
+        var dashModContainer = loader.getModContainer("dashloader");
+        if (dashModContainer.isEmpty()) {
+            throw new DashException("cannot find DashLoader in the mod registry!");
+        }
+        VERSION = dashModContainer.get().getMetadata().getVersion().getFriendlyString();
+        CONFIG = loader.getConfigDir().normalize();
+        IS_DEV = loader.isDevelopmentEnvironment();
     }
 
+    private static DashLoader instance;
     public static DashLoader getInstance() {
         return instance;
     }
 
-    public SpriteAtlasManager getAtlasManagerOut() {
-        return mappings.atlasManagerOut;
-    }
+    // TODO: are these really necessary?
+    public SpriteAtlasManager getAtlasManagerOut() { return mappings.atlasManagerOut; }
+    public Object2IntMap<BlockState> getStateLookupOut() { return stateLookupOut; }
+    public Map<Identifier, BakedModel> getModelsOut() { return mappings.modelsOut; }
+    public Map<Identifier, List<Sprite>> getParticlesOut() { return mappings.particlesOut; }
+    public Map<Identifier, List<Font>> getFontsOut() { return mappings.fontsOut; }
+    public List<String> getSplashTextOut() { return mappings.splashTextOut; }
 
-    public Object2IntMap<BlockState> getStateLookupOut() {
-        return stateLookupOut;
-    }
 
-    public Map<Identifier, BakedModel> getModelsOut() {
-        return mappings.modelsOut;
-    }
 
-    public Map<Identifier, List<Sprite>> getParticlesOut() {
-        return mappings.particlesOut;
-    }
 
-    public Map<Identifier, List<Font>> getFontsOut() {
-        return mappings.fontsOut;
-    }
-
-    public List<String> getSplashTextOut() {
-        return mappings.splashTextOut;
-    }
 
     public void reload() {
         LOGGER.info("Starting DashLoader thread.");
-        if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
+        if (IS_DEV) {
             LOGGER.warn("DashLoader launched in dev.");
         }
         state = DashCacheState.LOADING;
+
         Instant start = Instant.now();
-        Thread dashLoaderThread = new Thread(() -> {
-            initThreadPool();
-            api.initAPI();
-            initSerializers();
-            createDirectory();
-            LOGGER.info("[4/4] Launching DashCache.");
-            DashMetadata currentMetadata = DashMetadata.create();
-            ReloadEnum shouldReload;
-            if (Arrays.stream(DashCachePaths.values()).allMatch((path) -> path.getPath().toFile().exists())) {
-                DashMetadata previousMetadata = deserialize(DashMetadata.class, DashCachePaths.DASH_METADATA.getPath(), "Metadata");
-                shouldReload = currentMetadata.getState(previousMetadata);
-            } else {
-                shouldReload = ReloadEnum.MISSING_FILES;
-            }
-            if (shouldReload == ReloadEnum.ACCEPT) {
-                loadDashCache();
-            } else {
-                switch (shouldReload) {
-                    case FORMAT_CHANGE:
-                        LOGGER.warn("DashLoader update changed format. Recache requested.");
-                        break;
-                    case MOD_CHANGE:
-                        LOGGER.warn("DashLoader detected mod change. Recache requested.");
-                        break;
-                    case MISSING_FILES:
-                        LOGGER.warn("DashLoader detected missing files. Recache requested.");
-                        break;
-                }
-                destroyCache();
-                createMetadata(currentMetadata);
-                state = DashCacheState.EMPTY;
-            }
-            shutdownThreadPool();
-            LOGGER.info("Loaded cache in " + TimeHelper.getDecimalS(start, Instant.now()) + "s");
-        });
+        Thread dashLoaderThread = new Thread(this::dashLoaderThread);
+        LOGGER.info("Loaded cache in " + TimeHelper.getDecimalS(start, Instant.now()) + "s");
+
         dashLoaderThread.setContextClassLoader(classLoader);
         dashLoaderThread.setName("dashloader-supervisor");
         dashLoaderThread.start();
     }
 
+    private void dashLoaderThread() {
+        initThreadPool();
+        api.initAPI();
+        initSerializers();
+        createDirectory();
+        LOGGER.info("[4/4] Launching DashCache.");
+        var metadata = DashMetadata.create();
 
-    public DashLoaderAPI getApi() {
-        return api;
+        var shouldReload = shouldReload(metadata);
+
+        if (shouldReload == ReloadEnum.ACCEPT) {
+            loadDashCache();
+        } else {
+            switch (shouldReload) {
+                case FORMAT_CHANGE -> LOGGER.warn("DashLoader update changed format. Recache requested.");
+                case MOD_CHANGE -> LOGGER.warn("DashLoader detected mod change. Recache requested.");
+                case MISSING_FILES -> LOGGER.warn("DashLoader detected missing files. Recache requested.");
+            }
+            destroyCache();
+            createMetadata(metadata);
+            state = DashCacheState.EMPTY;
+        }
+        THREAD_POOL.shutdown();
     }
 
-    private void shutdownThreadPool() {
-        THREADPOOL.shutdown();
+    private ReloadEnum shouldReload(DashMetadata metadata) {
+        if (Arrays.stream(DashCachePaths.values()).allMatch((path) -> path.getPath().toFile().exists())) {
+            DashMetadata previousMetadata = deserialize(DashMetadata.class, DashCachePaths.DASH_METADATA.getPath(), "Metadata");
+            return metadata.getState(previousMetadata);
+        } else {
+            return ReloadEnum.MISSING_FILES;
+        }
     }
 
     private void createMetadata(DashMetadata data) {
@@ -185,8 +188,22 @@ public class DashLoader {
     }
 
     private void createDirectory() {
-        prepareAccess(new File(String.valueOf(config.resolve("quantumfusion/dashloader")))).mkdirs();
+        var configDir = CONFIG.resolve("quantumfusion/dashloader");
+
+        prepareAccess(configDir.toFile()).mkdirs();
     }
+
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    private File prepareAccess(File file) {
+        if (!file.canWrite()) {
+            file.setWritable(true);
+        }
+        if (!file.canRead()) {
+            file.setReadable(true);
+        }
+        return file;
+    }
+
 
     public void addExtraAtlasAssets(SpriteAtlasTexture atlas) {
         extraAtlases.add(atlas);
@@ -255,13 +272,13 @@ public class DashLoader {
         serializeObject(registry.getPropertyValues(), DashCachePaths.REGISTRY_PROPERTYVALUE.getPath(), "Registry PropertyValues");
         serializeObject(registry.getSprites(), DashCachePaths.REGISTRY_SPRITE.getPath(), "Registry Sprites");
         registry.apiReport(LOGGER);
-        shutdownThreadPool();
+        THREAD_POOL.shutdown();
         task = "Caching is now complete.";
         LOGGER.info("Created cache in " + TimeHelper.getDecimalS(start, Instant.now()) + "s");
     }
 
     private void initThreadPool() {
-        THREADPOOL = new ForkJoinPool(Runtime.getRuntime().availableProcessors() + 2, pool -> {
+        THREAD_POOL = new ForkJoinPool(Runtime.getRuntime().availableProcessors() + 2, pool -> {
             final ForkJoinWorkerThread worker = ForkJoinPool.defaultForkJoinWorkerThreadFactory.newThread(pool);
             worker.setName("dashloader-thread-" + worker.getPoolIndex());
             worker.setContextClassLoader(classLoader);
@@ -309,21 +326,21 @@ public class DashLoader {
     }
 
     public void applyDashCache(TextureManager textureManager) {
-        //register textures
-        System.out.println(atlasesToRegister.size());
         atlasesToRegister.forEach((spriteAtlasTexture) -> {
             //atlas registration
-            final DashSpriteAtlasTextureData data = atlasData.get(spriteAtlasTexture);
-            final Identifier id = spriteAtlasTexture.getId();
-            final int glId = TextureUtil.generateTextureId();
-            final int width = data.width;
-            final int maxLevel = data.maxLevel;
-            final int height = data.height;
-            TextureUtil.prepareImage(glId, data.maxLevel, data.width, data.height);
+            final var data = atlasData.get(spriteAtlasTexture);
+            final var id = spriteAtlasTexture.getId();
+            final var glId = TextureUtil.generateTextureId();
+            final var width = data.width;
+            final var maxLevel = data.maxLevel;
+            final var height = data.height;
+            TextureUtil.prepareImage(glId, maxLevel, width, height);
+
             ((AbstractTextureAccessor) spriteAtlasTexture).setGlId(glId);
             //ding dong lwjgl here are their styles
-            ((SpriteAtlasTextureAccessor) spriteAtlasTexture).getSprites().forEach((identifier1, sprite) -> sprite.upload());
+            ((SpriteAtlasTextureAccessor) spriteAtlasTexture).getSprites().forEach((ignored, sprite) -> sprite.upload());
             //helu textures here are the atlases
+
             textureManager.registerTexture(id, spriteAtlasTexture);
             textureManager.bindTexture(id);
             spriteAtlasTexture.setFilter(false, maxLevel > 0);
@@ -368,7 +385,7 @@ public class DashLoader {
     }
 
     public void destroyCache(Exception exception) {
-        if (!debug) {
+        if (!IS_DEV) {
             LOGGER.error("DashLoader failed, destroying cache and requesting recache. Slow start predicted.");
             exception.printStackTrace();
             if (!Arrays.stream(DashCachePaths.values()).allMatch((path -> !path.getPath().toFile().exists() || path.getPath().toFile().delete()))) {
@@ -380,7 +397,7 @@ public class DashLoader {
     }
 
     public void destroyCache() {
-        if (!debug) {
+        if (!IS_DEV) {
             LOGGER.error("DashLoader failed, destroying cache and requesting recache. Slow start predicted.");
             if (!Arrays.stream(DashCachePaths.values()).allMatch((path -> !path.getPath().toFile().exists() || path.getPath().toFile().delete()))) {
                 LOGGER.fatal("DashLoader file removal failed. Something went terribly wrong ");
@@ -394,18 +411,6 @@ public class DashLoader {
         task = s;
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-    private File prepareAccess(File file) {
-        if (!file.canWrite()) {
-            file.setWritable(true);
-        }
-        if (!file.canRead()) {
-            file.setReadable(true);
-        }
-        return file;
-    }
-
-
     /**
      * <h1>E gamin - its the game</h1>
      * fsda
@@ -413,7 +418,7 @@ public class DashLoader {
     private void initSerializers() {
         LOGGER.info("[3/4]  Started Serializer init.");
         Instant start = Instant.now();
-        final Class[] classes = new Class[]{
+        final Class<?>[] classes = new Class[]{
                 DashMetadata.class,
                 DashModelData.class,
                 DashSpriteAtlasData.class,

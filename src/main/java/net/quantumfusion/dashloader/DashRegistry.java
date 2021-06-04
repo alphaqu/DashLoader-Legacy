@@ -203,7 +203,7 @@ public class DashRegistry {
         }
         final long hash = bakedModel.hashCode();
         if (models.get(hash) == null) {
-            Factory<BakedModel, DashModel> model = loader.getApi().modelMappings.get(bakedModel.getClass());
+            Factory<BakedModel, DashModel> model = loader.api.modelMappings.get(bakedModel.getClass());
             if (model != null) {
                 models.put(hash, model.toDash(bakedModel, this, DashLoader.getInstance().multipartData.get(bakedModel)));
             } else {
@@ -254,7 +254,7 @@ public class DashRegistry {
         if (selector == MultipartModelSelector.FALSE || isTrue) {
             return new DashStaticPredicate(isTrue);
         } else {
-            PredicateFactory predicateFactory = loader.getApi().predicateMappings.get(selector.getClass());
+            PredicateFactory predicateFactory = loader.api.predicateMappings.get(selector.getClass());
             if (predicateFactory != null) {
                 return predicateFactory.toDash(selector, this, stateManager);
             } else {
@@ -268,7 +268,7 @@ public class DashRegistry {
     public final long createFontPointer(final Font font) {
         final long hash = font.hashCode();
         if (fonts.get(hash) == null) {
-            Factory<Font, DashFont> fontFactory = loader.getApi().fontMappings.get(font.getClass());
+            Factory<Font, DashFont> fontFactory = loader.api.fontMappings.get(font.getClass());
             if (fontFactory != null) {
                 fonts.put(hash, fontFactory.toDash(font, this, null));
             } else {
@@ -284,7 +284,7 @@ public class DashRegistry {
         final boolean propVal = !propertyValues.containsKey(hashV);
         final boolean prop = !properties.containsKey(hashP);
         if (propVal || prop) {
-            PropertyFactory propertyFactory = loader.getApi().propertyMappings.get(property.getClass());
+            PropertyFactory propertyFactory = loader.api.propertyMappings.get(property.getClass());
             if (propertyFactory != null) {
                 if (propVal) {
                     propertyValues.put(hashV, propertyFactory.toDash(value, this, hashP));
@@ -397,7 +397,7 @@ public class DashRegistry {
             currentStage[0]++;
         });
         log(logger, "Applying Model Overrides");
-        modelsToDeserialize.forEach(modelcategory -> DashLoader.THREADPOOL.invoke(new UndashTask.ApplyTask(new ArrayList<>(modelcategory.values()), 100, this)));
+        modelsToDeserialize.forEach(modelcategory -> DashLoader.THREAD_POOL.invoke(new UndashTask.ApplyTask(new ArrayList<>(modelcategory.values()), 100, this)));
         modelsToDeserialize = null;
     }
 

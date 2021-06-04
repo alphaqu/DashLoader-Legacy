@@ -14,13 +14,13 @@ public class ThreadHelper {
 
 
     public static void exec(Runnable... runnables) {
-        final List<Future<Object>> futures = DashLoader.THREADPOOL.invokeAll(Arrays.stream(runnables).map(Executors::callable).collect(Collectors.toList()));
+        final List<Future<Object>> futures = DashLoader.THREAD_POOL.invokeAll(Arrays.stream(runnables).map(Executors::callable).collect(Collectors.toList()));
         sleepUntilTrue(() -> futures.stream().allMatch(Future::isDone));
     }
 
     public static <V, D extends Dashable> Map<Long, V> execParallel(Map<Long, D> dashables, DashRegistry registry) {
         final Map<Long, V> answerMap = new HashMap<>((int) Math.ceil(dashables.size() / 0.75));
-        final Collection<Map.Entry<Long, V>> invoke = DashLoader.THREADPOOL.invoke(new UndashTask<>(new ArrayList<>(dashables.entrySet()), 100, registry));
+        final Collection<Map.Entry<Long, V>> invoke = DashLoader.THREAD_POOL.invoke(new UndashTask<>(new ArrayList<>(dashables.entrySet()), 100, registry));
         invoke.forEach((answer) -> answerMap.put(answer.getKey(), answer.getValue()));
         return answerMap;
     }
