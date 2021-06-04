@@ -12,22 +12,22 @@ import java.util.Map;
 import java.util.concurrent.RecursiveAction;
 import java.util.concurrent.RecursiveTask;
 
-public class UndashTask<K, D extends Dashable> extends RecursiveTask<Collection<Map.Entry<Long, K>>> {
-    private final List<Map.Entry<Long, D>> tasks;
+public class UndashTask<K, D extends Dashable> extends RecursiveTask<Collection<Map.Entry<Integer, K>>> {
+    private final List<Map.Entry<Integer, D>> tasks;
     private final int threshold;
     private final DashRegistry registry;
 
 
-    public UndashTask(List<Map.Entry<Long, D>> tasks, int threshold, DashRegistry registry) {
+    public UndashTask(List<Map.Entry<Integer, D>> tasks, int threshold, DashRegistry registry) {
         this.tasks = tasks;
         this.threshold = threshold;
         this.registry = registry;
     }
 
-    public UndashTask<K, D>[] split(List<Map.Entry<Long, D>> list, int size) {
+    public UndashTask<K, D>[] split(List<Map.Entry<Integer, D>> list, int size) {
         final int half = (int) Math.ceil(size / 2f);
-        List<Map.Entry<Long, D>> first = new ArrayList<>(half);
-        List<Map.Entry<Long, D>> second = new ArrayList<>(half);
+        List<Map.Entry<Integer, D>> first = new ArrayList<>(half);
+        List<Map.Entry<Integer, D>> second = new ArrayList<>(half);
         final int i1 = size / 2;
         for (int i = 0; i < i1; i++)
             first.add(list.get(i));
@@ -37,7 +37,7 @@ public class UndashTask<K, D extends Dashable> extends RecursiveTask<Collection<
     }
 
     @Override
-    protected Collection<Map.Entry<Long, K>> compute() {
+    protected Collection<Map.Entry<Integer, K>> compute() {
         final int size = tasks.size();
         if (size < threshold) {
             return computeDirectly();
@@ -50,13 +50,13 @@ public class UndashTask<K, D extends Dashable> extends RecursiveTask<Collection<
         }
     }
 
-    public final Collection<Map.Entry<Long, K>> combine(final Collection<Map.Entry<Long, K>> list, final Collection<Map.Entry<Long, K>> list2) {
+    public final Collection<Map.Entry<Integer, K>> combine(final Collection<Map.Entry<Integer, K>> list, final Collection<Map.Entry<Integer, K>> list2) {
         list.addAll(list2);
         return list;
     }
 
-    protected final Collection<Map.Entry<Long, K>> computeDirectly() {
-        final Collection<Map.Entry<Long, K>> count = new ArrayList<>(tasks.size());
+    protected final Collection<Map.Entry<Integer, K>> computeDirectly() {
+        final Collection<Map.Entry<Integer, K>> count = new ArrayList<>(tasks.size());
         tasks.forEach(dashable -> count.add(Pair.of(dashable.getKey(), dashable.getValue().toUndash(registry))));
         return count;
     }

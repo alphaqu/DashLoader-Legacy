@@ -43,6 +43,9 @@ public class DashModelTransformation {
     public final DashTransformation fixed;
 
 
+    public int nullTransformations = 0;
+
+
     public DashModelTransformation(@Deserialize("thirdPersonLeftHand") @Nullable DashTransformation thirdPersonLeftHand,
                                    @Deserialize("thirdPersonRightHand") @Nullable DashTransformation thirdPersonRightHand,
                                    @Deserialize("firstPersonLeftHand") @Nullable DashTransformation firstPersonLeftHand,
@@ -63,26 +66,46 @@ public class DashModelTransformation {
     }
 
     public DashModelTransformation(ModelTransformation other) {
-        this.thirdPersonLeftHand = other.thirdPersonLeftHand == Transformation.IDENTITY ? null : new DashTransformation(other.thirdPersonLeftHand);
-        this.thirdPersonRightHand = other.thirdPersonRightHand == Transformation.IDENTITY ? null : new DashTransformation(other.thirdPersonRightHand);
-        this.firstPersonLeftHand = other.firstPersonLeftHand == Transformation.IDENTITY ? null : new DashTransformation(other.firstPersonLeftHand);
-        this.firstPersonRightHand = other.firstPersonRightHand == Transformation.IDENTITY ? null : new DashTransformation(other.firstPersonRightHand);
-        this.head = other.head == Transformation.IDENTITY ? null : new DashTransformation(other.head);
-        this.gui = other.gui == Transformation.IDENTITY ? null : new DashTransformation(other.gui);
-        this.ground = other.ground == Transformation.IDENTITY ? null : new DashTransformation(other.ground);
-        this.fixed = other.fixed == Transformation.IDENTITY ? null : new DashTransformation(other.fixed);
+        this.thirdPersonLeftHand = createTransformation(other.thirdPersonLeftHand);
+        this.thirdPersonRightHand = createTransformation(other.thirdPersonRightHand);
+        this.firstPersonLeftHand = createTransformation(other.firstPersonLeftHand);
+        this.firstPersonRightHand = createTransformation(other.firstPersonRightHand);
+        this.head = createTransformation(other.head);
+        this.gui = createTransformation(other.gui);
+        this.ground = createTransformation(other.ground);
+        this.fixed = createTransformation(other.fixed);
+    }
+
+    public static DashModelTransformation createDashModelTransformation(ModelTransformation other) {
+        DashModelTransformation out = new DashModelTransformation(other);
+        if (out.nullTransformations == 8) {
+            return null;
+        }
+        return out;
+    }
+
+    private DashTransformation createTransformation(Transformation transformation) {
+        final DashTransformation dashTransformation = transformation == Transformation.IDENTITY ? null : new DashTransformation(transformation);
+        if (dashTransformation == null) {
+            nullTransformations++;
+        }
+        return dashTransformation;
+    }
+
+    private Transformation unDashTransformation(DashTransformation transformation) {
+        return transformation == null ? Transformation.IDENTITY : transformation.toUndash();
     }
 
     public ModelTransformation toUndash() {
         return new ModelTransformation(
-                thirdPersonLeftHand == null ? Transformation.IDENTITY : thirdPersonLeftHand.toUndash(),
-                thirdPersonRightHand == null ? Transformation.IDENTITY : thirdPersonRightHand.toUndash(),
-                firstPersonLeftHand == null ? Transformation.IDENTITY : firstPersonLeftHand.toUndash(),
-                firstPersonRightHand == null ? Transformation.IDENTITY : firstPersonRightHand.toUndash(),
-                head == null ? Transformation.IDENTITY : head.toUndash(),
-                gui == null ? Transformation.IDENTITY : gui.toUndash(),
-                ground == null ? Transformation.IDENTITY : ground.toUndash(),
-                fixed == null ? Transformation.IDENTITY : fixed.toUndash()
+                unDashTransformation(thirdPersonLeftHand),
+                unDashTransformation(thirdPersonRightHand),
+                unDashTransformation(firstPersonLeftHand),
+                unDashTransformation(firstPersonRightHand),
+                unDashTransformation(head),
+                unDashTransformation(gui),
+                unDashTransformation(ground),
+                unDashTransformation(fixed)
         );
     }
 }

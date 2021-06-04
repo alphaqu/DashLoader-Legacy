@@ -2,7 +2,6 @@ package net.quantumfusion.dashloader.font;
 
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
-import io.activej.serializer.annotations.SerializeNullable;
 import net.gudenau.lib.unsafe.Unsafe;
 import net.minecraft.client.font.UnicodeTextureFont;
 import net.minecraft.client.texture.NativeImage;
@@ -16,10 +15,7 @@ import java.util.Map;
 
 public class DashUnicodeFont implements DashFont {
     @Serialize(order = 0)
-    @SerializeNullable()
-    @SerializeNullable(path = {0})
-    @SerializeNullable(path = {1})
-    public final PairMap<Long, Long> images;
+    public final PairMap<Integer, Integer> images;
 
     @Serialize(order = 1)
     public final byte[] sizes;
@@ -28,7 +24,7 @@ public class DashUnicodeFont implements DashFont {
     public final String template;
 
 
-    public DashUnicodeFont(@Deserialize("images") PairMap<Long, Long> images,
+    public DashUnicodeFont(@Deserialize("images") PairMap<Integer, Integer> images,
                            @Deserialize("sizes") byte[] sizes,
                            @Deserialize("template") String template) {
         this.images = images;

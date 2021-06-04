@@ -2,7 +2,6 @@ package net.quantumfusion.dashloader.model;
 
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
-import io.activej.serializer.annotations.SerializeNullable;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenCustomHashMap;
 import net.gudenau.lib.unsafe.Unsafe;
 import net.minecraft.block.Block;
@@ -27,26 +26,17 @@ public class DashMultipartBakedModel implements DashModel {
 
     //identifier baked model
     @Serialize(order = 0)
-    @SerializeNullable()
-    @SerializeNullable(path = {0})
-    @SerializeNullable(path = {1})
-    public PairMap<Long, Long> components;
+    public PairMap<Integer, Integer> components;
 
     @Serialize(order = 1)
-    @SerializeNullable()
-    @SerializeNullable(path = {0})
-    @SerializeNullable(path = {1})
-    public PairMap<Long, byte[]> stateCache;
+    public PairMap<Integer, byte[]> stateCache;
 
     MultipartBakedModel toApply;
 
-    public DashMultipartBakedModel(@Deserialize("components") PairMap<Long, Long> components,
-                                   @Deserialize("stateCache") PairMap<Long, byte[]> stateCache) {
+    public DashMultipartBakedModel(@Deserialize("components") PairMap<Integer, Integer> components,
+                                   @Deserialize("stateCache") PairMap<Integer, byte[]> stateCache) {
         this.components = components;
         this.stateCache = stateCache;
-    }
-
-    public DashMultipartBakedModel() {
     }
 
     public DashMultipartBakedModel(MultipartBakedModel model, DashRegistry registry, Pair<List<MultipartModelSelector>, StateManager<Block, BlockState>> selectors) {

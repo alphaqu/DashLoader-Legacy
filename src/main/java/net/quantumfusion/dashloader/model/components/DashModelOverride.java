@@ -2,7 +2,6 @@ package net.quantumfusion.dashloader.model.components;
 
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
-import io.activej.serializer.annotations.SerializeNullable;
 import net.minecraft.client.render.model.json.ModelOverride;
 import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.mixin.accessor.ModelOverrideAccessor;
@@ -13,15 +12,12 @@ import java.util.List;
 public class DashModelOverride {
 
     @Serialize(order = 0)
-    public final Long modelId;
+    public final Integer modelId;
 
     @Serialize(order = 1)
-    @SerializeNullable()
-    @SerializeNullable(path = {0})
-    @SerializeNullable(path = {1})
     public final List<DashModelOverrideCondition> conditions;
 
-    public DashModelOverride(@Deserialize("modelId") Long modelId,
+    public DashModelOverride(@Deserialize("modelId") Integer modelId,
                              @Deserialize("conditions") List<DashModelOverrideCondition> conditions
     ) {
         this.modelId = modelId;

@@ -17,7 +17,7 @@ public class EnumPropertyFactory implements PropertyFactory {
 
     @Override
     public <K> DashPropertyValue toDash(Comparable<?> comparable, DashRegistry registry, K var1) {
-        return new DashEnumValue(((Enum) comparable).name(), (Long) var1);
+        return new DashEnumValue(((Enum) comparable).name(), (Integer) var1);
     }
 
     @Override

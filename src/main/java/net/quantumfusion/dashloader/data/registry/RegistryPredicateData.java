@@ -12,9 +12,9 @@ public class RegistryPredicateData {
     @Serialize(order = 0)
     @SerializeNullable(path = {0})
     @SerializeSubclasses(path = {1}, extraSubclassesId = "predicates")
-    public Map<Long, DashPredicate> predicates;
+    public Map<Integer, DashPredicate> predicates;
 
-    public RegistryPredicateData(@Deserialize("predicates") Map<Long, DashPredicate> predicates) {
+    public RegistryPredicateData(@Deserialize("predicates") Map<Integer, DashPredicate> predicates) {
         this.predicates = predicates;
     }
 }

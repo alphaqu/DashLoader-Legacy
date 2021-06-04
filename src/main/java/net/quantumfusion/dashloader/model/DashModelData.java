@@ -24,10 +24,10 @@ public class DashModelData {
     @Serialize(order = 0)
     @SerializeNullable(path = {0})
     @SerializeNullable(path = {1})
-    public PairMap<Long, Long> models;
+    public PairMap<Integer, Integer> models;
 
 
-    public DashModelData(@Deserialize("models") PairMap<Long, Long> models) {
+    public DashModelData(@Deserialize("models") PairMap<Integer, Integer> models) {
         this.models = models;
     }
 

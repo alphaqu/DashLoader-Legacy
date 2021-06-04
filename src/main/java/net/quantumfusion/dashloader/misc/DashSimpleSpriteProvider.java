@@ -13,9 +13,9 @@ import java.util.List;
 
 public class DashSimpleSpriteProvider {
     @Serialize(order = 0)
-    public List<Long> sprites;
+    public List<Integer> sprites;
 
-    public DashSimpleSpriteProvider(@Deserialize("sprites") List<Long> sprites) {
+    public DashSimpleSpriteProvider(@Deserialize("sprites") List<Integer> sprites) {
         this.sprites = sprites;
     }
 

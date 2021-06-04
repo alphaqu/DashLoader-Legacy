@@ -12,9 +12,9 @@ public class RegistryFontData {
     @Serialize(order = 0)
     @SerializeNullable(path = {0})
     @SerializeSubclasses(path = {1}, extraSubclassesId = "fonts")
-    public Map<Long, DashFont> fonts;
+    public Map<Integer, DashFont> fonts;
 
-    public RegistryFontData(@Deserialize("fonts") Map<Long, DashFont> fonts) {
+    public RegistryFontData(@Deserialize("fonts") Map<Integer, DashFont> fonts) {
         this.fonts = fonts;
     }
 }

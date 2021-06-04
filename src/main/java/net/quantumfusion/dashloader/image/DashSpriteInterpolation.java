@@ -15,9 +15,9 @@ import java.util.List;
 
 public class DashSpriteInterpolation {
     @Serialize(order = 0)
-    public final List<Long> images;
+    public final List<Integer> images;
 
-    public DashSpriteInterpolation(@Deserialize("images") List<Long> images) {
+    public DashSpriteInterpolation(@Deserialize("images") List<Integer> images) {
         this.images = images;
     }
 

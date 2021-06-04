@@ -35,7 +35,7 @@ public class DashSprite implements Dashable {
     @Serialize(order = 8)
     public final float vMax;
     @Serialize(order = 9)
-    public List<Long> images;
+    public List<Integer> images;
 
 
     public DashSprite(@Deserialize("animation") DashSpriteAnimation animation,
@@ -47,7 +47,7 @@ public class DashSprite implements Dashable {
                       @Deserialize("uMax") float uMax,
                       @Deserialize("vMin") float vMin,
                       @Deserialize("vMax") float vMax,
-                      @Deserialize("images") List<Long> images
+                      @Deserialize("images") List<Integer> images
     ) {
         this.animation = animation;
         this.images = images;

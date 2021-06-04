@@ -17,15 +17,15 @@ import org.apache.commons.lang3.tuple.Pair;
 public class DashBlockState implements Dashable {
 
     @Serialize(order = 0)
-    public final Long owner;
+    public final Integer owner;
 
     @Serialize(order = 1)
     @SerializeNullable()
-    public final PairMap<Long, Long> entriesEncoded;
+    public final PairMap<Integer, Integer> entriesEncoded;
 
 
-    public DashBlockState(@Deserialize("owner") Long owner,
-                          @Deserialize("entriesEncoded") PairMap<Long, Long> entriesEncoded) {
+    public DashBlockState(@Deserialize("owner") Integer owner,
+                          @Deserialize("entriesEncoded") PairMap<Integer, Integer> entriesEncoded) {
         this.owner = owner;
         this.entriesEncoded = entriesEncoded;
     }
@@ -34,7 +34,7 @@ public class DashBlockState implements Dashable {
         StateAccessor<Block, BlockState> accessState = ((StateAccessor<Block, BlockState>) blockState);
         entriesEncoded = new PairMap<>();
         accessState.getEntries().forEach((property, comparable) -> {
-            final Pair<Long, Long> propertyPointer = registry.createPropertyPointer(property, comparable);
+            final Pair<Integer, Integer> propertyPointer = registry.createPropertyPointer(property, comparable);
             entriesEncoded.put(propertyPointer.getLeft(), propertyPointer.getRight());
         });
         owner = registry.createIdentifierPointer(Registry.BLOCK.getId(blockState.getBlock()));

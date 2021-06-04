@@ -18,16 +18,16 @@ import java.util.*;
 
 public class DashSpriteAtlasTexture {
     @Serialize(order = 2)
-    public final Long id;
+    public final Integer id;
     @Serialize(order = 3)
     public final int maxTextureSize;
     @Serialize(order = 0)
-    public PairMap<DashSpriteAnimation, Long> animatedSprites; //sprite
+    public PairMap<DashSpriteAnimation, Integer> animatedSprites; //sprite
     @Serialize(order = 1)
     @SerializeNullable()
     @SerializeNullable(path = {1})
     @SerializeNullable(path = {0})
-    public PairMap<Long, Long> sprites;
+    public PairMap<Integer, Integer> sprites;
     @Serialize(order = 4)
     public boolean bilinear;
     @Serialize(order = 5)
@@ -37,9 +37,9 @@ public class DashSpriteAtlasTexture {
     public DashSpriteAtlasTextureData data;
 
 
-    public DashSpriteAtlasTexture(@Deserialize("animatedSprites") PairMap<DashSpriteAnimation, Long> animatedSprites,
-                                  @Deserialize("sprites") PairMap<Long, Long> sprites,
-                                  @Deserialize("id") Long id,
+    public DashSpriteAtlasTexture(@Deserialize("animatedSprites") PairMap<DashSpriteAnimation, Integer> animatedSprites,
+                                  @Deserialize("sprites") PairMap<Integer, Integer> sprites,
+                                  @Deserialize("id") Integer id,
                                   @Deserialize("maxTextureSize") int maxTextureSize,
                                   @Deserialize("bilinear") boolean bilinear,
                                   @Deserialize("mipmap") boolean mipmap,
@@ -61,7 +61,7 @@ public class DashSpriteAtlasTexture {
         animatedSprites = new PairMap<>();
         sprites = new PairMap<>();
         spriteTextureAccess.getSprites().forEach((identifier, sprite) -> {
-            final long spritePointer = registry.createSpritePointer(sprite);
+            final Integer spritePointer = registry.createSpritePointer(sprite);
             sprites.put(registry.createIdentifierPointer(identifier), spritePointer);
             final Sprite.Animation animation = (Sprite.Animation) sprite.getAnimation();
             if (animation != null) {
@@ -94,7 +94,7 @@ public class DashSpriteAtlasTexture {
         return spriteAtlasTexture;
     }
 
-    private Sprite loadSprite(Long spritePointer, DashRegistry registry, SpriteAtlasTexture spriteAtlasTexture) {
+    private Sprite loadSprite(Integer spritePointer, DashRegistry registry, SpriteAtlasTexture spriteAtlasTexture) {
         Sprite sprite = registry.getSprite(spritePointer);
         ((SpriteAccessor) sprite).setAtlas(spriteAtlasTexture);
         return sprite;

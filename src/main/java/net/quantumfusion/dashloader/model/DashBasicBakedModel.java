@@ -6,6 +6,7 @@ import io.activej.serializer.annotations.SerializeNullable;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.BakedQuad;
 import net.minecraft.client.render.model.BasicBakedModel;
+import net.minecraft.client.render.model.json.ModelTransformation;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.util.math.Direction;
 import net.quantumfusion.dashloader.DashRegistry;
@@ -25,9 +26,6 @@ public class DashBasicBakedModel implements DashModel {
     @Serialize(order = 0)
     public List<DashBakedQuad> quads;
     @Serialize(order = 1)
-    @SerializeNullable()
-    @SerializeNullable(path = {0})
-    @SerializeNullable(path = {1})
     public PairMap<DashDirection, List<DashBakedQuad>> faceQuads;
     @Serialize(order = 2)
     public boolean usesAo;
@@ -36,11 +34,12 @@ public class DashBasicBakedModel implements DashModel {
     @Serialize(order = 4)
     public boolean isSideLit;
     @Serialize(order = 5)
+    @SerializeNullable
     public DashModelTransformation transformation;
     @Serialize(order = 6)
     public DashModelOverrideList itemPropertyOverrides;
     @Serialize(order = 7)
-    public Long spritePointer;
+    public Integer spritePointer;
 
     public DashBasicBakedModel() {
     }
@@ -52,7 +51,7 @@ public class DashBasicBakedModel implements DashModel {
                                @Deserialize("isSideLit") boolean isSideLit,
                                @Deserialize("transformation") DashModelTransformation transformation,
                                @Deserialize("itemPropertyOverrides") DashModelOverrideList itemPropertyOverrides,
-                               @Deserialize("spritePointer") Long spritePointer) {
+                               @Deserialize("spritePointer") Integer spritePointer) {
         this.quads = quads;
         this.faceQuads = faceQuads;
         this.usesAo = usesAo;
@@ -79,7 +78,8 @@ public class DashBasicBakedModel implements DashModel {
         usesAo = access.getUsesAo();
         hasDepth = access.getHasDepth();
         isSideLit = access.getIsSideLit();
-        transformation = new DashModelTransformation(access.getTransformation());
+        final ModelTransformation transformation = access.getTransformation();
+        this.transformation = transformation == ModelTransformation.NONE ? null : DashModelTransformation.createDashModelTransformation(transformation);
         spritePointer = registry.createSpritePointer(access.getSprite());
     }
 
@@ -95,7 +95,7 @@ public class DashBasicBakedModel implements DashModel {
             dashBakedQuads.forEach(dashBakedQuad -> out.add(dashBakedQuad.toUndash(sprite, registry)));
             faceQuadsOut.put(dashDirection.toUndash(registry), out);
         });
-        return new BasicBakedModel(quadsOut, faceQuadsOut, usesAo, isSideLit, hasDepth, sprite, transformation.toUndash(), itemPropertyOverrides.toUndash(registry));
+        return new BasicBakedModel(quadsOut, faceQuadsOut, usesAo, isSideLit, hasDepth, sprite, transformation == null ? ModelTransformation.NONE : transformation.toUndash(), itemPropertyOverrides.toUndash(registry));
     }
 
     @Override

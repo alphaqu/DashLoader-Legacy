@@ -9,10 +9,10 @@ public class DashEnumValue implements DashPropertyValue {
     public final String value;
 
     @Serialize(order = 1)
-    public final long enumPointer;
+    public final Integer enumPointer;
 
     public DashEnumValue(@Deserialize("value") String value,
-                         @Deserialize("enumPointer") long enumPointer) {
+                         @Deserialize("enumPointer") Integer enumPointer) {
         this.value = value;
         this.enumPointer = enumPointer;
     }

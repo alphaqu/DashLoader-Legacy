@@ -3,7 +3,6 @@ package net.quantumfusion.dashloader.model.predicates;
 import com.google.common.base.Splitter;
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
-import io.activej.serializer.annotations.SerializeNullable;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.render.model.json.SimpleMultipartModelSelector;
@@ -25,13 +24,12 @@ public class DashSimplePredicate implements DashPredicate {
     private static final Splitter VALUE_SPLITTER = Splitter.on('|').omitEmptyStrings();
 
     @Serialize(order = 0)
-    @SerializeNullable()
-    public PairMap<Long, Long> properties;
+    public PairMap<Integer, Integer> properties;
 
     @Serialize(order = 1)
     public boolean negate;
 
-    public DashSimplePredicate(@Deserialize("properties") PairMap<Long, Long> properties,
+    public DashSimplePredicate(@Deserialize("properties") PairMap<Integer, Integer> properties,
                                @Deserialize("negate") boolean negate) {
         this.properties = properties;
         this.negate = negate;
@@ -52,17 +50,17 @@ public class DashSimplePredicate implements DashPredicate {
             List<String> list = VALUE_SPLITTER.splitToList(string);
             properties = new PairMap<>();
             if (list.size() == 1) {
-                Pair<Long, Long> predicateProperty = createPredicateInfo(stateManager, stateManagerProperty, string, registry);
+                Pair<Integer, Integer> predicateProperty = createPredicateInfo(stateManager, stateManagerProperty, string, registry);
                 properties.put(predicateProperty.getLeft(), predicateProperty.getRight());
             } else {
-                List<Pair<Long, Long>> predicateProperties = list.stream().map((stringx) -> createPredicateInfo(stateManager, stateManagerProperty, stringx, registry)).collect(Collectors.toList());
+                List<Pair<Integer, Integer>> predicateProperties = list.stream().map((stringx) -> createPredicateInfo(stateManager, stateManagerProperty, stringx, registry)).collect(Collectors.toList());
                 predicateProperties.forEach(pair -> properties.put(pair.getLeft(), pair.getRight()));
             }
         }
     }
 
 
-    private Pair<Long, Long> createPredicateInfo(StateManager<Block, BlockState> stateFactory, Property<?> property, String valueString, DashRegistry registry) {
+    private Pair<Integer, Integer> createPredicateInfo(StateManager<Block, BlockState> stateFactory, Property<?> property, String valueString, DashRegistry registry) {
         Optional<?> optional = property.parse(valueString);
         if (!optional.isPresent()) {
             throw new RuntimeException(String.format("Unknown value '%s' '%s'", valueString, stateFactory.getOwner().toString()));

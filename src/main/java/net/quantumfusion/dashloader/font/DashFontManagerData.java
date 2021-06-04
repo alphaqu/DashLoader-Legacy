@@ -2,7 +2,6 @@ package net.quantumfusion.dashloader.font;
 
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
-import io.activej.serializer.annotations.SerializeNullable;
 import net.minecraft.client.font.Font;
 import net.minecraft.util.Identifier;
 import net.quantumfusion.dashloader.DashRegistry;
@@ -16,20 +15,16 @@ import java.util.Map;
 public class DashFontManagerData {
 
     @Serialize(order = 0)
-    @SerializeNullable()
-    @SerializeNullable(path = {0})
-    @SerializeNullable(path = {1})
-    @SerializeNullable(path = {1, 0})
-    public PairMap<Long, List<Long>> fontMap;
+    public PairMap<Integer, List<Integer>> fontMap;
 
-    public DashFontManagerData(@Deserialize("fontMap") PairMap<Long, List<Long>> fontMap) {
+    public DashFontManagerData(@Deserialize("fontMap") PairMap<Integer, List<Integer>> fontMap) {
         this.fontMap = fontMap;
     }
 
     public DashFontManagerData(Map<Identifier, List<Font>> fontList, DashRegistry registry) {
         fontMap = new PairMap<>();
         fontList.forEach((identifier, fonts) -> {
-            List<Long> fontsOut = new ArrayList<>();
+            List<Integer> fontsOut = new ArrayList<>();
             fonts.forEach(font -> fontsOut.add(registry.createFontPointer(font)));
             fontMap.put(registry.createIdentifierPointer(identifier), fontsOut);
         });

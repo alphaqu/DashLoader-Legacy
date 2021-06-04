@@ -12,9 +12,9 @@ public class RegistryPropertyData {
     @Serialize(order = 0)
     @SerializeNullable(path = {0})
     @SerializeSubclasses(path = {1}, extraSubclassesId = "properties")
-    public Map<Long, DashProperty> property;
+    public Map<Integer, DashProperty> property;
 
-    public RegistryPropertyData(@Deserialize("property") Map<Long, DashProperty> property) {
+    public RegistryPropertyData(@Deserialize("property") Map<Integer, DashProperty> property) {
         this.property = property;
     }
 }
