@@ -44,7 +44,6 @@ dependencies {
 
     implementation "net.gudenau.lib:unsafe:1.4.1"
     include "net.gudenau.lib:unsafe:1.4.1"
-
 }
 
 processResources {

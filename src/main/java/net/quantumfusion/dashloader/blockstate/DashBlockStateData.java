@@ -30,7 +30,7 @@ public class DashBlockStateData {
 
     public Object2IntMap<BlockState> toUndash(DashRegistry registry) {
         final ConcurrentHashMap<BlockState, Integer> stateLookupOut = new ConcurrentHashMap<>();
-        blockstates.entrySet().parallelStream().forEach((entry) -> stateLookupOut.put(registry.getBlockstate(entry.getKey()), entry.getValue()));
+        blockstates.entrySet().parallelStream().forEach((entry) -> stateLookupOut.put(registry.getBlockState(entry.getKey()), entry.getValue()));
         return new Object2IntOpenHashMap<>(stateLookupOut);
     }
 

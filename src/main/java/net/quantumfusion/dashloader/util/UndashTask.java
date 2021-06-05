@@ -1,22 +1,17 @@
 package net.quantumfusion.dashloader.util;
 
-import it.unimi.dsi.fastutil.ints.AbstractInt2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectSortedMap;
 import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.data.Dashable;
 import net.quantumfusion.dashloader.model.DashModel;
 import org.apache.commons.lang3.tuple.Pair;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.RecursiveAction;
 import java.util.concurrent.RecursiveTask;
 
-public class UndashTask<K, D extends Dashable> extends RecursiveTask<Int2ObjectSortedMap<K>> {
+public class UndashTask<U, D extends Dashable> extends RecursiveTask<Int2ObjectSortedMap<U>> {
     private final Int2ObjectSortedMap<D> tasks;
     private final int threshold;
     private final DashRegistry registry;
@@ -29,26 +24,26 @@ public class UndashTask<K, D extends Dashable> extends RecursiveTask<Int2ObjectS
     }
 
     @Override
-    protected Int2ObjectSortedMap<K> compute() {
+    protected Int2ObjectSortedMap<U> compute() {
         final int size = tasks.size();
         if (size < threshold) {
             return computeDirectly();
         } else {
             final var half = size / 2;
-            final var first = new UndashTask<K, D>(tasks.subMap(0, half), threshold, registry);
-            final var second = new UndashTask<K, D>(tasks.subMap(half, tasks.size()), threshold, registry);
+            final var first = new UndashTask<U, D>(tasks.subMap(0, half), threshold, registry);
+            final var second = new UndashTask<U, D>(tasks.subMap(half, tasks.size()), threshold, registry);
             invokeAll(first, second);
             return combine(first.join(), second.join());
         }
     }
 
-    public final Int2ObjectSortedMap<K> combine(final Int2ObjectSortedMap<K> map, final Int2ObjectSortedMap<K> map2) {
+    public final Int2ObjectSortedMap<U> combine(final Int2ObjectSortedMap<U> map, final Int2ObjectSortedMap<U> map2) {
         map.putAll(map2);
         return map;
     }
 
-    protected final Int2ObjectSortedMap<K> computeDirectly() {
-        final var count = new Int2ObjectLinkedOpenHashMap<K>(tasks.size());
+    protected final Int2ObjectSortedMap<U> computeDirectly() {
+        final var count = new Int2ObjectLinkedOpenHashMap<U>(tasks.size());
         tasks.int2ObjectEntrySet().forEach(e -> count.put(e.getIntKey(), e.getValue().toUndash(registry)));
         return count;
     }
