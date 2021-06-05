@@ -43,7 +43,7 @@ import java.util.function.Predicate;
 public class DashRegistry {
     private static int totalTasks = 6;
     private static int tasksDone = 0;
-    private final Int2ObjectSortedMap<DashModel> models;
+    public Int2ObjectSortedMap<DashModel> models;
     public Map<Class<?>, FactoryType> apiFailed = new ConcurrentHashMap<>();
 
     public Int2ObjectSortedMap<BlockState> blockStatesOut;
@@ -56,15 +56,15 @@ public class DashRegistry {
     public Int2ObjectSortedMap<Property<?>> propertiesOut;
     public Int2ObjectSortedMap<Comparable<?>> propertyValuesOut;
 
-    public final Int2ObjectSortedMap<DashBlockState> blockStates;
-    public final Int2ObjectSortedMap<DashSprite> sprites;
-    public final Int2ObjectSortedMap<DashID> identifiers;
-    public final Int2ObjectSortedMap<DashFont> fonts;
-    public final Int2ObjectSortedMap<DashImage> images;
-    public final Int2ObjectSortedMap<DashPredicate> predicates;
-    private final Int2ObjectSortedMap<DashProperty> properties;
-    private final Int2ObjectSortedMap<DashPropertyValue> propertyValues;
-    private final List<Int2ObjectSortedMap<DashModel>> modelsToDeserialize;
+    public Int2ObjectSortedMap<DashBlockState> blockStates;
+    public Int2ObjectSortedMap<DashSprite> sprites;
+    public Int2ObjectSortedMap<DashID> identifiers;
+    public Int2ObjectSortedMap<DashFont> fonts;
+    public Int2ObjectSortedMap<DashImage> images;
+    public Int2ObjectSortedMap<DashPredicate> predicates;
+    public Int2ObjectSortedMap<DashProperty> properties;
+    public Int2ObjectSortedMap<DashPropertyValue> propertyValues;
+    public List<Int2ObjectSortedMap<DashModel>> modelsToDeserialize;
 
     private final DashLoader loader;
 
@@ -173,7 +173,7 @@ public class DashRegistry {
     public int createFontPointer(final Font font) {
         final var hash = font.hashCode();
         if (fonts.get(hash) == null) {
-            Factory<Font, DashFont> fontFactory = loader.api.fontMappings.get(font.getClass());
+            var fontFactory = loader.api.fontMappings.get(font.getClass());
             if (fontFactory != null) {
                 fonts.put(hash, fontFactory.toDash(font, this, null));
             } else {
@@ -187,10 +187,10 @@ public class DashRegistry {
     public final Pair<Integer, Integer> createPropertyPointer(final Property<?> property, final Comparable<?> value) {
         final var hashVal = value.hashCode();
         final var hashProp = property.hashCode();
-        final boolean hasPropVal = !propertyValues.containsKey(hashVal);
-        final boolean hasProp = !properties.containsKey(hashProp);
+        final var hasPropVal = !propertyValues.containsKey(hashVal);
+        final var hasProp = !properties.containsKey(hashProp);
         if (hasPropVal || hasProp) {
-            PropertyFactory propertyFactory = loader.api.propertyMappings.get(property.getClass());
+            final var propertyFactory = loader.api.propertyMappings.get(property.getClass());
             if (propertyFactory != null) {
                 if (hasPropVal) {
                     propertyValues.put(hashVal, propertyFactory.toDash(value, this, hashProp));

@@ -14,10 +14,10 @@ import net.quantumfusion.dashloader.mixin.accessor.StateAccessor;
 import net.quantumfusion.dashloader.util.PairMap;
 import org.apache.commons.lang3.tuple.Pair;
 
-public class DashBlockState implements Dashable {
+public class DashBlockState implements Dashable<BlockState> {
 
     @Serialize(order = 0)
-    public final Integer owner;
+    public final int owner;
 
     @Serialize(order = 1)
     @SerializeNullable()
@@ -31,7 +31,9 @@ public class DashBlockState implements Dashable {
     }
 
     public DashBlockState(BlockState blockState, DashRegistry registry) {
-        StateAccessor<Block, BlockState> accessState = ((StateAccessor<Block, BlockState>) blockState);
+        //noinspection unchecked
+        final var accessState = ((StateAccessor<Block, BlockState>) blockState);
+
         entriesEncoded = new PairMap<>();
         accessState.getEntries().forEach((property, comparable) -> {
             final Pair<Integer, Integer> propertyPointer = registry.createPropertyPointer(property, comparable);

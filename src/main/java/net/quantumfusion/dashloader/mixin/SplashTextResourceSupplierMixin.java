@@ -50,7 +50,7 @@ public class SplashTextResourceSupplierMixin {
                     }
 
                 }
-                DashLoader.getInstance().addSplashTextAssets(var7);
+                DashLoader.getInstance().setSplashTextAssets(var7);
                 cir.setReturnValue(var7);
             }
         } catch (IOException var36) {

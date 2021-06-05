@@ -91,7 +91,7 @@ public abstract class ParticleManagerMixin {
                 });
 
 
-                DashLoader.getInstance().addParticleManagerAssets(spriteAwareFactories, particleAtlasTexture);
+                DashLoader.getInstance().setParticleManagerAssets(spriteAwareFactories, particleAtlasTexture);
 
                 applyProfiler.pop();
                 applyProfiler.endTick();

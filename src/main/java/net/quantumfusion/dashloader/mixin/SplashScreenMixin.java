@@ -6,7 +6,7 @@ import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.quantumfusion.dashloader.DashLoader;
-import net.quantumfusion.dashloader.client.DashWindow;
+import net.quantumfusion.dashloader.client.DashScreen;
 import net.quantumfusion.dashloader.util.DashCacheState;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -34,7 +34,7 @@ public class SplashScreenMixin {
             ci.cancel();
         } else {
             this.client.setOverlay(null);
-            client.openScreen(new DashWindow(Text.of("dash")));
+            client.openScreen(new DashScreen(Text.of("dash")));
             ci.cancel();
         }
     }

@@ -14,11 +14,16 @@ import java.util.stream.Collectors;
 
 public class ThreadHelper {
     public static void exec(Runnable... runnables) {
-        final List<Future<Object>> futures = DashLoader.THREAD_POOL.invokeAll(Arrays.stream(runnables).map(Executors::callable).collect(Collectors.toList()));
+        final var futures = DashLoader.THREAD_POOL
+            .invokeAll(
+                Arrays.stream(runnables)
+                    .map(Executors::callable)
+                    .collect(Collectors.toList())
+            );
         sleepUntilTrue(() -> futures.stream().allMatch(Future::isDone));
     }
 
-    public static <U, D extends Dashable> Int2ObjectSortedMap<U> execParallel(Int2ObjectSortedMap<D> dashables, DashRegistry registry) {
+    public static <U, D extends Dashable<U>> Int2ObjectSortedMap<U> execParallel(Int2ObjectSortedMap<D> dashables, DashRegistry registry) {
         final var resultMap = new Int2ObjectLinkedOpenHashMap<U>((int) Math.ceil(dashables.size() / 0.75));
         resultMap.putAll(DashLoader.THREAD_POOL.invoke(new UndashTask<>(dashables, 100, registry)));
         return resultMap;
