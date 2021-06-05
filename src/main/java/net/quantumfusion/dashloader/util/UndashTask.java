@@ -1,5 +1,9 @@
 package net.quantumfusion.dashloader.util;
 
+import it.unimi.dsi.fastutil.ints.AbstractInt2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectSortedMap;
 import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.data.Dashable;
 import net.quantumfusion.dashloader.model.DashModel;
@@ -12,52 +16,40 @@ import java.util.Map;
 import java.util.concurrent.RecursiveAction;
 import java.util.concurrent.RecursiveTask;
 
-public class UndashTask<K, D extends Dashable> extends RecursiveTask<Collection<Map.Entry<Integer, K>>> {
-    private final List<Map.Entry<Integer, D>> tasks;
+public class UndashTask<K, D extends Dashable> extends RecursiveTask<Int2ObjectSortedMap<K>> {
+    private final Int2ObjectSortedMap<D> tasks;
     private final int threshold;
     private final DashRegistry registry;
 
 
-    public UndashTask(List<Map.Entry<Integer, D>> tasks, int threshold, DashRegistry registry) {
+    public UndashTask(Int2ObjectSortedMap<D> tasks, int threshold, DashRegistry registry) {
         this.tasks = tasks;
         this.threshold = threshold;
         this.registry = registry;
     }
 
-    public UndashTask<K, D>[] split(List<Map.Entry<Integer, D>> list, int size) {
-        final int half = (int) Math.ceil(size / 2f);
-        List<Map.Entry<Integer, D>> first = new ArrayList<>(half);
-        List<Map.Entry<Integer, D>> second = new ArrayList<>(half);
-        final int i1 = size / 2;
-        for (int i = 0; i < i1; i++)
-            first.add(list.get(i));
-        for (int i = i1; i < size; i++)
-            second.add(list.get(i));
-        return new UndashTask[]{new UndashTask<>(first, threshold, registry), new UndashTask<>(second, threshold, registry)};
-    }
-
     @Override
-    protected Collection<Map.Entry<Integer, K>> compute() {
+    protected Int2ObjectSortedMap<K> compute() {
         final int size = tasks.size();
         if (size < threshold) {
             return computeDirectly();
         } else {
-            final UndashTask<K, D>[] split = split(tasks, size);
-            final UndashTask<K, D> first = split[0];
-            final UndashTask<K, D> second = split[1];
+            final var half = size / 2;
+            final var first = new UndashTask<K, D>(tasks.subMap(0, half), threshold, registry);
+            final var second = new UndashTask<K, D>(tasks.subMap(half, tasks.size()), threshold, registry);
             invokeAll(first, second);
             return combine(first.join(), second.join());
         }
     }
 
-    public final Collection<Map.Entry<Integer, K>> combine(final Collection<Map.Entry<Integer, K>> list, final Collection<Map.Entry<Integer, K>> list2) {
-        list.addAll(list2);
-        return list;
+    public final Int2ObjectSortedMap<K> combine(final Int2ObjectSortedMap<K> map, final Int2ObjectSortedMap<K> map2) {
+        map.putAll(map2);
+        return map;
     }
 
-    protected final Collection<Map.Entry<Integer, K>> computeDirectly() {
-        final Collection<Map.Entry<Integer, K>> count = new ArrayList<>(tasks.size());
-        tasks.forEach(dashable -> count.add(Pair.of(dashable.getKey(), dashable.getValue().toUndash(registry))));
+    protected final Int2ObjectSortedMap<K> computeDirectly() {
+        final var count = new Int2ObjectLinkedOpenHashMap<K>(tasks.size());
+        tasks.int2ObjectEntrySet().forEach(e -> count.put(e.getIntKey(), e.getValue().toUndash(registry)));
         return count;
     }
 
@@ -74,13 +66,9 @@ public class UndashTask<K, D extends Dashable> extends RecursiveTask<Collection<
         }
 
         public final Pair<List<DashModel>, List<DashModel>> split(final List<DashModel> list, final int size) {
-            final List<DashModel> first = new ArrayList<>();
-            final List<DashModel> second = new ArrayList<>();
-            final int i1 = size / 2;
-            for (int i = 0; i < i1; i++)
-                first.add(list.get(i));
-            for (int i = i1; i < size; i++)
-                second.add(list.get(i));
+            final var half = size / 2;
+            final var first = list.subList(0, half);
+            final var second = list.subList(half, list.size());
             return Pair.of(first, second);
         }
 
