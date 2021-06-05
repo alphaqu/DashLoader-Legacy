@@ -188,20 +188,13 @@ public class DashLoader {
     }
 
     private void createDirectory() {
-        var configDir = CONFIG.resolve("quantumfusion/dashloader");
-
-        prepareAccess(configDir.toFile()).mkdirs();
-    }
-
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-    private File prepareAccess(File file) {
-        if (!file.canWrite()) {
-            file.setWritable(true);
+        var configDir = CONFIG.resolve("quantumfusion/dashloader").toFile();
+        if (!configDir.setWritable(true) && configDir.setReadable(true)) {
+            throw new DashException("Failed to prepare access for cache directory (" + configDir.getPath() + ")! Please check if you have the right permissions!");
         }
-        if (!file.canRead()) {
-            file.setReadable(true);
+        if (!configDir.mkdirs()) {
+            throw new DashException("Cannot create directory at " + configDir.getPath() + "!");
         }
-        return file;
     }
 
 
