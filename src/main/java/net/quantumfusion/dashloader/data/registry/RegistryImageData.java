@@ -11,9 +11,9 @@ public class RegistryImageData {
     @Serialize(order = 0)
     @SerializeNullable(path = {0})
     @SerializeNullable(path = {1})
-    public Map<Long, DashImage> images;
+    public Map<Integer, DashImage> images;
 
-    public RegistryImageData(@Deserialize("images") Map<Long, DashImage> images) {
+    public RegistryImageData(@Deserialize("images") Map<Integer, DashImage> images) {
         this.images = images;
     }
 }

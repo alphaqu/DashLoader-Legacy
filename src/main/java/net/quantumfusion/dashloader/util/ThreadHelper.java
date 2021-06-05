@@ -18,9 +18,9 @@ public class ThreadHelper {
         sleepUntilTrue(() -> futures.stream().allMatch(Future::isDone));
     }
 
-    public static <V, D extends Dashable> Map<Long, V> execParallel(Map<Long, D> dashables, DashRegistry registry) {
-        final Map<Long, V> answerMap = new HashMap<>((int) Math.ceil(dashables.size() / 0.75));
-        final Collection<Map.Entry<Long, V>> invoke = DashLoader.THREAD_POOL.invoke(new UndashTask<>(new ArrayList<>(dashables.entrySet()), 100, registry));
+    public static <V, D extends Dashable> Map<Integer, V> execParallel(Map<Integer, D> dashables, DashRegistry registry) {
+        final Map<Integer, V> answerMap = new HashMap<>((int) Math.ceil(dashables.size() / 0.75));
+        final Collection<Map.Entry<Integer, V>> invoke = DashLoader.THREAD_POOL.invoke(new UndashTask<>(new ArrayList<>(dashables.entrySet()), 100, registry));
         invoke.forEach((answer) -> answerMap.put(answer.getKey(), answer.getValue()));
         return answerMap;
     }

@@ -11,9 +11,9 @@ public class RegistryBlockStateData {
     @Serialize(order = 0)
     @SerializeNullable(path = {1})
     @SerializeNullable(path = {0})
-    public Map<Long, DashBlockState> blockstates;
+    public Map<Integer, DashBlockState> blockstates;
 
-    public RegistryBlockStateData(@Deserialize("blockstates") Map<Long, DashBlockState> blockstates) {
+    public RegistryBlockStateData(@Deserialize("blockstates") Map<Integer, DashBlockState> blockstates) {
         this.blockstates = blockstates;
     }
 }

@@ -17,9 +17,9 @@ public class DashBlockStateData {
     @Serialize(order = 0)
     @SerializeNullable(path = {1})
     @SerializeNullable(path = {0})
-    public Map<Long, Integer> blockstates;
+    public Map<Integer, Integer> blockstates;
 
-    public DashBlockStateData(@Deserialize("blockstates") Map<Long, Integer> blockstates) {
+    public DashBlockStateData(@Deserialize("blockstates") Map<Integer, Integer> blockstates) {
         this.blockstates = blockstates;
     }
 

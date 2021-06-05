@@ -24,7 +24,6 @@ import net.quantumfusion.dashloader.data.registry.*;
 import net.quantumfusion.dashloader.font.DashFont;
 import net.quantumfusion.dashloader.image.DashImage;
 import net.quantumfusion.dashloader.image.DashSprite;
-import net.quantumfusion.dashloader.mixin.accessor.NativeImageAccessor;
 import net.quantumfusion.dashloader.model.DashModel;
 import net.quantumfusion.dashloader.model.DashModelIdentifier;
 import net.quantumfusion.dashloader.model.predicates.DashPredicate;
@@ -44,40 +43,40 @@ public class DashRegistry {
 
     private static int totalTasks = 6;
     private static int tasksDone = 0;
-    private final Map<Long, DashModel> models;
+    private final Map<Integer, DashModel> models;
     public Map<Class, FactoryType> apiFailed = new ConcurrentHashMap<>();
-    public Map<Long, BlockState> blockstatesOut;
-    public Map<Long, Predicate<BlockState>> predicateOut;
-    public Map<Long, Identifier> identifiersOut;
-    public Map<Long, BakedModel> modelsOut;
-    public Map<Long, Sprite> spritesOut;
-    public Map<Long, Font> fontsOut;
-    public Map<Long, NativeImage> imagesOut;
-    public Map<Long, Property<?>> propertiesOut;
-    public Map<Long, Comparable<?>> propertyValuesOut;
+    public Map<Integer, BlockState> blockstatesOut;
+    public Map<Integer, Predicate<BlockState>> predicateOut;
+    public Map<Integer, Identifier> identifiersOut;
+    public Map<Integer, BakedModel> modelsOut;
+    public Map<Integer, Sprite> spritesOut;
+    public Map<Integer, Font> fontsOut;
+    public Map<Integer, NativeImage> imagesOut;
+    public Map<Integer, Property<?>> propertiesOut;
+    public Map<Integer, Comparable<?>> propertyValuesOut;
     DashLoader loader;
-    private Map<Long, DashBlockState> blockstates;
-    private Map<Long, DashSprite> sprites;
-    private Map<Long, DashID> identifiers;
-    private Map<Long, DashFont> fonts;
-    private Map<Long, DashImage> images;
-    private Map<Long, DashPredicate> predicates;
+    private Map<Integer, DashBlockState> blockstates;
+    private Map<Integer, DashSprite> sprites;
+    private Map<Integer, DashID> identifiers;
+    private Map<Integer, DashFont> fonts;
+    private Map<Integer, DashImage> images;
+    private Map<Integer, DashPredicate> predicates;
 
-    private Map<Long, DashProperty> properties;
-    private Map<Long, DashPropertyValue> propertyValues;
+    private Map<Integer, DashProperty> properties;
+    private Map<Integer, DashPropertyValue> propertyValues;
 
-    private List<Map<Long, DashModel>> modelsToDeserialize;
+    private List<Map<Integer, DashModel>> modelsToDeserialize;
 
 
-    public DashRegistry(Map<Long, DashBlockState> blockstates,
-                        Map<Long, DashSprite> sprites,
-                        Map<Long, DashID> identifiers,
-                        Map<Long, DashModel> models,
-                        Map<Long, DashFont> fonts,
-                        Map<Long, DashImage> images,
-                        Map<Long, DashPredicate> predicates,
-                        Map<Long, DashProperty> properties,
-                        Map<Long, DashPropertyValue> propertyValues) {
+    public DashRegistry(Map<Integer, DashBlockState> blockstates,
+                        Map<Integer, DashSprite> sprites,
+                        Map<Integer, DashID> identifiers,
+                        Map<Integer, DashModel> models,
+                        Map<Integer, DashFont> fonts,
+                        Map<Integer, DashImage> images,
+                        Map<Integer, DashPredicate> predicates,
+                        Map<Integer, DashProperty> properties,
+                        Map<Integer, DashPropertyValue> propertyValues) {
         this.blockstates = blockstates;
         this.sprites = sprites;
         this.identifiers = identifiers;
@@ -107,7 +106,7 @@ public class DashRegistry {
         return new RegistryBlockStateData(blockstates);
     }
 
-    public void setBlockstates(Map<Long, DashBlockState> blockstates) {
+    public void setBlockstates(Map<Integer, DashBlockState> blockstates) {
         this.blockstates = blockstates;
     }
 
@@ -115,7 +114,7 @@ public class DashRegistry {
         return new RegistrySpriteData(sprites);
     }
 
-    public void setSprites(Map<Long, DashSprite> sprites) {
+    public void setSprites(Map<Integer, DashSprite> sprites) {
         this.sprites = sprites;
     }
 
@@ -123,21 +122,21 @@ public class DashRegistry {
         return new RegistryIdentifierData(identifiers);
     }
 
-    public void setIdentifiers(Map<Long, DashID> identifiers) {
+    public void setIdentifiers(Map<Integer, DashID> identifiers) {
         this.identifiers = identifiers;
     }
 
     public RegistryModelData getModels() {
-        HashMap<Integer, Map<Long, DashModel>> modelsToAdd = new HashMap<>();
-        models.forEach((aLong, dashModel) -> {
+        HashMap<Integer, Map<Integer, DashModel>> modelsToAdd = new HashMap<>();
+        models.forEach((aInteger, dashModel) -> {
 
-            final Map<Long, DashModel> longDashModelMap = modelsToAdd.get(dashModel.getStage());
-            if (longDashModelMap == null) {
-                final HashMap<Long, DashModel> element = new HashMap<>();
-                element.put(aLong, dashModel);
+            final Map<Integer, DashModel> IntegerDashModelMap = modelsToAdd.get(dashModel.getStage());
+            if (IntegerDashModelMap == null) {
+                final HashMap<Integer, DashModel> element = new HashMap<>();
+                element.put(aInteger, dashModel);
                 modelsToAdd.put(dashModel.getStage(), element);
             } else {
-                longDashModelMap.put(aLong, dashModel);
+                IntegerDashModelMap.put(aInteger, dashModel);
             }
         });
         modelsToDeserialize = new ArrayList<>();
@@ -153,7 +152,7 @@ public class DashRegistry {
         return new RegistryFontData(fonts);
     }
 
-    public void setFonts(Map<Long, DashFont> fonts) {
+    public void setFonts(Map<Integer, DashFont> fonts) {
         this.fonts = fonts;
     }
 
@@ -161,7 +160,7 @@ public class DashRegistry {
         return new RegistryImageData(images);
     }
 
-    public void setImages(Map<Long, DashImage> images) {
+    public void setImages(Map<Integer, DashImage> images) {
         this.images = images;
     }
 
@@ -169,7 +168,7 @@ public class DashRegistry {
         return new RegistryPredicateData(predicates);
     }
 
-    public void setPredicates(Map<Long, DashPredicate> predicates) {
+    public void setPredicates(Map<Integer, DashPredicate> predicates) {
         this.predicates = predicates;
     }
 
@@ -177,7 +176,7 @@ public class DashRegistry {
         return new RegistryPropertyData(properties);
     }
 
-    public void setProperties(Map<Long, DashProperty> properties) {
+    public void setProperties(Map<Integer, DashProperty> properties) {
         this.properties = properties;
     }
 
@@ -185,23 +184,23 @@ public class DashRegistry {
         return new RegistryPropertyValueData(propertyValues);
     }
 
-    public void setPropertyValues(Map<Long, DashPropertyValue> propertyValues) {
+    public void setPropertyValues(Map<Integer, DashPropertyValue> propertyValues) {
         this.propertyValues = propertyValues;
     }
 
-    public long createBlockStatePointer(BlockState blockState) {
-        final long hash = blockState.hashCode();
+    public Integer createBlockStatePointer(BlockState blockState) {
+        final Integer hash = blockState.hashCode();
         if (blockstates.get(hash) == null) {
             blockstates.put(hash, new DashBlockState(blockState, this));
         }
         return hash;
     }
 
-    public final <K> Long createModelPointer(final BakedModel bakedModel) {
+    public final Integer createModelPointer(final BakedModel bakedModel) {
         if (bakedModel == null) {
             return null;
         }
-        final long hash = bakedModel.hashCode();
+        final Integer hash = bakedModel.hashCode();
         if (models.get(hash) == null) {
             Factory<BakedModel, DashModel> model = loader.api.modelMappings.get(bakedModel.getClass());
             if (model != null) {
@@ -213,16 +212,16 @@ public class DashRegistry {
         return hash;
     }
 
-    public final long createSpritePointer(final Sprite sprite) {
-        final long hash = sprite.hashCode();
+    public final Integer createSpritePointer(final Sprite sprite) {
+        final Integer hash = sprite.hashCode();
         if (sprites.get(hash) == null) {
             sprites.put(hash, new DashSprite(sprite, this));
         }
         return hash;
     }
 
-    public final long createIdentifierPointer(final Identifier identifier) {
-        final long hash = identifier.hashCode();
+    public final Integer createIdentifierPointer(final Identifier identifier) {
+        final Integer hash = identifier.hashCode();
         if (identifiers.get(hash) == null) {
             if (identifier instanceof ModelIdentifier) {
                 identifiers.put(hash, new DashModelIdentifier((ModelIdentifier) identifier));
@@ -233,16 +232,16 @@ public class DashRegistry {
         return hash;
     }
 
-    public final long createImagePointer(final NativeImage image) {
-        final long hash = ((NativeImageAccessor) (Object) image).getPointer();
+    public final Integer createImagePointer(final NativeImage image) {
+        final Integer hash = image.hashCode();
         if (images.get(hash) == null) {
             images.put(hash, new DashImage(image));
         }
         return hash;
     }
 
-    public final long createPredicatePointer(final MultipartModelSelector selector, final StateManager<Block, BlockState> stateManager) {
-        final long hash = selector.hashCode();
+    public final Integer createPredicatePointer(final MultipartModelSelector selector, final StateManager<Block, BlockState> stateManager) {
+        final Integer hash = selector.hashCode();
         if (predicates.get(hash) == null) {
             predicates.put(hash, obtainPredicate(selector, stateManager));
         }
@@ -265,8 +264,8 @@ public class DashRegistry {
     }
 
 
-    public final long createFontPointer(final Font font) {
-        final long hash = font.hashCode();
+    public final Integer createFontPointer(final Font font) {
+        final Integer hash = font.hashCode();
         if (fonts.get(hash) == null) {
             Factory<Font, DashFont> fontFactory = loader.api.fontMappings.get(font.getClass());
             if (fontFactory != null) {
@@ -278,9 +277,9 @@ public class DashRegistry {
         return hash;
     }
 
-    public final Pair<Long, Long> createPropertyPointer(final Property<?> property, final Comparable<?> value) {
-        final long hashV = value.hashCode();
-        final long hashP = property.hashCode();
+    public final Pair<Integer, Integer> createPropertyPointer(final Property<?> property, final Comparable<?> value) {
+        final Integer hashV = value.hashCode();
+        final Integer hashP = property.hashCode();
         final boolean propVal = !propertyValues.containsKey(hashV);
         final boolean prop = !properties.containsKey(hashP);
         if (propVal || prop) {
@@ -299,7 +298,7 @@ public class DashRegistry {
         return Pair.of(hashP, hashV);
     }
 
-    public final BlockState getBlockstate(final Long pointer) {
+    public final BlockState getBlockstate(final Integer pointer) {
         final BlockState blockstate = blockstatesOut.get(pointer);
         if (blockstate == null) {
             DashLoader.LOGGER.error("Blockstate not found in data. PINTR: " + pointer);
@@ -307,7 +306,7 @@ public class DashRegistry {
         return blockstate;
     }
 
-    public final Sprite getSprite(final Long pointer) {
+    public final Sprite getSprite(final Integer pointer) {
         final Sprite sprite = spritesOut.get(pointer);
         if (sprite == null) {
             DashLoader.LOGGER.error("Sprite not found in data. PINTR: " + pointer);
@@ -315,7 +314,7 @@ public class DashRegistry {
         return sprite;
     }
 
-    public final Identifier getIdentifier(final Long pointer) {
+    public final Identifier getIdentifier(final Integer pointer) {
         final Identifier identifier = identifiersOut.get(pointer);
         if (identifier == null) {
             DashLoader.LOGGER.error("Identifier not found in data. PINTR: " + pointer);
@@ -323,7 +322,7 @@ public class DashRegistry {
         return identifier;
     }
 
-    public final BakedModel getModel(final Long pointer) {
+    public final BakedModel getModel(final Integer pointer) {
         final BakedModel bakedModel = modelsOut.get(pointer);
         if (bakedModel == null) {
             DashLoader.LOGGER.error("Model not found in data. PINTR: " + pointer);
@@ -331,7 +330,7 @@ public class DashRegistry {
         return bakedModel;
     }
 
-    public final Font getFont(final Long pointer) {
+    public final Font getFont(final Integer pointer) {
         final Font font = fontsOut.get(pointer);
         if (font == null) {
             DashLoader.LOGGER.error("Font not found in data. PINTR: " + pointer);
@@ -339,7 +338,7 @@ public class DashRegistry {
         return font;
     }
 
-    public final NativeImage getImage(final Long pointer) {
+    public final NativeImage getImage(final Integer pointer) {
         final NativeImage image = imagesOut.get(pointer);
         if (image == null) {
             DashLoader.LOGGER.error("NativeImage not found in data. PINTR: " + pointer);
@@ -347,7 +346,7 @@ public class DashRegistry {
         return image;
     }
 
-    public final Predicate<BlockState> getPredicate(final Long pointer) {
+    public final Predicate<BlockState> getPredicate(final Integer pointer) {
         final Predicate<BlockState> predicate = predicateOut.get(pointer);
         if (predicate == null) {
             DashLoader.LOGGER.error("Predicate not found in data. PINTR: " + pointer);
@@ -355,7 +354,7 @@ public class DashRegistry {
         return predicate;
     }
 
-    public final Pair<Property<?>, Comparable<?>> getProperty(final Long propertyPointer, final Long valuePointer) {
+    public final Pair<Property<?>, Comparable<?>> getProperty(final Integer propertyPointer, final Integer valuePointer) {
         final Property<?> property = propertiesOut.get(propertyPointer);
         final Comparable<?> value = propertyValuesOut.get(valuePointer);
         if (property == null || value == null) {

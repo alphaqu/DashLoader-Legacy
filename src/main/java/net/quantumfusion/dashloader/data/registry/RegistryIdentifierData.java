@@ -17,9 +17,9 @@ public class RegistryIdentifierData {
             DashModelIdentifier.class
     })
     @SerializeNullable(path = {0})
-    public Map<Long, DashID> identifiers;
+    public Map<Integer, DashID> identifiers;
 
-    public RegistryIdentifierData(@Deserialize("identifiers") Map<Long, DashID> identifiers) {
+    public RegistryIdentifierData(@Deserialize("identifiers") Map<Integer, DashID> identifiers) {
         this.identifiers = identifiers;
     }
 }

@@ -2,7 +2,6 @@ package net.quantumfusion.dashloader.font;
 
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
-import io.activej.serializer.annotations.SerializeNullable;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.client.font.BitmapFont;
 import net.quantumfusion.dashloader.DashRegistry;
@@ -11,13 +10,11 @@ import net.quantumfusion.dashloader.util.PairMap;
 
 public class DashBitmapFont implements DashFont {
     @Serialize(order = 0)
-    public final Long image;
+    public final Integer image;
     @Serialize(order = 1)
-    @SerializeNullable(path = {0})
-    @SerializeNullable(path = {1})
     public PairMap<Integer, DashBitmapFontGlyph> glyphs;
 
-    public DashBitmapFont(@Deserialize("image") Long image,
+    public DashBitmapFont(@Deserialize("image") Integer image,
                           @Deserialize("glyphs") PairMap<Integer, DashBitmapFontGlyph> glyphs) {
         this.image = image;
         this.glyphs = glyphs;

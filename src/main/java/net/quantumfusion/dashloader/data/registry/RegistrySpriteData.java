@@ -11,9 +11,9 @@ public class RegistrySpriteData {
     @Serialize(order = 0)
     @SerializeNullable(path = {1})
     @SerializeNullable(path = {0})
-    public Map<Long, DashSprite> sprites;
+    public Map<Integer, DashSprite> sprites;
 
-    public RegistrySpriteData(@Deserialize("sprites") Map<Long, DashSprite> sprites) {
+    public RegistrySpriteData(@Deserialize("sprites") Map<Integer, DashSprite> sprites) {
         this.sprites = sprites;
     }
 }
