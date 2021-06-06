@@ -35,6 +35,7 @@
     "minecraft": "*"
   },
   "breaks": {
+    "adorn": "*",
     "optifabric": "*",
     "idontlikeoptifabric": "*",
     "sodium": "<=0.1.0",
