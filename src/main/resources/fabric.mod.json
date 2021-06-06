@@ -38,6 +38,7 @@
     "adorn": "*",
     "connected_block_textures": "*",
     "enhancedblockentities": "*",
+    "indrev": "*",
     "optifabric": "*",
     "idontlikeoptifabric": "*",
     "sodium": "<=0.1.0",
