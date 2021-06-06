@@ -41,7 +41,6 @@
     "indrev": "*",
     "lambdabettergrass": "*",
     "optifabric": "*",
-    "idontlikeoptifabric": "*",
     "sodium": "<=0.1.0",
     "hydrogen": "*"
   }
