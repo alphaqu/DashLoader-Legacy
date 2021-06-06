@@ -37,6 +37,7 @@
   "breaks": {
     "adorn": "*",
     "connected_block_textures": "*",
+    "enhancedblockentities": "*",
     "optifabric": "*",
     "idontlikeoptifabric": "*",
     "sodium": "<=0.1.0",
