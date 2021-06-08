@@ -185,12 +185,18 @@ public class DashLoader {
         // we have to use old IO here unfortunately, since NIO doesn't have a very nice interface for setting
         // permissions portably - leocth
 
-        var configDir = CONFIG.resolve("quantumfusion/dashloader").toFile();
-        if (!configDir.setWritable(true) && configDir.setReadable(true)) {
+        final var configDir = CONFIG.resolve("quantumfusion/dashloader").toFile();
+
+        final var writeable = configDir.canWrite() || configDir.setWritable(true);
+        final var readable = configDir.canRead() || configDir.setReadable(true);
+
+        if (writeable && readable) {
+            final var existsOrCreated = configDir.exists() || configDir.mkdirs();
+            if (!existsOrCreated) {
+                throw new DashException("Cannot create directory at " + configDir.getPath() + "!");
+            }
+        } else {
             throw new DashException("Failed to prepare access for cache directory (" + configDir.getPath() + ")! Please check if you have the right permissions!");
-        }
-        if (!configDir.mkdirs()) {
-            throw new DashException("Cannot create directory at " + configDir.getPath() + "!");
         }
     }
 
@@ -370,8 +376,9 @@ public class DashLoader {
             task = "Serializing " + name;
             LOGGER.info("\tStarting {} Serialization.", name);
             StreamOutput output = StreamOutput.create(Files.newOutputStream(path, StandardOpenOption.CREATE, StandardOpenOption.WRITE));
+            var serializer = serializers.get(clazz.getClass());
             //noinspection unchecked
-            output.serialize(serializers.get(clazz.getClass()), clazz);
+            output.serialize(serializer, clazz);
             output.close();
             LOGGER.info("\tFinished {} Serialization.", name);
         } catch (IOException e) {

@@ -6,7 +6,7 @@ import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.quantumfusion.dashloader.DashLoader;
-import net.quantumfusion.dashloader.client.DashScreen;
+import net.quantumfusion.dashloader.client.DashWindow;
 import net.quantumfusion.dashloader.util.DashCacheState;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -28,14 +28,13 @@ public class SplashScreenMixin {
             at = @At(value = "INVOKE", target = "Lnet/minecraft/resource/ResourceReload;throwException()V", shift = At.Shift.BEFORE), cancellable = true)
     private void render(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo ci) {
         if (DashLoader.getInstance().state == DashCacheState.LOADED && client.world == null) {
-            this.client.setOverlay(null);
-            this.client.openScreen(new TitleScreen(false));
-            this.client.currentScreen.init(this.client, this.client.getWindow().getScaledWidth(), this.client.getWindow().getScaledHeight());
-            ci.cancel();
+            client.setOverlay(null);
+            client.openScreen(new TitleScreen(false));
+            client.currentScreen.init(this.client, this.client.getWindow().getScaledWidth(), this.client.getWindow().getScaledHeight());
         } else {
             this.client.setOverlay(null);
-            client.openScreen(new DashScreen(Text.of("dash")));
-            ci.cancel();
+            client.openScreen(new DashWindow(Text.of("dash")));
         }
+        ci.cancel();
     }
 }

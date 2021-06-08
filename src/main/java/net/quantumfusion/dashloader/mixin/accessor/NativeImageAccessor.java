@@ -16,4 +16,7 @@ public interface NativeImageAccessor {
 
     @Accessor
     long getPointer();
+
+    @Accessor
+    int getWidth();
 }

@@ -11,7 +11,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MainMixin {
 
     @Inject(method = "main([Ljava/lang/String;)V",
-            at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;beginInitialization()V", shift = At.Shift.AFTER), cancellable = true)
+            at = @At(
+                value = "INVOKE",
+                target = "Lcom/mojang/blaze3d/systems/RenderSystem;beginInitialization()V",
+                shift = At.Shift.AFTER
+            ))
     private static void main(String[] args, CallbackInfo ci) {
         DashLoader loader = new DashLoader(Thread.currentThread().getContextClassLoader());
         loader.reload();

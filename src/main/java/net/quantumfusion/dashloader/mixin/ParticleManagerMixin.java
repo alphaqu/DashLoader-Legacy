@@ -18,10 +18,13 @@ import net.quantumfusion.dashloader.mixin.accessor.ParticleManagerSimpleSpritePr
 import org.apache.logging.log4j.LogManager;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import java.util.Collection;
 import java.util.List;
@@ -49,19 +52,39 @@ public abstract class ParticleManagerMixin {
     @Final
     private Map<ParticleTextureSheet, Queue<Particle>> particles;
 
-    @Inject(method = "reload(Lnet/minecraft/resource/ResourceReloader$Synchronizer;Lnet/minecraft/resource/ResourceManager;Lnet/minecraft/util/profiler/Profiler;Lnet/minecraft/util/profiler/Profiler;Ljava/util/concurrent/Executor;Ljava/util/concurrent/Executor;)Ljava/util/concurrent/CompletableFuture;",
-            at = @At(value = "HEAD"), cancellable = true)
-    private void reloadParticlesFast(ResourceReloader.Synchronizer synchronizer, ResourceManager manager, Profiler prepareProfiler, Profiler applyProfiler, Executor prepareExecutor, Executor applyExecutor, CallbackInfoReturnable<CompletableFuture<Void>> cir) {
+    /**
+     * @author alphaqu, leocth
+     * @reason DashLoader needs to replace the resource loading process completely. Thus, an overwrite is needed.
+     */
+    //TODO: consider splitting this into two injects instead of copying the entire damn thing
+    /*
+
+    @Overwrite
+    public CompletableFuture<Void> reload(ResourceReloader.Synchronizer synchronizer, ResourceManager manager, Profiler prepareProfiler, Profiler applyProfiler, Executor prepareExecutor, Executor applyExecutor) {
         if (DashLoader.getInstance().getParticlesOut() != null) {
             LogManager.getLogger().info("Particles loading");
-            cir.setReturnValue(CompletableFuture.runAsync(() -> DashLoader.getInstance().getParticlesOut().forEach((identifier, sprites) -> spriteAwareFactories.get(identifier).setSprites(sprites))).thenCompose(synchronizer::whenPrepared));
+            return CompletableFuture.runAsync(
+                () -> DashLoader.getInstance()
+                        .getParticlesOut()
+                        .forEach((identifier, sprites) ->
+                            spriteAwareFactories.get(identifier).setSprites(sprites)
+                        )
+            ).thenCompose(synchronizer::whenPrepared);
         } else {
             Map<Identifier, List<Identifier>> map = Maps.newConcurrentMap();
-            CompletableFuture<?>[] completableFutures = Registry.PARTICLE_TYPE.getIds().stream().map((identifier)
-                    -> CompletableFuture.runAsync(()
-                    -> this.loadTextureList(manager, identifier, map), prepareExecutor)).toArray(CompletableFuture<?>[]::new);
-            CompletableFuture<?> var10000 = CompletableFuture.allOf(completableFutures).thenApplyAsync((void_)
-                    -> {
+
+            var completableFutures=
+                Registry.PARTICLE_TYPE.getIds()
+                    .stream()
+                    .map(id ->
+                        CompletableFuture.runAsync(
+                            () -> this.loadTextureList(manager, id, map),
+                            prepareExecutor
+                        )
+                    )
+                    .toArray(CompletableFuture<?>[]::new);
+
+            CompletableFuture<?> var10000 = CompletableFuture.allOf(completableFutures).thenApplyAsync(fut -> {
                 prepareProfiler.startTick();
                 prepareProfiler.push("stitching");
                 SpriteAtlasTexture.Data data = this.particleAtlasTexture.stitch(manager, map.values().stream().flatMap(Collection::stream), prepareProfiler, 0);
@@ -69,6 +92,7 @@ public abstract class ParticleManagerMixin {
                 prepareProfiler.endTick();
                 return data;
             }, prepareExecutor);
+
             cir.setReturnValue(var10000.thenCompose(synchronizer::whenPrepared).thenAcceptAsync((data) -> {
                 LogManager.getLogger().info("Particle Apply");
                 this.particles.clear();
@@ -91,12 +115,59 @@ public abstract class ParticleManagerMixin {
                 });
 
 
-                DashLoader.getInstance().setParticleManagerAssets(spriteAwareFactories, particleAtlasTexture);
 
                 applyProfiler.pop();
                 applyProfiler.endTick();
             }, applyExecutor));
         }
         cir.cancel();
+    }
+    */
+
+    @Inject(
+        method = "reload",
+        at = @At("HEAD"),
+        cancellable = true
+    )
+    private void onLambdaThenAcceptAsync(
+        ResourceReloader.Synchronizer synchronizer,
+        ResourceManager manager,
+        Profiler prepareProfiler,
+        Profiler applyProfiler,
+        Executor prepareExecutor,
+        Executor applyExecutor,
+        CallbackInfoReturnable<CompletableFuture<Void>> cir
+    ) {
+        final var dashLoader = DashLoader.getInstance();
+        if (dashLoader.getParticlesOut() != null) {
+            DashLoader.LOGGER.info("Particles loading");
+            cir.setReturnValue(
+                CompletableFuture.runAsync(
+                    () -> dashLoader
+                        .getParticlesOut()
+                        .forEach((identifier, sprites) ->
+                            spriteAwareFactories.get(identifier).setSprites(sprites)
+                        )
+                ).thenCompose(synchronizer::whenPrepared)
+            );
+        }
+    }
+
+    @SuppressWarnings("UnresolvedMixinReference") // MCDev doesn't recognize synthetic methods lol
+    @Inject(
+        method = "method_18831",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/util/profiler/Profiler;pop()V",
+            ordinal = 0
+        )
+    )
+    private void onLambdaThenAcceptAsync(
+        Profiler profiler,
+        Map<Identifier, List<Identifier>> idsMap,
+        SpriteAtlasTexture.Data data,
+        CallbackInfo ci
+    ) {
+        DashLoader.getInstance().setParticleManagerAssets(spriteAwareFactories, particleAtlasTexture);
     }
 }
