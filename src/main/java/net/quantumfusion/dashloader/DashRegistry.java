@@ -1,9 +1,11 @@
 package net.quantumfusion.dashloader;
 
+import it.unimi.dsi.fastutil.ints.*;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.font.Font;
 import net.minecraft.client.render.model.BakedModel;
+import net.minecraft.client.render.model.MultipartBakedModel;
 import net.minecraft.client.render.model.json.MultipartModelSelector;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.Sprite;
@@ -13,7 +15,6 @@ import net.minecraft.state.property.Property;
 import net.minecraft.util.Identifier;
 import net.quantumfusion.dashloader.api.Factory;
 import net.quantumfusion.dashloader.api.FactoryType;
-import net.quantumfusion.dashloader.api.predicate.PredicateFactory;
 import net.quantumfusion.dashloader.api.property.PropertyFactory;
 import net.quantumfusion.dashloader.blockstate.DashBlockState;
 import net.quantumfusion.dashloader.blockstate.property.DashProperty;
@@ -36,174 +37,86 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 
 public class DashRegistry {
-
-
     private static int totalTasks = 6;
     private static int tasksDone = 0;
-    private final Map<Integer, DashModel> models;
-    public Map<Class, FactoryType> apiFailed = new ConcurrentHashMap<>();
-    public Map<Integer, BlockState> blockstatesOut;
-    public Map<Integer, Predicate<BlockState>> predicateOut;
-    public Map<Integer, Identifier> identifiersOut;
-    public Map<Integer, BakedModel> modelsOut;
-    public Map<Integer, Sprite> spritesOut;
-    public Map<Integer, Font> fontsOut;
-    public Map<Integer, NativeImage> imagesOut;
-    public Map<Integer, Property<?>> propertiesOut;
-    public Map<Integer, Comparable<?>> propertyValuesOut;
-    DashLoader loader;
-    private Map<Integer, DashBlockState> blockstates;
-    private Map<Integer, DashSprite> sprites;
-    private Map<Integer, DashID> identifiers;
-    private Map<Integer, DashFont> fonts;
-    private Map<Integer, DashImage> images;
-    private Map<Integer, DashPredicate> predicates;
+    public Int2ObjectSortedMap<DashModel> models;
+    public Map<Class<?>, FactoryType> apiFailed = new ConcurrentHashMap<>();
 
-    private Map<Integer, DashProperty> properties;
-    private Map<Integer, DashPropertyValue> propertyValues;
+    public Int2ObjectSortedMap<BlockState> blockStatesOut;
+    public Int2ObjectSortedMap<Predicate<BlockState>> predicatesOut;
+    public Int2ObjectSortedMap<Identifier> identifiersOut;
+    public Int2ObjectSortedMap<BakedModel> modelsOut;
+    public Int2ObjectSortedMap<Sprite> spritesOut;
+    public Int2ObjectSortedMap<Font> fontsOut;
+    public Int2ObjectSortedMap<NativeImage> imagesOut;
+    public Int2ObjectSortedMap<Property<?>> propertiesOut;
+    public Int2ObjectSortedMap<Comparable<?>> propertyValuesOut;
 
-    private List<Map<Integer, DashModel>> modelsToDeserialize;
+    public Int2ObjectSortedMap<DashBlockState> blockStates;
+    public Int2ObjectSortedMap<DashSprite> sprites;
+    public Int2ObjectSortedMap<DashID> identifiers;
+    public Int2ObjectSortedMap<DashFont> fonts;
+    public Int2ObjectSortedMap<DashImage> images;
+    public Int2ObjectSortedMap<DashPredicate> predicates;
+    public Int2ObjectSortedMap<DashProperty> properties;
+    public Int2ObjectSortedMap<DashPropertyValue> propertyValues;
+    public List<Int2ObjectSortedMap<DashModel>> modelsToDeserialize;
 
-
-    public DashRegistry(Map<Integer, DashBlockState> blockstates,
-                        Map<Integer, DashSprite> sprites,
-                        Map<Integer, DashID> identifiers,
-                        Map<Integer, DashModel> models,
-                        Map<Integer, DashFont> fonts,
-                        Map<Integer, DashImage> images,
-                        Map<Integer, DashPredicate> predicates,
-                        Map<Integer, DashProperty> properties,
-                        Map<Integer, DashPropertyValue> propertyValues) {
-        this.blockstates = blockstates;
-        this.sprites = sprites;
-        this.identifiers = identifiers;
-        this.models = models;
-        this.fonts = fonts;
-        this.images = images;
-        this.predicates = predicates;
-        this.properties = properties;
-        this.propertyValues = propertyValues;
-    }
+    private final DashLoader loader;
 
     public DashRegistry(DashLoader loader) {
-        blockstates = new HashMap<>();
-        sprites = new HashMap<>();
-        identifiers = new HashMap<>();
-        models = new HashMap<>();
-        fonts = new HashMap<>();
-        predicates = new HashMap<>();
-        images = new HashMap<>();
-        properties = new HashMap<>();
-        propertyValues = new HashMap<>();
+        blockStates = new Int2ObjectLinkedOpenHashMap<>();
+        sprites = new Int2ObjectLinkedOpenHashMap<>();
+        identifiers = new Int2ObjectLinkedOpenHashMap<>();
+        models = new Int2ObjectLinkedOpenHashMap<>();
+        fonts = new Int2ObjectLinkedOpenHashMap<>();
+        predicates = new Int2ObjectLinkedOpenHashMap<>();
+        images = new Int2ObjectLinkedOpenHashMap<>();
+        properties = new Int2ObjectLinkedOpenHashMap<>();
+        propertyValues = new Int2ObjectLinkedOpenHashMap<>();
         modelsToDeserialize = new ArrayList<>();
         this.loader = loader;
     }
 
-    public RegistryBlockStateData getBlockstates() {
-        return new RegistryBlockStateData(blockstates);
-    }
+    public RegistryBlockStateData makeBlockStatesData() { return new RegistryBlockStateData(blockStates); }
+    public RegistrySpriteData makeSpritesData() { return new RegistrySpriteData(sprites); }
+    public RegistryIdentifierData makeIdentifiersData() { return new RegistryIdentifierData(identifiers); }
+    public RegistryModelData makeModelsData() {
+        final var modelsToAdd = new Int2ObjectLinkedOpenHashMap<Int2ObjectSortedMap<DashModel>>();
 
-    public void setBlockstates(Map<Integer, DashBlockState> blockstates) {
-        this.blockstates = blockstates;
-    }
-
-    public RegistrySpriteData getSprites() {
-        return new RegistrySpriteData(sprites);
-    }
-
-    public void setSprites(Map<Integer, DashSprite> sprites) {
-        this.sprites = sprites;
-    }
-
-    public RegistryIdentifierData getIdentifiers() {
-        return new RegistryIdentifierData(identifiers);
-    }
-
-    public void setIdentifiers(Map<Integer, DashID> identifiers) {
-        this.identifiers = identifiers;
-    }
-
-    public RegistryModelData getModels() {
-        HashMap<Integer, Map<Integer, DashModel>> modelsToAdd = new HashMap<>();
-        models.forEach((aInteger, dashModel) -> {
-
-            final Map<Integer, DashModel> IntegerDashModelMap = modelsToAdd.get(dashModel.getStage());
-            if (IntegerDashModelMap == null) {
-                final HashMap<Integer, DashModel> element = new HashMap<>();
-                element.put(aInteger, dashModel);
-                modelsToAdd.put(dashModel.getStage(), element);
-            } else {
-                IntegerDashModelMap.put(aInteger, dashModel);
-            }
-        });
-        modelsToDeserialize = new ArrayList<>();
+        for (final var entry : models.int2ObjectEntrySet()) {
+            final var model = entry.getValue();
+            final var modelMap = modelsToAdd.computeIfAbsent(model.getStage(), Int2ObjectLinkedOpenHashMap::new);
+            modelMap.put(entry.getIntKey(), model);
+        }
+        modelsToDeserialize.clear();
         modelsToAdd.forEach(modelsToDeserialize::add);
         return new RegistryModelData(modelsToDeserialize);
     }
+    public RegistryFontData makeFontsData() { return new RegistryFontData(fonts); }
+    public RegistryImageData makeImagesData() { return new RegistryImageData(images); }
+    public RegistryPredicateData makePredicatesData() { return new RegistryPredicateData(predicates); }
+    public RegistryPropertyData makePropertiesData() { return new RegistryPropertyData(properties); }
+    public RegistryPropertyValueData makePropertyValuesData() { return new RegistryPropertyValueData(propertyValues); }
 
-    public void setModels(RegistryModelData data) {
-        modelsToDeserialize = data.models;
-    }
-
-    public RegistryFontData getFonts() {
-        return new RegistryFontData(fonts);
-    }
-
-    public void setFonts(Map<Integer, DashFont> fonts) {
-        this.fonts = fonts;
-    }
-
-    public RegistryImageData getImages() {
-        return new RegistryImageData(images);
-    }
-
-    public void setImages(Map<Integer, DashImage> images) {
-        this.images = images;
-    }
-
-    public RegistryPredicateData getPredicates() {
-        return new RegistryPredicateData(predicates);
-    }
-
-    public void setPredicates(Map<Integer, DashPredicate> predicates) {
-        this.predicates = predicates;
-    }
-
-    public RegistryPropertyData getProperties() {
-        return new RegistryPropertyData(properties);
-    }
-
-    public void setProperties(Map<Integer, DashProperty> properties) {
-        this.properties = properties;
-    }
-
-    public RegistryPropertyValueData getPropertyValues() {
-        return new RegistryPropertyValueData(propertyValues);
-    }
-
-    public void setPropertyValues(Map<Integer, DashPropertyValue> propertyValues) {
-        this.propertyValues = propertyValues;
-    }
-
-    public Integer createBlockStatePointer(BlockState blockState) {
-        final Integer hash = blockState.hashCode();
-        if (blockstates.get(hash) == null) {
-            blockstates.put(hash, new DashBlockState(blockState, this));
-        }
+    public int createBlockStatePointer(BlockState blockState) {
+        final var hash = blockState.hashCode();
+        blockStates.putIfAbsent(hash, new DashBlockState(blockState, this));
         return hash;
     }
 
-    public final Integer createModelPointer(final BakedModel bakedModel) {
+    public int createModelPointer(final BakedModel bakedModel) {
         if (bakedModel == null) {
-            return null;
+            return -1; // TODO: what should we do with this?
         }
-        final Integer hash = bakedModel.hashCode();
+        final int hash = bakedModel.hashCode();
         if (models.get(hash) == null) {
-            Factory<BakedModel, DashModel> model = loader.getApi().modelMappings.get(bakedModel.getClass());
-            if (model != null) {
+            final var model = loader.api.modelMappings.get(bakedModel.getClass());
+            if (model != null && bakedModel instanceof MultipartBakedModel) {
                 models.put(hash, model.toDash(bakedModel, this, DashLoader.getInstance().multipartData.get(bakedModel)));
             } else {
                 apiFailed.putIfAbsent(bakedModel.getClass(), FactoryType.MODEL);
@@ -212,48 +125,42 @@ public class DashRegistry {
         return hash;
     }
 
-    public final Integer createSpritePointer(final Sprite sprite) {
-        final Integer hash = sprite.hashCode();
-        if (sprites.get(hash) == null) {
-            sprites.put(hash, new DashSprite(sprite, this));
-        }
+    public int createSpritePointer(final Sprite sprite) {
+        final var hash = sprite.hashCode();
+        sprites.putIfAbsent(hash, new DashSprite(sprite, this));
         return hash;
     }
 
-    public final Integer createIdentifierPointer(final Identifier identifier) {
-        final Integer hash = identifier.hashCode();
-        if (identifiers.get(hash) == null) {
-            if (identifier instanceof ModelIdentifier) {
-                identifiers.put(hash, new DashModelIdentifier((ModelIdentifier) identifier));
+    public int createIdentifierPointer(final Identifier identifier) {
+        final var hash = identifier.hashCode();
+        identifiers.computeIfAbsent(hash, k -> {
+            if (identifier instanceof ModelIdentifier modelIdentifier) {
+                return new DashModelIdentifier(modelIdentifier);
             } else {
-                identifiers.put(hash, new DashIdentifier(identifier));
+                return new DashIdentifier(identifier);
             }
-        }
+        });
         return hash;
     }
 
-    public final Integer createImagePointer(final NativeImage image) {
-        final Integer hash = image.hashCode();
-        if (images.get(hash) == null) {
-            images.put(hash, new DashImage(image));
-        }
+    public int createImagePointer(final NativeImage image) {
+        final var hash = image.hashCode();
+        images.putIfAbsent(hash, new DashImage(image));
         return hash;
     }
 
-    public final Integer createPredicatePointer(final MultipartModelSelector selector, final StateManager<Block, BlockState> stateManager) {
-        final Integer hash = selector.hashCode();
-        if (predicates.get(hash) == null) {
-            predicates.put(hash, obtainPredicate(selector, stateManager));
-        }
+    public int createPredicatePointer(final MultipartModelSelector selector, final StateManager<Block, BlockState> stateManager) {
+        final var hash = selector.hashCode();
+        predicates.computeIfAbsent(hash, k -> obtainPredicate(selector, stateManager));
         return hash;
     }
 
-    public final DashPredicate obtainPredicate(final MultipartModelSelector selector, final StateManager<Block, BlockState> stateManager) {
+    public DashPredicate obtainPredicate(final MultipartModelSelector selector, final StateManager<Block, BlockState> stateManager) {
         final boolean isTrue = selector == MultipartModelSelector.TRUE;
         if (selector == MultipartModelSelector.FALSE || isTrue) {
             return new DashStaticPredicate(isTrue);
         } else {
-            PredicateFactory predicateFactory = loader.getApi().predicateMappings.get(selector.getClass());
+            final var predicateFactory = loader.api.predicateMappings.get(selector.getClass());
             if (predicateFactory != null) {
                 return predicateFactory.toDash(selector, this, stateManager);
             } else {
@@ -263,11 +170,10 @@ public class DashRegistry {
         return null;
     }
 
-
-    public final Integer createFontPointer(final Font font) {
-        final Integer hash = font.hashCode();
+    public int createFontPointer(final Font font) {
+        final var hash = font.hashCode();
         if (fonts.get(hash) == null) {
-            Factory<Font, DashFont> fontFactory = loader.getApi().fontMappings.get(font.getClass());
+            var fontFactory = loader.api.fontMappings.get(font.getClass());
             if (fontFactory != null) {
                 fonts.put(hash, fontFactory.toDash(font, this, null));
             } else {
@@ -277,84 +183,43 @@ public class DashRegistry {
         return hash;
     }
 
+    // TODO: remind me to switch to IntIntPair when Minecraft updates fastutil
     public final Pair<Integer, Integer> createPropertyPointer(final Property<?> property, final Comparable<?> value) {
-        final Integer hashV = value.hashCode();
-        final Integer hashP = property.hashCode();
-        final boolean propVal = !propertyValues.containsKey(hashV);
-        final boolean prop = !properties.containsKey(hashP);
-        if (propVal || prop) {
-            PropertyFactory propertyFactory = loader.getApi().propertyMappings.get(property.getClass());
+        final var hashVal = value.hashCode();
+        final var hashProp = property.hashCode();
+        final var hasPropVal = !propertyValues.containsKey(hashVal);
+        final var hasProp = !properties.containsKey(hashProp);
+        if (hasPropVal || hasProp) {
+            final var propertyFactory = loader.api.propertyMappings.get(property.getClass());
             if (propertyFactory != null) {
-                if (propVal) {
-                    propertyValues.put(hashV, propertyFactory.toDash(value, this, hashP));
+                if (hasPropVal) {
+                    propertyValues.put(hashVal, propertyFactory.toDash(value, this, hashProp));
                 }
-                if (prop) {
-                    properties.put(hashP, propertyFactory.toDash(property, this, hashP));
+                if (hasProp) {
+                    properties.put(hashProp, propertyFactory.toDash(property, this, hashProp));
                 }
             } else {
                 apiFailed.put(property.getClass(), FactoryType.PROPERTY);
             }
         }
-        return Pair.of(hashP, hashV);
+        return Pair.of(hashProp, hashVal);
     }
 
-    public final BlockState getBlockstate(final Integer pointer) {
-        final BlockState blockstate = blockstatesOut.get(pointer);
-        if (blockstate == null) {
-            DashLoader.LOGGER.error("Blockstate not found in data. PINTR: " + pointer);
-        }
-        return blockstate;
-    }
+    public BlockState getBlockState(final int pointer) { return logIfNullThenReturn(blockStatesOut, pointer, "BlockState"); }
 
-    public final Sprite getSprite(final Integer pointer) {
-        final Sprite sprite = spritesOut.get(pointer);
-        if (sprite == null) {
-            DashLoader.LOGGER.error("Sprite not found in data. PINTR: " + pointer);
-        }
-        return sprite;
-    }
+    public Sprite getSprite(final int pointer) { return logIfNullThenReturn(spritesOut, pointer, "Sprite"); }
 
-    public final Identifier getIdentifier(final Integer pointer) {
-        final Identifier identifier = identifiersOut.get(pointer);
-        if (identifier == null) {
-            DashLoader.LOGGER.error("Identifier not found in data. PINTR: " + pointer);
-        }
-        return identifier;
-    }
+    public Identifier getIdentifier(final int pointer) { return logIfNullThenReturn(identifiersOut, pointer, "Identifier"); }
 
-    public final BakedModel getModel(final Integer pointer) {
-        final BakedModel bakedModel = modelsOut.get(pointer);
-        if (bakedModel == null) {
-            DashLoader.LOGGER.error("Model not found in data. PINTR: " + pointer);
-        }
-        return bakedModel;
-    }
+    public BakedModel getModel(final int pointer) { return logIfNullThenReturn(modelsOut, pointer, "BakedModel"); }
 
-    public final Font getFont(final Integer pointer) {
-        final Font font = fontsOut.get(pointer);
-        if (font == null) {
-            DashLoader.LOGGER.error("Font not found in data. PINTR: " + pointer);
-        }
-        return font;
-    }
+    public Font getFont(final int pointer) { return logIfNullThenReturn(fontsOut, pointer, "Font"); }
 
-    public final NativeImage getImage(final Integer pointer) {
-        final NativeImage image = imagesOut.get(pointer);
-        if (image == null) {
-            DashLoader.LOGGER.error("NativeImage not found in data. PINTR: " + pointer);
-        }
-        return image;
-    }
+    public NativeImage getImage(final int pointer) { return logIfNullThenReturn(imagesOut, pointer, "NativeImage"); }
 
-    public final Predicate<BlockState> getPredicate(final Integer pointer) {
-        final Predicate<BlockState> predicate = predicateOut.get(pointer);
-        if (predicate == null) {
-            DashLoader.LOGGER.error("Predicate not found in data. PINTR: " + pointer);
-        }
-        return predicate;
-    }
+    public Predicate<BlockState> getPredicate(final int pointer) { return logIfNullThenReturn(predicatesOut, pointer, "Predicate"); }
 
-    public final Pair<Property<?>, Comparable<?>> getProperty(final Integer propertyPointer, final Integer valuePointer) {
+    public Pair<Property<?>, Comparable<?>> getProperty(final int propertyPointer, final int valuePointer) {
         final Property<?> property = propertiesOut.get(propertyPointer);
         final Comparable<?> value = propertyValuesOut.get(valuePointer);
         if (property == null || value == null) {
@@ -363,57 +228,76 @@ public class DashRegistry {
         return Pair.of(property, value);
     }
 
+
+    private <T> T logIfNullThenReturn(final Int2ObjectMap<T> map, final int ptr, final String typeStr) {
+        final T t = map.get(ptr);
+        if (t == null) {
+            //reified type parameters when?  - leocth
+            //DashLoader.LOGGER.error(T.class.getSimpleName() + " not found in data. PINTR: " + ptr);
+            DashLoader.LOGGER.error(typeStr + " not found in data. PINTR: " + ptr);
+        }
+        return t;
+    }
+
     public void toUndash() {
         Logger logger = LogManager.getLogger();
         totalTasks = 4 + modelsToDeserialize.size();
         log(logger, "Loading Simple Objects");
         identifiersOut = ThreadHelper.execParallel(identifiers, this);
         imagesOut = ThreadHelper.execParallel(images, this);
-        identifiers = null;
-        images = null;
+        identifiers.clear();
+        images.clear();
 
         log(logger, "Loading Properties");
         propertiesOut = ThreadHelper.execParallel(properties, this);
         propertyValuesOut = ThreadHelper.execParallel(propertyValues, this);
-        properties = null;
-        propertyValues = null;
+        properties.clear();
+        propertyValues.clear();
 
         log(logger, "Loading Advanced Objects");
-        blockstatesOut = ThreadHelper.execParallel(blockstates, this);
-        predicateOut = ThreadHelper.execParallel(predicates, this);
+        blockStatesOut = ThreadHelper.execParallel(blockStates, this);
+        predicatesOut = ThreadHelper.execParallel(predicates, this);
         spritesOut = ThreadHelper.execParallel(sprites, this);
         fontsOut = ThreadHelper.execParallel(fonts, this);
-        blockstates = null;
-        predicates = null;
-        sprites = null;
-        fonts = null;
+        blockStates.clear();
+        predicates.clear();
+        sprites.clear();
+        fonts.clear();
 
-        modelsOut = Collections.synchronizedMap(new HashMap<>((int) Math.ceil(modelsToDeserialize.size() / 0.75)));
-        final short[] currentStage = {0};
+        modelsOut = Int2ObjectSortedMaps.synchronize(new Int2ObjectLinkedOpenHashMap<>((int) Math.ceil(modelsToDeserialize.size() / 0.75)));
+
+        final var currentStage = new AtomicInteger();
         modelsToDeserialize.forEach(modelCategory -> {
-            log(logger, "Loading " + modelCategory.size() + " Models: " + "[" + currentStage[0] + "]");
+            log(logger, "Loading {} Models: [{}]", modelCategory.size(), currentStage);
             modelsOut.putAll(ThreadHelper.execParallel(modelCategory, this));
-            currentStage[0]++;
+            currentStage.getAndIncrement();
         });
+
         log(logger, "Applying Model Overrides");
-        modelsToDeserialize.forEach(modelcategory -> DashLoader.THREADPOOL.invoke(new UndashTask.ApplyTask(new ArrayList<>(modelcategory.values()), 100, this)));
-        modelsToDeserialize = null;
+        modelsToDeserialize.forEach(category -> DashLoader.THREAD_POOL.invoke(new UndashTask.ApplyTask(new ArrayList<>(category.values()), 100, this)));
+        modelsToDeserialize.clear();
     }
 
     private void log(Logger logger, String s) {
         tasksDone++;
-        logger.info("[" + tasksDone + "/" + totalTasks + "] " + s);
+        logger.info("[{}/{}] {}", tasksDone, totalTasks, s);
+    }
+
+    private void log(Logger logger, String s, Object... params) {
+        tasksDone++;
+        final var formatString = "[{}/{}] " + s;
+        logger.info(formatString, tasksDone, totalTasks, params);
     }
 
     public void apiReport(Logger logger) {
         if (apiFailed.size() != 0) {
             logger.error("Found incompatible objects that were not able to be serialized.");
-            int[] ints = new int[1];
+            final var counter = new AtomicInteger();
             apiFailed.entrySet().stream().sorted(Comparator.comparing(e -> e.getValue().name)).forEach(entry -> {
-                ints[0]++;
-                logger.error("[" + entry.getValue().name() + "] Object: " + entry.getKey().getName());
+                counter.getAndIncrement();
+                logger.error("[{}] Object: {}", entry.getValue().name(), entry.getKey().getName());
             });
-            logger.error("In total there are " + ints[0] + " incompatible objects. Please contact the mod developers to add support.");
+            logger.error("In total there are {} incompatible objects. Please contact the mod developers to add support.", counter.getAndIncrement());
         }
     }
 }

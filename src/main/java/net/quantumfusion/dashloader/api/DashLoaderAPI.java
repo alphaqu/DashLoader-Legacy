@@ -130,7 +130,7 @@ public class DashLoaderAPI {
     private void getValue(CustomValue values, ModMetadata modMetadata) {
         if (values != null) {
             for (CustomValue value : values.getAsArray()) {
-                final Class<?> cls = ClassHelper.forName(value.getAsString());
+                final Class<?> cls = ClassHelper.sneakyForName(value.getAsString());
                 if (cls != null) {
                     final Factory<?, ?> factory = (Factory<?, ?>) Unsafe.allocateInstance(cls);
                     switch (factory.getFactoryType()) {

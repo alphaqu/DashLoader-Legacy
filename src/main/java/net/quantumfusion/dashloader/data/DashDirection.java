@@ -5,18 +5,19 @@ import io.activej.serializer.annotations.Serialize;
 import net.minecraft.util.math.Direction;
 import net.quantumfusion.dashloader.DashRegistry;
 
-public class DashDirection implements Dashable {
+public class DashDirection implements Dashable<Direction> {
     @Serialize(order = 0)
-    public final short id;
+    public final byte id;
 
-    public DashDirection(@Deserialize("id") short id) {
+    public DashDirection(@Deserialize("id") byte id) {
         this.id = id;
     }
 
     public DashDirection(Direction direction) {
-        id = (short) direction.getId();
+        id = (byte) direction.getId();
     }
 
+    @Override
     public Direction toUndash(DashRegistry registry) {
         return Direction.byId(id);
     }

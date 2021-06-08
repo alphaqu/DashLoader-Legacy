@@ -3,6 +3,9 @@ package net.quantumfusion.dashloader.blockstate;
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import io.activej.serializer.annotations.SerializeNullable;
+import it.unimi.dsi.fastutil.ints.Int2IntLinkedOpenHashMap;
+import it.unimi.dsi.fastutil.ints.Int2IntMap;
+import it.unimi.dsi.fastutil.ints.Int2IntSortedMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.block.BlockState;
@@ -17,20 +20,20 @@ public class DashBlockStateData {
     @Serialize(order = 0)
     @SerializeNullable(path = {1})
     @SerializeNullable(path = {0})
-    public Map<Integer, Integer> blockstates;
+    public Int2IntMap blockstates;
 
-    public DashBlockStateData(@Deserialize("blockstates") Map<Integer, Integer> blockstates) {
+    public DashBlockStateData(@Deserialize("blockstates") Int2IntMap blockstates) {
         this.blockstates = blockstates;
     }
 
-    public DashBlockStateData(Object2IntMap<BlockState> blockstatess, DashRegistry registry) {
-        this.blockstates = new HashMap<>();
-        blockstatess.forEach((blockState, integer) -> this.blockstates.put(registry.createBlockStatePointer(blockState), integer));
+    public DashBlockStateData(Object2IntMap<BlockState> blockStates, DashRegistry registry) {
+        this.blockstates = new Int2IntLinkedOpenHashMap();
+        blockStates.forEach((blockState, hash) -> this.blockstates.put(registry.createBlockStatePointer(blockState), hash));
     }
 
     public Object2IntMap<BlockState> toUndash(DashRegistry registry) {
         final ConcurrentHashMap<BlockState, Integer> stateLookupOut = new ConcurrentHashMap<>();
-        blockstates.entrySet().parallelStream().forEach((entry) -> stateLookupOut.put(registry.getBlockstate(entry.getKey()), entry.getValue()));
+        blockstates.entrySet().parallelStream().forEach((entry) -> stateLookupOut.put(registry.getBlockState(entry.getKey()), entry.getValue()));
         return new Object2IntOpenHashMap<>(stateLookupOut);
     }
 

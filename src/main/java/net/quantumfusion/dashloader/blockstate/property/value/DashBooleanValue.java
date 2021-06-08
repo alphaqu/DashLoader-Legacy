@@ -4,16 +4,16 @@ import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import net.quantumfusion.dashloader.DashRegistry;
 
-public class DashBooleanValue implements DashPropertyValue {
+public class DashBooleanValue implements DashPropertyValue<Boolean> {
     @Serialize(order = 0)
-    public Boolean value;
+    public boolean value;
 
     public DashBooleanValue(@Deserialize("value") Boolean value) {
         this.value = value;
     }
 
     @Override
-    public Comparable toUndash(DashRegistry registry) {
+    public Boolean toUndash(DashRegistry registry) {
         return value;
     }
 }

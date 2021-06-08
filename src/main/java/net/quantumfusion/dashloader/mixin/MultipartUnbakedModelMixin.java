@@ -37,7 +37,7 @@ public class MultipartUnbakedModelMixin {
     private StateManager<Block, BlockState> stateFactory;
 
     @Inject(method = "bake(Lnet/minecraft/client/render/model/ModelLoader;Ljava/util/function/Function;Lnet/minecraft/client/render/model/ModelBakeSettings;Lnet/minecraft/util/Identifier;)Lnet/minecraft/client/render/model/BakedModel;",
-            at = @At(value = "RETURN"),
+            at = @At("RETURN"),
             locals = LocalCapture.CAPTURE_FAILSOFT,
             cancellable = true)
     private void addPredicateInfo(ModelLoader loader, Function<SpriteIdentifier, Sprite> textureGetter, ModelBakeSettings rotationContainer, Identifier modelId, CallbackInfoReturnable<BakedModel> cir, MultipartBakedModel.Builder builder) {

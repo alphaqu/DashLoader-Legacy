@@ -1,5 +1,7 @@
 package net.quantumfusion.dashloader.util;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectSortedMap;
 import net.quantumfusion.dashloader.DashLoader;
 import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.data.Dashable;
@@ -11,49 +13,51 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class ThreadHelper {
-
-
     public static void exec(Runnable... runnables) {
-        final List<Future<Object>> futures = DashLoader.THREADPOOL.invokeAll(Arrays.stream(runnables).map(Executors::callable).collect(Collectors.toList()));
+        final var futures = DashLoader.THREAD_POOL
+            .invokeAll(
+                Arrays.stream(runnables)
+                    .map(Executors::callable)
+                    .collect(Collectors.toList())
+            );
         sleepUntilTrue(() -> futures.stream().allMatch(Future::isDone));
     }
 
-    public static <V, D extends Dashable> Map<Integer, V> execParallel(Map<Integer, D> dashables, DashRegistry registry) {
-        final Map<Integer, V> answerMap = new HashMap<>((int) Math.ceil(dashables.size() / 0.75));
-        final Collection<Map.Entry<Integer, V>> invoke = DashLoader.THREADPOOL.invoke(new UndashTask<>(new ArrayList<>(dashables.entrySet()), 100, registry));
-        invoke.forEach((answer) -> answerMap.put(answer.getKey(), answer.getValue()));
-        return answerMap;
+    public static <U, D extends Dashable<U>> Int2ObjectSortedMap<U> execParallel(Int2ObjectSortedMap<D> dashables, DashRegistry registry) {
+        final var resultMap = new Int2ObjectLinkedOpenHashMap<U>((int) Math.ceil(dashables.size() / 0.75));
+        resultMap.putAll(DashLoader.THREAD_POOL.invoke(new UndashTask<>(dashables, 100, registry)));
+        return resultMap;
     }
 
-    public static void sleep(long millis) {
+    public static void sneakySleep(long millis) {
         try {
             Thread.sleep(millis);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 
     public static void sleepUntilTrue(Supplier<Boolean> supplier) {
         while (!supplier.get()) {
-            sleep(10);
+            sneakySleep(10);
         }
     }
 
     public static void sleepUntilFalse(Supplier<Boolean> supplier) {
         while (supplier.get()) {
-            sleep(10);
+            sneakySleep(10);
         }
     }
 
     public static void sleepUntilTrue(Supplier<Boolean> supplier, long millis) {
         while (!supplier.get()) {
-            sleep(millis);
+            sneakySleep(millis);
         }
     }
 
     public static void sleepUntilFalse(Supplier<Boolean> supplier, long millis) {
         while (supplier.get()) {
-            sleep(millis);
+            sneakySleep(millis);
         }
     }
 }

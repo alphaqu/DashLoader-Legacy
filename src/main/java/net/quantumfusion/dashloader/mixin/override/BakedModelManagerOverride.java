@@ -81,7 +81,7 @@ public class BakedModelManagerOverride {
             this.atlasManager = modelLoader.upload(this.textureManager, profiler);
             this.models = modelLoader.getBakedModelMap();
             this.stateLookup = modelLoader.getStateLookup();
-            loader.addBakedModelAssets(atlasManager, stateLookup, models);
+            loader.setBakedModelAssets(atlasManager, stateLookup, models);
 
         } else {
             //cache go brr

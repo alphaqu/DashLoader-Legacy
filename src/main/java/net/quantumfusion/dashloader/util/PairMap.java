@@ -25,11 +25,11 @@ public class PairMap<K, V> {
     }
 
     public void put(K key, V value) {
-        data.add(PairEntry.of(key, value));
+        data.add(new PairEntry<>(key, value));
     }
 
     public void forEach(BiConsumer<? super K, ? super V> action) {
-        data.forEach(kvPairEntry -> action.accept(kvPairEntry.key, kvPairEntry.value));
+        data.forEach(kvPairEntry -> action.accept(kvPairEntry.key(), kvPairEntry.value()));
     }
 
     public int size() {

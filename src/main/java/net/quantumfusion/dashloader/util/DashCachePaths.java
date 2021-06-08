@@ -22,11 +22,10 @@ public enum DashCachePaths {
     REGISTRY_PROPERTYVALUE("propertyvalue-registry"),
     REGISTRY_SPRITE("sprite-registry");
 
-
     private final Path path;
 
     DashCachePaths(String st) {
-        this.path = DashLoader.getConfig().resolve("quantumfusion/dashloader/" + st + ".activej");
+        this.path = DashLoader.CONFIG.resolve("quantumfusion/dashloader/" + st + ".activej");
     }
 
     public Path getPath() {

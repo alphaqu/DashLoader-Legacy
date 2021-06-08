@@ -80,14 +80,12 @@ public class MappingData {
     }
 
     public List<SpriteAtlasTexture> toUndash(DashRegistry registry) {
-        List<SpriteAtlasTexture> atlasesToRegister = new ArrayList<>();
-
-        final Pair<SpriteAtlasManager, List<SpriteAtlasTexture>> spriteData = spriteAtlasData.toUndash(registry);
-        this.atlasManagerOut = spriteData.getKey();
-        atlasesToRegister.addAll(spriteData.getValue());
+        final var spriteData = spriteAtlasData.toUndash(registry);
+        atlasManagerOut = spriteData.getKey();
+        final var  atlasesToRegister = new ArrayList<>(spriteData.getValue());
 
 
-        Pair<Map<Identifier, List<Sprite>>, SpriteAtlasTexture> outParticle = particleData.toUndash(registry);
+        final var outParticle = particleData.toUndash(registry);
         particlesOut = outParticle.getLeft();
         atlasesToRegister.add(outParticle.getValue());
 

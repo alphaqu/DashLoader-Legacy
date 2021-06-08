@@ -1,18 +1,11 @@
 package net.quantumfusion.dashloader.util;
 
 public final class ClassHelper {
-    @SuppressWarnings("unchecked")
-    public static <T> Class<T> castClass(Class<?> aClass) {
-        return (Class<T>) aClass;
-    }
-
-
-    public static Class<?> forName(String name) {
+    public static Class<?> sneakyForName(String name) {
         try {
             return Class.forName(name);
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e); //:omegabrain:
         }
-        return null;
     }
 }

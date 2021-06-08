@@ -60,7 +60,7 @@ public class DashMultipartBakedModel implements DashModel {
     public BakedModel toUndash(DashRegistry registry) {
         MultipartBakedModel model = Unsafe.allocateInstance(cls);
         Map<BlockState, BitSet> stateCacheOut = new Object2ObjectOpenCustomHashMap<>(Util.identityHashStrategy());
-        stateCache.forEach((blockstatePointer, bitSet) -> stateCacheOut.put(registry.getBlockstate(blockstatePointer), BitSet.valueOf(bitSet)));
+        stateCache.forEach((blockstatePointer, bitSet) -> stateCacheOut.put(registry.getBlockState(blockstatePointer), BitSet.valueOf(bitSet)));
         ((MultipartBakedModelAccessor) model).setStateCache(stateCacheOut);
         toApply = model;
         return model;
