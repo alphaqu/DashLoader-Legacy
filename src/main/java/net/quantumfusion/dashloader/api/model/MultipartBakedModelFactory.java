@@ -15,9 +15,9 @@ import java.util.List;
 
 public class MultipartBakedModelFactory implements ModelFactory {
     @Override
-    public <K> DashModel toDash(BakedModel model, DashRegistry registry, K var1) {
+    public <K> DashModel toDash(BakedModel model, DashRegistry registry, K modeldata) {
         //noinspection unchecked
-        return new DashMultipartBakedModel((MultipartBakedModel) model, registry, (Pair<List<MultipartModelSelector>, StateManager<Block, BlockState>>) var1);
+        return new DashMultipartBakedModel((MultipartBakedModel) model, registry, (Pair<List<MultipartModelSelector>, StateManager<Block, BlockState>>) modeldata);
     }
 
     @Override

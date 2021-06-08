@@ -1,12 +1,12 @@
 package net.quantumfusion.dashloader.util;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectSortedMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.quantumfusion.dashloader.DashLoader;
 import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.data.Dashable;
 
-import java.util.*;
+import java.util.Arrays;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.function.Supplier;
@@ -23,9 +23,9 @@ public class ThreadHelper {
         sleepUntilTrue(() -> futures.stream().allMatch(Future::isDone));
     }
 
-    public static <U, D extends Dashable<U>> Int2ObjectSortedMap<U> execParallel(Int2ObjectSortedMap<D> dashables, DashRegistry registry) {
+    public static <U, D extends Dashable<U>> Int2ObjectMap<U> execParallel(Int2ObjectMap<D> dashables, DashRegistry registry) {
         final var resultMap = new Int2ObjectLinkedOpenHashMap<U>((int) Math.ceil(dashables.size() / 0.75));
-        resultMap.putAll(DashLoader.THREAD_POOL.invoke(new UndashTask<>(dashables, 100, registry)));
+        resultMap.putAll(DashLoader.THREAD_POOL.invoke(new UndashTask<>(new Int2ObjectLinkedOpenHashMap<>(dashables), 100, registry)));
         return resultMap;
     }
 

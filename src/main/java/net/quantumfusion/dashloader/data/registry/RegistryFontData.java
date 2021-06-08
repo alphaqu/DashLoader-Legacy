@@ -4,19 +4,21 @@ import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import io.activej.serializer.annotations.SerializeNullable;
 import io.activej.serializer.annotations.SerializeSubclasses;
-import it.unimi.dsi.fastutil.ints.Int2ObjectSortedMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectSortedMaps;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.quantumfusion.dashloader.font.DashFont;
-
-import java.util.Map;
+import net.quantumfusion.dashloader.util.Pntr2ObjectMap;
 
 public class RegistryFontData {
     @Serialize(order = 0)
     @SerializeNullable(path = {0})
     @SerializeSubclasses(path = {1}, extraSubclassesId = "fonts")
-    public Int2ObjectSortedMap<DashFont> fonts;
+    public Pntr2ObjectMap<DashFont> fonts;
 
-    public RegistryFontData(@Deserialize("fonts") Int2ObjectSortedMap<DashFont> fonts) {
-        this.fonts = fonts;
+    public RegistryFontData(@Deserialize("fonts") Int2ObjectMap<DashFont> fonts) {
+        this.fonts = new Pntr2ObjectMap<>(fonts);
+    }
+
+    public Int2ObjectMap<DashFont> toUndash() {
+        return fonts.toUndash();
     }
 }

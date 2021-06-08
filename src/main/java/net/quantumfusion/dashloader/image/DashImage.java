@@ -4,12 +4,14 @@ import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import net.minecraft.client.texture.NativeImage;
 import net.quantumfusion.dashloader.DashException;
+import net.quantumfusion.dashloader.DashLoader;
 import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.data.Dashable;
 import net.quantumfusion.dashloader.mixin.accessor.NativeImageAccessor;
 import org.lwjgl.stb.STBImage;
 import org.lwjgl.system.MemoryStack;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
@@ -25,6 +27,9 @@ public class DashImage implements Dashable {
         byte[] image1 = null;
         try {
             image1 = image.getBytes();
+            final File file = DashLoader.getConfig().resolve("testing.png").toFile();
+            file.createNewFile();
+
         } catch (IOException e) {
             e.printStackTrace();
         }

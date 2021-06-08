@@ -4,12 +4,11 @@ import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import io.activej.serializer.annotations.SerializeNullable;
 import io.activej.serializer.annotations.SerializeSubclasses;
-import it.unimi.dsi.fastutil.ints.Int2ObjectSortedMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.quantumfusion.dashloader.data.DashID;
 import net.quantumfusion.dashloader.data.DashIdentifier;
 import net.quantumfusion.dashloader.model.DashModelIdentifier;
-
-import java.util.Map;
+import net.quantumfusion.dashloader.util.Pntr2ObjectMap;
 
 public class RegistryIdentifierData {
     @Serialize(order = 0)
@@ -18,9 +17,13 @@ public class RegistryIdentifierData {
             DashModelIdentifier.class
     })
     @SerializeNullable(path = {0})
-    public Int2ObjectSortedMap<DashID> identifiers;
+    public Pntr2ObjectMap<DashID> identifiers;
 
-    public RegistryIdentifierData(@Deserialize("identifiers") Int2ObjectSortedMap<DashID> identifiers) {
-        this.identifiers = identifiers;
+    public RegistryIdentifierData(@Deserialize("identifiers") Int2ObjectMap<DashID> identifiers) {
+        this.identifiers = new Pntr2ObjectMap<>(identifiers);
+    }
+
+    public Int2ObjectMap<DashID> toUndash() {
+        return identifiers.toUndash();
     }
 }
