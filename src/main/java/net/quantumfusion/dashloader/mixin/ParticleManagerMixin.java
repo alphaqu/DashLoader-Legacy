@@ -1,38 +1,27 @@
 package net.quantumfusion.dashloader.mixin;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleManager;
 import net.minecraft.client.particle.ParticleTextureSheet;
-import net.minecraft.client.texture.MissingSprite;
-import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.resource.ResourceReloader;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.profiler.Profiler;
-import net.minecraft.util.registry.Registry;
 import net.quantumfusion.dashloader.DashLoader;
-import net.quantumfusion.dashloader.mixin.accessor.ParticleManagerSimpleSpriteProviderAccessor;
-import org.apache.logging.log4j.LogManager;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-import java.util.stream.Stream;
 
 @Mixin(ParticleManager.class)
 public abstract class ParticleManagerMixin {
@@ -168,6 +157,6 @@ public abstract class ParticleManagerMixin {
         SpriteAtlasTexture.Data data,
         CallbackInfo ci
     ) {
-        DashLoader.getInstance().setParticleManagerAssets(spriteAwareFactories, particleAtlasTexture);
+        DashLoader.getInstance().addParticleManagerAssets(spriteAwareFactories, particleAtlasTexture);
     }
 }

@@ -19,6 +19,6 @@ public class RegistryFontData {
     }
 
     public Int2ObjectMap<DashFont> toUndash() {
-        return fonts.toUndash();
+        return fonts.convert();
     }
 }

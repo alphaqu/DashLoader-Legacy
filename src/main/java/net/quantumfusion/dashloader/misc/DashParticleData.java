@@ -2,7 +2,6 @@ package net.quantumfusion.dashloader.misc;
 
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
-import io.activej.serializer.annotations.SerializeNullable;
 import net.minecraft.client.particle.ParticleManager;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.texture.SpriteAtlasTexture;
@@ -22,8 +21,6 @@ import java.util.Map;
 public class DashParticleData {
 
     @Serialize(order = 0)
-    @SerializeNullable(path = {0})
-    @SerializeNullable(path = {1})
     public PairMap<Integer, List<Integer>> particles;
 
     @Serialize(order = 1)

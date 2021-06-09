@@ -4,7 +4,7 @@ import net.minecraft.client.render.model.BakedModel;
 import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.data.Dashable;
 
-public interface DashModel extends Dashable<BakedModel> {
+public interface DashModel extends Dashable {
     BakedModel toUndash(DashRegistry registry);
 
     default void apply(DashRegistry registry) {

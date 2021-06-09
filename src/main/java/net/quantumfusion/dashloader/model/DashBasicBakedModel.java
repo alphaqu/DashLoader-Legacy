@@ -39,7 +39,7 @@ public class DashBasicBakedModel implements DashModel {
     @Serialize(order = 6)
     public DashModelOverrideList itemPropertyOverrides;
     @Serialize(order = 7)
-    public Integer spritePointer;
+    public int spritePointer; //sprite pointer
 
     public DashBasicBakedModel() {
     }
@@ -51,7 +51,7 @@ public class DashBasicBakedModel implements DashModel {
                                @Deserialize("isSideLit") boolean isSideLit,
                                @Deserialize("transformation") DashModelTransformation transformation,
                                @Deserialize("itemPropertyOverrides") DashModelOverrideList itemPropertyOverrides,
-                               @Deserialize("spritePointer") Integer spritePointer) {
+                               @Deserialize("spritePointer") int spritePointer) {
         this.quads = quads;
         this.faceQuads = faceQuads;
         this.usesAo = usesAo;

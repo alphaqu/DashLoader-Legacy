@@ -2,7 +2,6 @@ package net.quantumfusion.dashloader.image;
 
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
-import io.activej.serializer.annotations.SerializeNullable;
 import net.gudenau.lib.unsafe.Unsafe;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.texture.SpriteAtlasTexture;
@@ -17,17 +16,14 @@ import net.quantumfusion.dashloader.util.PairMap;
 import java.util.*;
 
 public class DashSpriteAtlasTexture {
+    @Serialize(order = 0)
+    public final PairMap<DashSpriteAnimation, Integer> animatedSprites; //sprite
+    @Serialize(order = 1)
+    public final PairMap<Integer, Integer> sprites;
     @Serialize(order = 2)
     public final Integer id;
     @Serialize(order = 3)
     public final int maxTextureSize;
-    @Serialize(order = 0)
-    public PairMap<DashSpriteAnimation, Integer> animatedSprites; //sprite
-    @Serialize(order = 1)
-    @SerializeNullable()
-    @SerializeNullable(path = {1})
-    @SerializeNullable(path = {0})
-    public PairMap<Integer, Integer> sprites;
     @Serialize(order = 4)
     public boolean bilinear;
     @Serialize(order = 5)

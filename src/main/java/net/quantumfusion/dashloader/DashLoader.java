@@ -7,6 +7,8 @@ import io.activej.serializer.SerializerBuilder;
 import io.activej.serializer.stream.StreamInput;
 import io.activej.serializer.stream.StreamOutput;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -52,6 +54,9 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinWorkerThread;
+import java.util.function.Function;
+
+import static net.quantumfusion.dashloader.util.ThreadHelper.rebound;
 
 public class DashLoader {
     public static final Logger LOGGER = LogManager.getLogger();
@@ -60,7 +65,7 @@ public class DashLoader {
     public static final String version = FabricLoader.getInstance().getModContainer("dashloader").get().getMetadata().getVersion().getFriendlyString();
     private static final Path config = FabricLoader.getInstance().getConfigDir().normalize();
     private static final boolean debug = FabricLoader.getInstance().isDevelopmentEnvironment();
-    public static ForkJoinPool THREAD_POOL;
+    public static ForkJoinPool THREADPOOL;
     public static String task = "Starting DashLoader";
     private static DashLoader instance;
     public final Map<SpriteAtlasTexture, DashSpriteAtlasTextureData> atlasData = new HashMap<>();
@@ -68,7 +73,7 @@ public class DashLoader {
     public final List<SpriteAtlasTexture> atlasesToRegister;
     private final ClassLoader classLoader;
     private final List<SpriteAtlasTexture> extraAtlases;
-    private final ConcurrentHashMap<Class<?>, BinarySerializer> serializers = new ConcurrentHashMap<>();
+    private final Object2ObjectMap<Class<?>, BinarySerializer> serializers = new Object2ObjectOpenHashMap<>();
     public int tasksComplete = 0;
     public DashCacheState state;
     public Map<Identifier, List<Font>> fonts = new HashMap<>();
@@ -172,7 +177,7 @@ public class DashLoader {
     }
 
     private void shutdownThreadPool() {
-        THREAD_POOL.shutdown();
+        THREADPOOL.shutdown();
     }
 
     private void createMetadata(DashMetadata data) {
@@ -257,7 +262,7 @@ public class DashLoader {
     }
 
     private void initThreadPool() {
-        THREAD_POOL = new ForkJoinPool(Runtime.getRuntime().availableProcessors() + 2, pool -> {
+        THREADPOOL = new ForkJoinPool(Runtime.getRuntime().availableProcessors(), pool -> {
             final ForkJoinWorkerThread worker = ForkJoinPool.defaultForkJoinWorkerThreadFactory.newThread(pool);
             worker.setName("dashloader-thread-" + worker.getPoolIndex());
             worker.setContextClassLoader(classLoader);
@@ -346,6 +351,9 @@ public class DashLoader {
         try {
             task = "Serializing " + name;
             LOGGER.info("  Starting " + name + " Serialization.");
+            if (clazz == null) {
+                throw new DashException(name + "Object is null");
+            }
             StreamOutput output = StreamOutput.create(Files.newOutputStream(path, StandardOpenOption.CREATE, StandardOpenOption.WRITE));
             //noinspection unchecked
             output.serialize(serializers.get(clazz.getClass()), clazz);
@@ -403,49 +411,36 @@ public class DashLoader {
      * fsda
      */
     private void initSerializers() {
-        LOGGER.info("[3/4]  Started Serializer init.");
-        Instant start = Instant.now();
-        final Class[] classes = new Class[]{
-                DashMetadata.class,
-                DashModelData.class,
-                DashSpriteAtlasData.class,
-                DashBlockStateData.class,
-                DashParticleData.class,
-                DashFontManagerData.class,
-                DashSplashTextData.class,
-                RegistryBlockStateData.class,
-                RegistryIdentifierData.class,
-                RegistryImageData.class,
-                RegistryFontData.class,
-                RegistryModelData.class,
-                RegistryPredicateData.class,
-                RegistryPropertyData.class,
-                RegistryPropertyValueData.class,
-                RegistrySpriteData.class};
-        final Runnable[] runnables = {
-                () -> addSerializer(classes[0], SerializerBuilder.create()),
-                () -> addSerializer(classes[1], SerializerBuilder.create()),
-                () -> addSerializer(classes[2], SerializerBuilder.create()),
-                () -> addSerializer(classes[3], SerializerBuilder.create()),
-                () -> addSerializer(classes[4], SerializerBuilder.create()),
-                () -> addSerializer(classes[5], SerializerBuilder.create()),
-                () -> addSerializer(classes[6], SerializerBuilder.create()),
-                () -> addSerializer(classes[7], SerializerBuilder.create()),
-                () -> addSerializer(classes[8], SerializerBuilder.create()),
-                () -> addSerializer(classes[9], SerializerBuilder.create()),
-                () -> addSerializer(classes[10], SerializerBuilder.create().withSubclasses("fonts", api.fontTypes)),
-                () -> addSerializer(classes[11], SerializerBuilder.create().withSubclasses("models", api.modelTypes)),
-                () -> addSerializer(classes[12], SerializerBuilder.create().withSubclasses("predicates", api.predicateTypes)),
-                () -> addSerializer(classes[13], SerializerBuilder.create().withSubclasses("properties", api.propertyTypes)),
-                () -> addSerializer(classes[14], SerializerBuilder.create().withSubclasses("values", api.propertyValueTypes)),
-                () -> addSerializer(classes[15], SerializerBuilder.create())
-        };
-        ThreadHelper.exec(runnables);
-        LOGGER.info("[3/4] [" + Duration.between(start, Instant.now()).toMillis() + "ms] Created Serializers.");
+        try {
+            LOGGER.info("[3/4]  Started Serializer init.");
+            Instant start = Instant.now();
+            ConcurrentHashMap<Class<?>, BinarySerializer<?>> serializerMap = new ConcurrentHashMap<>();
+            addSerializer(serializerMap, rebound(), DashMetadata.class);
+            addSerializer(serializerMap, rebound(), DashModelData.class);
+            addSerializer(serializerMap, rebound(), DashSpriteAtlasData.class);
+            addSerializer(serializerMap, rebound(), DashBlockStateData.class);
+            addSerializer(serializerMap, rebound(), DashParticleData.class);
+            addSerializer(serializerMap, rebound(), DashFontManagerData.class);
+            addSerializer(serializerMap, rebound(), DashSplashTextData.class);
+            addSerializer(serializerMap, rebound(), RegistryBlockStateData.class);
+            addSerializer(serializerMap, rebound(), RegistryIdentifierData.class);
+            addSerializer(serializerMap, rebound(), RegistryImageData.class);
+            addSerializer(serializerMap, (builder) -> builder.withSubclasses("fonts", api.fontTypes), RegistryFontData.class);
+            addSerializer(serializerMap, (builder) -> builder.withSubclasses("models", api.modelTypes), RegistryModelData.class);
+            addSerializer(serializerMap, (builder) -> builder.withSubclasses("predicates", api.predicateTypes), RegistryPredicateData.class);
+            addSerializer(serializerMap, (builder) -> builder.withSubclasses("properties", api.propertyTypes), RegistryPropertyData.class);
+            addSerializer(serializerMap, (builder) -> builder.withSubclasses("values", api.propertyValueTypes), RegistryPropertyValueData.class);
+            addSerializer(serializerMap, rebound(), RegistrySpriteData.class);
+            serializerMap.forEach(serializers::put);
+            LOGGER.info("[3/4] [" + Duration.between(start, Instant.now()).toMillis() + "ms] Created Serializers.");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    private void addSerializer(Class<?> clazz, SerializerBuilder builder) {
-        serializers.put(clazz, builder.withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE).build(clazz));
+    private void addSerializer(ConcurrentHashMap<Class<?>, BinarySerializer<?>> serializerMap, Function<SerializerBuilder, SerializerBuilder> consumer, Class<?> clazz) {
+        serializerMap.put(clazz, consumer.apply(SerializerBuilder.create()).withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE).build(clazz));
     }
 
 

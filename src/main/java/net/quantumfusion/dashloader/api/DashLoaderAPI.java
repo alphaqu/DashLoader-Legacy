@@ -131,36 +131,34 @@ public class DashLoaderAPI {
         if (values != null) {
             for (CustomValue value : values.getAsArray()) {
                 final Class<?> cls = ClassHelper.sneakyForName(value.getAsString());
-                if (cls != null) {
-                    final Factory<?, ?> factory = (Factory<?, ?>) Unsafe.allocateInstance(cls);
-                    switch (factory.getFactoryType()) {
-                        case MODEL:
-                            final ModelFactory modelProxy = (ModelFactory) factory;
-                            addModelType(modelProxy);
-                            break;
-                        case PREDICATE:
-                            final PredicateFactory predicateProxy = (PredicateFactory) factory;
-                            addPredicateType(predicateProxy);
-                            break;
-                        case FONT:
-                            final FontFactory fontProxy = (FontFactory) factory;
-                            addFontType(fontProxy);
-                            break;
-                        case PROPERTY:
-                            final PropertyFactory propertyFactory = (PropertyFactory) factory;
-                            addPropertyType(propertyFactory);
-                            break;
-                        case DEFAULT:
-                            LOGGER.warn("Proxy Type not set" + value.getAsString());
-                            continue;
-                        default:
-                            LOGGER.warn("Proxy Type unknown." + value.getAsString());
-                            continue;
+                final Factory<?, ?> factory = (Factory<?, ?>) Unsafe.allocateInstance(cls);
+                switch (factory.getFactoryType()) {
+                    case MODEL -> {
+                        final ModelFactory modelProxy = (ModelFactory) factory;
+                        addModelType(modelProxy);
                     }
-                    LOGGER.info("Added custom " + factory.getFactoryType().name + ": " + factory.getType().getSimpleName());
-                } else {
-                    LOGGER.warn("Factory not found in mod: " + modMetadata.getName() + " with value: \"" + values.getAsString() + "\"");
+                    case PREDICATE -> {
+                        final PredicateFactory predicateProxy = (PredicateFactory) factory;
+                        addPredicateType(predicateProxy);
+                    }
+                    case FONT -> {
+                        final FontFactory fontProxy = (FontFactory) factory;
+                        addFontType(fontProxy);
+                    }
+                    case PROPERTY -> {
+                        final PropertyFactory propertyFactory = (PropertyFactory) factory;
+                        addPropertyType(propertyFactory);
+                    }
+                    case DEFAULT -> {
+                        LOGGER.warn("Proxy Type not set" + value.getAsString());
+                        continue;
+                    }
+                    default -> {
+                        LOGGER.warn("Proxy Type unknown." + value.getAsString());
+                        continue;
+                    }
                 }
+                LOGGER.info("Added custom " + factory.getFactoryType().name + ": " + factory.getType().getSimpleName());
             }
         }
     }

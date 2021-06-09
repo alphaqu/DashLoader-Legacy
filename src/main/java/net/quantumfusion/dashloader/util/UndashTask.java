@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.concurrent.RecursiveAction;
 import java.util.concurrent.RecursiveTask;
 
-public class UndashTask<U, D extends Dashable<U>> extends RecursiveTask<Int2ObjectSortedMap<U>> {
+public class UndashTask<U, D extends Dashable> extends RecursiveTask<Int2ObjectSortedMap<U>> {
     private final Int2ObjectSortedMap<D> tasks;
     private final int threshold;
     private final DashRegistry registry;
@@ -30,8 +30,8 @@ public class UndashTask<U, D extends Dashable<U>> extends RecursiveTask<Int2Obje
             return computeDirectly();
         } else {
             final var half = size / 2;
-            final var first = new UndashTask<>(tasks.subMap(0, half), threshold, registry);
-            final var second = new UndashTask<>(tasks.subMap(half, tasks.size()), threshold, registry);
+            final UndashTask<U, D> first = new UndashTask<>(tasks.subMap(0, half), threshold, registry);
+            final UndashTask<U, D> second = new UndashTask<>(tasks.subMap(half, tasks.size()), threshold, registry);
             invokeAll(first, second);
             return combine(first.join(), second.join());
         }

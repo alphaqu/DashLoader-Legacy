@@ -2,7 +2,6 @@ package net.quantumfusion.dashloader.blockstate;
 
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
-import io.activej.serializer.annotations.SerializeNullable;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.block.BlockState;
@@ -12,8 +11,6 @@ import net.quantumfusion.dashloader.util.Pntr2PntrMap;
 public class DashBlockStateData {
 
     @Serialize(order = 0)
-    @SerializeNullable(path = {1})
-    @SerializeNullable(path = {0})
     public Pntr2PntrMap blockstates;
 
     public DashBlockStateData(@Deserialize("blockstates") Pntr2PntrMap blockstates) {

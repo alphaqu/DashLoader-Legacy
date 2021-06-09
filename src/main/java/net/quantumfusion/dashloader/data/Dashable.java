@@ -8,6 +8,6 @@ import net.quantumfusion.dashloader.DashRegistry;
  *
  * @param <U> the "Undash" type
  */
-public interface Dashable<U> {
-    U toUndash(DashRegistry registry);
+public interface Dashable {
+    <U> U toUndash(DashRegistry registry);
 }

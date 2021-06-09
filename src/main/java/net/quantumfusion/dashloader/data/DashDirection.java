@@ -5,7 +5,7 @@ import io.activej.serializer.annotations.Serialize;
 import net.minecraft.util.math.Direction;
 import net.quantumfusion.dashloader.DashRegistry;
 
-public class DashDirection implements Dashable<Direction> {
+public class DashDirection implements Dashable {
     @Serialize(order = 0)
     public final byte id;
 

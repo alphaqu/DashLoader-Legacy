@@ -44,7 +44,7 @@ public class Pntr2ObjectMap<O> {
     }
 
 
-    public Int2ObjectMap<O> toUndash() {
+    public Int2ObjectMap<O> convert() {
         Int2ObjectOpenHashMap<O> out = new Int2ObjectOpenHashMap<>();
         forEach(entry -> out.put(entry.key(), entry.value()));
         return out;

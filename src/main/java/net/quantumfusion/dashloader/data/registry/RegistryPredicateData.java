@@ -2,7 +2,6 @@ package net.quantumfusion.dashloader.data.registry;
 
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
-import io.activej.serializer.annotations.SerializeNullable;
 import io.activej.serializer.annotations.SerializeSubclasses;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.quantumfusion.dashloader.model.predicates.DashPredicate;
@@ -10,8 +9,7 @@ import net.quantumfusion.dashloader.util.Pntr2ObjectMap;
 
 public class RegistryPredicateData {
     @Serialize(order = 0)
-    @SerializeNullable(path = {0})
-    @SerializeSubclasses(path = {1}, extraSubclassesId = "predicates")
+    @SerializeSubclasses(path = {0}, extraSubclassesId = "predicates")
     public Pntr2ObjectMap<DashPredicate> predicates;
 
     public RegistryPredicateData(@Deserialize("predicates") Int2ObjectMap<DashPredicate> predicates) {
@@ -19,6 +17,6 @@ public class RegistryPredicateData {
     }
 
     public Int2ObjectMap<DashPredicate> toUndash() {
-        return predicates.toUndash();
+        return predicates.convert();
     }
 }

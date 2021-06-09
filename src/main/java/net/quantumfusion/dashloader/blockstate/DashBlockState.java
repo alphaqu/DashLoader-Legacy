@@ -14,7 +14,7 @@ import net.quantumfusion.dashloader.mixin.accessor.StateAccessor;
 import net.quantumfusion.dashloader.util.PairMap;
 import org.apache.commons.lang3.tuple.Pair;
 
-public class DashBlockState implements Dashable<BlockState> {
+public class DashBlockState implements Dashable {
 
     @Serialize(order = 0)
     public final int owner;

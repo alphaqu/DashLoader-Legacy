@@ -8,7 +8,6 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.font.Font;
 import net.minecraft.client.render.model.BakedModel;
-import net.minecraft.client.render.model.MultipartBakedModel;
 import net.minecraft.client.render.model.json.MultipartModelSelector;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.Sprite;
@@ -45,6 +44,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class DashRegistry {
     private static int totalTasks = 6;
@@ -92,16 +92,20 @@ public class DashRegistry {
     public RegistrySpriteData makeSpritesData() { return new RegistrySpriteData(sprites); }
     public RegistryIdentifierData makeIdentifiersData() { return new RegistryIdentifierData(identifiers); }
     public RegistryModelData makeModelsData() {
-        final var modelsToAdd = new Int2ObjectOpenHashMap<Int2ObjectMap<DashModel>>();
+        final var modelsToAdd = new Int2ObjectLinkedOpenHashMap<Int2ObjectMap<DashModel>>();
 
         for (final var entry : models.int2ObjectEntrySet()) {
             final var model = entry.getValue();
-            final var modelMap = modelsToAdd.computeIfAbsent(model.getStage(), Int2ObjectLinkedOpenHashMap::new);
+            final var modelMap = modelsToAdd.computeIfAbsent(model.getStage(), Int2ObjectOpenHashMap::new);
             modelMap.put(entry.getIntKey(), model);
         }
-        ArrayList<Pntr2ObjectMap<DashModel>> modelsToDeserialize = new ArrayList<>();
-        modelsToAdd.forEach((integer, dashModelInt2ObjectMap) -> modelsToDeserialize.add(integer, new Pntr2ObjectMap<>(dashModelInt2ObjectMap)));
-        return new RegistryModelData(modelsToDeserialize);
+        final List<Pntr2ObjectMap<DashModel>> collect =
+                modelsToAdd.int2ObjectEntrySet()
+                        .stream()
+                        .sorted(Comparator.comparing(Int2ObjectMap.Entry::getIntKey))
+                        .map(entry -> new Pntr2ObjectMap<>(entry.getValue()))
+                        .collect(Collectors.toList());
+        return new RegistryModelData(collect);
     }
     public RegistryFontData makeFontsData() { return new RegistryFontData(fonts); }
     public RegistryImageData makeImagesData() { return new RegistryImageData(images); }
@@ -122,7 +126,7 @@ public class DashRegistry {
         final int hash = bakedModel.hashCode();
         if (models.get(hash) == null) {
             final var model = loader.getApi().modelMappings.get(bakedModel.getClass());
-            if (model != null && bakedModel instanceof MultipartBakedModel) {
+            if (model != null) {
                 models.put(hash, model.toDash(bakedModel, this, DashLoader.getInstance().multipartData.get(bakedModel)));
             } else {
                 apiFailed.putIfAbsent(bakedModel.getClass(), FactoryType.MODEL);
@@ -295,7 +299,7 @@ public class DashRegistry {
         });
 
         log(logger, "Applying Model Overrides");
-        modelsToDeserialize.forEach(category -> DashLoader.THREAD_POOL.invoke(new UndashTask.ApplyTask(new ArrayList<>(category.values()), 100, this)));
+        modelsToDeserialize.forEach(category -> DashLoader.THREADPOOL.invoke(new UndashTask.ApplyTask(new ArrayList<>(category.values()), 100, this)));
         modelsToDeserialize.clear();
     }
 

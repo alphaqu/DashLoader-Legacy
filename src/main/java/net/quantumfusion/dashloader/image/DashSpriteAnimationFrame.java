@@ -7,7 +7,7 @@ import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.data.Dashable;
 import net.quantumfusion.dashloader.mixin.accessor.SpriteAnimationFrameAccessor;
 
-public class DashSpriteAnimationFrame implements Dashable<Sprite.AnimationFrame> {
+public class DashSpriteAnimationFrame implements Dashable {
     @Serialize(order = 0)
     public int index;
     @Serialize(order = 1)
