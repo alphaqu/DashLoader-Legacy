@@ -13,4 +13,5 @@ DashLoader is a minecraft mod that caches the modelmanager while accelerating th
 #  
 
 [![yourkit](https://i.imgur.com/5NI4mjp.png)](https://www.yourkit.com/)
- DashLoader's performance is highly aided by the YourKit Java Profiler which helps us greatly with keeping standards high and load times low.
+ DashLoader's performance is highly aided by the [YourKit Java Profiler](https://www.yourkit.com/java/profiler/)
+ which helps us greatly with keeping standards high and load times low.
