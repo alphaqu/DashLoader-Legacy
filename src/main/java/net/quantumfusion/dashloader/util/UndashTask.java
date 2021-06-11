@@ -1,66 +1,63 @@
 package net.quantumfusion.dashloader.util;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.data.Dashable;
 import net.quantumfusion.dashloader.model.DashModel;
+import org.apache.commons.lang3.tuple.Pair;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.RecursiveAction;
 import java.util.concurrent.RecursiveTask;
 
-public class UndashTask<U, D extends Dashable> extends RecursiveTask<Int2ObjectOpenHashMap<U>> {
-    private final Int2ObjectMap.Entry<D>[] tasks;
+public class UndashTask<K, D extends Dashable> extends RecursiveTask<Collection<Map.Entry<Integer, K>>> {
+    private final List<Map.Entry<Integer, D>> tasks;
     private final int threshold;
-    int start, end;
     private final DashRegistry registry;
 
 
-    public UndashTask(Int2ObjectMap.Entry<D>[] tasks, int threshold, int start, int end, DashRegistry registry) {
+    public UndashTask(List<Map.Entry<Integer, D>> tasks, int threshold, DashRegistry registry) {
         this.tasks = tasks;
         this.threshold = threshold;
-        this.start = start;
-        this.end = end;
         this.registry = registry;
     }
 
-    public UndashTask(Int2ObjectMap<D> tasks, int threshold, DashRegistry registry) {
-        final int size = tasks.size();
-        var array = new Int2ObjectMap.Entry[size];
-        this.tasks = tasks.int2ObjectEntrySet().toArray(array);
-        this.threshold = threshold;
-        this.start = 0;
-        this.end = size;
-        this.registry = registry;
+    public UndashTask<K, D>[] split(List<Map.Entry<Integer, D>> list, int size) {
+        final int half = (int) Math.ceil(size / 2f);
+        List<Map.Entry<Integer, D>> first = new ArrayList<>(half);
+        List<Map.Entry<Integer, D>> second = new ArrayList<>(half);
+        final int i1 = size / 2;
+        for (int i = 0; i < i1; i++)
+            first.add(list.get(i));
+        for (int i = i1; i < size; i++)
+            second.add(list.get(i));
+        return new UndashTask[]{new UndashTask<>(first, threshold, registry), new UndashTask<>(second, threshold, registry)};
     }
-
 
     @Override
-    protected Int2ObjectOpenHashMap<U> compute() {
-        if ((end - start) < threshold) {
+    protected Collection<Map.Entry<Integer, K>> compute() {
+        final int size = tasks.size();
+        if (size < threshold) {
             return computeDirectly();
         } else {
-            final int middle = (start + end) / 2;
-            UndashTask<U, D> subtaskA = new UndashTask<>(tasks, threshold, start, middle, registry);
-            UndashTask<U, D> subtaskB = new UndashTask<>(tasks, threshold, middle, end, registry);
-            subtaskA.fork();
-            subtaskB.fork();
-            return combine(subtaskA.join(), subtaskB.join());
+            final UndashTask<K, D>[] split = split(tasks, size);
+            final UndashTask<K, D> first = split[0];
+            final UndashTask<K, D> second = split[1];
+            invokeAll(first, second);
+            return combine(first.join(), second.join());
         }
     }
 
-    public final Int2ObjectOpenHashMap<U> combine(final Int2ObjectOpenHashMap<U> map, final Int2ObjectOpenHashMap<U> map2) {
-        map.putAll(map2);
-        return map;
+    public final Collection<Map.Entry<Integer, K>> combine(final Collection<Map.Entry<Integer, K>> list, final Collection<Map.Entry<Integer, K>> list2) {
+        list.addAll(list2);
+        return list;
     }
 
-    protected final Int2ObjectOpenHashMap<U> computeDirectly() {
-        final Int2ObjectOpenHashMap<U> count = new Int2ObjectOpenHashMap<>((int) ((end - start) / 0.75f));
-        for (int i = start; i < end; i++) {
-            final Int2ObjectMap.Entry<D> task = tasks[i];
-            count.put(task.getIntKey(), task.getValue().toUndash(registry));
-        }
+    protected final Collection<Map.Entry<Integer, K>> computeDirectly() {
+        final Collection<Map.Entry<Integer, K>> count = new ArrayList<>(tasks.size());
+        tasks.forEach(dashable -> count.add(Pair.of(dashable.getKey(), dashable.getValue().toUndash(registry))));
         return count;
     }
 
@@ -76,15 +73,26 @@ public class UndashTask<U, D extends Dashable> extends RecursiveTask<Int2ObjectO
             this.registry = registry;
         }
 
+        public final Pair<List<DashModel>, List<DashModel>> split(final List<DashModel> list, final int size) {
+            final List<DashModel> first = new ArrayList<>();
+            final List<DashModel> second = new ArrayList<>();
+            final int i1 = size / 2;
+            for (int i = 0; i < i1; i++)
+                first.add(list.get(i));
+            for (int i = i1; i < size; i++)
+                second.add(list.get(i));
+            return Pair.of(first, second);
+        }
+
         @Override
         protected void compute() {
             final int size = tasks.size();
             if (size < threshold) {
                 computeDirectly();
             } else {
-                final var half = size / 2;
-                final ApplyTask subTask1 = new ApplyTask(tasks.subList(0, half), threshold, registry);
-                final ApplyTask subTask2 = new ApplyTask(tasks.subList(half, size), threshold, registry);
+                final Pair<List<DashModel>, List<DashModel>> subtask = split(tasks, size);
+                final ApplyTask subTask1 = new ApplyTask(subtask.getKey(), threshold, registry);
+                final ApplyTask subTask2 = new ApplyTask(subtask.getValue(), threshold, registry);
                 invokeAll(subTask1, subTask2);
             }
         }

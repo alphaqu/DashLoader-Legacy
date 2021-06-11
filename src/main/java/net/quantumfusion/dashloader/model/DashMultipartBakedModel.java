@@ -13,8 +13,7 @@ import net.minecraft.state.StateManager;
 import net.minecraft.util.Util;
 import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.mixin.accessor.MultipartBakedModelAccessor;
-import net.quantumfusion.dashloader.util.Pntr2ObjectMap;
-import net.quantumfusion.dashloader.util.Pntr2PntrMap;
+import net.quantumfusion.dashloader.util.PairMap;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
@@ -27,15 +26,15 @@ public class DashMultipartBakedModel implements DashModel {
 
     //identifier baked model
     @Serialize(order = 0)
-    public Pntr2PntrMap components; // predicate || model
+    public PairMap<Integer, Integer> components;
 
     @Serialize(order = 1)
-    public Pntr2ObjectMap<byte[]> stateCache; // blockstate || bitset
+    public PairMap<Integer, byte[]> stateCache;
 
     MultipartBakedModel toApply;
 
-    public DashMultipartBakedModel(@Deserialize("components") Pntr2PntrMap components,
-                                   @Deserialize("stateCache") Pntr2ObjectMap<byte[]> stateCache) {
+    public DashMultipartBakedModel(@Deserialize("components") PairMap<Integer, Integer> components,
+                                   @Deserialize("stateCache") PairMap<Integer, byte[]> stateCache) {
         this.components = components;
         this.stateCache = stateCache;
     }
@@ -44,13 +43,13 @@ public class DashMultipartBakedModel implements DashModel {
         MultipartBakedModelAccessor access = ((MultipartBakedModelAccessor) model);
         List<Pair<Predicate<BlockState>, BakedModel>> accessComponents = access.getComponents();
         final int size = accessComponents.size();
-        this.components = new Pntr2PntrMap(size);
+        this.components = new PairMap<>(size);
         for (int i = 0; i < size; i++) {
             final BakedModel right = accessComponents.get(i).getRight();
             components.put(registry.createPredicatePointer(selectors.getKey().get(i), selectors.getValue()), registry.createModelPointer(right));
         }
         final Map<BlockState, BitSet> stateCache = access.getStateCache();
-        this.stateCache = new Pntr2ObjectMap<>(stateCache.size());
+        this.stateCache = new PairMap<>(stateCache.size());
         stateCache.forEach((blockState, bitSet) -> this.stateCache.put(registry.createBlockStatePointer(blockState), bitSet.toByteArray()));
 
     }
@@ -61,7 +60,7 @@ public class DashMultipartBakedModel implements DashModel {
     public BakedModel toUndash(DashRegistry registry) {
         MultipartBakedModel model = Unsafe.allocateInstance(cls);
         Map<BlockState, BitSet> stateCacheOut = new Object2ObjectOpenCustomHashMap<>(Util.identityHashStrategy());
-        stateCache.forEach((entry) -> stateCacheOut.put(registry.getBlockState(entry.key()), BitSet.valueOf(entry.value())));
+        stateCache.forEach((blockstatePointer, bitSet) -> stateCacheOut.put(registry.getBlockstate(blockstatePointer), BitSet.valueOf(bitSet)));
         ((MultipartBakedModelAccessor) model).setStateCache(stateCacheOut);
         toApply = model;
         return model;
@@ -70,7 +69,7 @@ public class DashMultipartBakedModel implements DashModel {
     @Override
     public void apply(DashRegistry registry) {
         List<Pair<Predicate<BlockState>, BakedModel>> componentsOut = new ArrayList<>();
-        components.forEach((entry) -> componentsOut.add(Pair.of(registry.getPredicate(entry.key()), registry.getModel(entry.value()))));
+        components.forEach((dashPredicate, integer) -> componentsOut.add(Pair.of(registry.getPredicate(dashPredicate), registry.getModel(integer))));
         MultipartBakedModelAccessor access = ((MultipartBakedModelAccessor) toApply);
         BakedModel bakedModel = (BakedModel) ((Pair) componentsOut.iterator().next()).getRight();
         access.setComponents(componentsOut);

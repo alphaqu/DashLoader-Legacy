@@ -4,7 +4,6 @@
   "package": "net.quantumfusion.dashloader.mixin",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
-    "BootStrapMixin",
     "LanguageMixin",
     "MainMixin",
     "MinecraftClientMixin",
@@ -28,7 +27,6 @@
     "accessor.BasicBakedModelAccessor",
     "accessor.BitmapFontAccessor",
     "accessor.BitmapFontGlyphAccessor",
-    "accessor.BitSetVoxelSetAccessor",
     "accessor.BlockModelsAccessor",
     "accessor.BuiltinBakedModelAccessor",
     "accessor.FontManagerAccessor",
@@ -54,7 +52,6 @@
     "accessor.SpriteInfoAccessor",
     "accessor.SpriteInterpolationAccessor",
     "accessor.StateAccessor",
-    "accessor.StateManagerAccessor",
     "accessor.UnicodeTextureFontAccessor",
     "accessor.WeightedBakedModelAccessor",
     "accessor.WeightedBakedModelEntryAccessor",

@@ -6,13 +6,13 @@ import net.quantumfusion.dashloader.DashRegistry;
 
 public class DashEnumValue implements DashPropertyValue {
     @Serialize(order = 0)
-    public String value;
+    public final String value;
 
     @Serialize(order = 1)
-    public int enumPointer;
+    public final Integer enumPointer;
 
     public DashEnumValue(@Deserialize("value") String value,
-                         @Deserialize("enumPointer") int enumPointer) {
+                         @Deserialize("enumPointer") Integer enumPointer) {
         this.value = value;
         this.enumPointer = enumPointer;
     }

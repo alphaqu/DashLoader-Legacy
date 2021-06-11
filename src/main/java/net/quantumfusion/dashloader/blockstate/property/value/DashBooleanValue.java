@@ -6,14 +6,14 @@ import net.quantumfusion.dashloader.DashRegistry;
 
 public class DashBooleanValue implements DashPropertyValue {
     @Serialize(order = 0)
-    public boolean value;
+    public Boolean value;
 
-    public DashBooleanValue(@Deserialize("value") boolean value) {
+    public DashBooleanValue(@Deserialize("value") Boolean value) {
         this.value = value;
     }
 
     @Override
-    public Boolean toUndash(DashRegistry registry) {
+    public Comparable toUndash(DashRegistry registry) {
         return value;
     }
 }

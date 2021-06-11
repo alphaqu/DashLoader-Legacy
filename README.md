@@ -5,6 +5,8 @@
  [![GitHub release](https://img.shields.io/github/release/alphaqu/DashLoader.svg?style=for-the-badge&logo=appveyor&logoColor=white)](https://github.com/alphaqu/DashLoader/releases/)
  [![Github all releases](https://img.shields.io/github/downloads/alphaqu/DashLoader/total.svg?style=for-the-badge&logo=appveyor&logoColor=white)](https://github.com/alphaqu/DashLoader/releases/)
 
+
+
 #  
 
 
@@ -13,5 +15,5 @@ DashLoader is a minecraft mod that caches the modelmanager while accelerating th
 #  
 
 [![yourkit](https://i.imgur.com/5NI4mjp.png)](https://www.yourkit.com/)
- DashLoader's performance is highly aided by the [YourKit Java Profiler](https://www.yourkit.com/java/profiler/)
- which helps us greatly with keeping standards high and load times low.
+DashLoader's performance is highly aided by the YourKit Java Profiler which helps us greatly with keeping standards high
+and load times low.

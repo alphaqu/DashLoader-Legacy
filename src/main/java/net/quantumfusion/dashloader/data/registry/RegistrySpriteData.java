@@ -2,25 +2,18 @@ package net.quantumfusion.dashloader.data.registry;
 
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import io.activej.serializer.annotations.SerializeNullable;
 import net.quantumfusion.dashloader.image.DashSprite;
-import net.quantumfusion.dashloader.util.Pntr2ObjectMap;
 
+import java.util.Map;
 
 public class RegistrySpriteData {
     @Serialize(order = 0)
-    public Pntr2ObjectMap<DashSprite> sprites;
+    @SerializeNullable(path = {1})
+    @SerializeNullable(path = {0})
+    public Map<Integer, DashSprite> sprites;
 
-    public RegistrySpriteData(@Deserialize("sprites") Pntr2ObjectMap<DashSprite> sprites) {
+    public RegistrySpriteData(@Deserialize("sprites") Map<Integer, DashSprite> sprites) {
         this.sprites = sprites;
-    }
-
-
-    public RegistrySpriteData(Int2ObjectMap<DashSprite> sprites) {
-        this.sprites = new Pntr2ObjectMap<>(sprites);
-    }
-
-    public Int2ObjectMap<DashSprite> toUndash() {
-        return sprites.convert();
     }
 }

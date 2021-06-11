@@ -2,10 +2,7 @@ package net.quantumfusion.dashloader.mixin;
 
 import net.minecraft.client.texture.MipmapHelper;
 import net.minecraft.client.texture.NativeImage;
-import net.quantumfusion.dashloader.mixin.accessor.NativeImageAccessor;
-import org.lwjgl.system.MemoryUtil;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -16,53 +13,43 @@ public abstract class MipmapHelperMixin {
 
     @Shadow
     private static int blend(int one, int two, int three, int four, boolean checkAlpha) {
-        throw new AssertionError();
+        return 0;
     }
 
-    /**
-     * @author alphaqu, leocth
-     * @reason DashLoader needs to replace the resource loading process completely. Thus, an overwrite is needed.
-     */
-    @Overwrite
-    public static NativeImage[] getMipmapLevelsImages(NativeImage image, int mipmap) {
+    @Inject(method = "getMipmapLevelsImages(Lnet/minecraft/client/texture/NativeImage;I)[Lnet/minecraft/client/texture/NativeImage;",
+            at = @At(value = "HEAD"), cancellable = true)
+    private static void mapmapFast(NativeImage image, int mipmap, CallbackInfoReturnable<NativeImage[]> cir) {
         NativeImage[] nativeImages = new NativeImage[mipmap + 1];
         nativeImages[0] = image;
         if (mipmap > 0) {
-            boolean hasOpaquePixel = false;
-            gotOpaquePixel:
-            for (int pX = image.getWidth(); --pX >= 0;) {
-                for (int pY = image.getHeight(); --pY >= 0;) {
-                    if (image.getPixelColor(pX, pY) >> 24 == 0) {
-                        hasOpaquePixel = true;
-                        break gotOpaquePixel;
+            boolean bl = false;
+
+            int k;
+            label51:
+            for (k = 0; k < image.getWidth(); ++k) {
+                for (int j = 0; j < image.getHeight(); ++j) {
+                    if (image.getPixelColor(k, j) >> 24 == 0) {
+                        bl = true;
+                        break label51;
                     }
                 }
             }
+            for (k = 1; k <= mipmap; ++k) {
+                NativeImage nativeImage = nativeImages[k - 1];
+                NativeImage nativeImage2 = new NativeImage(nativeImage.getWidth() >> 1, nativeImage.getHeight() >> 1, false);
+                int l = nativeImage2.getWidth();
+                int m = nativeImage2.getHeight();
 
-            for (int i = 0; i < mipmap; i++) {
-                NativeImage srcImage = nativeImages[i];
-                NativeImage outImage = new NativeImage(srcImage.getWidth() >> 1, srcImage.getHeight() >> 1, false);
-
-
-                for (int pX = outImage.getWidth(); --pX >= 0;) {
-                    for (int pY = outImage.getHeight(); --pY >= 0;) {
-                        outImage.setPixelColor(
-                            pX, pY,
-                            blend(
-                                srcImage.getPixelColor(pX * 2, pY * 2),
-                                srcImage.getPixelColor(pX * 2 + 1, pY * 2),
-                                srcImage.getPixelColor(pX * 2, pY * 2 + 1),
-                                srcImage.getPixelColor(pX * 2 + 1, pY * 2 + 1),
-                                hasOpaquePixel
-                            )
-                        );
+                for (int n = 0; n < l; ++n) {
+                    for (int o = 0; o < m; ++o) {
+                        nativeImage2.setPixelColor(n, o, blend(nativeImage.getPixelColor(n * 2, o * 2), nativeImage.getPixelColor(n * 2 + 1, o * 2), nativeImage.getPixelColor(n * 2, o * 2 + 1), nativeImage.getPixelColor(n * 2 + 1, o * 2 + 1), bl));
                     }
                 }
 
-                nativeImages[i + 1] = outImage;
+                nativeImages[k] = nativeImage2;
             }
         }
 
-        return nativeImages;
+        cir.setReturnValue(nativeImages);
     }
 }

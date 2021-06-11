@@ -17,7 +17,7 @@ import org.apache.commons.lang3.tuple.Pair;
 public class DashBlockState implements Dashable {
 
     @Serialize(order = 0)
-    public final int owner;
+    public final Integer owner;
 
     @Serialize(order = 1)
     @SerializeNullable()
@@ -31,9 +31,7 @@ public class DashBlockState implements Dashable {
     }
 
     public DashBlockState(BlockState blockState, DashRegistry registry) {
-        //noinspection unchecked
-        final var accessState = ((StateAccessor<Block, BlockState>) blockState);
-
+        StateAccessor<Block, BlockState> accessState = ((StateAccessor<Block, BlockState>) blockState);
         entriesEncoded = new PairMap<>();
         accessState.getEntries().forEach((property, comparable) -> {
             final Pair<Integer, Integer> propertyPointer = registry.createPropertyPointer(property, comparable);

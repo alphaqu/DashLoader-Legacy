@@ -26,7 +26,7 @@ public class DashSpriteAnimationFrame implements Dashable {
     }
 
     @Override
-    public Sprite.AnimationFrame toUndash(DashRegistry registry) {
-        return SpriteAnimationFrameAccessor.newSpriteFrame(index, time);
+    public <K> K toUndash(DashRegistry registry) {
+        return (K) SpriteAnimationFrameAccessor.newSpriteFrame(index, time);
     }
 }

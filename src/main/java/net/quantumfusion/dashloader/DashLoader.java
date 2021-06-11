@@ -7,8 +7,6 @@ import io.activej.serializer.SerializerBuilder;
 import io.activej.serializer.stream.StreamInput;
 import io.activej.serializer.stream.StreamOutput;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -54,9 +52,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinWorkerThread;
-import java.util.function.Function;
-
-import static net.quantumfusion.dashloader.util.ThreadHelper.rebound;
 
 public class DashLoader {
     public static final Logger LOGGER = LogManager.getLogger();
@@ -73,7 +68,7 @@ public class DashLoader {
     public final List<SpriteAtlasTexture> atlasesToRegister;
     private final ClassLoader classLoader;
     private final List<SpriteAtlasTexture> extraAtlases;
-    private final Object2ObjectMap<Class<?>, BinarySerializer> serializers = new Object2ObjectOpenHashMap<>();
+    private final ConcurrentHashMap<Class<?>, BinarySerializer> serializers = new ConcurrentHashMap<>();
     public int tasksComplete = 0;
     public DashCacheState state;
     public Map<Identifier, List<Font>> fonts = new HashMap<>();
@@ -164,7 +159,7 @@ public class DashLoader {
             state = DashCacheState.EMPTY;
         }
         shutdownThreadPool();
-        LOGGER.info("Loaded cache in " + TimeHelper.getS1Decimal(start) + "s");
+        LOGGER.info("Loaded cache in " + TimeHelper.getDecimalS(start, Instant.now()) + "s");
 //        });
 //        dashLoaderThread.setContextClassLoader(classLoader);
 //        dashLoaderThread.setName("dashloader-supervisor");
@@ -246,23 +241,23 @@ public class DashLoader {
         serializeObject(mappings.fontManagerData, DashCachePaths.FONT.getPath(), "Fonts");
         serializeObject(mappings.splashTextData, DashCachePaths.SPLASH.getPath(), "Splash Text");
 
-        serializeObject(registry.makeBlockStatesData(), DashCachePaths.REGISTRY_BLOCKSTATE.getPath(), "Registry Blockstates");
-        serializeObject(registry.makeFontsData(), DashCachePaths.REGISTRY_FONT.getPath(), "Registry Fonts");
-        serializeObject(registry.makeIdentifiersData(), DashCachePaths.REGISTRY_IDENTIFIER.getPath(), "Registry Identifiers");
-        serializeObject(registry.makeImagesData(), DashCachePaths.REGISTRY_IMAGE.getPath(), "Registry Images");
-        serializeObject(registry.makeModelsData(), DashCachePaths.REGISTRY_MODEL.getPath(), "Registry Models");
-        serializeObject(registry.makePredicatesData(), DashCachePaths.REGISTRY_PREDICATE.getPath(), "Registry Predicates");
-        serializeObject(registry.makePropertiesData(), DashCachePaths.REGISTRY_PROPERTY.getPath(), "Registry Properties");
-        serializeObject(registry.makePropertyValuesData(), DashCachePaths.REGISTRY_PROPERTYVALUE.getPath(), "Registry PropertyValues");
-        serializeObject(registry.makeSpritesData(), DashCachePaths.REGISTRY_SPRITE.getPath(), "Registry Sprites");
+        serializeObject(registry.getBlockstates(), DashCachePaths.REGISTRY_BLOCKSTATE.getPath(), "Registry Blockstates");
+        serializeObject(registry.getFonts(), DashCachePaths.REGISTRY_FONT.getPath(), "Registry Fonts");
+        serializeObject(registry.getIdentifiers(), DashCachePaths.REGISTRY_IDENTIFIER.getPath(), "Registry Identifiers");
+        serializeObject(registry.getImages(), DashCachePaths.REGISTRY_IMAGE.getPath(), "Registry Images");
+        serializeObject(registry.getModels(), DashCachePaths.REGISTRY_MODEL.getPath(), "Registry Models");
+        serializeObject(registry.getPredicates(), DashCachePaths.REGISTRY_PREDICATE.getPath(), "Registry Predicates");
+        serializeObject(registry.getProperties(), DashCachePaths.REGISTRY_PROPERTY.getPath(), "Registry Properties");
+        serializeObject(registry.getPropertyValues(), DashCachePaths.REGISTRY_PROPERTYVALUE.getPath(), "Registry PropertyValues");
+        serializeObject(registry.getSprites(), DashCachePaths.REGISTRY_SPRITE.getPath(), "Registry Sprites");
         registry.apiReport(LOGGER);
         shutdownThreadPool();
         task = "Caching is now complete.";
-        LOGGER.info("Created cache in " + TimeHelper.getS1Decimal(start) + "s");
+        LOGGER.info("Created cache in " + TimeHelper.getDecimalS(start, Instant.now()) + "s");
     }
 
     private void initThreadPool() {
-        THREADPOOL = new ForkJoinPool(Runtime.getRuntime().availableProcessors(), pool -> {
+        THREADPOOL = new ForkJoinPool(Runtime.getRuntime().availableProcessors() + 2, pool -> {
             final ForkJoinWorkerThread worker = ForkJoinPool.defaultForkJoinWorkerThreadFactory.newThread(pool);
             worker.setName("dashloader-thread-" + worker.getPoolIndex());
             worker.setContextClassLoader(classLoader);
@@ -274,7 +269,17 @@ public class DashLoader {
         LOGGER.info("Starting DashLoader Deserialization");
         try {
             DashRegistry registry = new DashRegistry(this);
-            registry.deserialize(this);
+            ThreadHelper.exec(
+                    () -> registry.setBlockstates(deserialize(RegistryBlockStateData.class, DashCachePaths.REGISTRY_BLOCKSTATE.getPath(), "Registry Blockstates").blockstates),
+                    () -> registry.setFonts(deserialize(RegistryFontData.class, DashCachePaths.REGISTRY_FONT.getPath(), "Registry Fonts").fonts),
+                    () -> registry.setIdentifiers(deserialize(RegistryIdentifierData.class, DashCachePaths.REGISTRY_IDENTIFIER.getPath(), "Registry Identifiers").identifiers),
+                    () -> registry.setImages(deserialize(RegistryImageData.class, DashCachePaths.REGISTRY_IMAGE.getPath(), "Registry Images").images),
+                    () -> registry.setModels(deserialize(RegistryModelData.class, DashCachePaths.REGISTRY_MODEL.getPath(), "Registry Models")),
+                    () -> registry.setPredicates(deserialize(RegistryPredicateData.class, DashCachePaths.REGISTRY_PREDICATE.getPath(), "Registry Predicates").predicates),
+                    () -> registry.setProperties(deserialize(RegistryPropertyData.class, DashCachePaths.REGISTRY_PROPERTY.getPath(), "Registry Properties").property),
+                    () -> registry.setPropertyValues(deserialize(RegistryPropertyValueData.class, DashCachePaths.REGISTRY_PROPERTYVALUE.getPath(), "Registry PropertyValues").propertyValues),
+                    () -> registry.setSprites(deserialize(RegistrySpriteData.class, DashCachePaths.REGISTRY_SPRITE.getPath(), "Registry Sprites").sprites)
+            );
             LOGGER.info("      Loading Registry");
             registry.toUndash();
 
@@ -329,7 +334,7 @@ public class DashLoader {
     }
 
     @NotNull
-    protected <T> T deserialize(Class<T> clazz, Path path, String name) {
+    private <T> T deserialize(Class<T> clazz, Path path, String name) {
         try {
             //noinspection unchecked
             final BinarySerializer<T> serializer = serializers.get(clazz);
@@ -347,13 +352,10 @@ public class DashLoader {
         throw new DashException(name + " File failed");
     }
 
-    protected <T> void serializeObject(T clazz, Path path, String name) {
+    private <T> void serializeObject(T clazz, Path path, String name) {
         try {
             task = "Serializing " + name;
             LOGGER.info("  Starting " + name + " Serialization.");
-            if (clazz == null) {
-                throw new DashException(name + "Object is null");
-            }
             StreamOutput output = StreamOutput.create(Files.newOutputStream(path, StandardOpenOption.CREATE, StandardOpenOption.WRITE));
             //noinspection unchecked
             output.serialize(serializers.get(clazz.getClass()), clazz);
@@ -411,38 +413,49 @@ public class DashLoader {
      * fsda
      */
     private void initSerializers() {
-        try {
-            LOGGER.info("[3/4]  Started Serializer init.");
-            Instant start = Instant.now();
-            ConcurrentHashMap<Class<?>, BinarySerializer<?>> serializerMap = new ConcurrentHashMap<>();
-            ThreadHelper.exec(
-                    addSerializer(serializerMap, rebound(), DashMetadata.class),
-                    addSerializer(serializerMap, rebound(), DashModelData.class),
-                    addSerializer(serializerMap, rebound(), DashSpriteAtlasData.class),
-                    addSerializer(serializerMap, rebound(), DashBlockStateData.class),
-                    addSerializer(serializerMap, rebound(), DashParticleData.class),
-                    addSerializer(serializerMap, rebound(), DashFontManagerData.class),
-                    addSerializer(serializerMap, rebound(), DashSplashTextData.class),
-                    addSerializer(serializerMap, rebound(), RegistryBlockStateData.class),
-                    addSerializer(serializerMap, rebound(), RegistryIdentifierData.class),
-                    addSerializer(serializerMap, rebound(), RegistryImageData.class),
-                    addSerializer(serializerMap, (builder) -> builder.withSubclasses("fonts", api.fontTypes), RegistryFontData.class),
-                    addSerializer(serializerMap, (builder) -> builder.withSubclasses("models", api.modelTypes), RegistryModelData.class),
-                    addSerializer(serializerMap, (builder) -> builder.withSubclasses("predicates", api.predicateTypes), RegistryPredicateData.class),
-                    addSerializer(serializerMap, (builder) -> builder.withSubclasses("properties", api.propertyTypes), RegistryPropertyData.class),
-                    addSerializer(serializerMap, (builder) -> builder.withSubclasses("values", api.propertyValueTypes), RegistryPropertyValueData.class),
-                    addSerializer(serializerMap, rebound(), RegistrySpriteData.class)
-            );
-            serializerMap.forEach(serializers::put);
-            LOGGER.info("[3/4] [" + Duration.between(start, Instant.now()).toMillis() + "ms] Created Serializers.");
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        LOGGER.info("[3/4]  Started Serializer init.");
+        Instant start = Instant.now();
+        final Class[] classes = new Class[]{
+                DashMetadata.class,
+                DashModelData.class,
+                DashSpriteAtlasData.class,
+                DashBlockStateData.class,
+                DashParticleData.class,
+                DashFontManagerData.class,
+                DashSplashTextData.class,
+                RegistryBlockStateData.class,
+                RegistryIdentifierData.class,
+                RegistryImageData.class,
+                RegistryFontData.class,
+                RegistryModelData.class,
+                RegistryPredicateData.class,
+                RegistryPropertyData.class,
+                RegistryPropertyValueData.class,
+                RegistrySpriteData.class};
+        final Runnable[] runnables = {
+                () -> addSerializer(classes[0], SerializerBuilder.create()),
+                () -> addSerializer(classes[1], SerializerBuilder.create()),
+                () -> addSerializer(classes[2], SerializerBuilder.create()),
+                () -> addSerializer(classes[3], SerializerBuilder.create()),
+                () -> addSerializer(classes[4], SerializerBuilder.create()),
+                () -> addSerializer(classes[5], SerializerBuilder.create()),
+                () -> addSerializer(classes[6], SerializerBuilder.create()),
+                () -> addSerializer(classes[7], SerializerBuilder.create()),
+                () -> addSerializer(classes[8], SerializerBuilder.create()),
+                () -> addSerializer(classes[9], SerializerBuilder.create()),
+                () -> addSerializer(classes[10], SerializerBuilder.create().withSubclasses("fonts", api.fontTypes)),
+                () -> addSerializer(classes[11], SerializerBuilder.create().withSubclasses("models", api.modelTypes)),
+                () -> addSerializer(classes[12], SerializerBuilder.create().withSubclasses("predicates", api.predicateTypes)),
+                () -> addSerializer(classes[13], SerializerBuilder.create().withSubclasses("properties", api.propertyTypes)),
+                () -> addSerializer(classes[14], SerializerBuilder.create().withSubclasses("values", api.propertyValueTypes)),
+                () -> addSerializer(classes[15], SerializerBuilder.create())
+        };
+        ThreadHelper.exec(runnables);
+        LOGGER.info("[3/4] [" + Duration.between(start, Instant.now()).toMillis() + "ms] Created Serializers.");
     }
 
-    private Runnable addSerializer(ConcurrentHashMap<Class<?>, BinarySerializer<?>> serializerMap, Function<SerializerBuilder, SerializerBuilder> function, Class<?> clazz) {
-        return () -> serializerMap.put(clazz, function.apply(SerializerBuilder.create()).withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE).build(clazz));
+    private void addSerializer(Class<?> clazz, SerializerBuilder builder) {
+        serializers.put(clazz, builder.withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE).build(clazz));
     }
 
 

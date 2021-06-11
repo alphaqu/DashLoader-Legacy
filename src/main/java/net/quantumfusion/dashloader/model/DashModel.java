@@ -11,4 +11,5 @@ public interface DashModel extends Dashable {
     }
 
     int getStage();
+
 }

@@ -12,12 +12,12 @@ public class DashModelOverrideList {
     @Serialize(order = 0)
     public final DashModelOverrideListBakedOverride[] overrides;
     @Serialize(order = 1)
-    public final int[] conditionTypes; //identifiers
+    public final Integer[] conditionTypes; //identifiers
 
     ModelOverrideList toApply;
 
     public DashModelOverrideList(@Deserialize("overrides") DashModelOverrideListBakedOverride[] overrides,
-                                 @Deserialize("conditionTypes") int[] conditionTypes) {
+                                 @Deserialize("conditionTypes") Integer[] conditionTypes) {
         this.overrides = overrides;
         this.conditionTypes = conditionTypes;
     }
@@ -29,7 +29,7 @@ public class DashModelOverrideList {
             this.overrides[i] = new DashModelOverrideListBakedOverride(overrides[i], registry);
         }
         final Identifier[] conditionTypes = ((ModelOverrideListAccessor) modelOverrideList).getConditionTypes();
-        this.conditionTypes = new int[conditionTypes.length];
+        this.conditionTypes = new Integer[conditionTypes.length];
         for (int i = 0; i < conditionTypes.length; i++) {
             this.conditionTypes[i] = registry.createIdentifierPointer(conditionTypes[i]);
         }

@@ -22,6 +22,7 @@ public enum DashCachePaths {
     REGISTRY_PROPERTYVALUE("propertyvalue-registry"),
     REGISTRY_SPRITE("sprite-registry");
 
+
     private final Path path;
 
     DashCachePaths(String st) {

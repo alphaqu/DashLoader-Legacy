@@ -6,16 +6,16 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.client.font.BitmapFont;
 import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.mixin.accessor.BitmapFontAccessor;
-import net.quantumfusion.dashloader.util.Pntr2ObjectMap;
+import net.quantumfusion.dashloader.util.PairMap;
 
 public class DashBitmapFont implements DashFont {
     @Serialize(order = 0)
     public final Integer image;
     @Serialize(order = 1)
-    public Pntr2ObjectMap<DashBitmapFontGlyph> glyphs;
+    public PairMap<Integer, DashBitmapFontGlyph> glyphs;
 
     public DashBitmapFont(@Deserialize("image") Integer image,
-                          @Deserialize("glyphs") Pntr2ObjectMap<DashBitmapFontGlyph> glyphs) {
+                          @Deserialize("glyphs") PairMap<Integer, DashBitmapFontGlyph> glyphs) {
         this.image = image;
         this.glyphs = glyphs;
     }
@@ -23,13 +23,13 @@ public class DashBitmapFont implements DashFont {
     public DashBitmapFont(BitmapFont bitmapFont, DashRegistry registry) {
         BitmapFontAccessor font = ((BitmapFontAccessor) bitmapFont);
         image = registry.createImagePointer(font.getImage());
-        glyphs = new Pntr2ObjectMap<>();
+        glyphs = new PairMap<>();
         font.getGlyphs().forEach((integer, bitmapFontGlyph) -> glyphs.put(integer, new DashBitmapFontGlyph(bitmapFontGlyph, registry)));
     }
 
     public BitmapFont toUndash(DashRegistry registry) {
-        Int2ObjectOpenHashMap<BitmapFont.BitmapFontGlyph> out = new Int2ObjectOpenHashMap<>();
-        glyphs.forEach((entry) -> out.put(entry.key(), entry.value().toUndash(registry)));
+        Int2ObjectOpenHashMap<BitmapFont.BitmapFontGlyph> out = new Int2ObjectOpenHashMap();
+        glyphs.forEach((integer, dashBitmapFontGlyph) -> out.put(integer, dashBitmapFontGlyph.toUndash(registry)));
         return BitmapFontAccessor.init(registry.getImage(image), out);
     }
 

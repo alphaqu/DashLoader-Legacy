@@ -28,15 +28,14 @@ public class SplashScreenMixin {
             at = @At(value = "INVOKE", target = "Lnet/minecraft/resource/ResourceReload;throwException()V", shift = At.Shift.BEFORE), cancellable = true)
     private void render(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo ci) {
         if (DashLoader.getInstance().state == DashCacheState.LOADED && client.world == null) {
-            client.setOverlay(null);
-            client.openScreen(new TitleScreen(false));
-            client.currentScreen.init(this.client, this.client.getWindow().getScaledWidth(), this.client.getWindow().getScaledHeight());
+            this.client.setOverlay(null);
+            this.client.openScreen(new TitleScreen(false));
+            this.client.currentScreen.init(this.client, this.client.getWindow().getScaledWidth(), this.client.getWindow().getScaledHeight());
+            ci.cancel();
         } else {
             this.client.setOverlay(null);
             client.openScreen(new DashWindow(Text.of("dash")));
+            ci.cancel();
         }
-        ci.cancel();
     }
-
-
 }

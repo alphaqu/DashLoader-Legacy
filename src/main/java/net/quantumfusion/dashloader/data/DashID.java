@@ -4,5 +4,6 @@ import net.minecraft.util.Identifier;
 import net.quantumfusion.dashloader.DashRegistry;
 
 public interface DashID extends Dashable {
+
     Identifier toUndash(DashRegistry registry);
 }

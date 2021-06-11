@@ -14,7 +14,7 @@ public class DashModelOverrideListBakedOverride {
     @Nullable
     @Serialize(order = 1)
     @SerializeNullable
-    public final Integer model; // modeltooverride pointer || Integer to allow null
+    public final Integer model; // temp
 
     public DashModelOverrideListBakedOverride(@Deserialize("conditions") DashModelOverrideListInlinedCondition[] conditions,
                                               @Deserialize("model") @Nullable Integer model) {

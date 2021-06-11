@@ -2,24 +2,18 @@ package net.quantumfusion.dashloader.data.registry;
 
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import io.activej.serializer.annotations.SerializeNullable;
 import net.quantumfusion.dashloader.blockstate.DashBlockState;
-import net.quantumfusion.dashloader.util.Pntr2ObjectMap;
+
+import java.util.Map;
 
 public class RegistryBlockStateData {
     @Serialize(order = 0)
-    public Pntr2ObjectMap<DashBlockState> blockStates;
+    @SerializeNullable(path = {1})
+    @SerializeNullable(path = {0})
+    public Map<Integer, DashBlockState> blockstates;
 
-    public RegistryBlockStateData(@Deserialize("blockStates") Pntr2ObjectMap<DashBlockState> blockStates) {
-        this.blockStates = blockStates;
-    }
-
-    public RegistryBlockStateData(Int2ObjectMap<DashBlockState> blockStates) {
-        this.blockStates = new Pntr2ObjectMap<>(blockStates);
-    }
-
-
-    public Int2ObjectMap<DashBlockState> toUndash() {
-        return blockStates.convert();
+    public RegistryBlockStateData(@Deserialize("blockstates") Map<Integer, DashBlockState> blockstates) {
+        this.blockstates = blockstates;
     }
 }

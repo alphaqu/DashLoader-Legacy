@@ -21,8 +21,5 @@ public interface StateAccessor<O, S> {
     Table<Property<?>, Comparable<?>, S> getWithTable();
 
     @Accessor
-    void setWithTable(Table<Property<?>, Comparable<?>, S> withTable);
-
-    @Accessor
     MapCodec<S> getCodec();
 }

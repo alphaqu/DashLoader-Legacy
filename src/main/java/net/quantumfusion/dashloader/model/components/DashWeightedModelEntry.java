@@ -10,12 +10,12 @@ import net.quantumfusion.dashloader.mixin.accessor.WeightedBakedModelEntryAccess
 
 public class DashWeightedModelEntry {
     @Serialize(order = 0)
-    public int model; // model pointer
+    public Integer model;
 
     @Serialize(order = 1)
     public int weight;
 
-    public DashWeightedModelEntry(@Deserialize("model") int model,
+    public DashWeightedModelEntry(@Deserialize("model") Integer model,
                                   @Deserialize("weight") int weight) {
         this.model = model;
         this.weight = weight;

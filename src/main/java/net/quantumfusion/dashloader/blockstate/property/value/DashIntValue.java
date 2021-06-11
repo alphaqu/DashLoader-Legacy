@@ -6,14 +6,14 @@ import net.quantumfusion.dashloader.DashRegistry;
 
 public class DashIntValue implements DashPropertyValue {
     @Serialize(order = 0)
-    public int value;
+    public Integer value;
 
-    public DashIntValue(@Deserialize("value") int value) {
+    public DashIntValue(@Deserialize("value") Integer value) {
         this.value = value;
     }
 
     @Override
-    public Integer toUndash(DashRegistry registry) {
+    public Comparable toUndash(DashRegistry registry) {
         return value;
     }
 }
