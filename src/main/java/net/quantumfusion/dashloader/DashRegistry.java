@@ -3,7 +3,6 @@ package net.quantumfusion.dashloader;
 import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectSortedMaps;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.font.Font;
@@ -72,6 +71,7 @@ public class DashRegistry {
     public Int2ObjectMap<DashPropertyValue> propertyValues;
     public List<Int2ObjectMap<DashModel>> modelsToDeserialize;
 
+
     private final DashLoader loader;
 
     public DashRegistry(DashLoader loader) {
@@ -94,7 +94,7 @@ public class DashRegistry {
     public RegistryModelData makeModelsData() {
         final var modelsToAdd = new Int2ObjectLinkedOpenHashMap<Int2ObjectMap<DashModel>>();
 
-        for (final var entry : models.int2ObjectEntrySet()) {
+        for (final Int2ObjectMap.Entry<DashModel> entry : models.int2ObjectEntrySet()) {
             final var model = entry.getValue();
             final var modelMap = modelsToAdd.computeIfAbsent(model.getStage(), Int2ObjectOpenHashMap::new);
             modelMap.put(entry.getIntKey(), model);
@@ -255,9 +255,9 @@ public class DashRegistry {
                 () -> blockStates = (loader.deserialize(RegistryBlockStateData.class, DashCachePaths.REGISTRY_BLOCKSTATE.getPath(), "Registry Blockstates").toUndash()),
                 () -> fonts = (loader.deserialize(RegistryFontData.class, DashCachePaths.REGISTRY_FONT.getPath(), "Registry Fonts").toUndash()),
                 () -> identifiers = (loader.deserialize(RegistryIdentifierData.class, DashCachePaths.REGISTRY_IDENTIFIER.getPath(), "Registry Identifiers").toUndash()),
-                () -> images = (loader.deserialize(RegistryImageData.class, DashCachePaths.REGISTRY_IMAGE.getPath(), "Registry Images").toUndash()),
-                () -> modelsToDeserialize = (loader.deserialize(RegistryModelData.class, DashCachePaths.REGISTRY_MODEL.getPath(), "Registry Models").toUndash()),
-                () -> predicates = (loader.deserialize(RegistryPredicateData.class, DashCachePaths.REGISTRY_PREDICATE.getPath(), "Registry Predicates").toUndash()),
+                () -> images = (loader.deserialize(RegistryImageData.class, DashCachePaths.REGISTRY_IMAGE.getPath(), "Registry Images")).toUndash(),
+                () -> modelsToDeserialize = (loader.deserialize(RegistryModelData.class, DashCachePaths.REGISTRY_MODEL.getPath(), "Registry Models")).toUndash(),
+                () -> predicates = (loader.deserialize(RegistryPredicateData.class, DashCachePaths.REGISTRY_PREDICATE.getPath(), "Registry Predicates")).toUndash(),
                 () -> properties = (loader.deserialize(RegistryPropertyData.class, DashCachePaths.REGISTRY_PROPERTY.getPath(), "Registry Properties").toUndash()),
                 () -> propertyValues = (loader.deserialize(RegistryPropertyValueData.class, DashCachePaths.REGISTRY_PROPERTYVALUE.getPath(), "Registry PropertyValues").toUndash()),
                 () -> sprites = (loader.deserialize(RegistrySpriteData.class, DashCachePaths.REGISTRY_SPRITE.getPath(), "Registry Sprites").toUndash())
@@ -289,13 +289,16 @@ public class DashRegistry {
         sprites.clear();
         fonts.clear();
 
-        modelsOut = Int2ObjectSortedMaps.synchronize(new Int2ObjectLinkedOpenHashMap<>((int) Math.ceil(modelsToDeserialize.size() / 0.75)));
+        modelsOut = new Int2ObjectLinkedOpenHashMap<>((int) Math.ceil(modelsToDeserialize.size() / 0.75));
 
         final var currentStage = new AtomicInteger();
         modelsToDeserialize.forEach(modelCategory -> {
-            log(logger, "Loading {} Models: [{}]", modelCategory.size(), currentStage);
-            modelsOut.putAll(ThreadHelper.execParallel(modelCategory, this));
-            currentStage.getAndIncrement();
+            try {
+                log(logger, "Loading {} Models: [{}]", modelCategory.size(), currentStage.getAndIncrement());
+                modelsOut.putAll(ThreadHelper.execParallel(modelCategory, this));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         });
 
         log(logger, "Applying Model Overrides");
@@ -310,8 +313,7 @@ public class DashRegistry {
 
     private void log(Logger logger, String s, Object... params) {
         tasksDone++;
-        final var formatString = "[{}/{}] " + s;
-        logger.info(formatString, tasksDone, totalTasks, params);
+        logger.info("[{}/{}] " + s, tasksDone, totalTasks, params);
     }
 
     public void apiReport(Logger logger) {
@@ -322,7 +324,9 @@ public class DashRegistry {
                 counter.getAndIncrement();
                 logger.error("[{}] Object: {}", entry.getValue().name(), entry.getKey().getName());
             });
-            logger.error("In total there are {} incompatible objects. Please contact the mod developers to add support.", counter.getAndIncrement());
+            logger.error("In total there are {} incompatible objects. Please contact the mod developers to add support.", counter.get());
         }
     }
+
+
 }

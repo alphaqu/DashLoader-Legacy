@@ -17,7 +17,11 @@ public class RegistryIdentifierData {
     })
     public Pntr2ObjectMap<DashID> identifiers;
 
-    public RegistryIdentifierData(@Deserialize("identifiers") Int2ObjectMap<DashID> identifiers) {
+    public RegistryIdentifierData(@Deserialize("identifiers") Pntr2ObjectMap<DashID> identifiers) {
+        this.identifiers = identifiers;
+    }
+
+    public RegistryIdentifierData(Int2ObjectMap<DashID> identifiers) {
         this.identifiers = new Pntr2ObjectMap<>(identifiers);
     }
 

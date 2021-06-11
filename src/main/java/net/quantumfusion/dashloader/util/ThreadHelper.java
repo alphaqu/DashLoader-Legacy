@@ -1,7 +1,7 @@
 package net.quantumfusion.dashloader.util;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.quantumfusion.dashloader.DashLoader;
 import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.data.Dashable;
@@ -22,8 +22,8 @@ public class ThreadHelper {
     }
 
     public static <U, D extends Dashable> Int2ObjectMap<U> execParallel(Int2ObjectMap<D> dashables, DashRegistry registry) {
-        final var resultMap = new Int2ObjectLinkedOpenHashMap<U>((int) Math.ceil(dashables.size() / 0.75));
-        resultMap.putAll(DashLoader.THREADPOOL.invoke(new UndashTask<>(new Int2ObjectLinkedOpenHashMap<>(dashables), 100, registry)));
+        final var resultMap = new Int2ObjectOpenHashMap<U>((int) Math.ceil(dashables.size() / 0.75));
+        resultMap.putAll(DashLoader.THREADPOOL.invoke(new UndashTask<>(dashables, 100, registry)));
         return resultMap;
     }
 

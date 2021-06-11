@@ -12,7 +12,11 @@ public class RegistryPropertyValueData {
     @SerializeSubclasses(path = {0}, extraSubclassesId = "values")
     public Pntr2ObjectMap<DashPropertyValue> propertyValues;
 
-    public RegistryPropertyValueData(@Deserialize("propertyValues") Int2ObjectMap<DashPropertyValue> propertyValues) {
+    public RegistryPropertyValueData(@Deserialize("propertyValues") Pntr2ObjectMap<DashPropertyValue> propertyValues) {
+        this.propertyValues = propertyValues;
+    }
+
+    public RegistryPropertyValueData(Int2ObjectMap<DashPropertyValue> propertyValues) {
         this.propertyValues = new Pntr2ObjectMap<>(propertyValues);
     }
 

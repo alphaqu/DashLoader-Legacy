@@ -12,7 +12,11 @@ public class RegistryPredicateData {
     @SerializeSubclasses(path = {0}, extraSubclassesId = "predicates")
     public Pntr2ObjectMap<DashPredicate> predicates;
 
-    public RegistryPredicateData(@Deserialize("predicates") Int2ObjectMap<DashPredicate> predicates) {
+    public RegistryPredicateData(@Deserialize("predicates") Pntr2ObjectMap<DashPredicate> predicates) {
+        this.predicates = predicates;
+    }
+
+    public RegistryPredicateData(Int2ObjectMap<DashPredicate> predicates) {
         this.predicates = new Pntr2ObjectMap<>(predicates);
     }
 

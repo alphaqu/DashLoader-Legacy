@@ -1,50 +1,66 @@
 package net.quantumfusion.dashloader.util;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectSortedMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.data.Dashable;
 import net.quantumfusion.dashloader.model.DashModel;
-import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.List;
 import java.util.concurrent.RecursiveAction;
 import java.util.concurrent.RecursiveTask;
 
-public class UndashTask<U, D extends Dashable> extends RecursiveTask<Int2ObjectSortedMap<U>> {
-    private final Int2ObjectSortedMap<D> tasks;
+public class UndashTask<U, D extends Dashable> extends RecursiveTask<Int2ObjectOpenHashMap<U>> {
+    private final Int2ObjectMap.Entry<D>[] tasks;
     private final int threshold;
+    int start, end;
     private final DashRegistry registry;
 
 
-    public UndashTask(Int2ObjectSortedMap<D> tasks, int threshold, DashRegistry registry) {
+    public UndashTask(Int2ObjectMap.Entry<D>[] tasks, int threshold, int start, int end, DashRegistry registry) {
         this.tasks = tasks;
         this.threshold = threshold;
+        this.start = start;
+        this.end = end;
         this.registry = registry;
     }
 
-    @Override
-    protected Int2ObjectSortedMap<U> compute() {
+    public UndashTask(Int2ObjectMap<D> tasks, int threshold, DashRegistry registry) {
         final int size = tasks.size();
-        if (size < threshold) {
+        var array = new Int2ObjectMap.Entry[size];
+        this.tasks = tasks.int2ObjectEntrySet().toArray(array);
+        this.threshold = threshold;
+        this.start = 0;
+        this.end = size;
+        this.registry = registry;
+    }
+
+
+    @Override
+    protected Int2ObjectOpenHashMap<U> compute() {
+        if ((end - start) < threshold) {
             return computeDirectly();
         } else {
-            final var half = size / 2;
-            final UndashTask<U, D> first = new UndashTask<>(tasks.subMap(0, half), threshold, registry);
-            final UndashTask<U, D> second = new UndashTask<>(tasks.subMap(half, tasks.size()), threshold, registry);
-            invokeAll(first, second);
-            return combine(first.join(), second.join());
+            final int middle = (start + end) / 2;
+            UndashTask<U, D> subtaskA = new UndashTask<>(tasks, threshold, start, middle, registry);
+            UndashTask<U, D> subtaskB = new UndashTask<>(tasks, threshold, middle, end, registry);
+            subtaskA.fork();
+            subtaskB.fork();
+            return combine(subtaskA.join(), subtaskB.join());
         }
     }
 
-    public final Int2ObjectSortedMap<U> combine(final Int2ObjectSortedMap<U> map, final Int2ObjectSortedMap<U> map2) {
+    public final Int2ObjectOpenHashMap<U> combine(final Int2ObjectOpenHashMap<U> map, final Int2ObjectOpenHashMap<U> map2) {
         map.putAll(map2);
         return map;
     }
 
-    protected final Int2ObjectSortedMap<U> computeDirectly() {
-        final var count = new Int2ObjectLinkedOpenHashMap<U>(tasks.size());
-        tasks.int2ObjectEntrySet().forEach(e -> count.put(e.getIntKey(), e.getValue().toUndash(registry)));
+    protected final Int2ObjectOpenHashMap<U> computeDirectly() {
+        final Int2ObjectOpenHashMap<U> count = new Int2ObjectOpenHashMap<>((int) ((end - start) / 0.75f));
+        for (int i = start; i < end; i++) {
+            final Int2ObjectMap.Entry<D> task = tasks[i];
+            count.put(task.getIntKey(), task.getValue().toUndash(registry));
+        }
         return count;
     }
 
@@ -60,22 +76,15 @@ public class UndashTask<U, D extends Dashable> extends RecursiveTask<Int2ObjectS
             this.registry = registry;
         }
 
-        public final Pair<List<DashModel>, List<DashModel>> split(final List<DashModel> list, final int size) {
-            final var half = size / 2;
-            final var first = list.subList(0, half);
-            final var second = list.subList(half, list.size());
-            return Pair.of(first, second);
-        }
-
         @Override
         protected void compute() {
             final int size = tasks.size();
             if (size < threshold) {
                 computeDirectly();
             } else {
-                final Pair<List<DashModel>, List<DashModel>> subtask = split(tasks, size);
-                final ApplyTask subTask1 = new ApplyTask(subtask.getKey(), threshold, registry);
-                final ApplyTask subTask2 = new ApplyTask(subtask.getValue(), threshold, registry);
+                final var half = size / 2;
+                final ApplyTask subTask1 = new ApplyTask(tasks.subList(0, half), threshold, registry);
+                final ApplyTask subTask2 = new ApplyTask(tasks.subList(half, size), threshold, registry);
                 invokeAll(subTask1, subTask2);
             }
         }

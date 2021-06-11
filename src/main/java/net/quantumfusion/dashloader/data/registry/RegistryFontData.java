@@ -14,7 +14,11 @@ public class RegistryFontData {
     @SerializeSubclasses(path = {1}, extraSubclassesId = "fonts")
     public Pntr2ObjectMap<DashFont> fonts;
 
-    public RegistryFontData(@Deserialize("fonts") Int2ObjectMap<DashFont> fonts) {
+    public RegistryFontData(@Deserialize("fonts") Pntr2ObjectMap<DashFont> fonts) {
+        this.fonts = fonts;
+    }
+
+    public RegistryFontData(Int2ObjectMap<DashFont> fonts) {
         this.fonts = new Pntr2ObjectMap<>(fonts);
     }
 

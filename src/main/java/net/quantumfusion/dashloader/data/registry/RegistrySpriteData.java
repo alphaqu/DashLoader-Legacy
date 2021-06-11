@@ -11,7 +11,12 @@ public class RegistrySpriteData {
     @Serialize(order = 0)
     public Pntr2ObjectMap<DashSprite> sprites;
 
-    public RegistrySpriteData(@Deserialize("sprites") Int2ObjectMap<DashSprite> sprites) {
+    public RegistrySpriteData(@Deserialize("sprites") Pntr2ObjectMap<DashSprite> sprites) {
+        this.sprites = sprites;
+    }
+
+
+    public RegistrySpriteData(Int2ObjectMap<DashSprite> sprites) {
         this.sprites = new Pntr2ObjectMap<>(sprites);
     }
 

@@ -6,6 +6,7 @@ import io.activej.serializer.annotations.SerializeNullable;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.BakedQuad;
 import net.minecraft.client.render.model.BasicBakedModel;
+import net.minecraft.client.render.model.json.ModelOverrideList;
 import net.minecraft.client.render.model.json.ModelTransformation;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.util.math.Direction;
@@ -95,7 +96,8 @@ public class DashBasicBakedModel implements DashModel {
             dashBakedQuads.forEach(dashBakedQuad -> out.add(dashBakedQuad.toUndash(sprite, registry)));
             faceQuadsOut.put(dashDirection.toUndash(registry), out);
         });
-        return new BasicBakedModel(quadsOut, faceQuadsOut, usesAo, isSideLit, hasDepth, sprite, transformation == null ? ModelTransformation.NONE : transformation.toUndash(), itemPropertyOverrides.toUndash(registry));
+        final ModelOverrideList itemPropertyOverrides = this.itemPropertyOverrides.toUndash(registry);
+        return new BasicBakedModel(quadsOut, faceQuadsOut, usesAo, isSideLit, hasDepth, sprite, transformation == null ? ModelTransformation.NONE : transformation.toUndash(), itemPropertyOverrides);
     }
 
     @Override

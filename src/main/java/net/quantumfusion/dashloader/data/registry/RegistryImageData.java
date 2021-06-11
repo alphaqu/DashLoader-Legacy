@@ -10,7 +10,11 @@ public class RegistryImageData {
     @Serialize(order = 0)
     public Pntr2ObjectMap<DashImage> images;
 
-    public RegistryImageData(@Deserialize("images") Int2ObjectMap<DashImage> images) {
+    public RegistryImageData(@Deserialize("images") Pntr2ObjectMap<DashImage> images) {
+        this.images = images;
+    }
+
+    public RegistryImageData(Int2ObjectMap<DashImage> images) {
         this.images = new Pntr2ObjectMap<>(images);
     }
 

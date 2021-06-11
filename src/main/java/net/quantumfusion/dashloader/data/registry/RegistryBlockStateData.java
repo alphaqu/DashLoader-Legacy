@@ -10,9 +10,14 @@ public class RegistryBlockStateData {
     @Serialize(order = 0)
     public Pntr2ObjectMap<DashBlockState> blockStates;
 
-    public RegistryBlockStateData(@Deserialize("blockStates") Int2ObjectMap<DashBlockState> blockStates) {
+    public RegistryBlockStateData(@Deserialize("blockStates") Pntr2ObjectMap<DashBlockState> blockStates) {
+        this.blockStates = blockStates;
+    }
+
+    public RegistryBlockStateData(Int2ObjectMap<DashBlockState> blockStates) {
         this.blockStates = new Pntr2ObjectMap<>(blockStates);
     }
+
 
     public Int2ObjectMap<DashBlockState> toUndash() {
         return blockStates.convert();
