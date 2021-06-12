@@ -42,6 +42,7 @@ public class DashLoaderAPI {
 
     public List<Class<?>> propertyTypes;
     public List<Class<?>> propertyValueTypes;
+    private boolean initialized = false;
 
     public DashLoaderAPI() {
         modelMappings = Collections.synchronizedMap(new HashMap<>());
@@ -115,15 +116,18 @@ public class DashLoaderAPI {
     }
 
     public void initAPI() {
-        Instant start = Instant.now();
-        clearAPI();
-        initNativeAPI();
-        FabricLoader.getInstance().getAllMods().parallelStream().forEach(modContainer -> {
-            final ModMetadata metadata = modContainer.getMetadata();
-            getValue(metadata.getCustomValue("dashloader:factory"), metadata);
-        });
-        initTypes();
-        LOGGER.info("[" + Duration.between(start, Instant.now()).toMillis() + "ms] Initialized api.");
+        if (!initialized) {
+            Instant start = Instant.now();
+            clearAPI();
+            initNativeAPI();
+            FabricLoader.getInstance().getAllMods().parallelStream().forEach(modContainer -> {
+                final ModMetadata metadata = modContainer.getMetadata();
+                getValue(metadata.getCustomValue("dashloader:factory"), metadata);
+            });
+            initTypes();
+            LOGGER.info("[" + Duration.between(start, Instant.now()).toMillis() + "ms] Initialized api.");
+            initialized = true;
+        }
     }
 
 

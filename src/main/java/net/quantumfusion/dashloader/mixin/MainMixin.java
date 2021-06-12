@@ -14,6 +14,6 @@ public class MainMixin {
             at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;beginInitialization()V", shift = At.Shift.AFTER), cancellable = true)
     private static void main(String[] args, CallbackInfo ci) {
         DashLoader loader = new DashLoader(Thread.currentThread().getContextClassLoader());
-        loader.reload();
+        loader.initialize();
     }
 }

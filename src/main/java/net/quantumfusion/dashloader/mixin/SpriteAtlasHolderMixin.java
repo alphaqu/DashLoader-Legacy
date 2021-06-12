@@ -53,7 +53,6 @@ public class SpriteAtlasHolderMixin {
         if (DashLoader.getInstance().state == DashCacheState.LOADED) {
             ci.cancel();
         } else {
-            System.out.println(atlas.getId());
             DashLoader.getInstance().addExtraAtlasAssets(atlas);
         }
     }
