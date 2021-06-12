@@ -29,12 +29,11 @@ public class DashWindow extends Screen {
 
     @Override
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-        final int tasksComplete = DashLoader.getInstance().tasksComplete;
-        final float progress = tasksComplete == 0 ? 0 : tasksComplete / (float) DashLoader.totalTasks;
-        final float result = (progress - currentProgress);
+
+        final double result = (DashLoader.TASK_HANDLER.getProgress() - currentProgress);
         currentProgress += result == 0 ? 0 : result / 20;
         renderProgressBar(matrices, framesLeftToEnd == 0 ? 0 : framesLeftToEnd / (float) endFrames);
-        if (progress == 1) {
+        if (DashLoader.TASK_HANDLER.getProgress() == 1) {
             framesLeftToEnd--;
             if (framesLeftToEnd <= 0) {
                 if (MinecraftClient.getInstance().world != null) {
@@ -71,7 +70,7 @@ public class DashWindow extends Screen {
         DrawableHelper.drawTextWithShadow(
                 matrices,
                 textRenderer,
-                Text.of("(" + DashLoader.getInstance().tasksComplete + "/" + DashLoader.totalTasks + ") " + DashLoader.task),
+                DashLoader.TASK_HANDLER.getText(),
                 10,
                 screenHeight - progressBarHeight - textRenderer.fontHeight,
                 BackgroundHelper.ColorMixer.getArgb(255, 220, 220, 220));

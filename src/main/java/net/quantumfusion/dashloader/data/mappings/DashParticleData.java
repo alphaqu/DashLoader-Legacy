@@ -2,11 +2,10 @@ package net.quantumfusion.dashloader.data.mappings;
 
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
-import net.minecraft.client.particle.ParticleManager;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.util.Identifier;
 import net.quantumfusion.dashloader.DashRegistry;
-import net.quantumfusion.dashloader.mixin.accessor.ParticleManagerSimpleSpriteProviderAccessor;
+import net.quantumfusion.dashloader.util.VanillaData;
 import net.quantumfusion.dashloader.util.serialization.Pointer2ObjectMap;
 
 import java.util.ArrayList;
@@ -23,11 +22,11 @@ public class DashParticleData {
         this.particles = particles;
     }
 
-    public DashParticleData(Map<Identifier, ParticleManager.SimpleSpriteProvider> particles, DashRegistry registry) {
+    public DashParticleData(VanillaData data, DashRegistry registry) {
         this.particles = new Pointer2ObjectMap<>();
-        particles.forEach((identifier, simpleSpriteProvider) -> {
+        data.getParticles().forEach((identifier, spriteList) -> {
             List<Integer> out = new ArrayList<>();
-            ((ParticleManagerSimpleSpriteProviderAccessor) simpleSpriteProvider).getSprites().forEach(sprite -> out.add(registry.createSpritePointer(sprite)));
+            spriteList.forEach(sprite -> out.add(registry.createSpritePointer(sprite)));
             this.particles.put(registry.createIdentifierPointer(identifier), out);
         });
     }

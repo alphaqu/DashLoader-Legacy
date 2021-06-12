@@ -2,8 +2,8 @@ package net.quantumfusion.dashloader.util;
 
 import net.quantumfusion.dashloader.DashLoader;
 import net.quantumfusion.dashloader.api.DashLoaderAPI;
-import net.quantumfusion.dashloader.data.DashMappingData;
 import net.quantumfusion.dashloader.data.DashRegistryData;
+import net.quantumfusion.dashloader.data.DashVanillaData;
 
 import java.io.File;
 import java.time.Instant;
@@ -14,7 +14,7 @@ public class DashSerializers {
 
     public final static List<DashSerializer<?>> SERIALIZERS = new ArrayList<>();
     public final static DashSerializer<DashRegistryData> REGISTRY_SERIALIZER;
-    public final static DashSerializer<DashMappingData> MAPPING_SERIALIZER;
+    public final static DashSerializer<DashVanillaData> MAPPING_SERIALIZER;
 
     static {
         final DashLoader loader = DashLoader.getInstance();
@@ -30,7 +30,7 @@ public class DashSerializers {
                             .withSubclasses("properties", api.propertyTypes)
                             .withSubclasses("values", api.propertyValueTypes).build(DashRegistryData.class);
                 }));
-        MAPPING_SERIALIZER = addSerializer(new DashSerializer<>(loader, "mapping", builder -> builder.build(DashMappingData.class)));
+        MAPPING_SERIALIZER = addSerializer(new DashSerializer<>(loader, "mapping", builder -> builder.build(DashVanillaData.class)));
     }
 
     private static <O> DashSerializer<O> addSerializer(DashSerializer<O> serializer) {

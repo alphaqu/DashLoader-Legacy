@@ -5,6 +5,7 @@ import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.util.profiler.Profiler;
 import net.quantumfusion.dashloader.DashLoader;
+import net.quantumfusion.dashloader.DashMappings;
 import net.quantumfusion.dashloader.util.DashCacheState;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -38,12 +39,15 @@ public class SpriteAtlasHolderMixin {
     private void applyOverride(SpriteAtlasTexture.Data data, ResourceManager resourceManager, Profiler profiler, CallbackInfo ci) {
         final DashLoader instance = DashLoader.getInstance();
         if (instance.state == DashCacheState.LOADED) {
-            instance.atlasesToRegister.forEach(spriteAtlasTexture -> {
-                if (atlas.getId().equals(spriteAtlasTexture.getId())) {
-                    atlas = spriteAtlasTexture;
-                }
-            });
-            ci.cancel();
+            final DashMappings mappings = instance.getMappings();
+            if (mappings != null) {
+                mappings.getAtlases().forEach(spriteAtlasTexture -> {
+                    if (atlas.getId().equals(spriteAtlasTexture.getId())) {
+                        atlas = spriteAtlasTexture;
+                    }
+                });
+                ci.cancel();
+            }
         }
     }
 
@@ -53,7 +57,7 @@ public class SpriteAtlasHolderMixin {
         if (DashLoader.getInstance().state == DashCacheState.LOADED) {
             ci.cancel();
         } else {
-            DashLoader.getInstance().addExtraAtlasAssets(atlas);
+            DashLoader.getVanillaData().addExtraAtlasAssets(atlas);
         }
     }
 }

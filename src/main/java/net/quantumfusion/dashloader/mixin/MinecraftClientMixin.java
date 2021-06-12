@@ -15,7 +15,7 @@ public abstract class MinecraftClientMixin {
     @Inject(method = "reloadResources()Ljava/util/concurrent/CompletableFuture;",
             at = @At(value = "HEAD"), cancellable = true)
     private void reloadResourcesOverride(CallbackInfoReturnable<CompletableFuture<Void>> cir) {
-        DashLoader loader = new DashLoader(Thread.currentThread().getContextClassLoader());
+       new DashLoader(Thread.currentThread().getContextClassLoader());
     }
 
 }

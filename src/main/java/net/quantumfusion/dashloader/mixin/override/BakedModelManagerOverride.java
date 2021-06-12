@@ -14,6 +14,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.profiler.Profiler;
 import net.quantumfusion.dashloader.DashLoader;
 import net.quantumfusion.dashloader.util.DashCacheState;
+import net.quantumfusion.dashloader.util.VanillaData;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -81,15 +82,16 @@ public class BakedModelManagerOverride {
             this.atlasManager = modelLoader.upload(this.textureManager, profiler);
             this.models = modelLoader.getBakedModelMap();
             this.stateLookup = modelLoader.getStateLookup();
-            loader.setBakedModelAssets(atlasManager, stateLookup, models);
+            DashLoader.getVanillaData().setBakedModelAssets(atlasManager, stateLookup, models);
 
         } else {
             //cache go brr
             DashLoader.LOGGER.info("Starting apply stage.");
             loader.applyDashCache(textureManager, profiler);
-            this.atlasManager = loader.getAtlasManagerOut();
-            this.models = loader.getModelsOut();
-            this.stateLookup = loader.getStateLookupOut();
+            final VanillaData vanillaData = DashLoader.getVanillaData();
+            this.atlasManager = vanillaData.getAtlasManager();
+            this.models = vanillaData.getModels();
+            this.stateLookup = vanillaData.getStateLookup();
         }
         this.missingModel = this.models.get(ModelLoader.MISSING_ID);
         profiler.swap("cache");

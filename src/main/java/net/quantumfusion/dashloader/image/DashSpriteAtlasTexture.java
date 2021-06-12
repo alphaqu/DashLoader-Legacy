@@ -86,7 +86,7 @@ public class DashSpriteAtlasTexture {
         spriteAtlasTextureAccessor.setSprites(out);
         spriteAtlasTextureAccessor.setId(registry.getIdentifier(id));
         spriteAtlasTextureAccessor.setMaxTextureSize(maxTextureSize);
-        DashLoader.getInstance().atlasData.put(spriteAtlasTexture, data);
+        DashLoader.getVanillaData().addAtlasData(spriteAtlasTexture, data);
         return spriteAtlasTexture;
     }
 

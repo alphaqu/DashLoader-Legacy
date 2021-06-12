@@ -70,7 +70,7 @@ public class DashSerializer<O> {
 
     public void serializeObject(O clazz, Path path, String name) {
         try {
-            DashLoader.task = "Serializing " + name;
+            DashLoader.TASK_HANDLER.setCurrentTask("Serializing " + name);
             DashLoader.LOGGER.info("  Starting " + name + " Serialization.");
             StreamOutput output = StreamOutput.create(Files.newOutputStream(path, StandardOpenOption.CREATE, StandardOpenOption.WRITE));
             //noinspection unchecked
@@ -80,7 +80,7 @@ public class DashSerializer<O> {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        loader.tasksComplete++;
+        DashLoader.TASK_HANDLER.completedTask();
     }
 
     @NotNull

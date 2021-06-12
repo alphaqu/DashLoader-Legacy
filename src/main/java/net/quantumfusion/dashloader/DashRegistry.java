@@ -156,7 +156,7 @@ public class DashRegistry {
         if (models.get(hash) == null) {
             Factory<BakedModel, DashModel> model = loader.getApi().modelMappings.get(bakedModel.getClass());
             if (model != null) {
-                models.put(hash, model.toDash(bakedModel, this, loader.multipartData.get(bakedModel)));
+                models.put(hash, model.toDash(bakedModel, this, DashLoader.getVanillaData().getModelData(bakedModel)));
             } else {
                 apiFailed.putIfAbsent(bakedModel.getClass(), FactoryType.MODEL);
             }

@@ -52,9 +52,9 @@ public abstract class ParticleManagerMixin {
     @Inject(method = "reload(Lnet/minecraft/resource/ResourceReloader$Synchronizer;Lnet/minecraft/resource/ResourceManager;Lnet/minecraft/util/profiler/Profiler;Lnet/minecraft/util/profiler/Profiler;Ljava/util/concurrent/Executor;Ljava/util/concurrent/Executor;)Ljava/util/concurrent/CompletableFuture;",
             at = @At(value = "HEAD"), cancellable = true)
     private void reloadParticlesFast(ResourceReloader.Synchronizer synchronizer, ResourceManager manager, Profiler prepareProfiler, Profiler applyProfiler, Executor prepareExecutor, Executor applyExecutor, CallbackInfoReturnable<CompletableFuture<Void>> cir) {
-        if (DashLoader.getInstance().getParticlesOut() != null) {
+        if (DashLoader.getVanillaData().getParticles() != null) {
             LogManager.getLogger().info("Particles loading");
-            cir.setReturnValue(CompletableFuture.runAsync(() -> DashLoader.getInstance().getParticlesOut().forEach((identifier, sprites) -> spriteAwareFactories.get(identifier).setSprites(sprites))).thenCompose(synchronizer::whenPrepared));
+            cir.setReturnValue(CompletableFuture.runAsync(() -> DashLoader.getVanillaData().getParticles().forEach((identifier, sprites) -> spriteAwareFactories.get(identifier).setSprites(sprites))).thenCompose(synchronizer::whenPrepared));
         } else {
             Map<Identifier, List<Identifier>> map = Maps.newConcurrentMap();
             CompletableFuture<?>[] completableFutures = Registry.PARTICLE_TYPE.getIds().stream().map((identifier)
@@ -91,7 +91,7 @@ public abstract class ParticleManagerMixin {
                 });
 
 
-                DashLoader.getInstance().setParticleManagerAssets(spriteAwareFactories, particleAtlasTexture);
+                DashLoader.getVanillaData().setParticleManagerAssets(spriteAwareFactories, particleAtlasTexture);
 
                 applyProfiler.pop();
                 applyProfiler.endTick();

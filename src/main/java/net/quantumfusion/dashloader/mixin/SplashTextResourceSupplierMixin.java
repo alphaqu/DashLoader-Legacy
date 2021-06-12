@@ -34,7 +34,7 @@ public class SplashTextResourceSupplierMixin {
             cancellable = true)
     private void fastSplash(ResourceManager resourceManager, Profiler profiler, CallbackInfoReturnable<List<String>> cir) {
         try {
-            final List<String> splashTextOut = DashLoader.getInstance().getSplashTextOut();
+            final List<String> splashTextOut = DashLoader.getVanillaData().getSplashText();
             if (splashTextOut != null) {
                 cir.setReturnValue(splashTextOut);
             } else {
@@ -50,7 +50,7 @@ public class SplashTextResourceSupplierMixin {
                     }
 
                 }
-                DashLoader.getInstance().setSplashTextAssets(var7);
+                DashLoader.getVanillaData().setSplashTextAssets(var7);
                 cir.setReturnValue(var7);
             }
         } catch (IOException var36) {

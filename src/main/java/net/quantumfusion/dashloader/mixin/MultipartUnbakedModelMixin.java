@@ -44,7 +44,7 @@ public class MultipartUnbakedModelMixin {
         MultipartBakedModel bakedModel = (MultipartBakedModel) builder.build();
         List<MultipartModelSelector> outSelectors = new ArrayList<>();
         components.forEach(multipartModelComponent -> outSelectors.add(((MultipartModelComponentAccessor) multipartModelComponent).getSelector()));
-        DashLoader.getInstance().multipartData.put(bakedModel, Pair.of(outSelectors, stateFactory));
+        DashLoader.getVanillaData().addMultipartModelPredicate(bakedModel, Pair.of(outSelectors, stateFactory));
         cir.setReturnValue(bakedModel);
     }
 

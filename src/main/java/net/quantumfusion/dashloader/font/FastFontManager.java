@@ -34,7 +34,7 @@ public class FastFontManager {
 
     public final ResourceReloader resourceReloadListener = new SinglePreparationResourceReloader<Map<Identifier, List<Font>>>() {
         protected Map<Identifier, List<Font>> prepare(ResourceManager resourceManager, Profiler profiler) {
-            final Map<Identifier, List<Font>> fontsOut = DashLoader.getInstance().getFontsOut();
+            final Map<Identifier, List<Font>> fontsOut = DashLoader.getVanillaData().getFonts();
             if (fontsOut != null && DashLoader.getInstance().state == DashCacheState.LOADED) {
                 fontsOut.forEach((identifier, list) -> list.forEach(font -> {
                             if (font instanceof UnicodeTextureFont) {
@@ -109,7 +109,7 @@ public class FastFontManager {
                 fontStorage.setFonts(Lists.reverse(list));
                 fontManager.getFontStorages().put(identifier, fontStorage);
             });
-            DashLoader.getInstance().fonts = map;
+            DashLoader.getVanillaData().setFontAssets(map);
             profiler.pop();
             profiler.endTick();
         }
