@@ -7,12 +7,14 @@ import net.quantumfusion.dashloader.data.Dashable;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class ThreadHelper {
 
 
+    public static final Function REBOUND = func -> func;
     public static void exec(Runnable... runnables) {
         final List<Future<Object>> futures = DashLoader.THREADPOOL.invokeAll(Arrays.stream(runnables).map(Executors::callable).collect(Collectors.toList()));
         sleepUntilTrue(() -> futures.stream().allMatch(Future::isDone));

@@ -10,7 +10,7 @@ import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Property;
 import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.mixin.accessor.SimpleMultipartModelSelectorAccessor;
-import net.quantumfusion.dashloader.util.PairMap;
+import net.quantumfusion.dashloader.util.serialization.Pointer2PointerMap;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
@@ -24,12 +24,12 @@ public class DashSimplePredicate implements DashPredicate {
     private static final Splitter VALUE_SPLITTER = Splitter.on('|').omitEmptyStrings();
 
     @Serialize(order = 0)
-    public PairMap<Integer, Integer> properties;
+    public Pointer2PointerMap properties;
 
     @Serialize(order = 1)
     public boolean negate;
 
-    public DashSimplePredicate(@Deserialize("properties") PairMap<Integer, Integer> properties,
+    public DashSimplePredicate(@Deserialize("properties") Pointer2PointerMap properties,
                                @Deserialize("negate") boolean negate) {
         this.properties = properties;
         this.negate = negate;
@@ -48,7 +48,7 @@ public class DashSimplePredicate implements DashPredicate {
                 string = string.substring(1);
             }
             List<String> list = VALUE_SPLITTER.splitToList(string);
-            properties = new PairMap<>();
+            properties = new Pointer2PointerMap();
             if (list.size() == 1) {
                 Pair<Integer, Integer> predicateProperty = createPredicateInfo(stateManager, stateManagerProperty, string, registry);
                 properties.put(predicateProperty.getLeft(), predicateProperty.getRight());
@@ -72,7 +72,7 @@ public class DashSimplePredicate implements DashPredicate {
     @Override
     public Predicate<BlockState> toUndash(DashRegistry registry) {
         List<Map.Entry<? extends Property<?>, ? extends Comparable<?>>> out = new ArrayList<>();
-        properties.forEach((property, value) -> out.add(registry.getProperty(property, value)));
+        properties.forEach((entry) -> out.add(registry.getProperty(entry.key, entry.value)));
         Predicate<BlockState> outPredicate;
         if (out.size() == 1) {
             final Map.Entry<? extends Property<?>, ? extends Comparable<?>> entry = out.get(0);

@@ -1,4 +1,4 @@
-package net.quantumfusion.dashloader.util;
+package net.quantumfusion.dashloader.util.serialization;
 
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
@@ -10,9 +10,9 @@ import java.util.function.BiConsumer;
 public class PairMap<K, V> {
 
     @Serialize(order = 0)
-    public List<PairEntry<K, V>> data;
+    public List<Entry<K, V>> data;
 
-    public PairMap(@Deserialize("data") List<PairEntry<K, V>> data) {
+    public PairMap(@Deserialize("data") List<Entry<K, V>> data) {
         this.data = data;
     }
 
@@ -25,7 +25,7 @@ public class PairMap<K, V> {
     }
 
     public void put(K key, V value) {
-        data.add(PairEntry.of(key, value));
+        data.add(Entry.of(key, value));
     }
 
     public void forEach(BiConsumer<? super K, ? super V> action) {
@@ -34,5 +34,24 @@ public class PairMap<K, V> {
 
     public int size() {
         return data.size();
+    }
+
+
+    public static class Entry<K, V> {
+        @Serialize(order = 0)
+        public final K key;
+        @Serialize(order = 1)
+        public final V value;
+
+        public Entry(@Deserialize("key") K key,
+                     @Deserialize("value") V value) {
+            this.key = key;
+            this.value = value;
+        }
+
+        public static <K, V> Entry<K, V> of(K key, V value) {
+            return new Entry<>(key, value);
+        }
+
     }
 }

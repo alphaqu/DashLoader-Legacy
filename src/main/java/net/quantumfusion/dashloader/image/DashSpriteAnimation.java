@@ -13,14 +13,14 @@ import java.util.List;
 
 public class DashSpriteAnimation {
     @Serialize(order = 0)
-    public List<DashSpriteAnimationFrame> frames;
+    public DashSpriteAnimationFrame[] frames;
     @Serialize(order = 1)
     public int frameCount;
     @Serialize(order = 2)
     @SerializeNullable
     public DashSpriteInterpolation interpolation;
 
-    public DashSpriteAnimation(@Deserialize("frames") List<DashSpriteAnimationFrame> frames,
+    public DashSpriteAnimation(@Deserialize("frames") DashSpriteAnimationFrame[] frames,
                                @Deserialize("frameCount") int frameCount,
                                @Deserialize("interpolation") DashSpriteInterpolation interpolation) {
         this.frames = frames;
@@ -31,16 +31,21 @@ public class DashSpriteAnimation {
 
     public DashSpriteAnimation(Sprite.Animation animation, DashRegistry registry) {
         SpriteAnimationAccessor access = ((SpriteAnimationAccessor) animation);
-        frames = new ArrayList<>();
-        access.getFrames().forEach(animationFrame -> frames.add(new DashSpriteAnimationFrame(animationFrame)));
+        frames = new DashSpriteAnimationFrame[access.getFrames().size()];
+        List<Sprite.AnimationFrame> accessFrames = access.getFrames();
+        for (int i = 0, accessFramesSize = accessFrames.size(); i < accessFramesSize; i++) {
+            frames[i] = new DashSpriteAnimationFrame(accessFrames.get(i));
+        }
         frameCount = access.getFrameCount();
         interpolation = DashHelper.nullable(access.getInterpolation(), registry, DashSpriteInterpolation::new);
     }
 
 
     public Sprite.Animation toUndash(Sprite owner, DashRegistry registry) {
-        List<Sprite.AnimationFrame> out = new ArrayList<>();
-        frames.forEach(dashSpriteAnimationFrame -> out.add(dashSpriteAnimationFrame.toUndash(registry)));
+        List<Sprite.AnimationFrame> out = new ArrayList<>(frames.length);
+        for (DashSpriteAnimationFrame frame : frames) {
+            out.add(frame.toUndash(registry));
+        }
         return SpriteAnimationAccessor.init(owner, out, frameCount, interpolation == null ? null : interpolation.toUndash(owner, registry));
     }
 }

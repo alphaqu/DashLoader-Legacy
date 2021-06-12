@@ -1,11 +1,9 @@
 package net.quantumfusion.dashloader.model;
 
 
-import io.activej.serializer.StringFormat;
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import io.activej.serializer.annotations.SerializeFixedSize;
-import io.activej.serializer.annotations.SerializeStringFormat;
 import net.minecraft.client.util.ModelIdentifier;
 import net.minecraft.util.Identifier;
 import net.quantumfusion.dashloader.DashRegistry;
@@ -15,10 +13,8 @@ import net.quantumfusion.dashloader.mixin.accessor.ModelIdentifierAccessor;
 
 public class DashModelIdentifier implements DashID {
     @Serialize(order = 0)
-    @SerializeStringFormat(value = StringFormat.UTF8, path = {0, 0})
     @SerializeFixedSize(3)
     public String[] strings;
-
 
     public DashModelIdentifier(@Deserialize("strings") String[] strings) {
         this.strings = strings;

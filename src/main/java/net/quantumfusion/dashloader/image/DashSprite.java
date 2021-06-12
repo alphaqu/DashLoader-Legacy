@@ -10,10 +10,6 @@ import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.data.Dashable;
 import net.quantumfusion.dashloader.mixin.accessor.SpriteAccessor;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 public class DashSprite implements Dashable {
     @Serialize(order = 0)
     @SerializeNullable
@@ -35,7 +31,7 @@ public class DashSprite implements Dashable {
     @Serialize(order = 8)
     public final float vMax;
     @Serialize(order = 9)
-    public List<Integer> images;
+    public int[] images;
 
 
     public DashSprite(@Deserialize("animation") DashSpriteAnimation animation,
@@ -47,7 +43,7 @@ public class DashSprite implements Dashable {
                       @Deserialize("uMax") float uMax,
                       @Deserialize("vMin") float vMin,
                       @Deserialize("vMax") float vMax,
-                      @Deserialize("images") List<Integer> images
+                      @Deserialize("images") int[] images
     ) {
         this.animation = animation;
         this.images = images;
@@ -62,8 +58,11 @@ public class DashSprite implements Dashable {
     }
 
     public DashSprite(Sprite sprite, DashRegistry registry) {
-        images = new ArrayList<>();
-        Arrays.stream(((SpriteAccessor) sprite).getImages()).forEach(nativeImage -> images.add(registry.createImagePointer(nativeImage)));
+        final NativeImage[] images = ((SpriteAccessor) sprite).getImages();
+        this.images = new int[images.length];
+        for (int i = 0, imagesLength = images.length; i < imagesLength; i++) {
+            this.images[i] = registry.createImagePointer(images[i]);
+        }
         x = sprite.getX();
         y = sprite.getY();
         width = sprite.getWidth();
@@ -79,9 +78,11 @@ public class DashSprite implements Dashable {
     public final Sprite toUndash(final DashRegistry registry) {
         final Sprite out = Unsafe.allocateInstance(Sprite.class);
         final SpriteAccessor spriteAccessor = ((SpriteAccessor) out);
-        final ArrayList<NativeImage> imagesOut = new ArrayList<>();
-        images.forEach(dashImage -> imagesOut.add(registry.getImage(dashImage)));
-        spriteAccessor.setImages(imagesOut.toArray(new NativeImage[0]));
+        final NativeImage[] imagesOut = new NativeImage[images.length];
+        for (int i = 0, imagesLength = images.length; i < imagesLength; i++) {
+            imagesOut[i] = registry.getImage(images[i]);
+        }
+        spriteAccessor.setImages(imagesOut);
         spriteAccessor.setX(x);
         spriteAccessor.setY(y);
         spriteAccessor.setWidth(width);

@@ -1,8 +1,8 @@
 package net.quantumfusion.dashloader;
 
 import com.mojang.blaze3d.platform.TextureUtil;
+import io.activej.codegen.DefiningClassLoader;
 import io.activej.serializer.BinarySerializer;
-import io.activej.serializer.CompatibilityLevel;
 import io.activej.serializer.SerializerBuilder;
 import io.activej.serializer.stream.StreamInput;
 import io.activej.serializer.stream.StreamOutput;
@@ -23,19 +23,20 @@ import net.minecraft.state.StateManager;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.profiler.Profiler;
 import net.quantumfusion.dashloader.api.DashLoaderAPI;
-import net.quantumfusion.dashloader.blockstate.DashBlockStateData;
-import net.quantumfusion.dashloader.data.registry.*;
-import net.quantumfusion.dashloader.font.DashFontManagerData;
-import net.quantumfusion.dashloader.image.DashSpriteAtlasData;
+import net.quantumfusion.dashloader.data.DashMappingData;
+import net.quantumfusion.dashloader.data.DashMetadata;
+import net.quantumfusion.dashloader.data.DashRegistryData;
+import net.quantumfusion.dashloader.data.mappings.*;
 import net.quantumfusion.dashloader.image.DashSpriteAtlasTextureData;
-import net.quantumfusion.dashloader.misc.DashMetadata;
-import net.quantumfusion.dashloader.misc.DashParticleData;
-import net.quantumfusion.dashloader.misc.DashSplashTextData;
 import net.quantumfusion.dashloader.mixin.accessor.AbstractTextureAccessor;
 import net.quantumfusion.dashloader.mixin.accessor.SpriteAccessor;
 import net.quantumfusion.dashloader.mixin.accessor.SpriteAtlasTextureAccessor;
-import net.quantumfusion.dashloader.model.DashModelData;
-import net.quantumfusion.dashloader.util.*;
+import net.quantumfusion.dashloader.util.DashCachePaths;
+import net.quantumfusion.dashloader.util.DashCacheState;
+import net.quantumfusion.dashloader.util.ThreadHelper;
+import net.quantumfusion.dashloader.util.TimeHelper;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -43,20 +44,25 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinWorkerThread;
+import java.util.function.Function;
+
+import static io.activej.codegen.ClassBuilder.CLASS_BUILDER_MARKER;
 
 public class DashLoader {
     public static final Logger LOGGER = LogManager.getLogger();
     public static final int totalTasks = 22;
-    public static final double formatVersion = 2;
+    public static final short formatVersion = 2;
     public static final String version = FabricLoader.getInstance().getModContainer("dashloader").get().getMetadata().getVersion().getFriendlyString();
     private static final Path config = FabricLoader.getInstance().getConfigDir().normalize();
     private static final boolean debug = FabricLoader.getInstance().isDevelopmentEnvironment();
@@ -82,6 +88,7 @@ public class DashLoader {
     private Map<Identifier, ParticleManager.SimpleSpriteProvider> particleSprites;
     private SpriteAtlasTexture particleAtlas;
     private List<String> splashText;
+    private DashMetadata metadata;
 
     public DashLoader(ClassLoader classLoader) {
         LOGGER.info("Creating DashLoader Instance");
@@ -100,6 +107,7 @@ public class DashLoader {
     public static DashLoader getInstance() {
         return instance;
     }
+
 
     public SpriteAtlasManager getAtlasManagerOut() {
         return mappings.atlasManagerOut;
@@ -130,42 +138,20 @@ public class DashLoader {
         if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
             LOGGER.warn("DashLoader launched in dev.");
         }
-        state = DashCacheState.LOADING;
+        metadata = new DashMetadata(4, 20);
+        state = DashCacheState.EMPTY;
         Instant start = Instant.now();
-//        Thread dashLoaderThread = new Thread(() -> {
         initThreadPool();
-        api.initAPI();
         initSerializers();
         createDirectory();
-        LOGGER.info("[4/4] Launching DashCache.");
-        DashMetadata currentMetadata = DashMetadata.create();
-        ReloadEnum shouldReload;
-        if (Arrays.stream(DashCachePaths.values()).allMatch((path) -> path.getPath().toFile().exists())) {
-            DashMetadata previousMetadata = deserialize(DashMetadata.class, DashCachePaths.DASH_METADATA.getPath(), "Metadata");
-            shouldReload = currentMetadata.getState(previousMetadata);
-        } else {
-            shouldReload = ReloadEnum.MISSING_FILES;
-        }
-        if (shouldReload == ReloadEnum.ACCEPT) {
+        if (Arrays.stream(DashCachePaths.values()).allMatch(dashCachePaths -> dashCachePaths.getPath().toFile().exists())) {
             loadDashCache();
-        } else {
-            switch (shouldReload) {
-                case FORMAT_CHANGE -> LOGGER.warn("DashLoader update changed format. Recache requested.");
-                case MOD_CHANGE -> LOGGER.warn("DashLoader detected mod change. Recache requested.");
-                case MISSING_FILES -> LOGGER.warn("DashLoader detected missing files. Recache requested.");
-            }
-            destroyCache();
-            createMetadata(currentMetadata);
-            state = DashCacheState.EMPTY;
         }
+        LOGGER.info("[4/4] Launching DashCache.");
+
         shutdownThreadPool();
         LOGGER.info("Loaded cache in " + TimeHelper.getDecimalS(start, Instant.now()) + "s");
-//        });
-//        dashLoaderThread.setContextClassLoader(classLoader);
-//        dashLoaderThread.setName("dashloader-supervisor");
-//        dashLoaderThread.start();
     }
-
 
     public DashLoaderAPI getApi() {
         return api;
@@ -173,11 +159,6 @@ public class DashLoader {
 
     private void shutdownThreadPool() {
         THREADPOOL.shutdown();
-    }
-
-    private void createMetadata(DashMetadata data) {
-        tasksComplete--;
-        serializeObject(data, DashCachePaths.DASH_METADATA.getPath(), "Mod Info");
     }
 
     private void createDirectory() {
@@ -205,11 +186,9 @@ public class DashLoader {
         this.splashText = splashText;
     }
 
-
     public void saveDashCache() {
         Instant start = Instant.now();
         initThreadPool();
-        api.initAPI();
         initSerializers();
         createDirectory();
         tasksComplete++;
@@ -220,10 +199,10 @@ public class DashLoader {
         mappings.setBlockStateData(new DashBlockStateData(stateLookup, registry));
 
         logAndTask("Mapping Models");
-        mappings.setModelData(new DashModelData(models, multipartData, registry));
+        mappings.setModelData(new DashModelData(models, registry));
 
         logAndTask("Mapping Particles");
-        mappings.setParticleData(new DashParticleData(particleSprites, particleAtlas, registry));
+        mappings.setParticleData(new DashParticleData(particleSprites, registry));
 
         logAndTask("Mapping Fonts");
         mappings.setFontManagerData(new DashFontManagerData(fonts, registry));
@@ -234,22 +213,8 @@ public class DashLoader {
         logAndTask("Mapping Atlas");
         mappings.setSpriteAtlasData(new DashSpriteAtlasData(atlasManager, atlasData, registry, extraAtlases));
 
-        serializeObject(mappings.modelData, DashCachePaths.MODELS.getPath(), "Models");
-        serializeObject(mappings.spriteAtlasData, DashCachePaths.SPRITEATLAS.getPath(), "Atlases");
-        serializeObject(mappings.blockStateData, DashCachePaths.BLOCKSTATE.getPath(), "Blockstates");
-        serializeObject(mappings.particleData, DashCachePaths.PARTICLE.getPath(), "Particles");
-        serializeObject(mappings.fontManagerData, DashCachePaths.FONT.getPath(), "Fonts");
-        serializeObject(mappings.splashTextData, DashCachePaths.SPLASH.getPath(), "Splash Text");
-
-        serializeObject(registry.getBlockstates(), DashCachePaths.REGISTRY_BLOCKSTATE.getPath(), "Registry Blockstates");
-        serializeObject(registry.getFonts(), DashCachePaths.REGISTRY_FONT.getPath(), "Registry Fonts");
-        serializeObject(registry.getIdentifiers(), DashCachePaths.REGISTRY_IDENTIFIER.getPath(), "Registry Identifiers");
-        serializeObject(registry.getImages(), DashCachePaths.REGISTRY_IMAGE.getPath(), "Registry Images");
-        serializeObject(registry.getModels(), DashCachePaths.REGISTRY_MODEL.getPath(), "Registry Models");
-        serializeObject(registry.getPredicates(), DashCachePaths.REGISTRY_PREDICATE.getPath(), "Registry Predicates");
-        serializeObject(registry.getProperties(), DashCachePaths.REGISTRY_PROPERTY.getPath(), "Registry Properties");
-        serializeObject(registry.getPropertyValues(), DashCachePaths.REGISTRY_PROPERTYVALUE.getPath(), "Registry PropertyValues");
-        serializeObject(registry.getSprites(), DashCachePaths.REGISTRY_SPRITE.getPath(), "Registry Sprites");
+        serializeObject(registry.createData(), DashCachePaths.REGISTRY_CACHE.getPath(), "Cache");
+        serializeObject(mappings.createData(), DashCachePaths.MAPPINGS_CACHE.getPath(), "Mapping");
         registry.apiReport(LOGGER);
         shutdownThreadPool();
         task = "Caching is now complete.";
@@ -257,7 +222,7 @@ public class DashLoader {
     }
 
     private void initThreadPool() {
-        THREADPOOL = new ForkJoinPool(Runtime.getRuntime().availableProcessors() + 2, pool -> {
+        THREADPOOL = new ForkJoinPool(Runtime.getRuntime().availableProcessors(), pool -> {
             final ForkJoinWorkerThread worker = ForkJoinPool.defaultForkJoinWorkerThreadFactory.newThread(pool);
             worker.setName("dashloader-thread-" + worker.getPoolIndex());
             worker.setContextClassLoader(classLoader);
@@ -268,30 +233,18 @@ public class DashLoader {
     public void loadDashCache() {
         LOGGER.info("Starting DashLoader Deserialization");
         try {
+            Instant time = Instant.now();
             DashRegistry registry = new DashRegistry(this);
+            mappings = new MappingData();
             ThreadHelper.exec(
-                    () -> registry.setBlockstates(deserialize(RegistryBlockStateData.class, DashCachePaths.REGISTRY_BLOCKSTATE.getPath(), "Registry Blockstates").blockstates),
-                    () -> registry.setFonts(deserialize(RegistryFontData.class, DashCachePaths.REGISTRY_FONT.getPath(), "Registry Fonts").fonts),
-                    () -> registry.setIdentifiers(deserialize(RegistryIdentifierData.class, DashCachePaths.REGISTRY_IDENTIFIER.getPath(), "Registry Identifiers").identifiers),
-                    () -> registry.setImages(deserialize(RegistryImageData.class, DashCachePaths.REGISTRY_IMAGE.getPath(), "Registry Images").images),
-                    () -> registry.setModels(deserialize(RegistryModelData.class, DashCachePaths.REGISTRY_MODEL.getPath(), "Registry Models")),
-                    () -> registry.setPredicates(deserialize(RegistryPredicateData.class, DashCachePaths.REGISTRY_PREDICATE.getPath(), "Registry Predicates").predicates),
-                    () -> registry.setProperties(deserialize(RegistryPropertyData.class, DashCachePaths.REGISTRY_PROPERTY.getPath(), "Registry Properties").property),
-                    () -> registry.setPropertyValues(deserialize(RegistryPropertyValueData.class, DashCachePaths.REGISTRY_PROPERTYVALUE.getPath(), "Registry PropertyValues").propertyValues),
-                    () -> registry.setSprites(deserialize(RegistrySpriteData.class, DashCachePaths.REGISTRY_SPRITE.getPath(), "Registry Sprites").sprites)
+                    () -> registry.loadData(deserialize(DashRegistryData.class, DashCachePaths.REGISTRY_CACHE.getPath(), "Cache")),
+                    () -> mappings.loadData(deserialize(DashMappingData.class, DashCachePaths.MAPPINGS_CACHE.getPath(), "Mapping"))
             );
+            LOGGER.info(TimeHelper.getMs(time) + "ms");
+
             LOGGER.info("      Loading Registry");
             registry.toUndash();
 
-            mappings = new MappingData();
-            ThreadHelper.exec(
-                    () -> mappings.setModelData(deserialize(DashModelData.class, DashCachePaths.MODELS.getPath(), "Models")),
-                    () -> mappings.setSpriteAtlasData(deserialize(DashSpriteAtlasData.class, DashCachePaths.SPRITEATLAS.getPath(), "Atlases")),
-                    () -> mappings.setBlockStateData(deserialize(DashBlockStateData.class, DashCachePaths.BLOCKSTATE.getPath(), "Blockstates")),
-                    () -> mappings.setParticleData(deserialize(DashParticleData.class, DashCachePaths.PARTICLE.getPath(), "Particles")),
-                    () -> mappings.setFontManagerData(deserialize(DashFontManagerData.class, DashCachePaths.FONT.getPath(), "Fonts")),
-                    () -> mappings.setSplashTextData(deserialize(DashSplashTextData.class, DashCachePaths.SPLASH.getPath(), "Splash Text"))
-            );
             LOGGER.info("      Loading Mappings");
             atlasesToRegister.addAll(mappings.toUndash(registry));
 
@@ -299,7 +252,6 @@ public class DashLoader {
             stateLookupOut = mappings.stateLookupOut;
             state = DashCacheState.LOADED;
         } catch (Exception e) {
-            destroyCache(e);
             state = DashCacheState.CRASHLOADER;
         }
     }
@@ -341,7 +293,7 @@ public class DashLoader {
             if (serializer == null) {
                 throw new DashException(name + " Serializer not found.");
             }
-            T out = StreamInput.create(Files.newInputStream(path)).deserialize(serializer);
+            T out = StreamInput.create(Files.newInputStream(path), 1048576).deserialize(serializer);
             if (out == null) {
                 throw new DashException(name + " Deserialization failed");
             }
@@ -369,27 +321,6 @@ public class DashLoader {
         tasksComplete++;
     }
 
-    public void destroyCache(Exception exception) {
-        if (!debug) {
-            LOGGER.error("DashLoader failed, destroying cache and requesting recache. Slow start predicted.");
-            exception.printStackTrace();
-            if (!Arrays.stream(DashCachePaths.values()).allMatch((path -> !path.getPath().toFile().exists() || path.getPath().toFile().delete()))) {
-                LOGGER.fatal("DashLoader file removal failed. Something went terribly wrong ");
-            }
-        } else {
-            exception.printStackTrace();
-        }
-    }
-
-    public void destroyCache() {
-        if (!debug) {
-            LOGGER.error("DashLoader failed, destroying cache and requesting recache. Slow start predicted.");
-            if (!Arrays.stream(DashCachePaths.values()).allMatch((path -> !path.getPath().toFile().exists() || path.getPath().toFile().delete()))) {
-                LOGGER.fatal("DashLoader file removal failed. Something went terribly wrong ");
-            }
-        }
-    }
-
     private void logAndTask(String s) {
         LOGGER.info(s);
         tasksComplete++;
@@ -408,54 +339,97 @@ public class DashLoader {
     }
 
 
-    /**
-     * <h1>E gamin - its the game</h1>
-     * fsda
-     */
-    private void initSerializers() {
-        LOGGER.info("[3/4]  Started Serializer init.");
-        Instant start = Instant.now();
-        final Class[] classes = new Class[]{
-                DashMetadata.class,
-                DashModelData.class,
-                DashSpriteAtlasData.class,
-                DashBlockStateData.class,
-                DashParticleData.class,
-                DashFontManagerData.class,
-                DashSplashTextData.class,
-                RegistryBlockStateData.class,
-                RegistryIdentifierData.class,
-                RegistryImageData.class,
-                RegistryFontData.class,
-                RegistryModelData.class,
-                RegistryPredicateData.class,
-                RegistryPropertyData.class,
-                RegistryPropertyValueData.class,
-                RegistrySpriteData.class};
-        final Runnable[] runnables = {
-                () -> addSerializer(classes[0], SerializerBuilder.create()),
-                () -> addSerializer(classes[1], SerializerBuilder.create()),
-                () -> addSerializer(classes[2], SerializerBuilder.create()),
-                () -> addSerializer(classes[3], SerializerBuilder.create()),
-                () -> addSerializer(classes[4], SerializerBuilder.create()),
-                () -> addSerializer(classes[5], SerializerBuilder.create()),
-                () -> addSerializer(classes[6], SerializerBuilder.create()),
-                () -> addSerializer(classes[7], SerializerBuilder.create()),
-                () -> addSerializer(classes[8], SerializerBuilder.create()),
-                () -> addSerializer(classes[9], SerializerBuilder.create()),
-                () -> addSerializer(classes[10], SerializerBuilder.create().withSubclasses("fonts", api.fontTypes)),
-                () -> addSerializer(classes[11], SerializerBuilder.create().withSubclasses("models", api.modelTypes)),
-                () -> addSerializer(classes[12], SerializerBuilder.create().withSubclasses("predicates", api.predicateTypes)),
-                () -> addSerializer(classes[13], SerializerBuilder.create().withSubclasses("properties", api.propertyTypes)),
-                () -> addSerializer(classes[14], SerializerBuilder.create().withSubclasses("values", api.propertyValueTypes)),
-                () -> addSerializer(classes[15], SerializerBuilder.create())
-        };
-        ThreadHelper.exec(runnables);
-        LOGGER.info("[3/4] [" + Duration.between(start, Instant.now()).toMillis() + "ms] Created Serializers.");
+    private Path getSerializerPath(String name) {
+        final File[] files = getModBoundDir().toFile().listFiles();
+        if (files == null) return null;
+        for (File file : files) {
+            if (file.getName().endsWith(name + ".serializer")) {
+                return Paths.get(file.toURI());
+            }
+        }
+        return null;
     }
 
-    private void addSerializer(Class<?> clazz, SerializerBuilder builder) {
-        serializers.put(clazz, builder.withCompatibilityLevel(CompatibilityLevel.LEVEL_3_LE).build(clazz));
+    private <K> void renameRawSerializer(String name, BinarySerializer<K> serializer) throws IOException {
+        final String className = serializer.getClass().getName().replaceFirst("io.activej.codegen.", "");
+        LOGGER.info("Created Serializer {}", className);
+        final Path folder = getModBoundDir();
+        final Path resolve = folder.resolve(className + ".class");
+        resolve.toFile().renameTo(folder.resolve(className.replaceFirst("io.activej.serializer.", "") + "-" + name + ".serializer").toFile());
+    }
+
+
+    public Path getModBoundDir() {
+        final Path resolve = DashLoader.getConfig().resolve("quantumfusion/dashloader/mods-" + metadata.modInfo + "/");
+        if (!resolve.toFile().exists()) {
+            resolve.toFile().mkdirs();
+        }
+        return resolve;
+    }
+
+    public Path getResourcePackBoundDir() {
+        final Path resolve = getModBoundDir().resolve("resourcepacks-" + metadata.resourcePacks + "/");
+        if (!resolve.toFile().exists()) {
+            resolve.toFile().mkdirs();
+        }
+        return resolve;
+    }
+
+    private void initSerializers() {
+        Instant start = Instant.now();
+        final DefiningClassLoader definingClassLoader = DefiningClassLoader.create(classLoader);
+        serializers.put(DashRegistryData.class, initSerializer(DashRegistryData.class, definingClassLoader, "dashregistry",
+                (builder) -> {
+                    api.initAPI();
+                    return builder
+                            .withSubclasses("fonts", api.fontTypes)
+                            .withSubclasses("models", api.modelTypes)
+                            .withSubclasses("predicates", api.predicateTypes)
+                            .withSubclasses("properties", api.propertyTypes)
+                            .withSubclasses("values", api.propertyValueTypes);
+                }
+        ));
+        serializers.put(DashMappingData.class, initSerializer(DashMappingData.class, definingClassLoader, "dashmappings", (builder) -> builder));
+        LOGGER.info("[{}ms] Initialized Serializers", TimeHelper.getMs(start));
+    }
+
+    private <K> BinarySerializer<K> initSerializer(Class<K> clazz, DefiningClassLoader classLoader, String id, Function<SerializerBuilder, SerializerBuilder> createSerializer) {
+        final Path serializerPath = getSerializerPath(id);
+        if (serializerPath != null) {
+            try {
+                final File serializerFile = serializerPath.toFile();
+                if (serializerFile.exists()) return loadSerializerCache(classLoader, serializerFile);
+            } catch (IOException | IllegalAccessException | InstantiationException | InvocationTargetException | NoSuchMethodException e) {
+                e.printStackTrace();
+            }
+        } else {
+            try {
+                final BinarySerializer<K> build = createSerializer.apply(SerializerBuilder.create()).withGeneratedBytecodePath(getModBoundDir()).build(clazz);
+                renameRawSerializer(id, build);
+                return build;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        throw new DashException("Unable to create serializer");
+    }
+
+    private <K> BinarySerializer<K> loadSerializerCache(DefiningClassLoader classLoader, File serializer) throws IOException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+        final byte[] bytes = IOUtils.toByteArray(FileUtils.openInputStream(serializer));
+        final Object serializerObject = create(classLoader, "io.activej.codegen.io.activej.serializer." + serializer.getName().split("-")[0], bytes).getConstructor().newInstance();
+        return (BinarySerializer<K>) serializerObject;
+    }
+
+    private <T> Class<T> create(DefiningClassLoader classLoader, String actualClassName, byte[] bytecode) {
+        Class<T> aClass = (Class<T>) classLoader.defineClass(actualClassName, bytecode);
+        try {
+            Field field = aClass.getField(CLASS_BUILDER_MARKER);
+            //noinspection ResultOfMethodCallIgnored
+            field.get(null);
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            throw new AssertionError(e);
+        }
+        return aClass;
     }
 
 

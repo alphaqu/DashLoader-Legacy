@@ -13,7 +13,7 @@ import net.minecraft.state.StateManager;
 import net.minecraft.util.Util;
 import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.mixin.accessor.MultipartBakedModelAccessor;
-import net.quantumfusion.dashloader.util.PairMap;
+import net.quantumfusion.dashloader.util.serialization.PairMap;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;

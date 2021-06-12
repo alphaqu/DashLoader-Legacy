@@ -15,7 +15,7 @@ import net.quantumfusion.dashloader.mixin.accessor.BasicBakedModelAccessor;
 import net.quantumfusion.dashloader.model.components.DashBakedQuad;
 import net.quantumfusion.dashloader.model.components.DashModelOverrideList;
 import net.quantumfusion.dashloader.model.components.DashModelTransformation;
-import net.quantumfusion.dashloader.util.PairMap;
+import net.quantumfusion.dashloader.util.serialization.PairMap;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,7 +39,7 @@ public class DashBasicBakedModel implements DashModel {
     @Serialize(order = 6)
     public DashModelOverrideList itemPropertyOverrides;
     @Serialize(order = 7)
-    public Integer spritePointer;
+    public int spritePointer;
 
     public DashBasicBakedModel() {
     }
@@ -51,7 +51,7 @@ public class DashBasicBakedModel implements DashModel {
                                @Deserialize("isSideLit") boolean isSideLit,
                                @Deserialize("transformation") DashModelTransformation transformation,
                                @Deserialize("itemPropertyOverrides") DashModelOverrideList itemPropertyOverrides,
-                               @Deserialize("spritePointer") Integer spritePointer) {
+                               @Deserialize("spritePointer") int spritePointer) {
         this.quads = quads;
         this.faceQuads = faceQuads;
         this.usesAo = usesAo;

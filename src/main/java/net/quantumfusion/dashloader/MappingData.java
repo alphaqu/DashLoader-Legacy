@@ -1,6 +1,5 @@
 package net.quantumfusion.dashloader;
 
-import io.activej.serializer.annotations.Deserialize;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.font.Font;
@@ -9,12 +8,8 @@ import net.minecraft.client.render.model.SpriteAtlasManager;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.util.Identifier;
-import net.quantumfusion.dashloader.blockstate.DashBlockStateData;
-import net.quantumfusion.dashloader.font.DashFontManagerData;
-import net.quantumfusion.dashloader.image.DashSpriteAtlasData;
-import net.quantumfusion.dashloader.misc.DashParticleData;
-import net.quantumfusion.dashloader.misc.DashSplashTextData;
-import net.quantumfusion.dashloader.model.DashModelData;
+import net.quantumfusion.dashloader.data.DashMappingData;
+import net.quantumfusion.dashloader.data.mappings.*;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
@@ -39,20 +34,64 @@ public class MappingData {
     public MappingData() {
     }
 
-    @SuppressWarnings("unused")//active j uses this so stop complaining intelij.
-    public MappingData(@Deserialize("modelData") DashModelData modelData,
-                       @Deserialize("spriteAtlasData") DashSpriteAtlasData spriteAtlasData,
-                       @Deserialize("blockStateData") DashBlockStateData blockStateData,
-                       @Deserialize("particleData") DashParticleData particleData,
-                       @Deserialize("fontManagerData") DashFontManagerData fontManagerData,
-                       @Deserialize("splashTextData") DashSplashTextData splashTextData
-    ) {
-        this.modelData = modelData;
-        this.spriteAtlasData = spriteAtlasData;
-        this.blockStateData = blockStateData;
-        this.particleData = particleData;
-        this.fontManagerData = fontManagerData;
-        this.splashTextData = splashTextData;
+    public void loadData(DashMappingData data) {
+        this.modelData = data.modelMappings;
+        this.spriteAtlasData = data.spriteAtlasMappings;
+        this.blockStateData = data.blockStateMappings;
+        this.particleData = data.particleMappings;
+        this.fontManagerData = data.fontMappings;
+        this.splashTextData = data.splashTextMappings;
+    }
+
+    public DashMappingData createData() {
+        return new DashMappingData(blockStateData, fontManagerData, modelData, particleData, splashTextData, spriteAtlasData);
+    }
+
+    public List<SpriteAtlasTexture> toUndash(DashRegistry registry) {
+
+        final Pair<SpriteAtlasManager, List<SpriteAtlasTexture>> spriteData = spriteAtlasData.toUndash(registry);
+        this.atlasManagerOut = spriteData.getKey();
+        List<SpriteAtlasTexture> atlasesToRegister = new ArrayList<>(spriteData.getValue());
+
+
+        particlesOut = particleData.toUndash(registry);
+
+        splashTextOut = splashTextData.toUndash();
+        stateLookupOut = blockStateData.toUndash(registry);
+        modelsOut = modelData.toUndash(registry);
+        fontsOut = fontManagerData.toUndash(registry);
+
+        modelData = null;
+        spriteAtlasData = null;
+        blockStateData = null;
+        particleData = null;
+        fontManagerData = null;
+        splashTextData = null;
+        return atlasesToRegister;
+    }
+
+    public void setAtlasManagerOut(SpriteAtlasManager atlasManagerOut) {
+        this.atlasManagerOut = atlasManagerOut;
+    }
+
+    public void setStateLookupOut(Object2IntMap<BlockState> stateLookupOut) {
+        this.stateLookupOut = stateLookupOut;
+    }
+
+    public void setModelsOut(Map<Identifier, BakedModel> modelsOut) {
+        this.modelsOut = modelsOut;
+    }
+
+    public void setParticlesOut(Map<Identifier, List<Sprite>> particlesOut) {
+        this.particlesOut = particlesOut;
+    }
+
+    public void setFontsOut(Map<Identifier, List<Font>> fontsOut) {
+        this.fontsOut = fontsOut;
+    }
+
+    public void setSplashTextOut(List<String> splashTextOut) {
+        this.splashTextOut = splashTextOut;
     }
 
     public void setModelData(DashModelData modelData) {
@@ -78,32 +117,4 @@ public class MappingData {
     public void setSplashTextData(DashSplashTextData splashTextData) {
         this.splashTextData = splashTextData;
     }
-
-    public List<SpriteAtlasTexture> toUndash(DashRegistry registry) {
-        List<SpriteAtlasTexture> atlasesToRegister = new ArrayList<>();
-
-        final Pair<SpriteAtlasManager, List<SpriteAtlasTexture>> spriteData = spriteAtlasData.toUndash(registry);
-        this.atlasManagerOut = spriteData.getKey();
-        atlasesToRegister.addAll(spriteData.getValue());
-
-
-        Pair<Map<Identifier, List<Sprite>>, SpriteAtlasTexture> outParticle = particleData.toUndash(registry);
-        particlesOut = outParticle.getLeft();
-        atlasesToRegister.add(outParticle.getValue());
-
-        splashTextOut = splashTextData.toUndash();
-        stateLookupOut = blockStateData.toUndash(registry);
-        modelsOut = modelData.toUndash(registry);
-        fontsOut = fontManagerData.toUndash(registry);
-
-        modelData = null;
-        spriteAtlasData = null;
-        blockStateData = null;
-        particleData = null;
-        fontManagerData = null;
-        splashTextData = null;
-        return atlasesToRegister;
-    }
-
-
 }

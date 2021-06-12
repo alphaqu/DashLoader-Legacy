@@ -7,14 +7,14 @@ import net.quantumfusion.dashloader.DashRegistry;
 
 public class DashDirectionValue implements DashPropertyValue {
     @Serialize(order = 0)
-    public Integer direction;
+    public byte direction;
 
-    public DashDirectionValue(@Deserialize("direction") Integer direction) {
+    public DashDirectionValue(@Deserialize("direction") byte direction) {
         this.direction = direction;
     }
 
     public DashDirectionValue(Direction direction) {
-        this.direction = direction.getId();
+        this.direction = (byte) direction.getId();
     }
 
 

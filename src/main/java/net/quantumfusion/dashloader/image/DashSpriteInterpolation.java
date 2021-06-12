@@ -9,30 +9,31 @@ import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.mixin.accessor.SpriteInterpolationAccessor;
 import net.quantumfusion.dashloader.util.duck.SpriteInterpolationDuck;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 public class DashSpriteInterpolation {
     @Serialize(order = 0)
-    public final List<Integer> images;
+    public final int[] images;
 
-    public DashSpriteInterpolation(@Deserialize("images") List<Integer> images) {
+    public DashSpriteInterpolation(@Deserialize("images") int[] images) {
         this.images = images;
     }
 
     public DashSpriteInterpolation(Sprite.Interpolation interpolation, DashRegistry registry) {
-        images = new ArrayList<>();
-        Arrays.stream(((SpriteInterpolationAccessor) (Object) interpolation).getImages()).forEach(nativeImage -> images.add(registry.createImagePointer(nativeImage)));
+        final NativeImage[] images = ((SpriteInterpolationAccessor) (Object) interpolation).getImages();
+        this.images = new int[images.length];
+        for (int i = 0, imagesLength = images.length; i < imagesLength; i++) {
+            this.images[i] = registry.createImagePointer(images[i]);
+        }
 
     }
 
     public final Sprite.Interpolation toUndash(final Sprite owner, final DashRegistry registry) {
         final Sprite.Interpolation spriteInterpolation = Unsafe.allocateInstance(Sprite.Interpolation.class);
         final SpriteInterpolationAccessor spriteInterpolationAccessor = ((SpriteInterpolationAccessor) (Object) spriteInterpolation);
-        final List<NativeImage> nativeImages = new ArrayList<>();
-        images.forEach(dashImage -> nativeImages.add(registry.getImage(dashImage)));
-        spriteInterpolationAccessor.setImages(nativeImages.toArray(new NativeImage[0]));
+        final NativeImage[] nativeImages = new NativeImage[images.length];
+        for (int i = 0, imagesLength = images.length; i < imagesLength; i++) {
+            nativeImages[i] = registry.getImage(images[i]);
+        }
+        spriteInterpolationAccessor.setImages(nativeImages);
         ((SpriteInterpolationDuck) (Object) spriteInterpolation).interpolation(owner);
         return spriteInterpolation;
     }

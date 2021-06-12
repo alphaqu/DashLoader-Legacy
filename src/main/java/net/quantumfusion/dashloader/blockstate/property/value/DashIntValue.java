@@ -6,9 +6,9 @@ import net.quantumfusion.dashloader.DashRegistry;
 
 public class DashIntValue implements DashPropertyValue {
     @Serialize(order = 0)
-    public Integer value;
+    public int value;
 
-    public DashIntValue(@Deserialize("value") Integer value) {
+    public DashIntValue(@Deserialize("value") int value) {
         this.value = value;
     }
 

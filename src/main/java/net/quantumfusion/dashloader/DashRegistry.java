@@ -20,6 +20,7 @@ import net.quantumfusion.dashloader.blockstate.property.DashProperty;
 import net.quantumfusion.dashloader.blockstate.property.value.DashPropertyValue;
 import net.quantumfusion.dashloader.data.DashID;
 import net.quantumfusion.dashloader.data.DashIdentifier;
+import net.quantumfusion.dashloader.data.DashRegistryData;
 import net.quantumfusion.dashloader.data.registry.*;
 import net.quantumfusion.dashloader.font.DashFont;
 import net.quantumfusion.dashloader.image.DashImage;
@@ -30,6 +31,7 @@ import net.quantumfusion.dashloader.model.predicates.DashPredicate;
 import net.quantumfusion.dashloader.model.predicates.DashStaticPredicate;
 import net.quantumfusion.dashloader.util.ThreadHelper;
 import net.quantumfusion.dashloader.util.UndashTask;
+import net.quantumfusion.dashloader.util.serialization.Pointer2ObjectMap;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -102,91 +104,41 @@ public class DashRegistry {
         this.loader = loader;
     }
 
-    public RegistryBlockStateData getBlockstates() {
-        return new RegistryBlockStateData(blockstates);
+    public DashRegistryData createData() {
+        return new DashRegistryData(
+                new RegistryBlockStateData(new Pointer2ObjectMap<>(blockstates)),
+                new RegistryFontData(new Pointer2ObjectMap<>(fonts)),
+                new RegistryIdentifierData(new Pointer2ObjectMap<>(identifiers)),
+                new RegistryImageData(new Pointer2ObjectMap<>(images)),
+                getModels(),
+                new RegistryPropertyData(new Pointer2ObjectMap<>(properties)),
+                new RegistryPropertyValueData(new Pointer2ObjectMap<>(propertyValues)),
+                new RegistrySpriteData(new Pointer2ObjectMap<>(sprites)),
+                new RegistryPredicateData(new Pointer2ObjectMap<>(predicates))
+        );
     }
 
-    public void setBlockstates(Map<Integer, DashBlockState> blockstates) {
-        this.blockstates = blockstates;
-    }
-
-    public RegistrySpriteData getSprites() {
-        return new RegistrySpriteData(sprites);
-    }
-
-    public void setSprites(Map<Integer, DashSprite> sprites) {
-        this.sprites = sprites;
-    }
-
-    public RegistryIdentifierData getIdentifiers() {
-        return new RegistryIdentifierData(identifiers);
-    }
-
-    public void setIdentifiers(Map<Integer, DashID> identifiers) {
-        this.identifiers = identifiers;
+    public void loadData(DashRegistryData registryData) {
+        blockstates = registryData.blockStateRegistryData.toUndash();
+        sprites = registryData.spriteRegistryData.toUndash();
+        identifiers = registryData.identifierRegistryData.toUndash();
+        fonts = registryData.fontRegistryData.toUndash();
+        images = registryData.imageRegistryData.toUndash();
+        predicates = registryData.predicateRegistryData.toUndash();
+        properties = registryData.propertyRegistryData.toUndash();
+        propertyValues = registryData.propertyValueRegistryData.toUndash();
+        modelsToDeserialize = registryData.modelRegistryData.toUndash();
     }
 
     public RegistryModelData getModels() {
-        HashMap<Integer, Map<Integer, DashModel>> modelsToAdd = new HashMap<>();
-        models.forEach((aInteger, dashModel) -> {
-
-            final Map<Integer, DashModel> IntegerDashModelMap = modelsToAdd.get(dashModel.getStage());
-            if (IntegerDashModelMap == null) {
-                final HashMap<Integer, DashModel> element = new HashMap<>();
-                element.put(aInteger, dashModel);
-                modelsToAdd.put(dashModel.getStage(), element);
-            } else {
-                IntegerDashModelMap.put(aInteger, dashModel);
-            }
-        });
-        modelsToDeserialize = new ArrayList<>();
-        modelsToAdd.forEach(modelsToDeserialize::add);
-        return new RegistryModelData(modelsToDeserialize);
+        Map<Integer, Pointer2ObjectMap<DashModel>> modelsToAdd = new HashMap<>();
+        for (Map.Entry<Integer, DashModel> entry : models.entrySet()) {
+            final DashModel value = entry.getValue();
+            modelsToAdd.computeIfAbsent(value.getStage(), Pointer2ObjectMap::new).put(entry.getKey(), value);
+        }
+        return new RegistryModelData(new Pointer2ObjectMap<>(modelsToAdd));
     }
 
-    public void setModels(RegistryModelData data) {
-        modelsToDeserialize = data.models;
-    }
-
-    public RegistryFontData getFonts() {
-        return new RegistryFontData(fonts);
-    }
-
-    public void setFonts(Map<Integer, DashFont> fonts) {
-        this.fonts = fonts;
-    }
-
-    public RegistryImageData getImages() {
-        return new RegistryImageData(images);
-    }
-
-    public void setImages(Map<Integer, DashImage> images) {
-        this.images = images;
-    }
-
-    public RegistryPredicateData getPredicates() {
-        return new RegistryPredicateData(predicates);
-    }
-
-    public void setPredicates(Map<Integer, DashPredicate> predicates) {
-        this.predicates = predicates;
-    }
-
-    public RegistryPropertyData getProperties() {
-        return new RegistryPropertyData(properties);
-    }
-
-    public void setProperties(Map<Integer, DashProperty> properties) {
-        this.properties = properties;
-    }
-
-    public RegistryPropertyValueData getPropertyValues() {
-        return new RegistryPropertyValueData(propertyValues);
-    }
-
-    public void setPropertyValues(Map<Integer, DashPropertyValue> propertyValues) {
-        this.propertyValues = propertyValues;
-    }
 
     public Integer createBlockStatePointer(BlockState blockState) {
         final Integer hash = blockState.hashCode();
@@ -204,7 +156,7 @@ public class DashRegistry {
         if (models.get(hash) == null) {
             Factory<BakedModel, DashModel> model = loader.getApi().modelMappings.get(bakedModel.getClass());
             if (model != null) {
-                models.put(hash, model.toDash(bakedModel, this, DashLoader.getInstance().multipartData.get(bakedModel)));
+                models.put(hash, model.toDash(bakedModel, this, loader.multipartData.get(bakedModel)));
             } else {
                 apiFailed.putIfAbsent(bakedModel.getClass(), FactoryType.MODEL);
             }
@@ -298,7 +250,7 @@ public class DashRegistry {
         return Pair.of(hashP, hashV);
     }
 
-    public final BlockState getBlockstate(final Integer pointer) {
+    public final BlockState getBlockstate(final int pointer) {
         final BlockState blockstate = blockstatesOut.get(pointer);
         if (blockstate == null) {
             DashLoader.LOGGER.error("Blockstate not found in data. PINTR: " + pointer);
@@ -306,7 +258,7 @@ public class DashRegistry {
         return blockstate;
     }
 
-    public final Sprite getSprite(final Integer pointer) {
+    public final Sprite getSprite(final int pointer) {
         final Sprite sprite = spritesOut.get(pointer);
         if (sprite == null) {
             DashLoader.LOGGER.error("Sprite not found in data. PINTR: " + pointer);
@@ -314,7 +266,7 @@ public class DashRegistry {
         return sprite;
     }
 
-    public final Identifier getIdentifier(final Integer pointer) {
+    public final Identifier getIdentifier(final int pointer) {
         final Identifier identifier = identifiersOut.get(pointer);
         if (identifier == null) {
             DashLoader.LOGGER.error("Identifier not found in data. PINTR: " + pointer);
@@ -322,7 +274,7 @@ public class DashRegistry {
         return identifier;
     }
 
-    public final BakedModel getModel(final Integer pointer) {
+    public final BakedModel getModel(final int pointer) {
         final BakedModel bakedModel = modelsOut.get(pointer);
         if (bakedModel == null) {
             DashLoader.LOGGER.error("Model not found in data. PINTR: " + pointer);
@@ -330,7 +282,7 @@ public class DashRegistry {
         return bakedModel;
     }
 
-    public final Font getFont(final Integer pointer) {
+    public final Font getFont(final int pointer) {
         final Font font = fontsOut.get(pointer);
         if (font == null) {
             DashLoader.LOGGER.error("Font not found in data. PINTR: " + pointer);
@@ -338,7 +290,7 @@ public class DashRegistry {
         return font;
     }
 
-    public final NativeImage getImage(final Integer pointer) {
+    public final NativeImage getImage(final int pointer) {
         final NativeImage image = imagesOut.get(pointer);
         if (image == null) {
             DashLoader.LOGGER.error("NativeImage not found in data. PINTR: " + pointer);
@@ -346,7 +298,7 @@ public class DashRegistry {
         return image;
     }
 
-    public final Predicate<BlockState> getPredicate(final Integer pointer) {
+    public final Predicate<BlockState> getPredicate(final int pointer) {
         final Predicate<BlockState> predicate = predicateOut.get(pointer);
         if (predicate == null) {
             DashLoader.LOGGER.error("Predicate not found in data. PINTR: " + pointer);
@@ -354,7 +306,7 @@ public class DashRegistry {
         return predicate;
     }
 
-    public final Pair<Property<?>, Comparable<?>> getProperty(final Integer propertyPointer, final Integer valuePointer) {
+    public final Pair<Property<?>, Comparable<?>> getProperty(final int propertyPointer, final int valuePointer) {
         final Property<?> property = propertiesOut.get(propertyPointer);
         final Comparable<?> value = propertyValuesOut.get(valuePointer);
         if (property == null || value == null) {
@@ -365,39 +317,43 @@ public class DashRegistry {
 
     public void toUndash() {
         Logger logger = LogManager.getLogger();
-        totalTasks = 4 + modelsToDeserialize.size();
-        log(logger, "Loading Simple Objects");
-        identifiersOut = ThreadHelper.execParallel(identifiers, this);
-        imagesOut = ThreadHelper.execParallel(images, this);
-        identifiers = null;
-        images = null;
+        try {
+            totalTasks = 4 + modelsToDeserialize.size();
+            log(logger, "Loading Simple Objects");
+            identifiersOut = ThreadHelper.execParallel(identifiers, this);
+            imagesOut = ThreadHelper.execParallel(images, this);
+            identifiers = null;
+            images = null;
 
-        log(logger, "Loading Properties");
-        propertiesOut = ThreadHelper.execParallel(properties, this);
-        propertyValuesOut = ThreadHelper.execParallel(propertyValues, this);
-        properties = null;
-        propertyValues = null;
+            log(logger, "Loading Properties");
+            propertiesOut = ThreadHelper.execParallel(properties, this);
+            propertyValuesOut = ThreadHelper.execParallel(propertyValues, this);
+            properties = null;
+            propertyValues = null;
 
-        log(logger, "Loading Advanced Objects");
-        blockstatesOut = ThreadHelper.execParallel(blockstates, this);
-        predicateOut = ThreadHelper.execParallel(predicates, this);
-        spritesOut = ThreadHelper.execParallel(sprites, this);
-        fontsOut = ThreadHelper.execParallel(fonts, this);
-        blockstates = null;
-        predicates = null;
-        sprites = null;
-        fonts = null;
+            log(logger, "Loading Advanced Objects");
+            blockstatesOut = ThreadHelper.execParallel(blockstates, this);
+            predicateOut = ThreadHelper.execParallel(predicates, this);
+            spritesOut = ThreadHelper.execParallel(sprites, this);
+            fontsOut = ThreadHelper.execParallel(fonts, this);
+            blockstates = null;
+            predicates = null;
+            sprites = null;
+            fonts = null;
 
-        modelsOut = Collections.synchronizedMap(new HashMap<>((int) Math.ceil(modelsToDeserialize.size() / 0.75)));
-        final short[] currentStage = {0};
-        modelsToDeserialize.forEach(modelCategory -> {
-            log(logger, "Loading " + modelCategory.size() + " Models: " + "[" + currentStage[0] + "]");
-            modelsOut.putAll(ThreadHelper.execParallel(modelCategory, this));
-            currentStage[0]++;
-        });
-        log(logger, "Applying Model Overrides");
-        modelsToDeserialize.forEach(modelcategory -> DashLoader.THREADPOOL.invoke(new UndashTask.ApplyTask(new ArrayList<>(modelcategory.values()), 100, this)));
-        modelsToDeserialize = null;
+            modelsOut = new HashMap<>((int) Math.ceil(modelsToDeserialize.size() / 0.75));
+            final short[] currentStage = {0};
+            modelsToDeserialize.forEach(modelCategory -> {
+                log(logger, "Loading " + modelCategory.size() + " Models: " + "[" + currentStage[0] + "]");
+                modelsOut.putAll(ThreadHelper.execParallel(modelCategory, this));
+                currentStage[0]++;
+            });
+            log(logger, "Applying Model Overrides");
+            modelsToDeserialize.forEach(modelcategory -> DashLoader.THREADPOOL.invoke(new UndashTask.ApplyTask(new ArrayList<>(modelcategory.values()), 100, this)));
+            modelsToDeserialize = null;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void log(Logger logger, String s) {
@@ -416,4 +372,6 @@ public class DashRegistry {
             logger.error("In total there are " + ints[0] + " incompatible objects. Please contact the mod developers to add support.");
         }
     }
+
+
 }

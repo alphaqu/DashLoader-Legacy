@@ -2,7 +2,6 @@ package net.quantumfusion.dashloader.model.predicates;
 
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
-import io.activej.serializer.annotations.SerializeNullable;
 import io.activej.serializer.annotations.SerializeSubclasses;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -18,7 +17,6 @@ import java.util.stream.Collectors;
 
 public class DashOrPredicate implements DashPredicate {
     @Serialize(order = 0)
-    @SerializeNullable()
     @SerializeSubclasses(path = {0}, extraSubclassesId = "predicates")
     public List<DashPredicate> selectors;
 

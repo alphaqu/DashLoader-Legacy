@@ -7,14 +7,14 @@ import net.quantumfusion.dashloader.DashRegistry;
 
 public class DashDirection implements Dashable {
     @Serialize(order = 0)
-    public final short id;
+    public final byte id;
 
-    public DashDirection(@Deserialize("id") short id) {
+    public DashDirection(@Deserialize("id") byte id) {
         this.id = id;
     }
 
     public DashDirection(Direction direction) {
-        id = (short) direction.getId();
+        id = (byte) direction.getId();
     }
 
     public Direction toUndash(DashRegistry registry) {
