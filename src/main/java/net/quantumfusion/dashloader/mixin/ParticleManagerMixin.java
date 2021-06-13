@@ -15,7 +15,6 @@ import net.minecraft.util.profiler.Profiler;
 import net.minecraft.util.registry.Registry;
 import net.quantumfusion.dashloader.DashLoader;
 import net.quantumfusion.dashloader.mixin.accessor.ParticleManagerSimpleSpriteProviderAccessor;
-import org.apache.logging.log4j.LogManager;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -53,7 +52,6 @@ public abstract class ParticleManagerMixin {
             at = @At(value = "HEAD"), cancellable = true)
     private void reloadParticlesFast(ResourceReloader.Synchronizer synchronizer, ResourceManager manager, Profiler prepareProfiler, Profiler applyProfiler, Executor prepareExecutor, Executor applyExecutor, CallbackInfoReturnable<CompletableFuture<Void>> cir) {
         if (DashLoader.getVanillaData().getParticles() != null) {
-            LogManager.getLogger().info("Particles loading");
             cir.setReturnValue(CompletableFuture.runAsync(() -> DashLoader.getVanillaData().getParticles().forEach((identifier, sprites) -> spriteAwareFactories.get(identifier).setSprites(sprites))).thenCompose(synchronizer::whenPrepared));
         } else {
             Map<Identifier, List<Identifier>> map = Maps.newConcurrentMap();
@@ -70,7 +68,6 @@ public abstract class ParticleManagerMixin {
                 return data;
             }, prepareExecutor);
             cir.setReturnValue(var10000.thenCompose(synchronizer::whenPrepared).thenAcceptAsync((data) -> {
-                LogManager.getLogger().info("Particle Apply");
                 this.particles.clear();
                 applyProfiler.startTick();
                 applyProfiler.push("upload");

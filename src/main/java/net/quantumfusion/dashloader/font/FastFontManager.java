@@ -44,7 +44,6 @@ public class FastFontManager {
                 ));
                 return fontsOut;
             } else {
-                System.out.println("font override");
                 profiler.startTick();
                 Gson gson = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
                 Map<Identifier, List<Font>> map = Maps.newHashMap();

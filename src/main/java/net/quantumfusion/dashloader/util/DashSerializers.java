@@ -39,7 +39,6 @@ public class DashSerializers {
 
     public static void initSerializers() {
         Instant start = Instant.now();
-        System.out.println(SERIALIZERS.size());
         //create serializer objects
         //initialize the serializers
         if (!createSerializers(false)) {
