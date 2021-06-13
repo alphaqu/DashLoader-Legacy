@@ -5,6 +5,7 @@ import io.activej.serializer.annotations.Serialize;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.util.Identifier;
 import net.quantumfusion.dashloader.DashRegistry;
+import net.quantumfusion.dashloader.util.TaskHandler;
 import net.quantumfusion.dashloader.util.VanillaData;
 import net.quantumfusion.dashloader.util.serialization.Pointer2ObjectMap;
 
@@ -22,12 +23,15 @@ public class DashParticleData {
         this.particles = particles;
     }
 
-    public DashParticleData(VanillaData data, DashRegistry registry) {
+    public DashParticleData(VanillaData data, DashRegistry registry, TaskHandler taskHandler) {
         this.particles = new Pointer2ObjectMap<>();
-        data.getParticles().forEach((identifier, spriteList) -> {
+        final Map<Identifier, List<Sprite>> particles = data.getParticles();
+        taskHandler.setSubtasks(particles.size());
+        particles.forEach((identifier, spriteList) -> {
             List<Integer> out = new ArrayList<>();
             spriteList.forEach(sprite -> out.add(registry.createSpritePointer(sprite)));
             this.particles.put(registry.createIdentifierPointer(identifier), out);
+            taskHandler.completedSubTask();
         });
     }
 

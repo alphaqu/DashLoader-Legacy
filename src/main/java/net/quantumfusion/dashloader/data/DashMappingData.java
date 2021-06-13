@@ -4,7 +4,7 @@ import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import net.quantumfusion.dashloader.data.mappings.*;
 
-public class DashVanillaData {
+public class DashMappingData {
     @Serialize(order = 0)
     public final DashBlockStateData blockStateMappings;
     @Serialize(order = 1)
@@ -19,7 +19,7 @@ public class DashVanillaData {
     public final DashSpriteAtlasData spriteAtlasMappings;
 
 
-    public DashVanillaData(@Deserialize("blockStateMappings") DashBlockStateData blockStateMappings,
+    public DashMappingData(@Deserialize("blockStateMappings") DashBlockStateData blockStateMappings,
                            @Deserialize("fontMappings") DashFontManagerData fontMappings,
                            @Deserialize("modelMappings") DashModelData modelMappings,
                            @Deserialize("particleMappings") DashParticleData particleMappings,

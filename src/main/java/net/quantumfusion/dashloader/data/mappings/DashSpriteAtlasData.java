@@ -4,15 +4,18 @@ import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import net.minecraft.client.render.model.SpriteAtlasManager;
 import net.minecraft.client.texture.SpriteAtlasTexture;
+import net.minecraft.util.Identifier;
 import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.image.DashSpriteAtlasTexture;
 import net.quantumfusion.dashloader.mixin.accessor.SpriteAtlasManagerAccessor;
+import net.quantumfusion.dashloader.util.TaskHandler;
 import net.quantumfusion.dashloader.util.VanillaData;
 import net.quantumfusion.dashloader.util.serialization.Object2PointerMap;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class DashSpriteAtlasData {
     @Serialize(order = 0)
@@ -22,10 +25,22 @@ public class DashSpriteAtlasData {
         this.atlases = atlases;
     }
 
-    public DashSpriteAtlasData(VanillaData data, DashRegistry registry) {
+    public DashSpriteAtlasData(VanillaData data, DashRegistry registry, TaskHandler taskHandler) {
         atlases = new Object2PointerMap<>();
-        ((SpriteAtlasManagerAccessor) data.getAtlasManager()).getAtlases().forEach((identifier, spriteAtlasTexture) -> atlases.put(new DashSpriteAtlasTexture(spriteAtlasTexture, data.getAtlasData(spriteAtlasTexture), registry), 0));
-        data.getExtraAtlases().forEach(spriteAtlasTexture -> atlases.put(new DashSpriteAtlasTexture(spriteAtlasTexture, data.getAtlasData(spriteAtlasTexture), registry), 1));
+
+        final Map<Identifier, SpriteAtlasTexture> atlases = ((SpriteAtlasManagerAccessor) data.getAtlasManager()).getAtlases();
+        final List<SpriteAtlasTexture> extraAtlases = data.getExtraAtlases();
+        taskHandler.setSubtasks(atlases.size() + extraAtlases.size());
+        atlases.forEach((identifier, spriteAtlasTexture) -> {
+            System.out.println(identifier);
+            this.atlases.put(new DashSpriteAtlasTexture(spriteAtlasTexture, data.getAtlasData(spriteAtlasTexture), registry), 0);
+            taskHandler.completedSubTask();
+        });
+        extraAtlases.forEach(spriteAtlasTexture -> {
+            System.out.println("e: " + spriteAtlasTexture.getId());
+            this.atlases.put(new DashSpriteAtlasTexture(spriteAtlasTexture, data.getAtlasData(spriteAtlasTexture), registry), 1);
+            taskHandler.completedSubTask();
+        });
     }
 
     public Pair<SpriteAtlasManager, List<SpriteAtlasTexture>> toUndash(DashRegistry loader) {

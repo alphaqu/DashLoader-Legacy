@@ -51,7 +51,6 @@ public class DashWindow extends Screen {
     }
 
     private void renderProgressBar(MatrixStack matrices, float opacity) {
-        int j = Math.round(255.0F * opacity);
         final float progress = currentProgress;
         final float progressTimesTwo = progress * 2;
         int green = progress > 0.5f ? 255 : (int) (255 * progressTimesTwo);
@@ -59,12 +58,12 @@ public class DashWindow extends Screen {
         green = progress >= 1 ? 255 : green;
         red = progress >= 1 ? 0 : red;
         int progressColor = BackgroundHelper.ColorMixer.getArgb(255, red, green, 0);
-        int underbarColor = BackgroundHelper.ColorMixer.getArgb(j, 20, 20, 20);
+        int underbarColor = 0xff001f14;
         float end = (1 - opacity);
         int screenHeight = (client.getWindow().getScaledHeight());
         int screenWidth = client.getWindow().getScaledWidth();
         final int progressBarHeight = 3;
-        DrawableHelper.fill(matrices, 0, 0, screenWidth, screenHeight, BackgroundHelper.ColorMixer.getArgb(150, 31, 0, 0));
+        fillGradient(matrices, 0, 0, screenWidth, screenHeight, 0xff000c08, 0xff001f14);
         DrawableHelper.fill(matrices, (int) (screenWidth * progress), (screenHeight - progressBarHeight), screenWidth, screenHeight, underbarColor);
         DrawableHelper.fill(matrices, (int) (screenWidth * end), (screenHeight - progressBarHeight), (int) (screenWidth * progress), screenHeight, progressColor);
         DrawableHelper.drawTextWithShadow(
@@ -74,9 +73,14 @@ public class DashWindow extends Screen {
                 10,
                 screenHeight - progressBarHeight - textRenderer.fontHeight,
                 BackgroundHelper.ColorMixer.getArgb(255, 220, 220, 220));
-        //lets wait until the final logo is here
-//        this.client.getTextureManager().bindTexture(LOGO);
-//        drawTexture(matrices, (screenWidth / 2) - 100,(screenHeight / 2) - 100, 200,200, 0, 0, 800, 800, 800, 800);
+
+        final Text subText = DashLoader.TASK_HANDLER.getSubText();
+        DrawableHelper.drawTextWithShadow(matrices,
+                textRenderer,
+                subText,
+                (screenWidth - 10) - textRenderer.getWidth(subText),
+                screenHeight - progressBarHeight - textRenderer.fontHeight,
+                BackgroundHelper.ColorMixer.getArgb(255, 220, 220, 220));
 
     }
 

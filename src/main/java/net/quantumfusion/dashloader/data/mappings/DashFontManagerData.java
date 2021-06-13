@@ -5,6 +5,7 @@ import io.activej.serializer.annotations.Serialize;
 import net.minecraft.client.font.Font;
 import net.minecraft.util.Identifier;
 import net.quantumfusion.dashloader.DashRegistry;
+import net.quantumfusion.dashloader.util.TaskHandler;
 import net.quantumfusion.dashloader.util.VanillaData;
 import net.quantumfusion.dashloader.util.serialization.Pointer2ObjectMap;
 
@@ -22,11 +23,20 @@ public class DashFontManagerData {
         this.fontMap = fontMap;
     }
 
-    public DashFontManagerData(VanillaData data, DashRegistry registry) {
+    public DashFontManagerData(VanillaData data, DashRegistry registry, TaskHandler taskHandler) {
         fontMap = new Pointer2ObjectMap<>();
-        data.getFonts().forEach((identifier, fonts) -> {
+        int amount = 0;
+        final Map<Identifier, List<Font>> fonts = data.getFonts();
+        for (List<Font> value : fonts.values()) {
+            amount += value.size();
+        }
+        taskHandler.setSubtasks(amount);
+        fonts.forEach((identifier, fontList) -> {
             List<Integer> fontsOut = new ArrayList<>();
-            fonts.forEach(font -> fontsOut.add(registry.createFontPointer(font)));
+            fontList.forEach(font -> {
+                fontsOut.add(registry.createFontPointer(font));
+                taskHandler.completedSubTask();
+            });
             fontMap.put(registry.createIdentifierPointer(identifier), fontsOut);
         });
 

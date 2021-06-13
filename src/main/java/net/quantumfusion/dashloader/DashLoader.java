@@ -23,12 +23,12 @@ import static net.quantumfusion.dashloader.util.DashSerializers.REGISTRY_SERIALI
 
 public class DashLoader {
     public static final Logger LOGGER = LogManager.getLogger();
-    public static final String version = FabricLoader.getInstance().getModContainer("dashloader").get().getMetadata().getVersion().getFriendlyString();
+    public static final String VERSION = FabricLoader.getInstance().getModContainer("dashloader").get().getMetadata().getVersion().getFriendlyString();
     private static final Path CONFIG = FabricLoader.getInstance().getConfigDir().normalize();
+    private static final VanillaData VANILLA_DATA = new VanillaData();
     public static final TaskHandler TASK_HANDLER = new TaskHandler(LOGGER);
     public static ForkJoinPool THREADPOOL;
     private static DashLoader instance;
-    private final VanillaData vanillaData = new VanillaData();
     private final ClassLoader classLoader;
     private final DashLoaderAPI api;
     @Nullable
@@ -53,7 +53,7 @@ public class DashLoader {
     }
 
     public static VanillaData getVanillaData() {
-        return DashLoader.getInstance().vanillaData;
+        return VANILLA_DATA;
     }
 
     public DashMappings getMappings() {
@@ -106,7 +106,7 @@ public class DashLoader {
         TASK_HANDLER.completedTask();
         DashRegistry registry = new DashRegistry(this);
         DashMappings mappings = new DashMappings();
-        mappings.loadVanillaData(vanillaData, registry, TASK_HANDLER);
+        mappings.loadVanillaData(VANILLA_DATA, registry, TASK_HANDLER);
         REGISTRY_SERIALIZER.serializeObject(registry.createData(), DashCachePaths.REGISTRY_CACHE.getPath(), "Cache");
         MAPPING_SERIALIZER.serializeObject(mappings.createData(), DashCachePaths.MAPPINGS_CACHE.getPath(), "Mapping");
         registry.apiReport(LOGGER);
@@ -140,13 +140,14 @@ public class DashLoader {
             registry.toUndash();
 
             LOGGER.info("      Loading Mappings");
-            mappings.toUndash(registry, vanillaData);
+            mappings.toUndash(registry, VANILLA_DATA);
             this.mappings = mappings;
 
             LOGGER.info("    Loaded DashLoader");
             state = DashCacheState.LOADED;
         } catch (Exception e) {
             state = DashCacheState.CRASHLOADER;
+            LOGGER.error("DashLoader has devolved to CrashLoader???", e);
         }
     }
 

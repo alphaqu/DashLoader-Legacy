@@ -6,6 +6,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.block.BlockState;
 import net.quantumfusion.dashloader.DashRegistry;
+import net.quantumfusion.dashloader.util.TaskHandler;
 import net.quantumfusion.dashloader.util.VanillaData;
 import net.quantumfusion.dashloader.util.serialization.Pointer2PointerMap;
 
@@ -18,9 +19,14 @@ public class DashBlockStateData {
         this.blockstates = blockstates;
     }
 
-    public DashBlockStateData(VanillaData data, DashRegistry registry) {
+    public DashBlockStateData(VanillaData data, DashRegistry registry, final TaskHandler taskHandler) {
         this.blockstates = new Pointer2PointerMap();
-        data.getStateLookup().forEach((blockState, integer) -> this.blockstates.put(registry.createBlockStatePointer(blockState), integer));
+        final Object2IntMap<BlockState> stateLookup = data.getStateLookup();
+        taskHandler.setSubtasks(stateLookup.size());
+        stateLookup.forEach((blockState, integer) -> {
+            this.blockstates.put(registry.createBlockStatePointer(blockState), integer);
+            taskHandler.completedSubTask();
+        });
     }
 
     public Object2IntMap<BlockState> toUndash(DashRegistry registry) {

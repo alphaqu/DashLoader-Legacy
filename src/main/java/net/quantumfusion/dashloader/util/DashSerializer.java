@@ -15,10 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
+import java.nio.file.*;
 import java.util.function.Function;
 
 import static io.activej.codegen.ClassBuilder.CLASS_BUILDER_MARKER;
@@ -61,7 +58,9 @@ public class DashSerializer<O> {
                 renameRawSerializer(identifier, build);
                 serializer = build;
             } catch (IOException e) {
-                e.printStackTrace();
+                if (!(e instanceof FileSystemException)) {
+                    e.printStackTrace();
+                }
             }
         }
 
@@ -69,18 +68,23 @@ public class DashSerializer<O> {
     }
 
     public void serializeObject(O clazz, Path path, String name) {
+        final TaskHandler taskHandler = DashLoader.TASK_HANDLER;
         try {
-            DashLoader.TASK_HANDLER.setCurrentTask("Serializing " + name);
+            taskHandler.setCurrentTask("Serializing " + name);
+            taskHandler.setSubtasks(3);
             DashLoader.LOGGER.info("  Starting " + name + " Serialization.");
             StreamOutput output = StreamOutput.create(Files.newOutputStream(path, StandardOpenOption.CREATE, StandardOpenOption.WRITE));
+            taskHandler.completedSubTask();
             //noinspection unchecked
             output.serialize(serializer, clazz);
+            taskHandler.completedSubTask();
             output.close();
+            taskHandler.completedSubTask();
             DashLoader.LOGGER.info("    Finished " + name + " Serialization.");
         } catch (IOException e) {
             e.printStackTrace();
         }
-        DashLoader.TASK_HANDLER.completedTask();
+        taskHandler.completedTask();
     }
 
     @NotNull
@@ -137,8 +141,13 @@ public class DashSerializer<O> {
     private <K> void renameRawSerializer(String name, BinarySerializer<K> serializer) throws IOException {
         final String className = serializer.getClass().getName().replaceFirst("io.activej.codegen.", "");
         final Path folder = loader.getModBoundDir();
-        final Path resolve = folder.resolve(className + ".class");
-        resolve.toFile().renameTo(folder.resolve(className.replaceFirst("io.activej.serializer.BinarySerializer_", "") + "-" + name + ".serializer").toFile());
+        final Path rawSerializerPath = folder.resolve(className + ".class");
+        final Path destination = folder.resolve(className.replaceFirst("io.activej.serializer.BinarySerializer_", "") + "-" + name + ".serializer");
+        try {
+            Files.move(rawSerializerPath, destination, StandardCopyOption.REPLACE_EXISTING);
+        } finally {
+            Files.deleteIfExists(rawSerializerPath);
+        }
         DashLoader.LOGGER.info("Created Serializer {}", className);
     }
 }

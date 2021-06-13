@@ -5,7 +5,7 @@ import net.minecraft.client.render.model.SpriteAtlasManager;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.texture.TextureManager;
 import net.minecraft.util.Identifier;
-import net.quantumfusion.dashloader.data.DashVanillaData;
+import net.quantumfusion.dashloader.data.DashMappingData;
 import net.quantumfusion.dashloader.data.mappings.*;
 import net.quantumfusion.dashloader.image.DashSpriteAtlasTextureData;
 import net.quantumfusion.dashloader.mixin.accessor.AbstractTextureAccessor;
@@ -21,7 +21,6 @@ import java.util.List;
 
 public class DashMappings {
     private List<Pair<SpriteAtlasTexture, DashSpriteAtlasTextureData>> atlasesToRegister;
-    public VanillaData vanillaData;
     public DashModelData modelData;
     public DashSpriteAtlasData spriteAtlasData;
     public DashBlockStateData blockStateData;
@@ -32,7 +31,7 @@ public class DashMappings {
     public DashMappings() {
     }
 
-    public void loadCacheData(DashVanillaData data) {
+    public void loadCacheData(DashMappingData data) {
         this.modelData = data.modelMappings;
         this.spriteAtlasData = data.spriteAtlasMappings;
         this.blockStateData = data.blockStateMappings;
@@ -43,26 +42,26 @@ public class DashMappings {
 
     public void loadVanillaData(VanillaData data, DashRegistry registry, TaskHandler taskHandler) {
         taskHandler.logAndTask("Mapping Blockstates");
-        blockStateData = (new DashBlockStateData(data, registry));
+        blockStateData = new DashBlockStateData(data, registry, taskHandler);
 
         taskHandler.logAndTask("Mapping Models");
-        modelData = (new DashModelData(data, registry));
+        modelData = new DashModelData(data, registry, taskHandler);
 
         taskHandler.logAndTask("Mapping Particles");
-        particleData = (new DashParticleData(data, registry));
+        particleData = new DashParticleData(data, registry, taskHandler);
 
         taskHandler.logAndTask("Mapping Fonts");
-        fontManagerData = (new DashFontManagerData(data, registry));
+        fontManagerData = new DashFontManagerData(data, registry, taskHandler);
 
         taskHandler.logAndTask("Mapping Splash Text");
-        splashTextData = (new DashSplashTextData(data));
+        splashTextData = new DashSplashTextData(data, taskHandler);
 
         taskHandler.logAndTask("Mapping Atlas");
-        spriteAtlasData = (new DashSpriteAtlasData(data, registry));
+        spriteAtlasData = new DashSpriteAtlasData(data, registry, taskHandler);
     }
 
-    public DashVanillaData createData() {
-        return new DashVanillaData(blockStateData, fontManagerData, modelData, particleData, splashTextData, spriteAtlasData);
+    public DashMappingData createData() {
+        return new DashMappingData(blockStateData, fontManagerData, modelData, particleData, splashTextData, spriteAtlasData);
     }
 
     public void toUndash(DashRegistry registry, VanillaData data) {
@@ -77,7 +76,7 @@ public class DashMappings {
                 fontManagerData.toUndash(registry),
                 splashTextData.toUndash());
         atlasesToRegister = new ArrayList<>();
-        spriteData.getValue().forEach(atlasTexture -> atlasesToRegister.add(Pair.of(atlasTexture, vanillaData.getAtlasData(atlasTexture))));
+        spriteData.getValue().forEach(atlasTexture -> atlasesToRegister.add(Pair.of(atlasTexture, data.getAtlasData(atlasTexture))));
 
         modelData = null;
         spriteAtlasData = null;

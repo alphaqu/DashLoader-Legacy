@@ -5,6 +5,7 @@ import io.activej.serializer.annotations.Serialize;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.util.Identifier;
 import net.quantumfusion.dashloader.DashRegistry;
+import net.quantumfusion.dashloader.util.TaskHandler;
 import net.quantumfusion.dashloader.util.VanillaData;
 import net.quantumfusion.dashloader.util.serialization.Pointer2PointerMap;
 
@@ -22,12 +23,16 @@ public class DashModelData {
         this.models = models;
     }
 
-    public DashModelData(VanillaData data, DashRegistry registry) {
-        this.models = new Pointer2PointerMap(data.getModels().size());
-        data.getModels().forEach((identifier, bakedModel) -> {
+    public DashModelData(VanillaData data, DashRegistry registry, TaskHandler taskHandler) {
+        final Map<Identifier, BakedModel> models = data.getModels();
+        final int size = models.size();
+        this.models = new Pointer2PointerMap(size);
+        taskHandler.setSubtasks(size);
+        models.forEach((identifier, bakedModel) -> {
             if (bakedModel != null) {
                 this.models.put(registry.createIdentifierPointer(identifier), registry.createModelPointer(bakedModel));
             }
+            taskHandler.completedSubTask();
         });
     }
 

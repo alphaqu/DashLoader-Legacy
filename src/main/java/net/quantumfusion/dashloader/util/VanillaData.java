@@ -1,7 +1,6 @@
 package net.quantumfusion.dashloader.util;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import net.fabricmc.fabric.mixin.client.particle.ParticleManagerAccessor;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.font.Font;
@@ -15,6 +14,7 @@ import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.state.StateManager;
 import net.minecraft.util.Identifier;
 import net.quantumfusion.dashloader.image.DashSpriteAtlasTextureData;
+import net.quantumfusion.dashloader.mixin.accessor.ParticleManagerSimpleSpriteProviderAccessor;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
@@ -78,7 +78,7 @@ public class VanillaData {
 
     public void setParticleManagerAssets(Map<Identifier, ParticleManager.SimpleSpriteProvider> particles, SpriteAtlasTexture atlas) {
         this.particles = new HashMap<>();
-        particles.forEach((identifier, simpleSpriteProvider) -> this.particles.put(identifier, ((ParticleManagerAccessor.SimpleSpriteProviderAccessor) particles).getSprites()));
+        particles.forEach((identifier, simpleSpriteProvider) -> this.particles.put(identifier, ((ParticleManagerSimpleSpriteProviderAccessor) simpleSpriteProvider).getSprites()));
         addExtraAtlasAssets(atlas);
     }
 

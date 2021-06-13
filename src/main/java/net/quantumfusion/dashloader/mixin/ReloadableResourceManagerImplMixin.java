@@ -18,10 +18,15 @@ import java.util.concurrent.Executor;
 @Mixin(ReloadableResourceManagerImpl.class)
 public class ReloadableResourceManagerImplMixin {
 
+    private static boolean reloaded = false;
+
     @Inject(method = "reload(Ljava/util/concurrent/Executor;Ljava/util/concurrent/Executor;Ljava/util/concurrent/CompletableFuture;Ljava/util/List;)Lnet/minecraft/resource/ResourceReload;",
             at = @At(value = "HEAD"),
             cancellable = true)
     private void reloadDash(Executor prepareExecutor, Executor applyExecutor, CompletableFuture<Unit> initialStage, List<ResourcePack> packs, CallbackInfoReturnable<ResourceReload> cir) {
-        DashLoader.getInstance().reload(MinecraftClient.getInstance().getResourcePackManager().getEnabledNames());
+        if (!reloaded) {
+            DashLoader.getInstance().reload(MinecraftClient.getInstance().getResourcePackManager().getEnabledNames());
+            reloaded = true;
+        }
     }
 }

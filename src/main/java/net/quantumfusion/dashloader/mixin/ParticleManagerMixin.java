@@ -85,16 +85,14 @@ public abstract class ParticleManagerMixin {
                         Stream<Identifier> spriteStream = spritesAssets.stream();
                         SpriteAtlasTexture spriteAtlasTexture = this.particleAtlasTexture;
                         spriteList = spriteStream.map(spriteAtlasTexture::getSprite).collect(ImmutableList.toImmutableList());
+
                     }
                     ImmutableList<Sprite> immutableList = spriteList;
                     ((ParticleManagerSimpleSpriteProviderAccessor) this.spriteAwareFactories.get(identifier)).setSprites(immutableList);
                 });
-
-
-                DashLoader.getVanillaData().setParticleManagerAssets(spriteAwareFactories, particleAtlasTexture);
-
                 applyProfiler.pop();
                 applyProfiler.endTick();
+                DashLoader.getVanillaData().setParticleManagerAssets(spriteAwareFactories, particleAtlasTexture);
             }, applyExecutor));
         }
         cir.cancel();
