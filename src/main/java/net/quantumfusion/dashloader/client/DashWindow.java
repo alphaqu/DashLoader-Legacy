@@ -1,26 +1,23 @@
 package net.quantumfusion.dashloader.client;
 
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.hud.BackgroundHelper;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 import net.quantumfusion.dashloader.DashLoader;
 
 public class DashWindow extends Screen {
-    private static final Identifier LOGO = new Identifier("dashloader:textures/icon.png");
-
     private final int endFrames = 120;
-    float currentProgress = 0f;
-    int framesLeftToEnd;
-    boolean started = false;
+    private final Screen previousScreen;
+    private float currentProgress = 0f;
+    private int framesLeftToEnd;
+    private boolean started = false;
 
-    public DashWindow(Text title) {
+    public DashWindow(Text title, Screen previousScreen) {
         super(title);
         framesLeftToEnd = endFrames;
+        this.previousScreen = previousScreen;
     }
 
     @Override
@@ -29,21 +26,16 @@ public class DashWindow extends Screen {
 
     @Override
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-
         final double result = (DashLoader.TASK_HANDLER.getProgress() - currentProgress);
         currentProgress += result == 0 ? 0 : result / 20;
         renderProgressBar(matrices, framesLeftToEnd == 0 ? 0 : framesLeftToEnd / (float) endFrames);
         if (DashLoader.TASK_HANDLER.getProgress() == 1) {
             framesLeftToEnd--;
             if (framesLeftToEnd <= 0) {
-                if (MinecraftClient.getInstance().world != null) {
-                    client.openScreen(null);
-                } else {
-                    client.openScreen(new TitleScreen());
-                }
+                client.openScreen(previousScreen);
             }
         }
-        if (!started) {
+        if (!started) { //boys talk with me im still here
             new Thread(() -> DashLoader.getInstance().saveDashCache()).start();
             started = true;
         }

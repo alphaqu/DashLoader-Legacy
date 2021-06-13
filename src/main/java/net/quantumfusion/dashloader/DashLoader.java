@@ -24,17 +24,18 @@ import static net.quantumfusion.dashloader.util.DashSerializers.REGISTRY_SERIALI
 public class DashLoader {
     public static final Logger LOGGER = LogManager.getLogger();
     public static final String VERSION = FabricLoader.getInstance().getModContainer("dashloader").get().getMetadata().getVersion().getFriendlyString();
+    public static final TaskHandler TASK_HANDLER = new TaskHandler(LOGGER);
     private static final Path CONFIG = FabricLoader.getInstance().getConfigDir().normalize();
     private static final VanillaData VANILLA_DATA = new VanillaData();
-    public static final TaskHandler TASK_HANDLER = new TaskHandler(LOGGER);
     public static ForkJoinPool THREADPOOL;
+    private static boolean shouldReload = true;
     private static DashLoader instance;
     private final ClassLoader classLoader;
     private final DashLoaderAPI api;
+    public DashCacheState state;
     @Nullable
     private DashMappings mappings;
     private DashMetadata metadata;
-    public DashCacheState state;
 
     public DashLoader(ClassLoader classLoader) {
         LOGGER.info("Creating DashLoader Instance");
@@ -77,14 +78,25 @@ public class DashLoader {
 
     }
 
+    public void updatedResourcePack() {
+        shouldReload = true;
+    }
+
     public void reload(Collection<String> resourcePacks) {
-        LOGGER.info("Reloading DashLoader");
-        metadata.setResourcePacks(resourcePacks);
-        if (Arrays.stream(DashCachePaths.values()).allMatch(dashCachePaths -> dashCachePaths.getPath().toFile().exists())) {
-            loadDashCache();
+        if (shouldReload) {
+            state = DashCacheState.EMPTY;
+            if (THREADPOOL.isTerminated()) {
+                initThreadPool();
+            }
+            metadata.setResourcePacks(resourcePacks);
+            LOGGER.info("Reloading DashLoader. [mod-hash: {}] [resource-hash: {}]", metadata.modInfo, metadata.resourcePacks);
+            if (Arrays.stream(DashCachePaths.values()).allMatch(dashCachePaths -> dashCachePaths.getPath().toFile().exists())) {
+                loadDashCache();
+            }
+            shutdownThreadPool();
+            LOGGER.info("Reloaded DashLoader");
+            shouldReload = false;
         }
-        shutdownThreadPool();
-        LOGGER.info("Reloaded DashLoader");
     }
 
     public DashLoaderAPI getApi() {
@@ -101,6 +113,7 @@ public class DashLoader {
 
     public void saveDashCache() {
         Instant start = Instant.now();
+        TASK_HANDLER.reset();
         initThreadPool();
         api.initAPI();
         TASK_HANDLER.completedTask();
@@ -141,6 +154,7 @@ public class DashLoader {
 
             LOGGER.info("      Loading Mappings");
             mappings.toUndash(registry, VANILLA_DATA);
+            this.mappings = null;
             this.mappings = mappings;
 
             LOGGER.info("    Loaded DashLoader");

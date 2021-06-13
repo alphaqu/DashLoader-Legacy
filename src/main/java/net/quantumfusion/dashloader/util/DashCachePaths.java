@@ -9,13 +9,13 @@ public enum DashCachePaths {
     MAPPINGS_CACHE("mappings-data");
 
 
-    private final Path path;
+    private final String path;
 
-    DashCachePaths(String st) {
-        this.path = DashLoader.getInstance().getResourcePackBoundDir().resolve(st + ".activej");
+    DashCachePaths(String path) {
+        this.path = path;
     }
 
     public Path getPath() {
-        return path;
+        return DashLoader.getInstance().getResourcePackBoundDir().resolve(path + ".activej");
     }
 }

@@ -32,12 +32,10 @@ public class DashSpriteAtlasData {
         final List<SpriteAtlasTexture> extraAtlases = data.getExtraAtlases();
         taskHandler.setSubtasks(atlases.size() + extraAtlases.size());
         atlases.forEach((identifier, spriteAtlasTexture) -> {
-            System.out.println(identifier);
             this.atlases.put(new DashSpriteAtlasTexture(spriteAtlasTexture, data.getAtlasData(spriteAtlasTexture), registry), 0);
             taskHandler.completedSubTask();
         });
         extraAtlases.forEach(spriteAtlasTexture -> {
-            System.out.println("e: " + spriteAtlasTexture.getId());
             this.atlases.put(new DashSpriteAtlasTexture(spriteAtlasTexture, data.getAtlasData(spriteAtlasTexture), registry), 1);
             taskHandler.completedSubTask();
         });

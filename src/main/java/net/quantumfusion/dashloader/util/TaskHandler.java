@@ -19,6 +19,12 @@ public class TaskHandler {
         task = s;
     }
 
+    public void reset() {
+        tasksComplete = 0;
+        subTotalTasks = 1;
+        subTasksComplete = 0;
+    }
+
     public void completedTask() {
         tasksComplete++;
     }
