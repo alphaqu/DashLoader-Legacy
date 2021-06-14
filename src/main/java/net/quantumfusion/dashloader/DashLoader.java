@@ -84,7 +84,8 @@ public class DashLoader {
 
     public void reload(Collection<String> resourcePacks) {
         if (shouldReload) {
-            DashReport.addTime(Instant.now(), "From reload");
+            final Instant time = Instant.now();
+            DashReport.addTime(time, "From reload");
             state = DashCacheState.EMPTY;
             if (THREADPOOL.isTerminated()) {
                 initThreadPool();
@@ -97,6 +98,7 @@ public class DashLoader {
             shutdownThreadPool();
             LOGGER.info("Reloaded DashLoader");
             shouldReload = false;
+            DashReport.addEntry(new DashReport.Entry(time, "Reload", true));
         }
     }
 
@@ -141,7 +143,6 @@ public class DashLoader {
     public void loadDashCache() {
         LOGGER.info("Starting DashLoader Deserialization");
         try {
-            Instant time = Instant.now();
             DashRegistry registry = new DashRegistry(this);
             DashMappings mappings = new DashMappings();
             ThreadHelper.exec(
@@ -158,7 +159,6 @@ public class DashLoader {
             this.mappings = mappings;
 
             LOGGER.info("    Loaded DashLoader");
-            DashReport.addEntry(new DashReport.Entry(time, "Cache Loading", true));
             state = DashCacheState.LOADED;
         } catch (Exception e) {
             state = DashCacheState.CRASHLOADER;

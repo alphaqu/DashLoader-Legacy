@@ -21,12 +21,12 @@ public class TimeHelper {
         return getMs(start, Instant.now());
     }
 
-    public static float smartGetTime(Instant start, Instant stop) {
+    public static String smartGetTime(Instant start, Instant stop) {
         final long millis = Duration.between(start, stop).toMillis();
         if (millis < 2000) {
-            return millis;
+            return millis + "ms";
         } else {
-            return Math.round(millis / 100f) / 10f;
+            return Math.round(millis / 100f) / 10f + "s";
         }
     }
 }

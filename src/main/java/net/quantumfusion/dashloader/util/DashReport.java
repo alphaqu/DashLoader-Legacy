@@ -23,7 +23,7 @@ public class DashReport {
     }
 
     public static void printReport() {
-        printBorder();
+        printBorder("Minecraft Samples");
         List<Entry> dashEntries = new ArrayList<>();
         for (Entry entry : entries) {
             if (!entry.dashReport) {
@@ -32,13 +32,13 @@ public class DashReport {
                 dashEntries.add(entry);
             }
         }
-        printBorder();
+        printBorder("DashLoader Samples");
         for (Entry dashEntry : dashEntries) {
             printEntry(dashEntry);
         }
-        printBorder();
+        printBorder("Launch Time");
         printLaunch();
-        printBorder();
+        printBorder("DashReport End");
     }
 
     private static void printLaunch() {
@@ -48,8 +48,8 @@ public class DashReport {
         }
     }
 
-    private static void printBorder() {
-        LOGGER.info("**************************************************");
+    private static void printBorder(String text) {
+        LOGGER.info("*************************[{}]*************************", text);
     }
 
     private static void printEntry(Entry entry) {

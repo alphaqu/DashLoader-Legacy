@@ -10,6 +10,7 @@ import java.time.Instant;
 @Environment(EnvType.CLIENT)
 public class DashClient implements PreLaunchEntrypoint {
 
+
     @Override
     public void onPreLaunch() {
         DashReport.addTime(Instant.now(), "From beginning");

@@ -24,7 +24,7 @@ public class BootStrapMixin {
     @Inject(method = "initialize", at = @At(value = "TAIL"), cancellable = true)
     private static void logInitializeEnd(CallbackInfo ci) {
         DashReport.addEntry(new DashReport.Entry(start, "Bootstrap", false));
-        DashReport.addTime(Instant.now(), "Ignoring Bootstrap");
+        DashReport.addTime(Instant.now(), "After Bootstrap");
     }
 
 

@@ -8,6 +8,7 @@ import net.minecraft.text.Text;
 import net.quantumfusion.dashloader.DashLoader;
 import net.quantumfusion.dashloader.client.DashWindow;
 import net.quantumfusion.dashloader.util.DashCacheState;
+import net.quantumfusion.dashloader.util.DashReport;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -24,6 +25,8 @@ public class SplashScreenMixin {
     @Final
     private MinecraftClient client;
 
+    private static boolean printed = false;
+
     @Inject(method = "render(Lnet/minecraft/client/util/math/MatrixStack;IIF)V",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Util;getMeasuringTimeMs()J", shift = At.Shift.BEFORE, ordinal = 1), cancellable = true)
     private void render(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo ci) {
@@ -35,11 +38,14 @@ public class SplashScreenMixin {
                 }
                 this.client.currentScreen.init(this.client, this.client.getWindow().getScaledWidth(), this.client.getWindow().getScaledHeight());
             }
-            ci.cancel();
         } else {
             this.client.setOverlay(null);
             client.openScreen(new DashWindow(Text.of("dash"), client.currentScreen));
-            ci.cancel();
         }
+        if (!printed) {
+            DashReport.printReport();
+            printed = true;
+        }
+        ci.cancel();
     }
 }
