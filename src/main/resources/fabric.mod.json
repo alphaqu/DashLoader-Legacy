@@ -35,9 +35,13 @@
     "minecraft": "*"
   },
   "breaks": {
+    "adorn": "*",
+    "connected_block_textures": "*",
+    "enhancedblockentities": "*",
+    "hydrogen": "*",
+    "indrev": "*",
+    "lambdabettergrass": "*",
     "optifabric": "*",
-    "idontlikeoptifabric": "*",
-    "sodium": "<=0.1.0",
-    "hydrogen": "*"
+    "sodium": "<=0.1.0"
   }
 }
