@@ -1,4 +1,4 @@
-package net.quantumfusion.dashloader.misc;
+package net.quantumfusion.dashloader.util;
 
 import it.unimi.dsi.fastutil.ints.IntComparator;
 

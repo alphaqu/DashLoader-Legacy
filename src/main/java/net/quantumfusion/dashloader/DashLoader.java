@@ -62,6 +62,7 @@ public class DashLoader {
     }
 
     public void initialize() {
+        Instant start = Instant.now();
         LOGGER.info("Initializing DashLoader.");
         final FabricLoader instance = FabricLoader.getInstance();
         if (instance.isDevelopmentEnvironment()) {
@@ -73,9 +74,8 @@ public class DashLoader {
         initThreadPool();
         createDirectory();
         DashSerializers.initSerializers();
+        DashReport.addEntry(new DashReport.Entry(start, "Initialization", true));
         LOGGER.info("Initialized DashLoader");
-
-
     }
 
     public void updatedResourcePack() {
@@ -84,6 +84,7 @@ public class DashLoader {
 
     public void reload(Collection<String> resourcePacks) {
         if (shouldReload) {
+            DashReport.addTime(Instant.now(), "From reload");
             state = DashCacheState.EMPTY;
             if (THREADPOOL.isTerminated()) {
                 initThreadPool();
@@ -147,7 +148,6 @@ public class DashLoader {
                     () -> registry.loadData(REGISTRY_SERIALIZER.deserializeObject(DashCachePaths.REGISTRY_CACHE.getPath(), "Cache")),
                     () -> mappings.loadCacheData(MAPPING_SERIALIZER.deserializeObject(DashCachePaths.MAPPINGS_CACHE.getPath(), "Mapping"))
             );
-            LOGGER.info(TimeHelper.getMs(time) + "ms");
 
             LOGGER.info("      Loading Registry");
             registry.toUndash();
@@ -158,6 +158,7 @@ public class DashLoader {
             this.mappings = mappings;
 
             LOGGER.info("    Loaded DashLoader");
+            DashReport.addEntry(new DashReport.Entry(time, "Cache Loading", true));
             state = DashCacheState.LOADED;
         } catch (Exception e) {
             state = DashCacheState.CRASHLOADER;
@@ -185,6 +186,7 @@ public class DashLoader {
         }
         return file;
     }
+
 
     public Path getModBoundDir() {
         final Path resolve = DashLoader.getConfig().resolve("quantumfusion/dashloader/mods-" + metadata.modInfo + "/");

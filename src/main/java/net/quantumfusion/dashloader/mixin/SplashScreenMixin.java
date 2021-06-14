@@ -16,7 +16,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 
-
 @Mixin(SplashScreen.class)
 public class SplashScreenMixin {
 
@@ -26,12 +25,16 @@ public class SplashScreenMixin {
     private MinecraftClient client;
 
     @Inject(method = "render(Lnet/minecraft/client/util/math/MatrixStack;IIF)V",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/resource/ResourceReload;throwException()V", shift = At.Shift.BEFORE), cancellable = true)
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Util;getMeasuringTimeMs()J", shift = At.Shift.BEFORE, ordinal = 1), cancellable = true)
     private void render(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo ci) {
         if (DashLoader.getInstance().state == DashCacheState.LOADED) {
             this.client.setOverlay(null);
-            this.client.openScreen(new TitleScreen(false));
-            this.client.currentScreen.init(this.client, this.client.getWindow().getScaledWidth(), this.client.getWindow().getScaledHeight());
+            if (client.currentScreen != null) {
+                if (client.currentScreen instanceof TitleScreen) {
+                    client.currentScreen = new TitleScreen(false);
+                }
+                this.client.currentScreen.init(this.client, this.client.getWindow().getScaledWidth(), this.client.getWindow().getScaledHeight());
+            }
             ci.cancel();
         } else {
             this.client.setOverlay(null);

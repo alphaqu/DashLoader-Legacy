@@ -17,7 +17,7 @@
   "environment": "client",
   "accessWidener": "dashloader.accesswidener",
   "entrypoints": {
-    "client": [
+    "preLaunch": [
       "net.quantumfusion.dashloader.client.DashClient"
     ]
   },
