@@ -1,23 +1,24 @@
 package net.quantumfusion.dashloader.util;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.data.Dashable;
 import net.quantumfusion.dashloader.model.DashModel;
+import net.quantumfusion.dashloader.util.serialization.Pointer2ObjectMap;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.RecursiveAction;
 import java.util.concurrent.RecursiveTask;
 
-public class UndashTask<K, D extends Dashable> extends RecursiveTask<ArrayList<Map.Entry<Integer, K>>> {
-    private final List<Map.Entry<Integer, D>> tasks;
+public class UndashTask<K, D extends Dashable> extends RecursiveTask<ArrayList<Pointer2ObjectMap.Entry<K>>> {
+    private final List<Int2ObjectMap.Entry<D>> tasks;
     private final int threshold;
     private final DashRegistry registry;
 
 
-    public UndashTask(List<Map.Entry<Integer, D>> tasks, int threshold, DashRegistry registry) {
+    public UndashTask(List<Int2ObjectMap.Entry<D>> tasks, int threshold, DashRegistry registry) {
         this.tasks = tasks;
         this.threshold = threshold;
         this.registry = registry;
@@ -25,7 +26,7 @@ public class UndashTask<K, D extends Dashable> extends RecursiveTask<ArrayList<M
 
 
     @Override
-    protected ArrayList<Map.Entry<Integer, K>> compute() {
+    protected ArrayList<Pointer2ObjectMap.Entry<K>> compute() {
         final int size = tasks.size();
         if (size < threshold) {
             return computeDirectly();
@@ -38,15 +39,15 @@ public class UndashTask<K, D extends Dashable> extends RecursiveTask<ArrayList<M
         }
     }
 
-    public final ArrayList<Map.Entry<Integer, K>> combine(final ArrayList<Map.Entry<Integer, K>> list, final ArrayList<Map.Entry<Integer, K>> list2) {
+    public final ArrayList<Pointer2ObjectMap.Entry<K>> combine(final ArrayList<Pointer2ObjectMap.Entry<K>> list, final ArrayList<Pointer2ObjectMap.Entry<K>> list2) {
         list.ensureCapacity(list.size() * 2);
         list.addAll(list2);
         return list;
     }
 
-    protected final ArrayList<Map.Entry<Integer, K>> computeDirectly() {
-        final ArrayList<Map.Entry<Integer, K>> count = new ArrayList<>(tasks.size());
-        tasks.forEach(dashable -> count.add(Pair.of(dashable.getKey(), dashable.getValue().toUndash(registry))));
+    protected final ArrayList<Pointer2ObjectMap.Entry<K>> computeDirectly() {
+        final ArrayList<Pointer2ObjectMap.Entry<K>> count = new ArrayList<>(tasks.size());
+        tasks.forEach(dashable -> count.add(new Pointer2ObjectMap.Entry<>(dashable.getIntKey(), dashable.getValue().toUndash(registry))));
         return count;
     }
 

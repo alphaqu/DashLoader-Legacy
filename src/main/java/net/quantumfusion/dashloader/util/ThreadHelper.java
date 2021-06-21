@@ -1,29 +1,29 @@
 package net.quantumfusion.dashloader.util;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.quantumfusion.dashloader.DashLoader;
 import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.data.Dashable;
+import net.quantumfusion.dashloader.util.serialization.Pointer2ObjectMap;
 
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class ThreadHelper {
 
 
-    public static final Function REBOUND = func -> func;
     public static void exec(Runnable... runnables) {
-        final List<Future<Object>> futures = DashLoader.THREADPOOL.invokeAll(Arrays.stream(runnables).map(Executors::callable).collect(Collectors.toList()));
+        final List<Future<Object>> futures = DashLoader.THREAD_POOL.invokeAll(Arrays.stream(runnables).map(Executors::callable).collect(Collectors.toList()));
         sleepUntilTrue(() -> futures.stream().allMatch(Future::isDone));
     }
 
-    public static <V, D extends Dashable> Map<Integer, V> execParallel(Map<Integer, D> dashables, DashRegistry registry) {
+    public static <V, D extends Dashable> Map<Integer, V> execParallel(Int2ObjectMap<D> dashables, DashRegistry registry) {
         final Map<Integer, V> answerMap = new HashMap<>((int) Math.ceil(dashables.size() / 0.75));
-        final Collection<Map.Entry<Integer, V>> invoke = DashLoader.THREADPOOL.invoke(new UndashTask<>(new ArrayList<>(dashables.entrySet()), 100, registry));
-        invoke.forEach((answer) -> answerMap.put(answer.getKey(), answer.getValue()));
+        final Collection<Pointer2ObjectMap.Entry<V>> invoke = DashLoader.THREAD_POOL.invoke(new UndashTask<>(new ArrayList<>(dashables.int2ObjectEntrySet()), 100, registry));
+        invoke.forEach((answer) -> answerMap.put(answer.key, answer.value));
         return answerMap;
     }
 

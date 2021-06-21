@@ -3,12 +3,11 @@ package net.quantumfusion.dashloader.data.registry;
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import io.activej.serializer.annotations.SerializeSubclasses;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.quantumfusion.dashloader.data.DashID;
 import net.quantumfusion.dashloader.data.DashIdentifier;
 import net.quantumfusion.dashloader.model.DashModelIdentifier;
 import net.quantumfusion.dashloader.util.serialization.Pointer2ObjectMap;
-
-import java.util.Map;
 
 public class RegistryIdentifierData {
     @Serialize(order = 0)
@@ -23,7 +22,7 @@ public class RegistryIdentifierData {
     }
 
 
-    public Map<Integer, DashID> toUndash() {
+    public Int2ObjectMap<DashID> toUndash() {
         return identifiers.convert();
     }
 }

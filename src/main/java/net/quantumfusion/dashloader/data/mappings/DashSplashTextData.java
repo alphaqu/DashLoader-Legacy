@@ -2,8 +2,8 @@ package net.quantumfusion.dashloader.data.mappings;
 
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
+import net.quantumfusion.dashloader.data.VanillaData;
 import net.quantumfusion.dashloader.util.TaskHandler;
-import net.quantumfusion.dashloader.util.VanillaData;
 
 import java.util.List;
 

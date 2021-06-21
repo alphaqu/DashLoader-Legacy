@@ -2,9 +2,10 @@ package net.quantumfusion.dashloader.util.serialization;
 
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -42,8 +43,8 @@ public class Pointer2ObjectMap<O> {
         return data.size();
     }
 
-    public Map<Integer, O> convert() {
-        Map<Integer, O> map = new HashMap<>((int) (data.size() / 0.75));
+    public Int2ObjectMap<O> convert() {
+        Int2ObjectOpenHashMap<O> map = new Int2ObjectOpenHashMap<>((int) (data.size() / 0.75));
         data.forEach(entry -> map.put(entry.key, entry.value));
         return map;
     }

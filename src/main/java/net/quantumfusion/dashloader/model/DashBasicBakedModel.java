@@ -15,10 +15,11 @@ import net.quantumfusion.dashloader.mixin.accessor.BasicBakedModelAccessor;
 import net.quantumfusion.dashloader.model.components.DashBakedQuad;
 import net.quantumfusion.dashloader.model.components.DashModelOverrideList;
 import net.quantumfusion.dashloader.model.components.DashModelTransformation;
+import net.quantumfusion.dashloader.util.DashHelper;
 import net.quantumfusion.dashloader.util.serialization.PairMap;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -68,12 +69,10 @@ public class DashBasicBakedModel implements DashModel {
         quads = new ArrayList<>();
         access.getQuads().forEach(bakedQuad -> quads.add(new DashBakedQuad(bakedQuad)));
         final Map<Direction, List<BakedQuad>> faceQuads = access.getFaceQuads();
-        this.faceQuads = new PairMap<>(faceQuads.size());
-        faceQuads.forEach((direction, bakedQuads) -> {
-            List<DashBakedQuad> out = new ArrayList<>();
-            bakedQuads.forEach(bakedQuad -> out.add(new DashBakedQuad(bakedQuad)));
-            this.faceQuads.put(new DashDirection(direction), out);
-        });
+        this.faceQuads = DashHelper.convertMapToPM(
+                faceQuads,
+                (direction, bakedQuads)
+                        -> Pair.of(new DashDirection(direction), DashHelper.convertList(bakedQuads, DashBakedQuad::new)));
         itemPropertyOverrides = new DashModelOverrideList(access.getItemPropertyOverrides(), registry);
         usesAo = access.getUsesAo();
         hasDepth = access.getHasDepth();
@@ -87,14 +86,12 @@ public class DashBasicBakedModel implements DashModel {
     @Override
     public BakedModel toUndash(final DashRegistry registry) {
         final Sprite sprite = registry.getSprite(spritePointer);
-        final List<BakedQuad> quadsOut = new ArrayList<>();
-        final Map<Direction, List<BakedQuad>> faceQuadsOut = new HashMap<>();
-        quads.forEach(dashBakedQuad -> quadsOut.add(dashBakedQuad.toUndash(sprite, registry)));
-        faceQuads.forEach((dashDirection, dashBakedQuads) -> {
-            List<BakedQuad> out = new ArrayList<>();
-            dashBakedQuads.forEach(dashBakedQuad -> out.add(dashBakedQuad.toUndash(sprite, registry)));
-            faceQuadsOut.put(dashDirection.toUndash(registry), out);
-        });
+        final List<BakedQuad> quadsOut = DashHelper.convertList(quads, (dashBakedQuad) -> dashBakedQuad.toUndash(sprite, registry));
+
+        final Map<Direction, List<BakedQuad>> faceQuadsOut = DashHelper.convertPairMapToMap(faceQuads, (dashDirection, dashBakedQuads) ->
+                Pair.of(dashDirection.toUndash(registry), DashHelper.convertList(dashBakedQuads, dashBakedQuad ->
+                        dashBakedQuad.toUndash(sprite, registry))));
+
         return new BasicBakedModel(quadsOut, faceQuadsOut, usesAo, isSideLit, hasDepth, sprite, transformation == null ? ModelTransformation.NONE : transformation.toUndash(), itemPropertyOverrides.toUndash(registry));
     }
 

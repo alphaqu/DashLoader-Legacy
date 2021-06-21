@@ -1,5 +1,7 @@
 package net.quantumfusion.dashloader;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.font.Font;
@@ -47,6 +49,7 @@ public class DashRegistry {
     private static int tasksDone = 0;
     private final Map<Integer, DashModel> models;
     public Map<Class, FactoryType> apiFailed = new ConcurrentHashMap<>();
+    DashLoader loader;
     public Map<Integer, BlockState> blockstatesOut;
     public Map<Integer, Predicate<BlockState>> predicateOut;
     public Map<Integer, Identifier> identifiersOut;
@@ -56,29 +59,27 @@ public class DashRegistry {
     public Map<Integer, NativeImage> imagesOut;
     public Map<Integer, Property<?>> propertiesOut;
     public Map<Integer, Comparable<?>> propertyValuesOut;
-    DashLoader loader;
-    private Map<Integer, DashBlockState> blockstates;
-    private Map<Integer, DashSprite> sprites;
-    private Map<Integer, DashID> identifiers;
-    private Map<Integer, DashFont> fonts;
-    private Map<Integer, DashImage> images;
-    private Map<Integer, DashPredicate> predicates;
+    private Int2ObjectMap<DashBlockState> blockstates;
+    private Int2ObjectMap<DashSprite> sprites;
+    private Int2ObjectMap<DashID> identifiers;
+    private Int2ObjectMap<DashFont> fonts;
+    private Int2ObjectMap<DashImage> images;
+    private Int2ObjectMap<DashPredicate> predicates;
+    private Int2ObjectMap<DashProperty> properties;
+    private Int2ObjectMap<DashPropertyValue> propertyValues;
 
-    private Map<Integer, DashProperty> properties;
-    private Map<Integer, DashPropertyValue> propertyValues;
-
-    private List<Map<Integer, DashModel>> modelsToDeserialize;
+    private List<Int2ObjectMap<DashModel>> modelsToDeserialize;
 
 
-    public DashRegistry(Map<Integer, DashBlockState> blockstates,
-                        Map<Integer, DashSprite> sprites,
-                        Map<Integer, DashID> identifiers,
-                        Map<Integer, DashModel> models,
-                        Map<Integer, DashFont> fonts,
-                        Map<Integer, DashImage> images,
-                        Map<Integer, DashPredicate> predicates,
-                        Map<Integer, DashProperty> properties,
-                        Map<Integer, DashPropertyValue> propertyValues) {
+    public DashRegistry(Int2ObjectMap<DashBlockState> blockstates,
+                        Int2ObjectMap<DashSprite> sprites,
+                        Int2ObjectMap<DashID> identifiers,
+                        Int2ObjectMap<DashModel> models,
+                        Int2ObjectMap<DashFont> fonts,
+                        Int2ObjectMap<DashImage> images,
+                        Int2ObjectMap<DashPredicate> predicates,
+                        Int2ObjectMap<DashProperty> properties,
+                        Int2ObjectMap<DashPropertyValue> propertyValues) {
         this.blockstates = blockstates;
         this.sprites = sprites;
         this.identifiers = identifiers;
@@ -91,15 +92,15 @@ public class DashRegistry {
     }
 
     public DashRegistry(DashLoader loader) {
-        blockstates = new HashMap<>();
-        sprites = new HashMap<>();
-        identifiers = new HashMap<>();
-        models = new HashMap<>();
-        fonts = new HashMap<>();
-        predicates = new HashMap<>();
-        images = new HashMap<>();
-        properties = new HashMap<>();
-        propertyValues = new HashMap<>();
+        blockstates = new Int2ObjectOpenHashMap<>();
+        sprites = new Int2ObjectOpenHashMap<>();
+        identifiers = new Int2ObjectOpenHashMap<>();
+        models = new Int2ObjectOpenHashMap<>();
+        fonts = new Int2ObjectOpenHashMap<>();
+        predicates = new Int2ObjectOpenHashMap<>();
+        images = new Int2ObjectOpenHashMap<>();
+        properties = new Int2ObjectOpenHashMap<>();
+        propertyValues = new Int2ObjectOpenHashMap<>();
         modelsToDeserialize = new ArrayList<>();
         this.loader = loader;
     }
@@ -141,7 +142,7 @@ public class DashRegistry {
 
 
     public Integer createBlockStatePointer(BlockState blockState) {
-        final Integer hash = blockState.hashCode();
+        final int hash = blockState.hashCode();
         if (blockstates.get(hash) == null) {
             blockstates.put(hash, new DashBlockState(blockState, this));
         }
@@ -165,7 +166,7 @@ public class DashRegistry {
     }
 
     public final Integer createSpritePointer(final Sprite sprite) {
-        final Integer hash = sprite.hashCode();
+        final int hash = sprite.hashCode();
         if (sprites.get(hash) == null) {
             sprites.put(hash, new DashSprite(sprite, this));
         }
@@ -173,7 +174,7 @@ public class DashRegistry {
     }
 
     public final Integer createIdentifierPointer(final Identifier identifier) {
-        final Integer hash = identifier.hashCode();
+        final int hash = identifier.hashCode();
         if (identifiers.get(hash) == null) {
             if (identifier instanceof ModelIdentifier) {
                 identifiers.put(hash, new DashModelIdentifier((ModelIdentifier) identifier));
@@ -185,7 +186,7 @@ public class DashRegistry {
     }
 
     public final Integer createImagePointer(final NativeImage image) {
-        final Integer hash = image.hashCode();
+        final int hash = image.hashCode();
         if (images.get(hash) == null) {
             images.put(hash, new DashImage(image));
         }
@@ -193,7 +194,7 @@ public class DashRegistry {
     }
 
     public final Integer createPredicatePointer(final MultipartModelSelector selector, final StateManager<Block, BlockState> stateManager) {
-        final Integer hash = selector.hashCode();
+        final int hash = selector.hashCode();
         if (predicates.get(hash) == null) {
             predicates.put(hash, obtainPredicate(selector, stateManager));
         }
@@ -217,7 +218,7 @@ public class DashRegistry {
 
 
     public final Integer createFontPointer(final Font font) {
-        final Integer hash = font.hashCode();
+        final int hash = font.hashCode();
         if (fonts.get(hash) == null) {
             Factory<Font, DashFont> fontFactory = loader.getApi().fontMappings.get(font.getClass());
             if (fontFactory != null) {
@@ -230,8 +231,8 @@ public class DashRegistry {
     }
 
     public final Pair<Integer, Integer> createPropertyPointer(final Property<?> property, final Comparable<?> value) {
-        final Integer hashV = value.hashCode();
-        final Integer hashP = property.hashCode();
+        final int hashV = value.hashCode();
+        final int hashP = property.hashCode();
         final boolean propVal = !propertyValues.containsKey(hashV);
         final boolean prop = !properties.containsKey(hashP);
         if (propVal || prop) {
@@ -349,7 +350,7 @@ public class DashRegistry {
                 currentStage[0]++;
             });
             log(logger, "Applying Model Overrides");
-            modelsToDeserialize.forEach(modelcategory -> DashLoader.THREADPOOL.invoke(new UndashTask.ApplyTask(new ArrayList<>(modelcategory.values()), 100, this)));
+            modelsToDeserialize.forEach(modelcategory -> DashLoader.THREAD_POOL.invoke(new UndashTask.ApplyTask(new ArrayList<>(modelcategory.values()), 100, this)));
             modelsToDeserialize = null;
         } catch (Exception e) {
             e.printStackTrace();
