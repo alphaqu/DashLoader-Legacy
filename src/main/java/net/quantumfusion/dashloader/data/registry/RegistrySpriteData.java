@@ -2,10 +2,9 @@ package net.quantumfusion.dashloader.data.registry;
 
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.quantumfusion.dashloader.image.DashSprite;
 import net.quantumfusion.dashloader.util.serialization.Pointer2ObjectMap;
-
-import java.util.Map;
 
 public class RegistrySpriteData {
     @Serialize(order = 0)
@@ -16,7 +15,7 @@ public class RegistrySpriteData {
     }
 
 
-    public Map<Integer, DashSprite> toUndash() {
+    public Int2ObjectMap<DashSprite> toUndash() {
         return sprites.convert();
     }
 }

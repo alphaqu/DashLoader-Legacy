@@ -17,5 +17,6 @@ public enum DashCachePaths {
 
     public Path getPath() {
         return DashLoader.getInstance().getResourcePackBoundDir().resolve(path + ".activej");
+
     }
 }

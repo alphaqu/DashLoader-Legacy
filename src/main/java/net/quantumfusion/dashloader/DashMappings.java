@@ -1,18 +1,19 @@
 package net.quantumfusion.dashloader;
 
 import com.mojang.blaze3d.platform.TextureUtil;
+import io.activej.serializer.annotations.Deserialize;
+import io.activej.serializer.annotations.Serialize;
 import net.minecraft.client.render.model.SpriteAtlasManager;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.texture.TextureManager;
 import net.minecraft.util.Identifier;
-import net.quantumfusion.dashloader.data.DashMappingData;
+import net.quantumfusion.dashloader.data.VanillaData;
 import net.quantumfusion.dashloader.data.mappings.*;
 import net.quantumfusion.dashloader.image.DashSpriteAtlasTextureData;
 import net.quantumfusion.dashloader.mixin.accessor.AbstractTextureAccessor;
 import net.quantumfusion.dashloader.mixin.accessor.SpriteAccessor;
 import net.quantumfusion.dashloader.mixin.accessor.SpriteAtlasTextureAccessor;
 import net.quantumfusion.dashloader.util.TaskHandler;
-import net.quantumfusion.dashloader.util.VanillaData;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 
@@ -21,23 +22,41 @@ import java.util.List;
 
 public class DashMappings {
     private List<Pair<SpriteAtlasTexture, DashSpriteAtlasTextureData>> atlasesToRegister;
-    public DashModelData modelData;
-    public DashSpriteAtlasData spriteAtlasData;
+
+    @Serialize(order = 0)
     public DashBlockStateData blockStateData;
-    public DashParticleData particleData;
+    @Serialize(order = 1)
     public DashFontManagerData fontManagerData;
+    @Serialize(order = 2)
+    public DashModelData modelData;
+    @Serialize(order = 3)
+    public DashParticleData particleData;
+    @Serialize(order = 4)
     public DashSplashTextData splashTextData;
+    @Serialize(order = 5)
+    public DashSpriteAtlasData spriteAtlasData;
+    @Serialize(order = 6)
+    public DashShaderData shaderData;
+
 
     public DashMappings() {
     }
 
-    public void loadCacheData(DashMappingData data) {
-        this.modelData = data.modelMappings;
-        this.spriteAtlasData = data.spriteAtlasMappings;
-        this.blockStateData = data.blockStateMappings;
-        this.particleData = data.particleMappings;
-        this.fontManagerData = data.fontMappings;
-        this.splashTextData = data.splashTextMappings;
+    @SuppressWarnings("unused") //active j
+    public DashMappings(@Deserialize("blockStateData") DashBlockStateData blockStateData,
+                        @Deserialize("fontManagerData") DashFontManagerData fontManagerData,
+                        @Deserialize("modelData") DashModelData modelData,
+                        @Deserialize("particleData") DashParticleData particleData,
+                        @Deserialize("splashTextData") DashSplashTextData splashTextData,
+                        @Deserialize("spriteAtlasData") DashSpriteAtlasData spriteAtlasData,
+                        @Deserialize("shaderData") DashShaderData shaderData) {
+        this.blockStateData = blockStateData;
+        this.fontManagerData = fontManagerData;
+        this.modelData = modelData;
+        this.particleData = particleData;
+        this.splashTextData = splashTextData;
+        this.spriteAtlasData = spriteAtlasData;
+        this.shaderData = shaderData;
     }
 
     public void loadVanillaData(VanillaData data, DashRegistry registry, TaskHandler taskHandler) {
@@ -58,10 +77,10 @@ public class DashMappings {
 
         taskHandler.logAndTask("Mapping Atlas");
         spriteAtlasData = new DashSpriteAtlasData(data, registry, taskHandler);
-    }
 
-    public DashMappingData createData() {
-        return new DashMappingData(blockStateData, fontManagerData, modelData, particleData, splashTextData, spriteAtlasData);
+        taskHandler.logAndTask("Mapping Shaders");
+        shaderData = new DashShaderData(data, taskHandler);
+
     }
 
     public void toUndash(DashRegistry registry, VanillaData data) {
@@ -74,7 +93,8 @@ public class DashMappings {
                 modelData.toUndash(registry),
                 particleData.toUndash(registry),
                 fontManagerData.toUndash(registry),
-                splashTextData.toUndash());
+                splashTextData.toUndash(),
+                shaderData.toUndash());
         atlasesToRegister = new ArrayList<>();
         spriteData.getValue().forEach(atlasTexture -> atlasesToRegister.add(Pair.of(atlasTexture, data.getAtlasData(atlasTexture))));
 

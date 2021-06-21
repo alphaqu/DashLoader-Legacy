@@ -5,8 +5,8 @@ import io.activej.serializer.annotations.Serialize;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.util.Identifier;
 import net.quantumfusion.dashloader.DashRegistry;
+import net.quantumfusion.dashloader.data.VanillaData;
 import net.quantumfusion.dashloader.util.TaskHandler;
-import net.quantumfusion.dashloader.util.VanillaData;
 import net.quantumfusion.dashloader.util.serialization.Pointer2PointerMap;
 
 import java.util.HashMap;

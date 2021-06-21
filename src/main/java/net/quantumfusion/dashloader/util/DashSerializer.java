@@ -45,7 +45,7 @@ public class DashSerializer<O> {
                     final File serializerFile = serializerPath.toFile();
                     if (serializerFile.exists()) {
                         serializerCache = serializerFile;
-                        serializer = loadSerializerCache(ClassLoaderWrapper.from(loader.getAssignedClassLoader()), serializerFile);
+                        serializer = loadSerializerCache(DashLoader.getInstance().getAssignedClassLoader(), serializerFile);
                         return true;
                     }
                 } catch (IOException | IllegalAccessException | InstantiationException | InvocationTargetException | NoSuchMethodException e) {
@@ -75,7 +75,6 @@ public class DashSerializer<O> {
             DashLoader.LOGGER.info("  Starting " + name + " Serialization.");
             StreamOutput output = StreamOutput.create(Files.newOutputStream(path, StandardOpenOption.CREATE, StandardOpenOption.WRITE));
             taskHandler.completedSubTask();
-            //noinspection unchecked
             output.serialize(serializer, clazz);
             taskHandler.completedSubTask();
             output.close();
@@ -90,7 +89,6 @@ public class DashSerializer<O> {
     @NotNull
     public O deserializeObject(Path path, String name) {
         try {
-            //noinspection unchecked
             if (serializer == null) {
                 throw new DashException(name + " Serializer not created.");
             }
@@ -111,8 +109,9 @@ public class DashSerializer<O> {
         return createSerializerInstance(classLoader, "io.activej.codegen.io.activej.serializer.BinarySerializer_" + serializer.getName().split("-")[0], bytes);
     }
 
+    @SuppressWarnings("unchecked")
     private <T> BinarySerializer<T> createSerializerInstance(ClassLoaderWrapper classLoader, String actualClassName, byte[] bytecode) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-        Class<?> aClass = classLoader.defineClass(actualClassName, bytecode);
+        Class<?> aClass = classLoader.defineCustomClass(actualClassName, bytecode);
         try {
             Field field = aClass.getField(CLASS_BUILDER_MARKER);
             //noinspection ResultOfMethodCallIgnored
@@ -124,7 +123,7 @@ public class DashSerializer<O> {
     }
 
     private Path getSerializerPath(String name) {
-        final File[] files = loader.getModBoundDir().toFile().listFiles();
+        File[] files = loader.getModBoundDir().toFile().listFiles();
         if (files == null) return null;
         for (File file : files) {
             if (file.getName().endsWith(name + ".serializer")) {

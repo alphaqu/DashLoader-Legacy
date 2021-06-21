@@ -3,10 +3,9 @@ package net.quantumfusion.dashloader.data.registry;
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import io.activej.serializer.annotations.SerializeSubclasses;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.quantumfusion.dashloader.blockstate.property.DashProperty;
 import net.quantumfusion.dashloader.util.serialization.Pointer2ObjectMap;
-
-import java.util.Map;
 
 public class RegistryPropertyData {
     @Serialize(order = 0)
@@ -17,7 +16,7 @@ public class RegistryPropertyData {
         this.property = property;
     }
 
-    public Map<Integer, DashProperty> toUndash() {
+    public Int2ObjectMap<DashProperty> toUndash() {
         return property.convert();
     }
 }

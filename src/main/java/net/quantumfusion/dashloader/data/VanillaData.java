@@ -1,10 +1,13 @@
-package net.quantumfusion.dashloader.util;
+package net.quantumfusion.dashloader.data;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.font.Font;
 import net.minecraft.client.particle.ParticleManager;
+import net.minecraft.client.render.Shader;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.MultipartBakedModel;
 import net.minecraft.client.render.model.SpriteAtlasManager;
@@ -26,6 +29,7 @@ public class VanillaData {
     private final List<SpriteAtlasTexture> extraAtlases = new ArrayList<>();
     private final Map<SpriteAtlasTexture, DashSpriteAtlasTextureData> atlasData = new HashMap<>();
     private final Map<BakedModel, Pair<List<MultipartModelSelector>, StateManager<Block, BlockState>>> multipartData = new HashMap<>();
+    private final Int2ObjectMap<List<String>> programData = new Int2ObjectOpenHashMap<>();
 
     private SpriteAtlasManager atlasManager;
     private Object2IntMap<BlockState> stateLookup;
@@ -33,6 +37,7 @@ public class VanillaData {
     private Map<Identifier, List<Sprite>> particles;
     private Map<Identifier, List<Font>> fonts;
     private List<String> splashText;
+    private Map<String, Shader> shaders;
 
 
     public VanillaData() {
@@ -43,13 +48,29 @@ public class VanillaData {
                               Map<Identifier, BakedModel> models,
                               Map<Identifier, List<Sprite>> particles,
                               Map<Identifier, List<Font>> fonts,
-                              List<String> splashText) {
+                              List<String> splashText,
+                              Map<String, Shader> shaders) {
         this.atlasManager = atlasManager;
         this.stateLookup = stateLookup;
         this.models = models;
         this.particles = particles;
         this.fonts = fonts;
         this.splashText = splashText;
+        this.shaders = shaders;
+    }
+
+
+    public void addProgramData(int program, List<String> data) {
+        programData.put(program, data);
+    }
+
+    public List<String> getProgramData(int program) {
+        return programData.get(program);
+    }
+
+
+    public void setShaderAssets(Map<String, Shader> shaders) {
+        this.shaders = shaders;
     }
 
     public void addExtraAtlasAssets(SpriteAtlasTexture atlas) {
@@ -124,4 +145,7 @@ public class VanillaData {
         return extraAtlases;
     }
 
+    public Map<String, Shader> getShaderData() {
+        return shaders;
+    }
 }

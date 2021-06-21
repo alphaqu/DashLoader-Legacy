@@ -2,11 +2,10 @@ package net.quantumfusion.dashloader.image;
 
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
-import net.minecraft.client.resource.metadata.AnimationFrameResourceMetadata;
 import net.minecraft.client.resource.metadata.AnimationResourceMetadata;
 import net.quantumfusion.dashloader.mixin.accessor.AnimationResourceMetadataAccessor;
+import net.quantumfusion.dashloader.util.DashHelper;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class DashAnimationResourceMetadata {
@@ -35,9 +34,8 @@ public class DashAnimationResourceMetadata {
     }
 
     public DashAnimationResourceMetadata(AnimationResourceMetadata animationResourceMetadata) {
-        frames = new ArrayList<>();
         AnimationResourceMetadataAccessor metadataAccessor = ((AnimationResourceMetadataAccessor) animationResourceMetadata);
-        metadataAccessor.getFrames().forEach(animationFrameResourceMetadata -> frames.add(new DashAnimationFrameResourceMetadata(animationFrameResourceMetadata)));
+        frames = DashHelper.convertList(metadataAccessor.getFrames(), DashAnimationFrameResourceMetadata::new);
         width = metadataAccessor.getWidth();
         height = metadataAccessor.getHeight();
         defaultFrameTime = metadataAccessor.getDefaultFrameTime();
@@ -45,8 +43,11 @@ public class DashAnimationResourceMetadata {
     }
 
     public AnimationResourceMetadata toUndash() {
-        final List<AnimationFrameResourceMetadata> framesOut = new ArrayList<>();
-        frames.forEach(dashAnimationFrameResourceMetadata -> framesOut.add(dashAnimationFrameResourceMetadata.toUndash()));
-        return new AnimationResourceMetadata(framesOut, width, height, defaultFrameTime, interpolate);
+        return new AnimationResourceMetadata(
+                DashHelper.convertList(frames, DashAnimationFrameResourceMetadata::toUndash),
+                width,
+                height,
+                defaultFrameTime,
+                interpolate);
     }
 }

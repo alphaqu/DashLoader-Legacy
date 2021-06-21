@@ -1,17 +1,16 @@
 package net.quantumfusion.dashloader.util;
 
-public class ClassLoaderWrapper extends ClassLoader {
+import java.security.SecureClassLoader;
 
-    private ClassLoaderWrapper(ClassLoader parent) {
+public class ClassLoaderWrapper extends SecureClassLoader {
+
+    public ClassLoaderWrapper(SecureClassLoader parent) {
         super(parent);
     }
 
-
-    public Class<?> defineClass(String className, byte[] bytecode) {
-        return defineClass(className, bytecode, 0, bytecode.length);
+    public Class<?> defineCustomClass(String name, byte[] b) throws ClassFormatError {
+        return super.defineClass(name, b, 0, b.length);
     }
 
-    public static ClassLoaderWrapper from(ClassLoader loader) {
-        return new ClassLoaderWrapper(loader);
-    }
+
 }

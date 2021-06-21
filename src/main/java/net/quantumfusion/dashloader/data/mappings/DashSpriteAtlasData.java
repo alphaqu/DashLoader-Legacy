@@ -6,10 +6,10 @@ import net.minecraft.client.render.model.SpriteAtlasManager;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.util.Identifier;
 import net.quantumfusion.dashloader.DashRegistry;
+import net.quantumfusion.dashloader.data.VanillaData;
 import net.quantumfusion.dashloader.image.DashSpriteAtlasTexture;
 import net.quantumfusion.dashloader.mixin.accessor.SpriteAtlasManagerAccessor;
 import net.quantumfusion.dashloader.util.TaskHandler;
-import net.quantumfusion.dashloader.util.VanillaData;
 import net.quantumfusion.dashloader.util.serialization.Object2PointerMap;
 import org.apache.commons.lang3.tuple.Pair;
 

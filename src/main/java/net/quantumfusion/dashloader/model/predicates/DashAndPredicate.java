@@ -9,11 +9,10 @@ import net.minecraft.client.render.model.json.AndMultipartModelSelector;
 import net.minecraft.state.StateManager;
 import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.mixin.accessor.AndMultipartModelSelectorAccessor;
+import net.quantumfusion.dashloader.util.DashHelper;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 public class DashAndPredicate implements DashPredicate {
     @Serialize(order = 0)
@@ -26,13 +25,12 @@ public class DashAndPredicate implements DashPredicate {
 
     public DashAndPredicate(AndMultipartModelSelector selector, StateManager<Block, BlockState> stateManager, DashRegistry registry) {
         AndMultipartModelSelectorAccessor access = ((AndMultipartModelSelectorAccessor) selector);
-        selectors = new ArrayList<>();
-        access.getSelectors().forEach(selector1 -> selectors.add(registry.obtainPredicate(selector1, stateManager)));
+        selectors = DashHelper.convertList(access.getSelectors(), selector1 -> registry.obtainPredicate(selector1, stateManager));
     }
 
     @Override
     public Predicate<BlockState> toUndash(DashRegistry registry) {
-        List<Predicate<BlockState>> list = selectors.stream().map(dashPredicate -> dashPredicate.toUndash(registry)).collect(Collectors.toList());
+        List<Predicate<BlockState>> list = DashHelper.convertList(selectors, predicate -> predicate.toUndash(registry));
         return (blockState) -> list.stream().allMatch((predicate) -> predicate.test(blockState));
     }
 }

@@ -36,7 +36,11 @@ public class DashWindow extends Screen {
             }
         }
         if (!started) { //boys talk with me im still here
-            new Thread(() -> DashLoader.getInstance().saveDashCache()).start();
+            final Thread thread = new Thread(() -> {
+                DashLoader.getInstance().saveDashCache();
+            });
+            thread.setContextClassLoader(DashLoader.getInstance().getAssignedClassLoader());
+            thread.start();
             started = true;
         }
         super.render(matrices, mouseX, mouseY, delta);

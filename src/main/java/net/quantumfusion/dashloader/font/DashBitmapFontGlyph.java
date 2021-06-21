@@ -10,7 +10,7 @@ public class DashBitmapFontGlyph {
     @Serialize(order = 0)
     public float scaleFactor;
     @Serialize(order = 1)
-    public Integer image;
+    public int image;
     @Serialize(order = 2)
     public int x;
     @Serialize(order = 3)
@@ -25,7 +25,7 @@ public class DashBitmapFontGlyph {
     public int ascent;
 
     public DashBitmapFontGlyph(@Deserialize("scaleFactor") float scaleFactor,
-                               @Deserialize("image") Integer image,
+                               @Deserialize("image") int image,
                                @Deserialize("x") int x,
                                @Deserialize("y") int y,
                                @Deserialize("width") int width,
