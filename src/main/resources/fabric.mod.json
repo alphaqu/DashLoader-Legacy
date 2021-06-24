@@ -38,7 +38,6 @@
     "minecraft": "*"
   },
   "breaks": {
-    "adorn": "*",
     "connected_block_textures": "*",
     "enhancedblockentities": "*",
     "hydrogen": "*",
