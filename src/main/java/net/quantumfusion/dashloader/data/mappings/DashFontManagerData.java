@@ -5,6 +5,7 @@ import io.activej.serializer.annotations.Serialize;
 import net.minecraft.client.font.Font;
 import net.minecraft.util.Identifier;
 import net.quantumfusion.dashloader.DashRegistry;
+import net.quantumfusion.dashloader.data.Dashable;
 import net.quantumfusion.dashloader.data.VanillaData;
 import net.quantumfusion.dashloader.util.TaskHandler;
 import net.quantumfusion.dashloader.util.serialization.Pointer2ObjectMap;
@@ -14,7 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class DashFontManagerData {
+public class DashFontManagerData implements Dashable {
 
     @Serialize(order = 0)
     public Pointer2ObjectMap<List<Integer>> fontMap;

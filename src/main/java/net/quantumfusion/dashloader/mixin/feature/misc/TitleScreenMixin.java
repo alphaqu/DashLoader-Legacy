@@ -1,11 +1,10 @@
-package net.quantumfusion.dashloader.mixin;
+package net.quantumfusion.dashloader.mixin.feature.misc;
 
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.quantumfusion.dashloader.DashLoader;
-import net.quantumfusion.dashloader.util.DashCacheState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -24,8 +23,6 @@ public class TitleScreenMixin extends Screen {
                     target = "Ljava/util/List;iterator()Ljava/util/Iterator;"),
             cancellable = true)
     private void waterMark(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo ci) {
-        if (DashLoader.getInstance().state == DashCacheState.LOADED) {
             drawStringWithShadow(matrices, this.textRenderer, "DashLoader (" + DashLoader.VERSION + ")", 2, this.height - 12 - textRenderer.fontHeight, 16777215);
-        }
     }
 }

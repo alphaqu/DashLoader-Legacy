@@ -1,4 +1,4 @@
-package net.quantumfusion.dashloader.mixin;
+package net.quantumfusion.dashloader.mixin.feature.misc;
 
 import net.minecraft.client.font.UnicodeTextureFont;
 import net.minecraft.util.Identifier;

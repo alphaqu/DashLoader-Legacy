@@ -1,4 +1,4 @@
-package net.quantumfusion.dashloader.mixin;
+package net.quantumfusion.dashloader.mixin.feature.cache;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.GameRenderer;

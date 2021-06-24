@@ -1,4 +1,4 @@
-package net.quantumfusion.dashloader.mixin.override;
+package net.quantumfusion.dashloader.mixin.feature.cache;
 
 import net.minecraft.client.font.FontManager;
 import net.minecraft.resource.ResourceReloader;

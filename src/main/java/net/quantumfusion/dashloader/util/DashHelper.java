@@ -13,9 +13,13 @@ import java.util.function.Function;
 
 public class DashHelper {
 
-
     public static <O, I> O nullable(I input, Function<I, O> func) {
         return input == null ? null : func.apply(input);
+    }
+
+
+    public static <O, I> O nullable(I input) {
+        return (O) nullable(input, i -> i);
     }
 
     public static <O, I> O nullable(I input, DashRegistry registry, BiFunction<I, DashRegistry, O> func) {

@@ -1,9 +1,8 @@
 package net.quantumfusion.dashloader;
 
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.texture.TextureManager;
-import net.minecraft.util.profiler.Profiler;
 import net.quantumfusion.dashloader.api.DashLoaderAPI;
+import net.quantumfusion.dashloader.api.feature.FeatureHandler;
 import net.quantumfusion.dashloader.data.DashMetadata;
 import net.quantumfusion.dashloader.data.VanillaData;
 import net.quantumfusion.dashloader.util.*;
@@ -135,19 +134,11 @@ public class DashLoader {
         }
     }
 
-    public void applyDashCache(TextureManager textureManager, Profiler profiler) {
-        //register textures
-        profiler.push("atlas");
-        if (mappings != null) {
-            mappings.registerAtlases(textureManager);
-        }
-        profiler.swap("baking");
-        profiler.pop();
-    }
 
     public void saveDashCache() {
         Instant start = Instant.now();
         TASK_HANDLER.reset();
+        TaskHandler.setTotalTasks(FeatureHandler.calculateTasks());
         initThreadPool();
         api.initAPI();
         TASK_HANDLER.completedTask();

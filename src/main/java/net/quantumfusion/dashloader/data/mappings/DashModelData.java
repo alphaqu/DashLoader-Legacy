@@ -5,6 +5,7 @@ import io.activej.serializer.annotations.Serialize;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.util.Identifier;
 import net.quantumfusion.dashloader.DashRegistry;
+import net.quantumfusion.dashloader.data.Dashable;
 import net.quantumfusion.dashloader.data.VanillaData;
 import net.quantumfusion.dashloader.util.TaskHandler;
 import net.quantumfusion.dashloader.util.serialization.Pointer2PointerMap;
@@ -12,7 +13,7 @@ import net.quantumfusion.dashloader.util.serialization.Pointer2PointerMap;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DashModelData {
+public class DashModelData implements Dashable {
 
 
     @Serialize(order = 0)

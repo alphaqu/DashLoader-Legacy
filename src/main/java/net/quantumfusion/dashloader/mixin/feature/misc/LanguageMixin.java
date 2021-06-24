@@ -1,4 +1,4 @@
-package net.quantumfusion.dashloader.mixin;
+package net.quantumfusion.dashloader.mixin.feature.misc;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;

@@ -28,8 +28,11 @@ public class SpriteAtlasHolderMixin {
     @Inject(method = "prepare(Lnet/minecraft/resource/ResourceManager;Lnet/minecraft/util/profiler/Profiler;)Lnet/minecraft/client/texture/SpriteAtlasTexture$Data;",
             at = @At(value = "HEAD"), cancellable = true)
     private void prepareOverride(ResourceManager resourceManager, Profiler profiler, CallbackInfoReturnable<SpriteAtlasTexture.Data> cir) {
-        if (DashLoader.getInstance().state == DashCacheState.LOADED) {
-            cir.setReturnValue(null);
+        final DashLoader loader = DashLoader.getInstance();
+        if (loader.state == DashCacheState.LOADED) {
+            if (loader.getMappings().getAtlas(this.atlas.getId()) != null) {
+                cir.setReturnValue(null);
+            }
         }
     }
 
@@ -41,12 +44,11 @@ public class SpriteAtlasHolderMixin {
         if (instance.state == DashCacheState.LOADED) {
             final DashMappings mappings = instance.getMappings();
             if (mappings != null) {
-                mappings.getAtlases().forEach(spriteAtlasTexture -> {
-                    if (atlas.getId().equals(spriteAtlasTexture.getId())) {
-                        atlas = spriteAtlasTexture;
-                    }
-                });
-                ci.cancel();
+                final SpriteAtlasTexture atlas = mappings.getAtlas(this.atlas.getId());
+                if (atlas != null) {
+                    this.atlas = atlas;
+                    ci.cancel();
+                }
             }
         }
     }

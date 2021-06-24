@@ -35,6 +35,7 @@ public class VanillaData {
     private Object2IntMap<BlockState> stateLookup;
     private Map<Identifier, BakedModel> models;
     private Map<Identifier, List<Sprite>> particles;
+    private SpriteAtlasTexture particleAtlas;
     private Map<Identifier, List<Font>> fonts;
     private List<String> splashText;
     private Map<String, Shader> shaders;
@@ -100,7 +101,7 @@ public class VanillaData {
     public void setParticleManagerAssets(Map<Identifier, ParticleManager.SimpleSpriteProvider> particles, SpriteAtlasTexture atlas) {
         this.particles = new HashMap<>();
         particles.forEach((identifier, simpleSpriteProvider) -> this.particles.put(identifier, ((ParticleManagerSimpleSpriteProviderAccessor) simpleSpriteProvider).getSprites()));
-        addExtraAtlasAssets(atlas);
+        particleAtlas = atlas;
     }
 
     public void setSplashTextAssets(List<String> splashText) {
@@ -147,5 +148,9 @@ public class VanillaData {
 
     public Map<String, Shader> getShaderData() {
         return shaders;
+    }
+
+    public SpriteAtlasTexture getParticleAtlas() {
+        return particleAtlas;
     }
 }

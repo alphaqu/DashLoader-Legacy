@@ -1,4 +1,4 @@
-package net.quantumfusion.dashloader.mixin;
+package net.quantumfusion.dashloader.mixin.feature.misc;
 
 import net.minecraft.client.sound.Sound;
 import net.minecraft.client.sound.SoundManager;
@@ -16,7 +16,7 @@ public class SoundManagerMixin {
     @Inject(method = "isSoundResourcePresent(Lnet/minecraft/client/sound/Sound;Lnet/minecraft/util/Identifier;Lnet/minecraft/resource/ResourceManager;)Z",
             at = @At(value = "HEAD"),
             cancellable = true)
-    private static void dontchecksounds(Sound sound, Identifier identifier, ResourceManager resourceManager, CallbackInfoReturnable<Boolean> cir) {
+    private static void dontCheckIfExists(Sound sound, Identifier identifier, ResourceManager resourceManager, CallbackInfoReturnable<Boolean> cir) {
         cir.setReturnValue(true);
     }
 }

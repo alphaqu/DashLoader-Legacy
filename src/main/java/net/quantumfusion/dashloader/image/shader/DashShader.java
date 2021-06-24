@@ -174,33 +174,32 @@ public class DashShader {
     public Shader toUndash() throws IOException {
         toApply = Unsafe.allocateInstance(Shader.class);
         ShaderAccessor shaderAccess = (ShaderAccessor) toApply;
-        shaderAccess.setSamplers(this.samplers);
-        shaderAccess.setName(this.name);
-        shaderAccess.setBlendState(this.blendState.toUndash());
-        shaderAccess.setVertexShader(this.vertexShader.toUndashProgram());
-        shaderAccess.setFragmentShader(this.fragmentShader.toUndashProgram());
-        final VertexFormat format = this.format.getFormat();
-        shaderAccess.setFormat(format);
-        //TODO remove serialization
-        final int programId = GlProgramManager.createProgram();
-        shaderAccess.setProgramId(programId);
-
-
-        shaderAccess.setAttributeNames(this.attributeNames);
-        if (this.attributeNames != null) {
-            List<Integer> loadedAttributeIds = new ArrayList<>();
-            int l = 0;
-            for (UnmodifiableIterator<String> var35 = format.getShaderAttributes().iterator(); var35.hasNext(); ++l) {
-                String string3 = var35.next();
-                GlUniform.bindAttribLocation(programId, l, string3);
-                loadedAttributeIds.add(l);
-            }
-            shaderAccess.setLoadedAttributeIds(loadedAttributeIds);
-        }
-
+        //object init
+        shaderAccess.setLoadedSamplerIds(new ArrayList<>());
+        shaderAccess.setLoadedUniformIds(new ArrayList<>());
+        shaderAccess.setLoadedUniforms(new HashMap<>());
+        final ArrayList<GlUniform> uniforms = new ArrayList<>();
+        shaderAccess.setUniforms(uniforms);
+        List<Integer> loadedAttributeIds = new ArrayList<>();
+        shaderAccess.setLoadedAttributeIds(loadedAttributeIds);
 
         shaderAccess.setSamplerNames(samplerNames);
-        final ArrayList<GlUniform> uniforms = new ArrayList<>();
+
+        //<init> top
+        shaderAccess.setName(this.name);
+        final VertexFormat format = this.format.getFormat();
+        shaderAccess.setFormat(format);
+
+
+        //JsonHelper.getArray(jsonObject, "samplers", (JsonArray)null)
+        shaderAccess.setSamplers(this.samplers);
+
+
+        // JsonHelper.getArray(jsonObject, "attributes", (JsonArray)null);
+        shaderAccess.setAttributeNames(this.attributeNames);
+
+
+        // JsonHelper.getArray(jsonObject, "uniforms", (JsonArray)null);
         final GlUniform modelViewMatOut = nullable(modelViewMat, (modelViewMat) -> modelViewMat.toUndash(toApply, uniforms));
         final GlUniform projectionMatOut = nullable(projectionMat, (projectionMat) -> projectionMat.toUndash(toApply, uniforms));
         final GlUniform textureMatOut = nullable(textureMat, (textureMat) -> textureMat.toUndash(toApply, uniforms));
@@ -214,12 +213,28 @@ public class DashShader {
         final GlUniform lineWidthOut = nullable(lineWidth, (lineWidth) -> lineWidth.toUndash(toApply, uniforms));
         final GlUniform gameTimeOut = nullable(gameTime, (gameTime) -> gameTime.toUndash(toApply, uniforms));
         final GlUniform chunkOffsetOut = nullable(chunkOffset, (chunkOffset) -> chunkOffset.toUndash(toApply, uniforms));
-        shaderAccess.setUniforms(uniforms);
-        shaderAccess.setLoadedSamplerIds(new ArrayList<>());
-        shaderAccess.setLoadedUniformIds(new ArrayList<>());
-        shaderAccess.setLoadedUniforms(new HashMap<>());
+
+        shaderAccess.setBlendState(this.blendState.toUndash());
+        shaderAccess.setVertexShader(this.vertexShader.toUndashProgram());
+        shaderAccess.setFragmentShader(this.fragmentShader.toUndashProgram());
+
+
+        final int programId = GlProgramManager.createProgram();
+        shaderAccess.setProgramId(programId);
+
+
+        if (this.attributeNames != null) {
+            int l = 0;
+            for (UnmodifiableIterator<String> var35 = format.getShaderAttributes().iterator(); var35.hasNext(); ++l) {
+                String string3 = var35.next();
+                GlUniform.bindAttribLocation(programId, l, string3);
+                loadedAttributeIds.add(l);
+            }
+        }
         GlProgramManager.linkProgram(toApply);
         shaderAccess.loadref();
+
+
         toApply.markUniformsDirty();
         shaderAccess.setModelViewMat(modelViewMatOut);
         shaderAccess.setProjectionMat(projectionMatOut);

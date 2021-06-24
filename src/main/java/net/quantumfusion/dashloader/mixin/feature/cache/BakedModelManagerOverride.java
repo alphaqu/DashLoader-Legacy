@@ -1,4 +1,4 @@
-package net.quantumfusion.dashloader.mixin.override;
+package net.quantumfusion.dashloader.mixin.feature.cache;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.minecraft.block.BlockState;
@@ -13,6 +13,8 @@ import net.minecraft.resource.ResourceManager;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.profiler.Profiler;
 import net.quantumfusion.dashloader.DashLoader;
+import net.quantumfusion.dashloader.DashMappings;
+import net.quantumfusion.dashloader.api.feature.Feature;
 import net.quantumfusion.dashloader.data.VanillaData;
 import net.quantumfusion.dashloader.util.DashCacheState;
 import org.jetbrains.annotations.Nullable;
@@ -87,7 +89,14 @@ public class BakedModelManagerOverride {
         } else {
             //cache go brr
             DashLoader.LOGGER.info("Starting apply stage.");
-            loader.applyDashCache(textureManager, profiler);
+            //register textures
+            profiler.push("atlas");
+            final DashMappings mappings = loader.getMappings();
+            if (mappings != null) {
+                mappings.registerAtlases(textureManager, Feature.MODEL_LOADER);
+            }
+            profiler.swap("baking");
+            profiler.pop();
             final VanillaData vanillaData = DashLoader.getVanillaData();
             this.atlasManager = vanillaData.getAtlasManager();
             this.models = vanillaData.getModels();

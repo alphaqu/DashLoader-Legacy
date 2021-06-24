@@ -6,11 +6,12 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.block.BlockState;
 import net.quantumfusion.dashloader.DashRegistry;
+import net.quantumfusion.dashloader.data.Dashable;
 import net.quantumfusion.dashloader.data.VanillaData;
 import net.quantumfusion.dashloader.util.TaskHandler;
 import net.quantumfusion.dashloader.util.serialization.Pointer2PointerMap;
 
-public class DashBlockStateData {
+public class DashBlockStateData implements Dashable {
 
     @Serialize(order = 0)
     public Pointer2PointerMap blockstates;

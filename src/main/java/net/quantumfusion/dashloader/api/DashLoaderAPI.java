@@ -39,9 +39,12 @@ public class DashLoaderAPI {
     public List<Class<?>> modelTypes;
     public List<Class<?>> predicateTypes;
     public List<Class<?>> fontTypes;
-
     public List<Class<?>> propertyTypes;
     public List<Class<?>> propertyValueTypes;
+
+    public long features;
+
+
     private boolean initialized = false;
 
     public DashLoaderAPI() {
@@ -122,7 +125,7 @@ public class DashLoaderAPI {
             initNativeAPI();
             FabricLoader.getInstance().getAllMods().parallelStream().forEach(modContainer -> {
                 final ModMetadata metadata = modContainer.getMetadata();
-                getValue(metadata.getCustomValue("dashloader:factory"), metadata);
+                getFactoryValue(metadata.getCustomValue("dashloader:factory"), metadata);
             });
             initTypes();
             LOGGER.info("[" + Duration.between(start, Instant.now()).toMillis() + "ms] Initialized api.");
@@ -130,36 +133,42 @@ public class DashLoaderAPI {
         }
     }
 
+    private void getFeatureValue() {
 
-    private void getValue(CustomValue values, ModMetadata modMetadata) {
+    }
+
+
+    private void getFactoryValue(CustomValue values, ModMetadata modMetadata) {
         if (values != null) {
             for (CustomValue value : values.getAsArray()) {
                 final Class<?> cls = ClassHelper.forName(value.getAsString());
                 if (cls != null) {
                     final Factory<?, ?> factory = (Factory<?, ?>) Unsafe.allocateInstance(cls);
                     switch (factory.getFactoryType()) {
-                        case MODEL:
+                        case MODEL -> {
                             final ModelFactory modelProxy = (ModelFactory) factory;
                             addModelType(modelProxy);
-                            break;
-                        case PREDICATE:
+                        }
+                        case PREDICATE -> {
                             final PredicateFactory predicateProxy = (PredicateFactory) factory;
                             addPredicateType(predicateProxy);
-                            break;
-                        case FONT:
+                        }
+                        case FONT -> {
                             final FontFactory fontProxy = (FontFactory) factory;
                             addFontType(fontProxy);
-                            break;
-                        case PROPERTY:
+                        }
+                        case PROPERTY -> {
                             final PropertyFactory propertyFactory = (PropertyFactory) factory;
                             addPropertyType(propertyFactory);
-                            break;
-                        case DEFAULT:
+                        }
+                        case DEFAULT -> {
                             LOGGER.warn("Proxy Type not set" + value.getAsString());
                             continue;
-                        default:
+                        }
+                        default -> {
                             LOGGER.warn("Proxy Type unknown." + value.getAsString());
                             continue;
+                        }
                     }
                     LOGGER.info("Added custom " + factory.getFactoryType().name + ": " + factory.getType().getSimpleName());
                 } else {

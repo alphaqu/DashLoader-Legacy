@@ -1,4 +1,4 @@
-package net.quantumfusion.dashloader.mixin;
+package net.quantumfusion.dashloader.mixin.feature.cache;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.resource.SplashTextResourceSupplier;
@@ -32,7 +32,7 @@ public class SplashTextResourceSupplierMixin {
     @Inject(method = "prepare(Lnet/minecraft/resource/ResourceManager;Lnet/minecraft/util/profiler/Profiler;)Ljava/util/List;",
             at = @At(value = "HEAD"),
             cancellable = true)
-    private void fastSplash(ResourceManager resourceManager, Profiler profiler, CallbackInfoReturnable<List<String>> cir) {
+    private void applySplashCache(ResourceManager resourceManager, Profiler profiler, CallbackInfoReturnable<List<String>> cir) {
         try {
             final List<String> splashTextOut = DashLoader.getVanillaData().getSplashText();
             if (splashTextOut != null) {

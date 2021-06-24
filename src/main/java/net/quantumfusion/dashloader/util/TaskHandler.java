@@ -4,8 +4,8 @@ import net.minecraft.text.Text;
 import org.apache.logging.log4j.Logger;
 
 public class TaskHandler {
-    public static final int TOTALTASKS = 9;
-    private static final float taskStep = 1f / TOTALTASKS;
+    public static int TOTALTASKS = 9;
+    private static float taskStep = 1f / TOTALTASKS;
     private String task;
     private final Logger logger;
     private int tasksComplete;
@@ -23,6 +23,11 @@ public class TaskHandler {
         tasksComplete = 0;
         subTotalTasks = 1;
         subTasksComplete = 0;
+    }
+
+    public static void setTotalTasks(int tasks) {
+        TOTALTASKS = tasks;
+        taskStep = 1f / TOTALTASKS;
     }
 
     public void completedTask() {
