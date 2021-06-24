@@ -139,22 +139,10 @@ public class DashLoaderAPI {
                 if (cls != null) {
                     final Factory<?, ?, ?> factory = (Factory<?, ?, ?>) Unsafe.allocateInstance(cls);
                     switch (factory.getFactoryType()) {
-                        case MODEL -> {
-                            final ModelFactory modelProxy = (ModelFactory) factory;
-                            addModelType(modelProxy);
-                        }
-                        case PREDICATE -> {
-                            final PredicateFactory predicateProxy = (PredicateFactory) factory;
-                            addPredicateType(predicateProxy);
-                        }
-                        case FONT -> {
-                            final FontFactory fontProxy = (FontFactory) factory;
-                            addFontType(fontProxy);
-                        }
-                        case PROPERTY -> {
-                            final PropertyFactory propertyFactory = (PropertyFactory) factory;
-                            addPropertyType(propertyFactory);
-                        }
+                        case MODEL -> addModelType((ModelFactory) factory);
+                        case PREDICATE -> addPredicateType((PredicateFactory) factory);
+                        case FONT -> addFontType((FontFactory) factory);
+                        case PROPERTY -> addPropertyType((PropertyFactory) factory);
                         case DEFAULT -> {
                             LOGGER.warn("Proxy Type not set" + value.getAsString());
                             continue;

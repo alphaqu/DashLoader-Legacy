@@ -1,10 +1,13 @@
 package net.quantumfusion.dashloader;
 
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.MinecraftClient;
 import net.quantumfusion.dashloader.api.DashLoaderAPI;
 import net.quantumfusion.dashloader.api.feature.FeatureHandler;
+import net.quantumfusion.dashloader.client.DashCacheOverlay;
 import net.quantumfusion.dashloader.data.DashMetadata;
 import net.quantumfusion.dashloader.data.VanillaData;
+import net.quantumfusion.dashloader.mixin.accessor.MinecraftClientAccessor;
 import net.quantumfusion.dashloader.util.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -90,6 +93,9 @@ public class DashLoader {
 
     public void reload(Collection<String> resourcePacks) {
         if (shouldReload) {
+            final MinecraftClient client = MinecraftClient.getInstance();
+            client.setOverlay(new DashCacheOverlay(client));
+            ((MinecraftClientAccessor) client).callRender(false);
             final Instant time = Instant.now();
             DashReport.addTime(time, "From reload");
             state = DashCacheState.EMPTY;

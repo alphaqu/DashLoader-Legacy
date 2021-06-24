@@ -30,6 +30,7 @@
     "accessor.GlUniformAccessor",
     "accessor.IdentifierAccessor",
     "accessor.JsonEffectGlShaderAccessor",
+    "accessor.MinecraftClientAccessor",
     "accessor.ModelIdentifierAccessor",
     "accessor.ModelOverrideAccessor",
     "accessor.ModelOverrideListAccessor",
