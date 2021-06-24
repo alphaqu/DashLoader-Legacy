@@ -13,8 +13,9 @@ import net.minecraft.client.util.ModelIdentifier;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.Identifier;
-import net.quantumfusion.dashloader.api.Factory;
 import net.quantumfusion.dashloader.api.FactoryType;
+import net.quantumfusion.dashloader.api.font.FontFactory;
+import net.quantumfusion.dashloader.api.model.ModelFactory;
 import net.quantumfusion.dashloader.api.predicate.PredicateFactory;
 import net.quantumfusion.dashloader.api.property.PropertyFactory;
 import net.quantumfusion.dashloader.blockstate.DashBlockState;
@@ -155,7 +156,7 @@ public class DashRegistry {
         }
         final Integer hash = bakedModel.hashCode();
         if (models.get(hash) == null) {
-            Factory<BakedModel, DashModel> model = loader.getApi().modelMappings.get(bakedModel.getClass());
+            ModelFactory model = loader.getApi().modelMappings.get(bakedModel.getClass());
             if (model != null) {
                 models.put(hash, model.toDash(bakedModel, this, DashLoader.getVanillaData().getModelData(bakedModel)));
             } else {
@@ -220,7 +221,7 @@ public class DashRegistry {
     public final Integer createFontPointer(final Font font) {
         final int hash = font.hashCode();
         if (fonts.get(hash) == null) {
-            Factory<Font, DashFont> fontFactory = loader.getApi().fontMappings.get(font.getClass());
+            FontFactory fontFactory = loader.getApi().fontMappings.get(font.getClass());
             if (fontFactory != null) {
                 fonts.put(hash, fontFactory.toDash(font, this, null));
             } else {
@@ -242,7 +243,7 @@ public class DashRegistry {
                     propertyValues.put(hashV, propertyFactory.toDash(value, this, hashP));
                 }
                 if (prop) {
-                    properties.put(hashP, propertyFactory.toDash(property, this, hashP));
+                    properties.put(hashP, propertyFactory.toDash(property, this, hashV));
                 }
             } else {
                 apiFailed.put(property.getClass(), FactoryType.PROPERTY);

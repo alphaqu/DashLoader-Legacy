@@ -13,12 +13,12 @@ public class IntPropertyFactory implements PropertyFactory {
     }
 
     @Override
-    public <K> DashProperty toDash(Property property, DashRegistry registry, K var1) {
+    public DashProperty toDash(Property property, DashRegistry registry, Integer valuePointer) {
         return new DashIntProperty((IntProperty) property);
     }
 
     @Override
-    public <K> DashPropertyValue toDash(Comparable<?> comparable, DashRegistry registry, K var1) {
+    public DashPropertyValue toDash(Comparable<?> comparable, DashRegistry registry, Integer typePointer) {
         return new DashIntValue((Integer) comparable);
     }
 

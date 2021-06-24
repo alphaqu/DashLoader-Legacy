@@ -9,7 +9,7 @@ import net.quantumfusion.dashloader.font.DashFont;
 public class BlankFontFactory implements FontFactory {
 
     @Override
-    public <K> DashFont toDash(Font font, DashRegistry registry, K var1) {
+    public DashFont toDash(Font font, DashRegistry registry, Object reserved) {
         return new DashBlankFont();
     }
 

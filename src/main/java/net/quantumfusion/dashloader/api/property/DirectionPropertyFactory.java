@@ -12,12 +12,12 @@ import net.quantumfusion.dashloader.blockstate.property.value.DashPropertyValue;
 public class DirectionPropertyFactory implements PropertyFactory {
 
     @Override
-    public <K> DashProperty toDash(Property property, DashRegistry registry, K var1) {
+    public DashProperty toDash(Property property, DashRegistry registry, Integer valuePointer) {
         return new DashDirectionProperty((DirectionProperty) property);
     }
 
     @Override
-    public <K> DashPropertyValue toDash(Comparable<?> comparable, DashRegistry registry, K var1) {
+    public DashPropertyValue toDash(Comparable<?> comparable, DashRegistry registry, Integer typePointer) {
         return new DashDirectionValue((Direction) comparable);
     }
 

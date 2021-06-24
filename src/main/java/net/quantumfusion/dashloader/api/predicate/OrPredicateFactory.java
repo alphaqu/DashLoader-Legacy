@@ -13,8 +13,8 @@ public class OrPredicateFactory implements PredicateFactory {
 
 
     @Override
-    public <K> DashPredicate toDash(MultipartModelSelector modelSelector, DashRegistry registry, K var1) {
-        return new DashOrPredicate((OrMultipartModelSelector) modelSelector, (StateManager<Block, BlockState>) var1, registry);
+    public DashPredicate toDash(MultipartModelSelector modelSelector, DashRegistry registry, StateManager<Block, BlockState> stateManager) {
+        return new DashOrPredicate((OrMultipartModelSelector) modelSelector, stateManager, registry);
     }
 
     @Override

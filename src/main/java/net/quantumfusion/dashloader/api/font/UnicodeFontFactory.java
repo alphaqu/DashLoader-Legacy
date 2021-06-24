@@ -10,7 +10,7 @@ public class UnicodeFontFactory implements FontFactory {
 
 
     @Override
-    public <K> DashFont toDash(Font font, DashRegistry registry, K var1) {
+    public DashFont toDash(Font font, DashRegistry registry, Object reserved) {
         return new DashUnicodeFont((UnicodeTextureFont) font, registry);
     }
 

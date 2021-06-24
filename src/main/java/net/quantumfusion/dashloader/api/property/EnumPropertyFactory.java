@@ -11,13 +11,13 @@ import net.quantumfusion.dashloader.blockstate.property.value.DashPropertyValue;
 public class EnumPropertyFactory implements PropertyFactory {
 
     @Override
-    public <K> DashProperty toDash(Property property, DashRegistry registry, K var1) {
+    public DashProperty toDash(Property property, DashRegistry registry, Integer valuePointer) {
         return new DashEnumProperty((EnumProperty) property);
     }
 
     @Override
-    public <K> DashPropertyValue toDash(Comparable<?> comparable, DashRegistry registry, K var1) {
-        return new DashEnumValue(((Enum) comparable).name(), (Integer) var1);
+    public DashPropertyValue toDash(Comparable<?> comparable, DashRegistry registry, Integer typePointer) {
+        return new DashEnumValue(((Enum) comparable).name(), typePointer);
     }
 
     @Override

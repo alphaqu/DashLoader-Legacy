@@ -42,8 +42,6 @@ public class DashLoaderAPI {
     public List<Class<?>> propertyTypes;
     public List<Class<?>> propertyValueTypes;
 
-    public long features;
-
 
     private boolean initialized = false;
 
@@ -94,7 +92,7 @@ public class DashLoaderAPI {
             addPredicateType(new AndPredicateFactory());
             addPredicateType(new OrPredicateFactory());
             addPredicateType(new SimplePredicateFactory());
-            predicateTypes.add(DashStaticPredicate.class);
+            predicateTypes.add(DashStaticPredicate.class); // cursed
         }, () -> {
             addFontType(new BitmapFontFactory());
             addFontType(new BlankFontFactory());
@@ -125,16 +123,12 @@ public class DashLoaderAPI {
             initNativeAPI();
             FabricLoader.getInstance().getAllMods().parallelStream().forEach(modContainer -> {
                 final ModMetadata metadata = modContainer.getMetadata();
-                getFactoryValue(metadata.getCustomValue("dashloader:factory"), metadata);
+                getFactoryValue(metadata.getCustomValue("dashloader:customfactory"), metadata);
             });
             initTypes();
             LOGGER.info("[" + Duration.between(start, Instant.now()).toMillis() + "ms] Initialized api.");
             initialized = true;
         }
-    }
-
-    private void getFeatureValue() {
-
     }
 
 

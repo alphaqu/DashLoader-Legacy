@@ -10,12 +10,12 @@ import net.quantumfusion.dashloader.blockstate.property.value.DashPropertyValue;
 
 public class BooleanPropertyFactory implements PropertyFactory {
     @Override
-    public <K> DashProperty toDash(Property property, DashRegistry registry, K var1) {
+    public DashProperty toDash(Property property, DashRegistry registry, Integer valuePointer) {
         return new DashBooleanProperty((BooleanProperty) property);
     }
 
     @Override
-    public <K> DashPropertyValue toDash(Comparable<?> comparable, DashRegistry registry, K var1) {
+    public DashPropertyValue toDash(Comparable<?> comparable, DashRegistry registry, Integer typePointer) {
         return new DashBooleanValue((Boolean) comparable);
     }
 

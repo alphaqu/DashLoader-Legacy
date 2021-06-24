@@ -2,9 +2,9 @@ package net.quantumfusion.dashloader.api;
 
 import net.quantumfusion.dashloader.DashRegistry;
 
-public interface Factory<T, D> {
+public interface Factory<T, D, E> {
 
-    <K> D toDash(T font, DashRegistry registry, K var1);
+    D toDash(T font, DashRegistry registry, E var1);
 
     Class<? extends T> getType();
 

@@ -11,8 +11,8 @@ import net.quantumfusion.dashloader.model.predicates.DashPredicate;
 
 public class AndPredicateFactory implements PredicateFactory {
     @Override
-    public <K> DashPredicate toDash(MultipartModelSelector modelSelector, DashRegistry registry, K var1) {
-        return new DashAndPredicate((AndMultipartModelSelector) modelSelector, (StateManager<Block, BlockState>) var1, registry);
+    public DashPredicate toDash(MultipartModelSelector modelSelector, DashRegistry registry, StateManager<Block, BlockState> stateManager) {
+        return new DashAndPredicate((AndMultipartModelSelector) modelSelector, stateManager, registry);
     }
 
     @Override

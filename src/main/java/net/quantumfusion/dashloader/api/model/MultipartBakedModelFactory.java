@@ -15,16 +15,14 @@ import java.util.List;
 
 public class MultipartBakedModelFactory implements ModelFactory {
     @Override
-    public <K> DashModel toDash(BakedModel model, DashRegistry registry, K var1) {
-        //noinspection unchecked
-        return new DashMultipartBakedModel((MultipartBakedModel) model, registry, (Pair<List<MultipartModelSelector>, StateManager<Block, BlockState>>) var1);
+    public DashModel toDash(BakedModel model, DashRegistry registry, Pair<List<MultipartModelSelector>, StateManager<Block, BlockState>> selectorsAndStates) {
+        return new DashMultipartBakedModel((MultipartBakedModel) model, registry, selectorsAndStates);
     }
 
     @Override
     public Class<? extends BakedModel> getType() {
         return MultipartBakedModel.class;
     }
-
 
     @Override
     public Class<? extends DashModel> getDashType() {
