@@ -112,7 +112,7 @@ public class DashLoaderAPI {
         );
     }
 
-    private <T, D> List<Class<?>> getDashTypes(Map<Class<? extends T>, ? extends Factory<T, D>> factory) {
+    private <T, D, E> List<Class<?>> getDashTypes(Map<Class<? extends T>, ? extends Factory<T, D, E>> factory) {
         return factory.values().stream().map(Factory::getDashType).sorted(Comparator.comparing(Class::getSimpleName)).collect(Collectors.toList());
     }
 
@@ -137,7 +137,7 @@ public class DashLoaderAPI {
             for (CustomValue value : values.getAsArray()) {
                 final Class<?> cls = ClassHelper.forName(value.getAsString());
                 if (cls != null) {
-                    final Factory<?, ?> factory = (Factory<?, ?>) Unsafe.allocateInstance(cls);
+                    final Factory<?, ?, ?> factory = (Factory<?, ?, ?>) Unsafe.allocateInstance(cls);
                     switch (factory.getFactoryType()) {
                         case MODEL -> {
                             final ModelFactory modelProxy = (ModelFactory) factory;
