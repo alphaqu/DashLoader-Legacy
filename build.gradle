@@ -36,8 +36,16 @@ dependencies {
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
-    // Fabric API. This is technically optional, but you probably want it anyway.
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    //jackson yaml
+    implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:${project.jackson_version}"
+    include "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:${project.jackson_version}"
+    //core
+    implementation "com.fasterxml.jackson.core:jackson-core:${project.jackson_version}"
+    include "com.fasterxml.jackson.core:jackson-core:${project.jackson_version}"
+
+    //thing that is included
+    include "com.fasterxml.jackson.core:jackson-annotations:${project.jackson_version}"
+    include "com.fasterxml.jackson.core:jackson-databind:${project.jackson_version}"
 
     // Uncomment to add Sodium to the dev environment
     // modImplementation "com.github.CaffeineMC:sodium-fabric:${project.sodium_version}"

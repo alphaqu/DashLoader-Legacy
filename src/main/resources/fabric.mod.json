@@ -34,7 +34,6 @@
   },
   "depends": {
     "fabricloader": ">=0.11.3",
-    "fabric": ">=0.33.0",
     "minecraft": "*"
   },
   "breaks": {
