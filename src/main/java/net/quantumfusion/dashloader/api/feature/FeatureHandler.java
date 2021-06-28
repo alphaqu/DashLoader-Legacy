@@ -23,7 +23,7 @@ public class FeatureHandler {
 
     public static int calculateTasks() {
         //value is the static tasks that dashloader has
-        int out = 3;
+        int out = 5;
         for (Feature value : Feature.values()) {
             if (value.active()) {
                 out += value.tasks;

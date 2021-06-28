@@ -36,6 +36,7 @@ import net.quantumfusion.dashloader.util.ThreadHelper;
 import net.quantumfusion.dashloader.util.UndashTask;
 import net.quantumfusion.dashloader.util.serialization.Pointer2ObjectMap;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -50,7 +51,6 @@ public class DashRegistry {
     private static int tasksDone = 0;
     private final Map<Integer, DashModel> models;
     public Map<Class, FactoryType> apiFailed = new ConcurrentHashMap<>();
-    DashLoader loader;
     public Map<Integer, BlockState> blockstatesOut;
     public Map<Integer, Predicate<BlockState>> predicateOut;
     public Map<Integer, Identifier> identifiersOut;
@@ -60,6 +60,7 @@ public class DashRegistry {
     public Map<Integer, NativeImage> imagesOut;
     public Map<Integer, Property<?>> propertiesOut;
     public Map<Integer, Comparable<?>> propertyValuesOut;
+    DashLoader loader;
     private Int2ObjectMap<DashBlockState> blockstates;
     private Int2ObjectMap<DashSprite> sprites;
     private Int2ObjectMap<DashID> identifiers;
@@ -106,31 +107,40 @@ public class DashRegistry {
         this.loader = loader;
     }
 
-    public DashRegistryData createData() {
-        return new DashRegistryData(
-                new RegistryBlockStateData(new Pointer2ObjectMap<>(blockstates)),
-                new RegistryFontData(new Pointer2ObjectMap<>(fonts)),
-                new RegistryIdentifierData(new Pointer2ObjectMap<>(identifiers)),
+    public Triple<DashRegistryData, RegistryImageData, RegistryModelData> createData() {
+        return Triple.of(
+                new DashRegistryData(
+                        new RegistryBlockStateData(new Pointer2ObjectMap<>(blockstates)),
+                        new RegistryFontData(new Pointer2ObjectMap<>(fonts)),
+                        new RegistryIdentifierData(new Pointer2ObjectMap<>(identifiers)),
+                        new RegistryPropertyData(new Pointer2ObjectMap<>(properties)),
+                        new RegistryPropertyValueData(new Pointer2ObjectMap<>(propertyValues)),
+                        new RegistrySpriteData(new Pointer2ObjectMap<>(sprites)),
+                        new RegistryPredicateData(new Pointer2ObjectMap<>(predicates))
+                ),
                 new RegistryImageData(new Pointer2ObjectMap<>(images)),
-                getModels(),
-                new RegistryPropertyData(new Pointer2ObjectMap<>(properties)),
-                new RegistryPropertyValueData(new Pointer2ObjectMap<>(propertyValues)),
-                new RegistrySpriteData(new Pointer2ObjectMap<>(sprites)),
-                new RegistryPredicateData(new Pointer2ObjectMap<>(predicates))
-        );
+                getModels());
     }
 
     public void loadData(DashRegistryData registryData) {
         blockstates = registryData.blockStateRegistryData.toUndash();
         sprites = registryData.spriteRegistryData.toUndash();
-        identifiers = registryData.identifierRegistryData.toUndash();
         fonts = registryData.fontRegistryData.toUndash();
-        images = registryData.imageRegistryData.toUndash();
         predicates = registryData.predicateRegistryData.toUndash();
         properties = registryData.propertyRegistryData.toUndash();
         propertyValues = registryData.propertyValueRegistryData.toUndash();
-        modelsToDeserialize = registryData.modelRegistryData.toUndash();
+        identifiers = registryData.identifierRegistryData.toUndash();
     }
+
+    public void loadImageData(RegistryImageData dashImageData) {
+        images = dashImageData.toUndash();
+    }
+
+
+    public void loadModelData(RegistryModelData modelData) {
+        this.modelsToDeserialize = modelData.toUndash();
+    }
+
 
     public RegistryModelData getModels() {
         Map<Integer, Pointer2ObjectMap<DashModel>> modelsToAdd = new HashMap<>();

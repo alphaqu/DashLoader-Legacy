@@ -6,6 +6,8 @@ import java.nio.file.Path;
 
 public enum DashCachePaths {
     REGISTRY_CACHE("registry-data"),
+    REGISTRY_MODEL_CACHE("registry-model-data"),
+    REGISTRY_IMAGE_CACHE("registry-image-data"),
     MAPPINGS_CACHE("mappings-data");
 
 

@@ -46,6 +46,8 @@ dependencies {
     //thing that is included
     include "com.fasterxml.jackson.core:jackson-annotations:${project.jackson_version}"
     include "com.fasterxml.jackson.core:jackson-databind:${project.jackson_version}"
+    implementation "org.yaml:snakeyaml:1.27"
+    include "org.yaml:snakeyaml:1.27"
 
     // Uncomment to add Sodium to the dev environment
     // modImplementation "com.github.CaffeineMC:sodium-fabric:${project.sodium_version}"

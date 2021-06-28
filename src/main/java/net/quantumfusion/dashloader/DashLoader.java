@@ -6,9 +6,13 @@ import net.quantumfusion.dashloader.api.DashLoaderAPI;
 import net.quantumfusion.dashloader.api.feature.FeatureHandler;
 import net.quantumfusion.dashloader.client.DashCacheOverlay;
 import net.quantumfusion.dashloader.data.DashMetadata;
+import net.quantumfusion.dashloader.data.DashRegistryData;
 import net.quantumfusion.dashloader.data.VanillaData;
+import net.quantumfusion.dashloader.data.registry.RegistryImageData;
+import net.quantumfusion.dashloader.data.registry.RegistryModelData;
 import net.quantumfusion.dashloader.mixin.accessor.MinecraftClientAccessor;
 import net.quantumfusion.dashloader.util.*;
+import org.apache.commons.lang3.tuple.Triple;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -22,8 +26,7 @@ import java.util.Collection;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinWorkerThread;
 
-import static net.quantumfusion.dashloader.util.DashSerializers.MAPPING_SERIALIZER;
-import static net.quantumfusion.dashloader.util.DashSerializers.REGISTRY_SERIALIZER;
+import static net.quantumfusion.dashloader.util.DashSerializers.*;
 
 public class DashLoader {
     public static final Logger LOGGER = LogManager.getLogger();
@@ -120,6 +123,8 @@ public class DashLoader {
             DashRegistry registry = new DashRegistry(this);
             ThreadHelper.exec(
                     () -> registry.loadData(REGISTRY_SERIALIZER.deserializeObject(DashCachePaths.REGISTRY_CACHE.getPath(), "Cache")),
+                    () -> registry.loadModelData(MODEL_SERIALIZER.deserializeObject(DashCachePaths.REGISTRY_MODEL_CACHE.getPath(), "Model Cache")),
+                    () -> registry.loadImageData(IMAGE_SERIALIZER.deserializeObject(DashCachePaths.REGISTRY_IMAGE_CACHE.getPath(), "Image Cache")),
                     () -> mappings = (MAPPING_SERIALIZER.deserializeObject(DashCachePaths.MAPPINGS_CACHE.getPath(), "Mapping"))
             );
             assert mappings != null;
@@ -151,7 +156,10 @@ public class DashLoader {
         DashRegistry registry = new DashRegistry(this);
         DashMappings mappings = new DashMappings();
         mappings.loadVanillaData(VANILLA_DATA, registry, TASK_HANDLER);
-        REGISTRY_SERIALIZER.serializeObject(registry.createData(), DashCachePaths.REGISTRY_CACHE.getPath(), "Cache");
+        final Triple<DashRegistryData, RegistryImageData, RegistryModelData> data = registry.createData();
+        REGISTRY_SERIALIZER.serializeObject(data.getLeft(), DashCachePaths.REGISTRY_CACHE.getPath(), "Cache");
+        IMAGE_SERIALIZER.serializeObject(data.getMiddle(), DashCachePaths.REGISTRY_IMAGE_CACHE.getPath(), "Image Cache");
+        MODEL_SERIALIZER.serializeObject(data.getRight(), DashCachePaths.REGISTRY_MODEL_CACHE.getPath(), "Model Cache");
         MAPPING_SERIALIZER.serializeObject(mappings, DashCachePaths.MAPPINGS_CACHE.getPath(), "Mapping");
         registry.apiReport(LOGGER);
         shutdownThreadPool();

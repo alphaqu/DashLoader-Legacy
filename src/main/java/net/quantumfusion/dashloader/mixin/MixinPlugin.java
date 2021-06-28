@@ -41,6 +41,7 @@ public class MixinPlugin implements IMixinConfigPlugin {
         final Path resolve = DashLoader.getConfig().resolve("dashloader.yaml");
         if (Files.exists(resolve)) {
             try {
+                resolve.toFile().setReadable(true);
                 final DashConfig dashConfig = objectMapper.readValue(resolve.toFile(), DashConfig.class);
                 for (Feature feature : dashConfig.disabledFeatures) {
                     FeatureHandler.disableFeature(feature);
@@ -51,7 +52,7 @@ public class MixinPlugin implements IMixinConfigPlugin {
             }
         } else {
             try {
-                Files.createDirectories(resolve);
+                resolve.toFile().setWritable(true);
                 Files.createFile(resolve);
                 objectMapper.writeValue(resolve.toFile(), new DashConfig(new Feature[]{}));
             } catch (IOException e) {

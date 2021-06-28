@@ -4,6 +4,8 @@ import net.quantumfusion.dashloader.DashLoader;
 import net.quantumfusion.dashloader.DashMappings;
 import net.quantumfusion.dashloader.api.DashLoaderAPI;
 import net.quantumfusion.dashloader.data.DashRegistryData;
+import net.quantumfusion.dashloader.data.registry.RegistryImageData;
+import net.quantumfusion.dashloader.data.registry.RegistryModelData;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -14,21 +16,29 @@ public class DashSerializers {
     public final static List<DashSerializer<?>> SERIALIZERS = new ArrayList<>();
     public final static DashSerializer<DashRegistryData> REGISTRY_SERIALIZER;
     public final static DashSerializer<DashMappings> MAPPING_SERIALIZER;
+    public final static DashSerializer<RegistryModelData> MODEL_SERIALIZER;
+    public final static DashSerializer<RegistryImageData> IMAGE_SERIALIZER;
 
     static {
         final DashLoader loader = DashLoader.getInstance();
-        REGISTRY_SERIALIZER = addSerializer(new DashSerializer<>(loader,
-                "registry",
-                (builder) -> {
-                    final DashLoaderAPI api = loader.getApi();
-                    api.initAPI();
-                    return builder
-                            .withSubclasses("fonts", api.fontTypes)
-                            .withSubclasses("models", api.modelTypes)
-                            .withSubclasses("predicates", api.predicateTypes)
-                            .withSubclasses("properties", api.propertyTypes)
-                            .withSubclasses("values", api.propertyValueTypes).build(DashRegistryData.class);
-                }));
+        REGISTRY_SERIALIZER = addSerializer(new DashSerializer<>(loader, "registry", (builder) -> {
+            final DashLoaderAPI api = loader.getApi();
+            api.initAPI();
+            return builder
+                    .withSubclasses("fonts", api.fontTypes)
+                    .withSubclasses("predicates", api.predicateTypes)
+                    .withSubclasses("properties", api.propertyTypes)
+                    .withSubclasses("values", api.propertyValueTypes)
+                    .build(DashRegistryData.class);
+        }));
+        MODEL_SERIALIZER = addSerializer(new DashSerializer<>(loader, "model", (builder) -> {
+            final DashLoaderAPI api = loader.getApi();
+            api.initAPI();
+            return builder
+                    .withSubclasses("models", api.modelTypes)
+                    .build(RegistryModelData.class);
+        }));
+        IMAGE_SERIALIZER = addSerializer(new DashSerializer<>(loader, "image", (builder) -> builder.build(RegistryImageData.class)));
         MAPPING_SERIALIZER = addSerializer(new DashSerializer<>(loader, "mapping", builder -> builder.build(DashMappings.class)));
     }
 
