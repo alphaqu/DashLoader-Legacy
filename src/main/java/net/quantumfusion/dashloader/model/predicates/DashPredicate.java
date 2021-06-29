@@ -2,7 +2,7 @@ package net.quantumfusion.dashloader.model.predicates;
 
 import net.minecraft.block.BlockState;
 import net.quantumfusion.dashloader.DashRegistry;
-import net.quantumfusion.dashloader.data.Dashable;
+import net.quantumfusion.dashloader.Dashable;
 
 import java.util.function.Predicate;
 

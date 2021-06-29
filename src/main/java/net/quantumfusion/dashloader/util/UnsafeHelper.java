@@ -6,7 +6,7 @@ import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
-public class Unsafe {
+public class UnsafeHelper {
 
     private static final MethodHandle allocateInstance;
 
@@ -40,6 +40,6 @@ public class Unsafe {
             }
         }
 
-        throw new RuntimeException("Unable to find Sun Unsafe Library.");
+        throw new RuntimeException("Unable to find Sun UnsafeHelper Library.");
     }
 }

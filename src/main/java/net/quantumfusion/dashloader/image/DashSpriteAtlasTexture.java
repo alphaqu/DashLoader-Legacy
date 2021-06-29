@@ -7,12 +7,12 @@ import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.util.Identifier;
 import net.quantumfusion.dashloader.DashLoader;
 import net.quantumfusion.dashloader.DashRegistry;
+import net.quantumfusion.dashloader.data.serialization.Object2PointerMap;
+import net.quantumfusion.dashloader.data.serialization.Pointer2PointerMap;
 import net.quantumfusion.dashloader.mixin.accessor.AbstractTextureAccessor;
 import net.quantumfusion.dashloader.mixin.accessor.SpriteAccessor;
 import net.quantumfusion.dashloader.mixin.accessor.SpriteAtlasTextureAccessor;
-import net.quantumfusion.dashloader.util.Unsafe;
-import net.quantumfusion.dashloader.util.serialization.Object2PointerMap;
-import net.quantumfusion.dashloader.util.serialization.Pointer2PointerMap;
+import net.quantumfusion.dashloader.util.UnsafeHelper;
 
 import java.util.*;
 
@@ -71,7 +71,7 @@ public class DashSpriteAtlasTexture {
     }
 
     public SpriteAtlasTexture toUndash(DashRegistry registry) {
-        final SpriteAtlasTexture spriteAtlasTexture = Unsafe.allocateInstance(SpriteAtlasTexture.class);
+        final SpriteAtlasTexture spriteAtlasTexture = UnsafeHelper.allocateInstance(SpriteAtlasTexture.class);
         final AbstractTextureAccessor access = ((AbstractTextureAccessor) spriteAtlasTexture);
         access.setBilinear(bilinear);
         access.setMipmap(mipmap);

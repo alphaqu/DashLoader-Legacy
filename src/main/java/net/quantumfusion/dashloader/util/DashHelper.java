@@ -1,7 +1,7 @@
 package net.quantumfusion.dashloader.util;
 
 import net.quantumfusion.dashloader.DashRegistry;
-import net.quantumfusion.dashloader.util.serialization.PairMap;
+import net.quantumfusion.dashloader.data.serialization.PairMap;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;

@@ -25,6 +25,7 @@ import net.quantumfusion.dashloader.data.DashID;
 import net.quantumfusion.dashloader.data.DashIdentifier;
 import net.quantumfusion.dashloader.data.DashRegistryData;
 import net.quantumfusion.dashloader.data.registry.*;
+import net.quantumfusion.dashloader.data.serialization.Pointer2ObjectMap;
 import net.quantumfusion.dashloader.font.DashFont;
 import net.quantumfusion.dashloader.image.DashImage;
 import net.quantumfusion.dashloader.image.DashSprite;
@@ -33,8 +34,6 @@ import net.quantumfusion.dashloader.model.DashModelIdentifier;
 import net.quantumfusion.dashloader.model.predicates.DashPredicate;
 import net.quantumfusion.dashloader.model.predicates.DashStaticPredicate;
 import net.quantumfusion.dashloader.util.ThreadHelper;
-import net.quantumfusion.dashloader.util.UndashTask;
-import net.quantumfusion.dashloader.util.serialization.Pointer2ObjectMap;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.apache.logging.log4j.LogManager;
@@ -361,7 +360,7 @@ public class DashRegistry {
                 currentStage[0]++;
             });
             log(logger, "Applying Model Overrides");
-            modelsToDeserialize.forEach(modelcategory -> DashLoader.THREAD_POOL.invoke(new UndashTask.ApplyTask(new ArrayList<>(modelcategory.values()), 100, this)));
+            modelsToDeserialize.forEach(modelcategory -> DashLoader.THREAD_POOL.invoke(new ThreadHelper.UndashTask.ApplyTask(new ArrayList<>(modelcategory.values()), 100, this)));
             modelsToDeserialize = null;
         } catch (Exception e) {
             e.printStackTrace();

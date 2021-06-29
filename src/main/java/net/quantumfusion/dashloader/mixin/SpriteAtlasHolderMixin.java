@@ -6,7 +6,7 @@ import net.minecraft.resource.ResourceManager;
 import net.minecraft.util.profiler.Profiler;
 import net.quantumfusion.dashloader.DashLoader;
 import net.quantumfusion.dashloader.DashMappings;
-import net.quantumfusion.dashloader.util.DashCacheState;
+import net.quantumfusion.dashloader.util.enums.DashCacheState;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;

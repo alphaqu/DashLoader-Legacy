@@ -6,9 +6,9 @@ import io.activej.serializer.annotations.SerializeNullable;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.Sprite;
 import net.quantumfusion.dashloader.DashRegistry;
-import net.quantumfusion.dashloader.data.Dashable;
+import net.quantumfusion.dashloader.Dashable;
 import net.quantumfusion.dashloader.mixin.accessor.SpriteAccessor;
-import net.quantumfusion.dashloader.util.Unsafe;
+import net.quantumfusion.dashloader.util.UnsafeHelper;
 
 public class DashSprite implements Dashable {
     @Serialize(order = 0)
@@ -76,7 +76,7 @@ public class DashSprite implements Dashable {
     }
 
     public final Sprite toUndash(final DashRegistry registry) {
-        final Sprite out = Unsafe.allocateInstance(Sprite.class);
+        final Sprite out = UnsafeHelper.allocateInstance(Sprite.class);
         final SpriteAccessor spriteAccessor = ((SpriteAccessor) out);
         final NativeImage[] imagesOut = new NativeImage[images.length];
         for (int i = 0, imagesLength = images.length; i < imagesLength; i++) {

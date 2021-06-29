@@ -5,8 +5,8 @@ import io.activej.serializer.annotations.Serialize;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.client.font.BitmapFont;
 import net.quantumfusion.dashloader.DashRegistry;
+import net.quantumfusion.dashloader.data.serialization.Pointer2ObjectMap;
 import net.quantumfusion.dashloader.mixin.accessor.BitmapFontAccessor;
-import net.quantumfusion.dashloader.util.serialization.Pointer2ObjectMap;
 
 public class DashBitmapFont implements DashFont {
     @Serialize(order = 0)

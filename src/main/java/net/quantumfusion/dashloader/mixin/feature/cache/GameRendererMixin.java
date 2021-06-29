@@ -6,7 +6,7 @@ import net.minecraft.resource.ResourceManager;
 import net.quantumfusion.dashloader.DashLoader;
 import net.quantumfusion.dashloader.data.VanillaData;
 import net.quantumfusion.dashloader.image.shader.DashShader;
-import net.quantumfusion.dashloader.util.DashCacheState;
+import net.quantumfusion.dashloader.util.enums.DashCacheState;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;

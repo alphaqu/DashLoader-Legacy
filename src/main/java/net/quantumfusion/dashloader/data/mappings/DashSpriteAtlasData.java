@@ -5,12 +5,12 @@ import io.activej.serializer.annotations.Serialize;
 import net.minecraft.client.render.model.SpriteAtlasManager;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.util.Identifier;
+import net.quantumfusion.dashloader.DashLoader;
 import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.data.VanillaData;
+import net.quantumfusion.dashloader.data.serialization.Object2PointerMap;
 import net.quantumfusion.dashloader.image.DashSpriteAtlasTexture;
 import net.quantumfusion.dashloader.mixin.accessor.SpriteAtlasManagerAccessor;
-import net.quantumfusion.dashloader.util.TaskHandler;
-import net.quantumfusion.dashloader.util.serialization.Object2PointerMap;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
@@ -25,7 +25,7 @@ public class DashSpriteAtlasData {
         this.atlases = atlases;
     }
 
-    public DashSpriteAtlasData(VanillaData data, DashRegistry registry, TaskHandler taskHandler) {
+    public DashSpriteAtlasData(VanillaData data, DashRegistry registry, DashLoader.TaskHandler taskHandler) {
         atlases = new Object2PointerMap<>();
 
         final Map<Identifier, SpriteAtlasTexture> atlases = ((SpriteAtlasManagerAccessor) data.getAtlasManager()).getAtlases();

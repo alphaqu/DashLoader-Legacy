@@ -2,8 +2,8 @@ package net.quantumfusion.dashloader.data.mappings;
 
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
+import net.quantumfusion.dashloader.DashLoader;
 import net.quantumfusion.dashloader.data.VanillaData;
-import net.quantumfusion.dashloader.util.TaskHandler;
 
 import java.util.List;
 
@@ -15,7 +15,7 @@ public class DashSplashTextData {
         this.splashList = splashList;
     }
 
-    public DashSplashTextData(VanillaData data, TaskHandler taskHandler) {
+    public DashSplashTextData(VanillaData data, DashLoader.TaskHandler taskHandler) {
         taskHandler.setSubtasks(1);
         splashList = data.getSplashText();
         taskHandler.completedSubTask();

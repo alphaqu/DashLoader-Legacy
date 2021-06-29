@@ -1,4 +1,4 @@
-package net.quantumfusion.dashloader.util;
+package net.quantumfusion.dashloader.data.serializers;
 
 import io.activej.serializer.BinarySerializer;
 import io.activej.serializer.SerializerBuilder;
@@ -6,6 +6,7 @@ import io.activej.serializer.stream.StreamInput;
 import io.activej.serializer.stream.StreamOutput;
 import net.quantumfusion.dashloader.DashException;
 import net.quantumfusion.dashloader.DashLoader;
+import net.quantumfusion.dashloader.util.ClassLoaderWrapper;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.NotNull;
@@ -68,7 +69,7 @@ public class DashSerializer<O> {
     }
 
     public void serializeObject(O clazz, Path path, String name) {
-        final TaskHandler taskHandler = DashLoader.TASK_HANDLER;
+        final DashLoader.TaskHandler taskHandler = DashLoader.TASK_HANDLER;
         try {
             taskHandler.setCurrentTask("Serializing " + name);
             taskHandler.setSubtasks(3);

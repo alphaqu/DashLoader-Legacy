@@ -5,11 +5,11 @@ import io.activej.serializer.annotations.Serialize;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.block.BlockState;
+import net.quantumfusion.dashloader.DashLoader;
 import net.quantumfusion.dashloader.DashRegistry;
-import net.quantumfusion.dashloader.data.Dashable;
+import net.quantumfusion.dashloader.Dashable;
 import net.quantumfusion.dashloader.data.VanillaData;
-import net.quantumfusion.dashloader.util.TaskHandler;
-import net.quantumfusion.dashloader.util.serialization.Pointer2PointerMap;
+import net.quantumfusion.dashloader.data.serialization.Pointer2PointerMap;
 
 public class DashBlockStateData implements Dashable {
 
@@ -20,7 +20,7 @@ public class DashBlockStateData implements Dashable {
         this.blockstates = blockstates;
     }
 
-    public DashBlockStateData(VanillaData data, DashRegistry registry, final TaskHandler taskHandler) {
+    public DashBlockStateData(VanillaData data, DashRegistry registry, final DashLoader.TaskHandler taskHandler) {
         this.blockstates = new Pointer2PointerMap();
         final Object2IntMap<BlockState> stateLookup = data.getStateLookup();
         taskHandler.setSubtasks(stateLookup.size());

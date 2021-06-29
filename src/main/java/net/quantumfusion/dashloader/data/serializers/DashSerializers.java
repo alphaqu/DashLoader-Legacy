@@ -1,4 +1,4 @@
-package net.quantumfusion.dashloader.util;
+package net.quantumfusion.dashloader.data.serializers;
 
 import net.quantumfusion.dashloader.DashLoader;
 import net.quantumfusion.dashloader.DashMappings;
@@ -6,6 +6,7 @@ import net.quantumfusion.dashloader.api.DashLoaderAPI;
 import net.quantumfusion.dashloader.data.DashRegistryData;
 import net.quantumfusion.dashloader.data.registry.RegistryImageData;
 import net.quantumfusion.dashloader.data.registry.RegistryModelData;
+import net.quantumfusion.dashloader.util.TimeHelper;
 
 import java.time.Instant;
 import java.util.ArrayList;

@@ -1,4 +1,4 @@
-package net.quantumfusion.dashloader.util.serialization;
+package net.quantumfusion.dashloader.data.serialization;
 
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;

@@ -1,4 +1,4 @@
-package net.quantumfusion.dashloader.util;
+package net.quantumfusion.dashloader.util.enums;
 
 public enum Impact {
     NONE,

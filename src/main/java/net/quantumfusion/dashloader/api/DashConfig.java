@@ -1,4 +1,4 @@
-package net.quantumfusion.dashloader.util;
+package net.quantumfusion.dashloader.api;
 
 import net.quantumfusion.dashloader.api.feature.Feature;
 

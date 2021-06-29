@@ -4,7 +4,7 @@ import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import net.minecraft.client.texture.Sprite;
 import net.quantumfusion.dashloader.DashRegistry;
-import net.quantumfusion.dashloader.data.Dashable;
+import net.quantumfusion.dashloader.Dashable;
 import net.quantumfusion.dashloader.mixin.accessor.SpriteAnimationFrameAccessor;
 
 public class DashSpriteAnimationFrame implements Dashable {

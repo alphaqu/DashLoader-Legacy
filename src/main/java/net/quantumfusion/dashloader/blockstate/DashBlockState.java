@@ -8,9 +8,9 @@ import net.minecraft.block.BlockState;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.registry.Registry;
 import net.quantumfusion.dashloader.DashRegistry;
-import net.quantumfusion.dashloader.data.Dashable;
+import net.quantumfusion.dashloader.Dashable;
+import net.quantumfusion.dashloader.data.serialization.Pointer2PointerMap;
 import net.quantumfusion.dashloader.mixin.accessor.StateAccessor;
-import net.quantumfusion.dashloader.util.serialization.Pointer2PointerMap;
 import org.apache.commons.lang3.tuple.Pair;
 
 public class DashBlockState implements Dashable {

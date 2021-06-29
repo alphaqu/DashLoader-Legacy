@@ -1,6 +1,6 @@
 package net.quantumfusion.dashloader.api.feature;
 
-import net.quantumfusion.dashloader.util.Impact;
+import net.quantumfusion.dashloader.util.enums.Impact;
 
 @SuppressWarnings("SpellCheckingInspection")
 public enum Feature {

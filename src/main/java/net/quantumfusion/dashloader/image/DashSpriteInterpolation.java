@@ -6,7 +6,7 @@ import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.Sprite;
 import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.mixin.accessor.SpriteInterpolationAccessor;
-import net.quantumfusion.dashloader.util.Unsafe;
+import net.quantumfusion.dashloader.util.UnsafeHelper;
 import net.quantumfusion.dashloader.util.duck.SpriteInterpolationDuck;
 
 public class DashSpriteInterpolation {
@@ -27,7 +27,7 @@ public class DashSpriteInterpolation {
     }
 
     public final Sprite.Interpolation toUndash(final Sprite owner, final DashRegistry registry) {
-        final Sprite.Interpolation spriteInterpolation = Unsafe.allocateInstance(Sprite.Interpolation.class);
+        final Sprite.Interpolation spriteInterpolation = UnsafeHelper.allocateInstance(Sprite.Interpolation.class);
         final SpriteInterpolationAccessor spriteInterpolationAccessor = ((SpriteInterpolationAccessor) (Object) spriteInterpolation);
         final NativeImage[] nativeImages = new NativeImage[images.length];
         for (int i = 0, imagesLength = images.length; i < imagesLength; i++) {

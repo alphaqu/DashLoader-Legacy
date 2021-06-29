@@ -17,7 +17,7 @@ import net.minecraft.util.profiler.Profiler;
 import net.quantumfusion.dashloader.DashLoader;
 import net.quantumfusion.dashloader.mixin.accessor.FontManagerAccessor;
 import net.quantumfusion.dashloader.mixin.accessor.UnicodeTextureFontAccessor;
-import net.quantumfusion.dashloader.util.DashCacheState;
+import net.quantumfusion.dashloader.util.enums.DashCacheState;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

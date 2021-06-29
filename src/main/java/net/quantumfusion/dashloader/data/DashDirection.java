@@ -4,6 +4,7 @@ import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import net.minecraft.util.math.Direction;
 import net.quantumfusion.dashloader.DashRegistry;
+import net.quantumfusion.dashloader.Dashable;
 
 public class DashDirection implements Dashable {
     @Serialize(order = 0)

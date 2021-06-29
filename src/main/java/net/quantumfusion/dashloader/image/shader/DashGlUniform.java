@@ -8,7 +8,7 @@ import net.minecraft.client.gl.GlUniform;
 import net.quantumfusion.dashloader.mixin.accessor.GlUniformAccessor;
 import net.quantumfusion.dashloader.util.DashHelper;
 import net.quantumfusion.dashloader.util.IOHelper;
-import net.quantumfusion.dashloader.util.Unsafe;
+import net.quantumfusion.dashloader.util.UnsafeHelper;
 import org.lwjgl.system.MemoryUtil;
 
 import java.nio.FloatBuffer;
@@ -54,7 +54,7 @@ public class DashGlUniform {
     }
 
     public GlUniform toUndash(GlShader shader, List<GlUniform> uniforms) {
-        final GlUniform glUniform = Unsafe.allocateInstance(GlUniform.class);
+        final GlUniform glUniform = UnsafeHelper.allocateInstance(GlUniform.class);
         GlUniformAccessor glUniformAccess = (GlUniformAccessor) glUniform;
         glUniformAccess.setCount(this.count);
         glUniformAccess.setDataType(this.dataType);

@@ -1,17 +1,24 @@
 package net.quantumfusion.dashloader;
 
 import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.text.Text;
 import net.quantumfusion.dashloader.api.DashLoaderAPI;
 import net.quantumfusion.dashloader.api.feature.FeatureHandler;
 import net.quantumfusion.dashloader.client.DashCacheOverlay;
-import net.quantumfusion.dashloader.data.DashMetadata;
 import net.quantumfusion.dashloader.data.DashRegistryData;
 import net.quantumfusion.dashloader.data.VanillaData;
 import net.quantumfusion.dashloader.data.registry.RegistryImageData;
 import net.quantumfusion.dashloader.data.registry.RegistryModelData;
+import net.quantumfusion.dashloader.data.serializers.DashSerializers;
 import net.quantumfusion.dashloader.mixin.accessor.MinecraftClientAccessor;
-import net.quantumfusion.dashloader.util.*;
+import net.quantumfusion.dashloader.util.ClassLoaderWrapper;
+import net.quantumfusion.dashloader.util.DashReport;
+import net.quantumfusion.dashloader.util.ThreadHelper;
+import net.quantumfusion.dashloader.util.TimeHelper;
+import net.quantumfusion.dashloader.util.enums.DashCachePaths;
+import net.quantumfusion.dashloader.util.enums.DashCacheState;
 import org.apache.commons.lang3.tuple.Triple;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -26,7 +33,7 @@ import java.util.Collection;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinWorkerThread;
 
-import static net.quantumfusion.dashloader.util.DashSerializers.*;
+import static net.quantumfusion.dashloader.data.serializers.DashSerializers.*;
 
 public class DashLoader {
     public static final Logger LOGGER = LogManager.getLogger();
@@ -202,4 +209,102 @@ public class DashLoader {
     }
 
 
+    public static class TaskHandler {
+        public static int TOTALTASKS = 9;
+        private static float taskStep = 1f / TOTALTASKS;
+        private String task;
+        private final Logger logger;
+        private int tasksComplete;
+
+        private int subTotalTasks = 1;
+        private int subTasksComplete = 0;
+
+        public void logAndTask(String s) {
+            logger.info(s);
+            tasksComplete++;
+            task = s;
+        }
+
+        public void reset() {
+            tasksComplete = 0;
+            subTotalTasks = 1;
+            subTasksComplete = 0;
+        }
+
+        public static void setTotalTasks(int tasks) {
+            TOTALTASKS = tasks;
+            taskStep = 1f / TOTALTASKS;
+        }
+
+        public void completedTask() {
+            tasksComplete++;
+        }
+
+        public void setCurrentTask(String task) {
+            this.task = task;
+        }
+
+        public void setSubtasks(int tasks) {
+            subTotalTasks = tasks;
+            subTasksComplete = 0;
+        }
+
+        public void completedSubTask() {
+            subTasksComplete++;
+        }
+
+        public Text getText() {
+            return Text.of("(" + tasksComplete + "/" + TOTALTASKS + ") " + task);
+        }
+
+        public Text getSubText() {
+            return TOTALTASKS == tasksComplete ? Text.of("") : Text.of("[" + subTasksComplete + "/" + subTotalTasks + "] ");
+        }
+
+        public double getProgress() {
+            return (subTasksComplete == subTotalTasks && tasksComplete == TOTALTASKS) ? 1 : (tasksComplete == 0 ? 0 : tasksComplete / (float) TOTALTASKS) + (((float) subTasksComplete / subTotalTasks) * taskStep);
+        }
+
+        public TaskHandler(Logger logger) {
+            task = "Starting DashLoader";
+            tasksComplete = 0;
+            this.logger = logger;
+        }
+    }
+
+    public static class DashMetadata {
+        public String modInfo;
+        public String resourcePacks;
+
+
+        public DashMetadata() {
+
+        }
+
+        public void setMods(FabricLoader loader) {
+            long modInfoData = 0;
+            for (ModContainer mod : loader.getAllMods()) {
+                for (char c : mod.getMetadata().getVersion().getFriendlyString().toCharArray()) {
+                    modInfoData += c;
+                }
+            }
+            modInfo = Long.toHexString(modInfoData);
+        }
+
+        public void setResourcePacks(Collection<String> resourcePacks) {
+            long resourcePackData = 0;
+            for (String resourcePack : resourcePacks) {
+                for (char c : resourcePack.toCharArray()) {
+                    resourcePackData += c;
+                }
+            }
+            this.resourcePacks = Long.toHexString(resourcePackData);
+        }
+
+
+        public String getId() {
+            return modInfo + "-" + resourcePacks;
+        }
+
+    }
 }

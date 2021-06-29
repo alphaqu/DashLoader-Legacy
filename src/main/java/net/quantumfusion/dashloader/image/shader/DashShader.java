@@ -10,8 +10,7 @@ import net.minecraft.client.gl.GlUniform;
 import net.minecraft.client.render.Shader;
 import net.minecraft.client.render.VertexFormat;
 import net.quantumfusion.dashloader.mixin.accessor.ShaderAccessor;
-import net.quantumfusion.dashloader.util.Unsafe;
-import net.quantumfusion.dashloader.util.VertexFormatsHelper;
+import net.quantumfusion.dashloader.util.UnsafeHelper;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -172,7 +171,7 @@ public class DashShader {
 
 
     public Shader toUndash() {
-        toApply = Unsafe.allocateInstance(Shader.class);
+        toApply = UnsafeHelper.allocateInstance(Shader.class);
         ShaderAccessor shaderAccess = (ShaderAccessor) toApply;
         //object init
         shaderAccess.setLoadedSamplerIds(new ArrayList<>());

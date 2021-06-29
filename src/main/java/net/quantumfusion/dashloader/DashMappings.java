@@ -17,7 +17,6 @@ import net.quantumfusion.dashloader.mixin.accessor.AbstractTextureAccessor;
 import net.quantumfusion.dashloader.mixin.accessor.SpriteAccessor;
 import net.quantumfusion.dashloader.mixin.accessor.SpriteAtlasTextureAccessor;
 import net.quantumfusion.dashloader.util.DashHelper;
-import net.quantumfusion.dashloader.util.TaskHandler;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.Nullable;
 
@@ -77,7 +76,7 @@ public class DashMappings {
         this.shaderData = shaderData;
     }
 
-    public void loadVanillaData(VanillaData data, DashRegistry registry, TaskHandler taskHandler) {
+    public void loadVanillaData(VanillaData data, DashRegistry registry, DashLoader.TaskHandler taskHandler) {
         if (Feature.MODEL_LOADER.active()) {
             taskHandler.logAndTask("Mapping Blockstates");
             blockStateData = new DashBlockStateData(data, registry, taskHandler);

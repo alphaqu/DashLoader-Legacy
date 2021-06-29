@@ -11,12 +11,12 @@ import net.minecraft.client.texture.Sprite;
 import net.minecraft.util.math.Direction;
 import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.data.DashDirection;
+import net.quantumfusion.dashloader.data.serialization.PairMap;
 import net.quantumfusion.dashloader.mixin.accessor.BasicBakedModelAccessor;
 import net.quantumfusion.dashloader.model.components.DashBakedQuad;
 import net.quantumfusion.dashloader.model.components.DashModelOverrideList;
 import net.quantumfusion.dashloader.model.components.DashModelTransformation;
 import net.quantumfusion.dashloader.util.DashHelper;
-import net.quantumfusion.dashloader.util.serialization.PairMap;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;

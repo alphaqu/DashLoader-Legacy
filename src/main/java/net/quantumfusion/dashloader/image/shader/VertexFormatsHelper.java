@@ -1,16 +1,12 @@
-package net.quantumfusion.dashloader.util;
+package net.quantumfusion.dashloader.image.shader;
 
 import net.minecraft.client.render.VertexFormat;
 import net.minecraft.client.render.VertexFormats;
 
-import java.util.Map;
-
 public class VertexFormatsHelper {
 
-    private static Map<VertexFormat, Value> cache;
-
     public static Value getEnum(VertexFormat format) {
-        //i tried having a cache but something in mojangs hashcode chain made it not have all of them
+        //i tried having a cache but mojang does not calculate order in their hashCode impl which lead to POSITION_TEXTURE_COLOR merging with POSITION_COLOR_TEXTURE
         if (format == VertexFormats.BLIT_SCREEN) {
             return Value.BLIT_SCREEN;
         }

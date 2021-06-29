@@ -5,7 +5,7 @@ import io.activej.serializer.annotations.Serialize;
 import net.minecraft.client.texture.NativeImage;
 import net.quantumfusion.dashloader.DashException;
 import net.quantumfusion.dashloader.DashRegistry;
-import net.quantumfusion.dashloader.data.Dashable;
+import net.quantumfusion.dashloader.Dashable;
 import net.quantumfusion.dashloader.mixin.accessor.NativeImageAccessor;
 import org.lwjgl.stb.STBImage;
 import org.lwjgl.system.MemoryStack;

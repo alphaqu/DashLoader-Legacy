@@ -4,11 +4,11 @@ import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.util.Identifier;
+import net.quantumfusion.dashloader.DashLoader;
 import net.quantumfusion.dashloader.DashRegistry;
-import net.quantumfusion.dashloader.data.Dashable;
+import net.quantumfusion.dashloader.Dashable;
 import net.quantumfusion.dashloader.data.VanillaData;
-import net.quantumfusion.dashloader.util.TaskHandler;
-import net.quantumfusion.dashloader.util.serialization.Pointer2PointerMap;
+import net.quantumfusion.dashloader.data.serialization.Pointer2PointerMap;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,7 +24,7 @@ public class DashModelData implements Dashable {
         this.models = models;
     }
 
-    public DashModelData(VanillaData data, DashRegistry registry, TaskHandler taskHandler) {
+    public DashModelData(VanillaData data, DashRegistry registry, DashLoader.TaskHandler taskHandler) {
         final Map<Identifier, BakedModel> models = data.getModels();
         final int size = models.size();
         this.models = new Pointer2PointerMap(size);

@@ -2,7 +2,7 @@ package net.quantumfusion.dashloader.model;
 
 import net.minecraft.client.render.model.BakedModel;
 import net.quantumfusion.dashloader.DashRegistry;
-import net.quantumfusion.dashloader.data.Dashable;
+import net.quantumfusion.dashloader.Dashable;
 
 public interface DashModel extends Dashable {
     BakedModel toUndash(DashRegistry registry);

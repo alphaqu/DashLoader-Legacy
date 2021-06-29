@@ -20,7 +20,7 @@ import net.quantumfusion.dashloader.api.property.*;
 import net.quantumfusion.dashloader.model.predicates.DashStaticPredicate;
 import net.quantumfusion.dashloader.util.ClassHelper;
 import net.quantumfusion.dashloader.util.ThreadHelper;
-import net.quantumfusion.dashloader.util.Unsafe;
+import net.quantumfusion.dashloader.util.UnsafeHelper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -137,7 +137,7 @@ public class DashLoaderAPI {
             for (CustomValue value : values.getAsArray()) {
                 final Class<?> cls = ClassHelper.forName(value.getAsString());
                 if (cls != null) {
-                    final Factory<?, ?, ?> factory = (Factory<?, ?, ?>) Unsafe.allocateInstance(cls);
+                    final Factory<?, ?, ?> factory = (Factory<?, ?, ?>) UnsafeHelper.allocateInstance(cls);
                     switch (factory.getFactoryType()) {
                         case MODEL -> addModelType((ModelFactory) factory);
                         case PREDICATE -> addPredicateType((PredicateFactory) factory);

@@ -3,10 +3,10 @@ package net.quantumfusion.dashloader.data.mappings;
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import net.minecraft.client.render.Shader;
+import net.quantumfusion.dashloader.DashLoader;
 import net.quantumfusion.dashloader.data.VanillaData;
 import net.quantumfusion.dashloader.image.shader.DashShader;
 import net.quantumfusion.dashloader.util.DashHelper;
-import net.quantumfusion.dashloader.util.TaskHandler;
 import net.quantumfusion.dashloader.util.ThreadHelper;
 
 import java.util.ArrayList;
@@ -24,7 +24,7 @@ public class DashShaderData {
         this.shaders = shaders;
     }
 
-    public DashShaderData(VanillaData data, TaskHandler taskHandler) {
+    public DashShaderData(VanillaData data, DashLoader.TaskHandler taskHandler) {
         taskHandler.setSubtasks(1);
         this.shaders = DashHelper.convertMapValues(data.getShaderData(), DashShader::new);
         taskHandler.completedSubTask();

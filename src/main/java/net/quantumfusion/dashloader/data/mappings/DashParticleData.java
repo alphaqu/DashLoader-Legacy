@@ -5,12 +5,12 @@ import io.activej.serializer.annotations.Serialize;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.util.Identifier;
+import net.quantumfusion.dashloader.DashLoader;
 import net.quantumfusion.dashloader.DashRegistry;
-import net.quantumfusion.dashloader.data.Dashable;
+import net.quantumfusion.dashloader.Dashable;
 import net.quantumfusion.dashloader.data.VanillaData;
+import net.quantumfusion.dashloader.data.serialization.Pointer2ObjectMap;
 import net.quantumfusion.dashloader.image.DashSpriteAtlasTexture;
-import net.quantumfusion.dashloader.util.TaskHandler;
-import net.quantumfusion.dashloader.util.serialization.Pointer2ObjectMap;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
@@ -32,7 +32,7 @@ public class DashParticleData implements Dashable {
         this.atlasTexture = atlasTexture;
     }
 
-    public DashParticleData(VanillaData data, DashRegistry registry, TaskHandler taskHandler) {
+    public DashParticleData(VanillaData data, DashRegistry registry, DashLoader.TaskHandler taskHandler) {
         this.particles = new Pointer2ObjectMap<>();
         final Map<Identifier, List<Sprite>> particles = data.getParticles();
         taskHandler.setSubtasks(particles.size() + 1);

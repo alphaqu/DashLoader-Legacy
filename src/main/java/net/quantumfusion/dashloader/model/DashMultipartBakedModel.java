@@ -11,10 +11,10 @@ import net.minecraft.client.render.model.json.MultipartModelSelector;
 import net.minecraft.state.StateManager;
 import net.minecraft.util.Util;
 import net.quantumfusion.dashloader.DashRegistry;
+import net.quantumfusion.dashloader.data.serialization.Pointer2ObjectMap;
+import net.quantumfusion.dashloader.data.serialization.Pointer2PointerMap;
 import net.quantumfusion.dashloader.mixin.accessor.MultipartBakedModelAccessor;
-import net.quantumfusion.dashloader.util.Unsafe;
-import net.quantumfusion.dashloader.util.serialization.Pointer2ObjectMap;
-import net.quantumfusion.dashloader.util.serialization.Pointer2PointerMap;
+import net.quantumfusion.dashloader.util.UnsafeHelper;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
@@ -62,7 +62,7 @@ public class DashMultipartBakedModel implements DashModel {
 
     @Override
     public BakedModel toUndash(DashRegistry registry) {
-        MultipartBakedModel model = Unsafe.allocateInstance(cls);
+        MultipartBakedModel model = UnsafeHelper.allocateInstance(cls);
         Map<BlockState, BitSet> stateCacheOut = new Object2ObjectOpenCustomHashMap<>(Util.identityHashStrategy());
         stateCache.forEach((entry) -> stateCacheOut.put(registry.getBlockstate(entry.key), BitSet.valueOf(entry.value)));
         ((MultipartBakedModelAccessor) model).setStateCache(stateCacheOut);

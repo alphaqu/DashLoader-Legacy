@@ -67,7 +67,7 @@ public class StateManagerMixin<O, S extends State<O, S>> {
 //
 //    private StateManager<O, S> multiBuild(Function<O, S> function, O object, StateManager.Factory<O, S> factory, Map<String, Property<?>> propertiesMap) {
 //        //noinspection unchecked
-//        final StateManager<O, S> stateManager = Unsafe.allocateInstance(StateManager.class);
+//        final StateManager<O, S> stateManager = UnsafeHelper.allocateInstance(StateManager.class);
 //        //stfu ----------- ^
 //        final StateManagerAccessor<O, S> access = (StateManagerAccessor<O, S>) stateManager;
 //
@@ -90,7 +90,7 @@ public class StateManagerMixin<O, S extends State<O, S>> {
 //
 //    private StateManager<O, S> fastBuild(Function<O, S> function, O object, StateManager.Factory<O, S> factory, Map<String, Property<?>> propertiesMap) {
 //        //noinspection unchecked
-//        final StateManager<O, S> stateManager = Unsafe.allocateInstance(StateManager.class);
+//        final StateManager<O, S> stateManager = UnsafeHelper.allocateInstance(StateManager.class);
 //        //stfu ----------- ^
 //        final StateManagerAccessor<O, S> access = (StateManagerAccessor<O, S>) stateManager;
 //

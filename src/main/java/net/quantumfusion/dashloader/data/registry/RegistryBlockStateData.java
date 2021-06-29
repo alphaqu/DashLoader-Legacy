@@ -4,7 +4,7 @@ import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.quantumfusion.dashloader.blockstate.DashBlockState;
-import net.quantumfusion.dashloader.util.serialization.Pointer2ObjectMap;
+import net.quantumfusion.dashloader.data.serialization.Pointer2ObjectMap;
 
 public class RegistryBlockStateData {
     @Serialize(order = 0)
