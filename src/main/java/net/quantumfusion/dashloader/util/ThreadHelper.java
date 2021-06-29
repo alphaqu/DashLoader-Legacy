@@ -7,6 +7,7 @@ import net.quantumfusion.dashloader.data.Dashable;
 import net.quantumfusion.dashloader.util.serialization.Pointer2ObjectMap;
 
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.function.Supplier;
@@ -16,7 +17,11 @@ public class ThreadHelper {
 
 
     public static void exec(Runnable... runnables) {
-        final List<Future<Object>> futures = DashLoader.THREAD_POOL.invokeAll(Arrays.stream(runnables).map(Executors::callable).collect(Collectors.toList()));
+        exec(Arrays.stream(runnables).map(Executors::callable).collect(Collectors.toList()));
+    }
+
+    public static <T> void exec(List<Callable<T>> callable) {
+        final List<Future<T>> futures = DashLoader.THREAD_POOL.invokeAll(callable);
         sleepUntilTrue(() -> futures.stream().allMatch(Future::isDone));
     }
 

@@ -1,11 +1,8 @@
 package net.quantumfusion.dashloader.mixin.feature.cache;
 
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.render.Shader;
-import net.minecraft.entity.Entity;
 import net.minecraft.resource.ResourceManager;
-import net.minecraft.util.Identifier;
 import net.quantumfusion.dashloader.DashLoader;
 import net.quantumfusion.dashloader.util.DashCacheState;
 import org.jetbrains.annotations.Nullable;
@@ -187,27 +184,6 @@ public abstract class GameRendererMixin {
     @Shadow
     @Final
     private Map<String, Shader> shaders;
-
-    @Shadow
-    private int forcedShaderIndex;
-
-    @Shadow
-    @Final
-    public static int SHADER_COUNT;
-
-    @Shadow
-    public abstract void onCameraEntitySet(@Nullable Entity entity);
-
-    @Shadow
-    @Final
-    private MinecraftClient client;
-
-    @Shadow
-    protected abstract void loadShader(Identifier id);
-
-    @Shadow
-    @Final
-    private static Identifier[] SHADERS_LOCATIONS;
 
     @Shadow
     protected abstract void clearShaders();

@@ -7,9 +7,13 @@ import net.quantumfusion.dashloader.data.VanillaData;
 import net.quantumfusion.dashloader.image.shader.DashShader;
 import net.quantumfusion.dashloader.util.DashHelper;
 import net.quantumfusion.dashloader.util.TaskHandler;
+import net.quantumfusion.dashloader.util.ThreadHelper;
 
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class DashShaderData {
     @Serialize(order = 0)
@@ -26,14 +30,13 @@ public class DashShaderData {
         taskHandler.completedSubTask();
     }
 
-    public Map<String, Shader> toUndash() {
-        return DashHelper.convertMapValues(shaders, shader -> {
-            try {
-                return shader.toUndash();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return null;
-        });
+    public <T> Map<String, Shader> toUndash() {
+        Map<String, Shader> out = new ConcurrentHashMap<>();
+        List<Callable<T>> callables = new ArrayList<>();
+        //noinspection unchecked, stfu
+        shaders.forEach((key, value) -> callables.add(() -> (T) out.put(key, value.toUndash())));
+        ThreadHelper.exec(callables);
+        shaders.values().forEach(DashShader::apply);
+        return out;
     }
 }

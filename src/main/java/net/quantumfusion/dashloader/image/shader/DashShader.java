@@ -1,6 +1,7 @@
 package net.quantumfusion.dashloader.image.shader;
 
 import com.google.common.collect.UnmodifiableIterator;
+import com.mojang.blaze3d.platform.GlStateManager;
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import io.activej.serializer.annotations.SerializeNullable;
@@ -12,7 +13,6 @@ import net.minecraft.client.render.VertexFormat;
 import net.quantumfusion.dashloader.mixin.accessor.ShaderAccessor;
 import net.quantumfusion.dashloader.util.VertexFormatsHelper;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -171,7 +171,7 @@ public class DashShader {
     }
 
 
-    public Shader toUndash() throws IOException {
+    public Shader toUndash() {
         toApply = Unsafe.allocateInstance(Shader.class);
         ShaderAccessor shaderAccess = (ShaderAccessor) toApply;
         //object init
@@ -214,25 +214,6 @@ public class DashShader {
         final GlUniform gameTimeOut = nullable(gameTime, (gameTime) -> gameTime.toUndash(toApply, uniforms));
         final GlUniform chunkOffsetOut = nullable(chunkOffset, (chunkOffset) -> chunkOffset.toUndash(toApply, uniforms));
 
-        shaderAccess.setBlendState(this.blendState.toUndash());
-        shaderAccess.setVertexShader(this.vertexShader.toUndashProgram());
-        shaderAccess.setFragmentShader(this.fragmentShader.toUndashProgram());
-
-
-        final int programId = GlProgramManager.createProgram();
-        shaderAccess.setProgramId(programId);
-
-
-        if (this.attributeNames != null) {
-            int l = 0;
-            for (UnmodifiableIterator<String> var35 = format.getShaderAttributes().iterator(); var35.hasNext(); ++l) {
-                String string3 = var35.next();
-                GlUniform.bindAttribLocation(programId, l, string3);
-                loadedAttributeIds.add(l);
-            }
-        }
-        GlProgramManager.linkProgram(toApply);
-        shaderAccess.loadref();
 
 
         toApply.markUniformsDirty();
@@ -250,6 +231,30 @@ public class DashShader {
         shaderAccess.setGameTime(gameTimeOut);
         shaderAccess.setChunkOffset(chunkOffsetOut);
         return toApply;
+    }
+
+
+    public void apply() {
+        ShaderAccessor shaderAccess = (ShaderAccessor) toApply;
+        shaderAccess.setBlendState(this.blendState.toUndash());
+        shaderAccess.setVertexShader(this.vertexShader.toUndashProgram());
+        shaderAccess.setFragmentShader(this.fragmentShader.toUndashProgram());
+        final List<Integer> loadedAttributeIds = shaderAccess.getLoadedAttributeIds();
+
+        final int programId = GlStateManager.glCreateProgram();
+        shaderAccess.setProgramId(programId);
+
+
+        if (this.attributeNames != null) {
+            int l = 0;
+            for (UnmodifiableIterator<String> var35 = format.getFormat().getShaderAttributes().iterator(); var35.hasNext(); ++l) {
+                String string3 = var35.next();
+                GlUniform.bindAttribLocation(programId, l, string3);
+                loadedAttributeIds.add(l);
+            }
+        }
+        GlProgramManager.linkProgram(toApply);
+        shaderAccess.loadref();
     }
 
 
