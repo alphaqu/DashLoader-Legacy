@@ -2,7 +2,6 @@ package net.quantumfusion.dashloader.image;
 
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
-import net.gudenau.lib.unsafe.Unsafe;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.util.Identifier;
@@ -11,6 +10,7 @@ import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.mixin.accessor.AbstractTextureAccessor;
 import net.quantumfusion.dashloader.mixin.accessor.SpriteAccessor;
 import net.quantumfusion.dashloader.mixin.accessor.SpriteAtlasTextureAccessor;
+import net.quantumfusion.dashloader.util.Unsafe;
 import net.quantumfusion.dashloader.util.serialization.Object2PointerMap;
 import net.quantumfusion.dashloader.util.serialization.Pointer2PointerMap;
 

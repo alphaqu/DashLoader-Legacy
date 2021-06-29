@@ -2,11 +2,11 @@ package net.quantumfusion.dashloader.image;
 
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
-import net.gudenau.lib.unsafe.Unsafe;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.Sprite;
 import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.mixin.accessor.SpriteInterpolationAccessor;
+import net.quantumfusion.dashloader.util.Unsafe;
 import net.quantumfusion.dashloader.util.duck.SpriteInterpolationDuck;
 
 public class DashSpriteInterpolation {

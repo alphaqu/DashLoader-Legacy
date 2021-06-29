@@ -3,7 +3,6 @@ package net.quantumfusion.dashloader.api;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.metadata.CustomValue;
 import net.fabricmc.loader.api.metadata.ModMetadata;
-import net.gudenau.lib.unsafe.Unsafe;
 import net.minecraft.client.font.Font;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.json.MultipartModelSelector;
@@ -21,6 +20,7 @@ import net.quantumfusion.dashloader.api.property.*;
 import net.quantumfusion.dashloader.model.predicates.DashStaticPredicate;
 import net.quantumfusion.dashloader.util.ClassHelper;
 import net.quantumfusion.dashloader.util.ThreadHelper;
+import net.quantumfusion.dashloader.util.Unsafe;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

@@ -5,12 +5,12 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import io.activej.serializer.annotations.SerializeNullable;
-import net.gudenau.lib.unsafe.Unsafe;
 import net.minecraft.client.gl.GlProgramManager;
 import net.minecraft.client.gl.GlUniform;
 import net.minecraft.client.render.Shader;
 import net.minecraft.client.render.VertexFormat;
 import net.quantumfusion.dashloader.mixin.accessor.ShaderAccessor;
+import net.quantumfusion.dashloader.util.Unsafe;
 import net.quantumfusion.dashloader.util.VertexFormatsHelper;
 
 import java.util.ArrayList;

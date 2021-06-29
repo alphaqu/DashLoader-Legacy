@@ -3,12 +3,12 @@ package net.quantumfusion.dashloader.image;
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import io.activej.serializer.annotations.SerializeNullable;
-import net.gudenau.lib.unsafe.Unsafe;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.Sprite;
 import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.data.Dashable;
 import net.quantumfusion.dashloader.mixin.accessor.SpriteAccessor;
+import net.quantumfusion.dashloader.util.Unsafe;
 
 public class DashSprite implements Dashable {
     @Serialize(order = 0)

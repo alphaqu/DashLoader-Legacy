@@ -2,11 +2,11 @@ package net.quantumfusion.dashloader.model.components;
 
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
-import net.gudenau.lib.unsafe.Unsafe;
 import net.minecraft.client.render.model.json.ModelOverrideList;
 import net.minecraft.util.Identifier;
 import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.mixin.accessor.ModelOverrideListAccessor;
+import net.quantumfusion.dashloader.util.Unsafe;
 
 public class DashModelOverrideList {
     @Serialize(order = 0)

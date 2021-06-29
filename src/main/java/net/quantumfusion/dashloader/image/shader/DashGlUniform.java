@@ -3,12 +3,12 @@ package net.quantumfusion.dashloader.image.shader;
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import io.activej.serializer.annotations.SerializeNullable;
-import net.gudenau.lib.unsafe.Unsafe;
 import net.minecraft.client.gl.GlShader;
 import net.minecraft.client.gl.GlUniform;
 import net.quantumfusion.dashloader.mixin.accessor.GlUniformAccessor;
 import net.quantumfusion.dashloader.util.DashHelper;
 import net.quantumfusion.dashloader.util.IOHelper;
+import net.quantumfusion.dashloader.util.Unsafe;
 import org.lwjgl.system.MemoryUtil;
 
 import java.nio.FloatBuffer;

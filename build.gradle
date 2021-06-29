@@ -43,9 +43,6 @@ dependencies {
     // Uncomment to add Sodium to the dev environment
     // modImplementation "com.github.CaffeineMC:sodium-fabric:${project.sodium_version}"
 
-    implementation "net.gudenau.lib:unsafe:1.4.1"
-    include "net.gudenau.lib:unsafe:1.4.1"
-
 }
 
 processResources {
