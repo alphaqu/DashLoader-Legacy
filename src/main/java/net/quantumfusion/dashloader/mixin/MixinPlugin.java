@@ -1,8 +1,5 @@
 package net.quantumfusion.dashloader.mixin;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.metadata.CustomValue;
@@ -11,9 +8,13 @@ import net.quantumfusion.dashloader.DashLoader;
 import net.quantumfusion.dashloader.api.feature.Feature;
 import net.quantumfusion.dashloader.api.feature.FeatureHandler;
 import net.quantumfusion.dashloader.util.DashConfig;
+import org.apache.commons.io.FileUtils;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.nodes.Tag;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -37,13 +38,15 @@ public class MixinPlugin implements IMixinConfigPlugin {
                 });
             }
         }
-        final ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory().disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER));
+        DumperOptions options = new DumperOptions();
+        options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+        Yaml yaml = new Yaml(options);
         final Path resolve = DashLoader.getConfig().resolve("dashloader.yaml");
         if (Files.exists(resolve)) {
             try {
                 resolve.toFile().setReadable(true);
-                final DashConfig dashConfig = objectMapper.readValue(resolve.toFile(), DashConfig.class);
-                for (Feature feature : dashConfig.disabledFeatures) {
+                final DashConfig dashConfig = yaml.loadAs(FileUtils.openInputStream(resolve.toFile()), DashConfig.class);
+                for (Feature feature : dashConfig.getDisabledFeatures()) {
                     FeatureHandler.disableFeature(feature);
                     DashLoader.LOGGER.error("Disabled " + feature + " feature from config");
                 }
@@ -54,7 +57,8 @@ public class MixinPlugin implements IMixinConfigPlugin {
             try {
                 resolve.toFile().setWritable(true);
                 Files.createFile(resolve);
-                objectMapper.writeValue(resolve.toFile(), new DashConfig(new Feature[]{}));
+                final DashConfig data = new DashConfig(new Feature[]{});
+                Files.writeString(resolve, yaml.dumpAs(data, Tag.MAP, null));
             } catch (IOException e) {
                 e.printStackTrace();
             }

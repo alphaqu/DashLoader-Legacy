@@ -36,16 +36,7 @@ dependencies {
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
-    //jackson yaml
-    implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:${project.jackson_version}"
-    include "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:${project.jackson_version}"
-    //core
-    implementation "com.fasterxml.jackson.core:jackson-core:${project.jackson_version}"
-    include "com.fasterxml.jackson.core:jackson-core:${project.jackson_version}"
-
-    //thing that is included
-    include "com.fasterxml.jackson.core:jackson-annotations:${project.jackson_version}"
-    include "com.fasterxml.jackson.core:jackson-databind:${project.jackson_version}"
+    //snakeyaml
     implementation "org.yaml:snakeyaml:1.27"
     include "org.yaml:snakeyaml:1.27"
 

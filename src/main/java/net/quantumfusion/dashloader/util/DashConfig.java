@@ -3,10 +3,10 @@ package net.quantumfusion.dashloader.util;
 import net.quantumfusion.dashloader.api.feature.Feature;
 
 public class DashConfig {
-    public Feature[] disabledFeatures;
+    private Feature[] disabledFeatures;
 
 
-    @SuppressWarnings("unused") // jackson
+    @SuppressWarnings("unused") // snakeyaml
     public DashConfig() {
     }
 
