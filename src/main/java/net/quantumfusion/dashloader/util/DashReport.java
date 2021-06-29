@@ -13,6 +13,8 @@ public class DashReport {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final List<Entry> entries = new ArrayList<>();
     private static final List<Pair<Instant, String>> times = new ArrayList<>();
+    private static final int BARSIZE = 20;
+    private static final char BARCHAR = '*';
 
     public static void addEntry(Entry entry) {
         entries.add(entry);
@@ -49,7 +51,16 @@ public class DashReport {
     }
 
     private static void printBorder(String text) {
-        LOGGER.info("*************************[{}]*************************", text);
+        final int chars = ((BARSIZE - text.length()) / 2);
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < chars; i++) {
+            chars.
+        }
+        LOGGER.info("{}[{}]{}", text);
+    }
+
+    public static void getBorder(int textLength) {
+
     }
 
     private static void printEntry(Entry entry) {

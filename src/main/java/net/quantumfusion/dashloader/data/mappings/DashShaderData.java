@@ -36,7 +36,6 @@ public class DashShaderData {
         //noinspection unchecked, stfu
         shaders.forEach((key, value) -> callables.add(() -> (T) out.put(key, value.toUndash())));
         ThreadHelper.exec(callables);
-        shaders.values().forEach(DashShader::apply);
         return out;
     }
 }
