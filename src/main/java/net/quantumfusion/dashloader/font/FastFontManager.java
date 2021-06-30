@@ -6,6 +6,10 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import net.minecraft.client.font.*;
 import net.minecraft.resource.Resource;
 import net.minecraft.resource.ResourceManager;
@@ -13,9 +17,11 @@ import net.minecraft.resource.ResourceReloader;
 import net.minecraft.resource.SinglePreparationResourceReloader;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.profiler.Profiler;
 import net.quantumfusion.dashloader.DashLoader;
 import net.quantumfusion.dashloader.mixin.accessor.FontManagerAccessor;
+import net.quantumfusion.dashloader.mixin.accessor.FontStorageAccessor;
 import net.quantumfusion.dashloader.mixin.accessor.UnicodeTextureFontAccessor;
 import net.quantumfusion.dashloader.util.enums.DashCacheState;
 import org.apache.logging.log4j.LogManager;
@@ -23,15 +29,14 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.function.IntConsumer;
+import java.util.function.IntFunction;
 
 public class FastFontManager {
 
-    private final FontManagerAccessor fontManager;
     private static final Logger LOGGER = LogManager.getLogger();
-
+    private final FontManagerAccessor fontManager;
     public final ResourceReloader resourceReloadListener = new SinglePreparationResourceReloader<Map<Identifier, List<Font>>>() {
         protected Map<Identifier, List<Font>> prepare(ResourceManager resourceManager, Profiler profiler) {
             final Map<Identifier, List<Font>> fontsOut = DashLoader.getVanillaData().getFonts();
@@ -103,11 +108,23 @@ public class FastFontManager {
             fontManager.getFontStorages().values().forEach(FontStorage::close);
             fontManager.getFontStorages().clear();
             profiler.swap("reloading");
-            map.forEach((identifier, list) -> {
-                FontStorage fontStorage = new FontStorage(fontManager.getTextureManager(), identifier);
-                fontStorage.setFonts(Lists.reverse(list));
-                fontManager.getFontStorages().put(identifier, fontStorage);
-            });
+            if (DashLoader.getVanillaData().getFonts() != null && DashLoader.getInstance().state == DashCacheState.LOADED) {
+                Map<FontStorage, List<Font>> fontMap = new LinkedHashMap<>();
+                map.forEach((identifier, fonts) -> {
+                    FontStorage fontStorage = new FontStorage(fontManager.getTextureManager(), identifier);
+                    prepareFontStorage(((FontStorageAccessor) fontStorage));
+                    fontManager.getFontStorages().put(identifier, fontStorage);
+                    fontMap.put(fontStorage, fonts);
+                });
+
+                fontMap.entrySet().parallelStream().forEach(entry -> computeFontStorages(((FontStorageAccessor) entry.getKey()), entry.getValue()));
+            } else {
+                map.forEach((identifier, list) -> {
+                    FontStorage fontStorage = new FontStorage(fontManager.getTextureManager(), identifier);
+                    fontStorage.setFonts(Lists.reverse(list));
+                    fontManager.getFontStorages().put(identifier, fontStorage);
+                });
+            }
             DashLoader.getVanillaData().setFontAssets(map);
             profiler.pop();
             profiler.endTick();
@@ -118,7 +135,42 @@ public class FastFontManager {
         }
     };
 
+
     public FastFontManager(FontManagerAccessor fontManager) {
         this.fontManager = fontManager;
+    }
+
+    private void prepareFontStorage(FontStorageAccessor access) {
+        access.closeFonts();
+        access.closeGlyphAtlases();
+        access.getGlyphRendererCache().clear();
+        access.getGlyphCache().clear();
+        access.getCharactersByWidth().clear();
+        access.setBlankGlyphRenderer(access.getGlyphRenderer(BlankGlyph.INSTANCE));
+        access.setWhiteRectangleGlyphRenderer(access.getGlyphRenderer(WhiteRectangleGlyph.INSTANCE));
+    }
+
+    private void computeFontStorages(FontStorageAccessor access, List<Font> fonts) {
+        final Glyph space = access.getSPACE();
+
+        final IntSet intSet = new IntOpenHashSet();
+        final IntFunction<IntList> creatIntArrayListFunc = (i) -> new IntArrayList();
+        fonts.forEach(font -> intSet.addAll(font.getProvidedGlyphs()));
+
+        final Set<Font> set = new HashSet<>();
+        intSet.forEach((IntConsumer) (codePoint) -> {
+            for (Font font : fonts) {
+                Glyph glyph = codePoint == 32 ? space : font.getGlyph(codePoint);
+                if (glyph != null) {
+                    set.add(font);
+                    if (glyph != BlankGlyph.INSTANCE) {
+                        access.getCharactersByWidth().computeIfAbsent(MathHelper.ceil(glyph.getAdvance(false)), creatIntArrayListFunc).add(codePoint);
+                    }
+                    break;
+                }
+            }
+
+        });
+        fonts.stream().filter(set::contains).forEach(fonts::add);
     }
 }
