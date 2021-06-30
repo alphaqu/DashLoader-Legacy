@@ -13,12 +13,12 @@ import java.util.List;
 
 public class DashSpriteAnimation {
     @Serialize(order = 0)
-    public DashSpriteAnimationFrame[] frames;
+    public final DashSpriteAnimationFrame[] frames;
     @Serialize(order = 1)
-    public int frameCount;
+    public final int frameCount;
     @Serialize(order = 2)
     @SerializeNullable
-    public DashSpriteInterpolation interpolation;
+    public final DashSpriteInterpolation interpolation;
 
     public DashSpriteAnimation(@Deserialize("frames") DashSpriteAnimationFrame[] frames,
                                @Deserialize("frameCount") int frameCount,

@@ -1,6 +1,7 @@
 package net.quantumfusion.dashloader.util;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.quantumfusion.dashloader.DashLoader;
 import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.Dashable;
@@ -8,7 +9,10 @@ import net.quantumfusion.dashloader.data.serialization.Pointer2ObjectMap;
 import net.quantumfusion.dashloader.model.DashModel;
 import org.apache.commons.lang3.tuple.Pair;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -25,8 +29,8 @@ public class ThreadHelper {
         sleepUntilTrue(() -> futures.stream().allMatch(Future::isDone));
     }
 
-    public static <V, D extends Dashable> Map<Integer, V> execParallel(Int2ObjectMap<D> dashables, DashRegistry registry) {
-        final Map<Integer, V> answerMap = new HashMap<>((int) Math.ceil(dashables.size() / 0.75));
+    public static <V, D extends Dashable> Int2ObjectMap<V> execParallel(Int2ObjectMap<D> dashables, DashRegistry registry) {
+        final Int2ObjectMap<V> answerMap = new Int2ObjectOpenHashMap<>((int) Math.ceil(dashables.size() / 0.75));
         final Collection<Pointer2ObjectMap.Entry<V>> invoke = DashLoader.THREAD_POOL.invoke(new UndashTask<>(new ArrayList<>(dashables.int2ObjectEntrySet()), 100, registry));
         invoke.forEach((answer) -> answerMap.put(answer.key, answer.value));
         return answerMap;

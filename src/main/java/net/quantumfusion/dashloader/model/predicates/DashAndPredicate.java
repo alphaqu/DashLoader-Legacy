@@ -17,7 +17,7 @@ import java.util.function.Predicate;
 public class DashAndPredicate implements DashPredicate {
     @Serialize(order = 0)
     @SerializeSubclasses(path = {0}, extraSubclassesId = "predicates")
-    public List<DashPredicate> selectors;
+    public final List<DashPredicate> selectors;
 
     public DashAndPredicate(@Deserialize("selectors") List<DashPredicate> selectors) {
         this.selectors = selectors;

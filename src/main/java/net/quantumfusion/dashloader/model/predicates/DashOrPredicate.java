@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 public class DashOrPredicate implements DashPredicate {
     @Serialize(order = 0)
     @SerializeSubclasses(path = {0}, extraSubclassesId = "predicates")
-    public List<DashPredicate> selectors;
+    public final List<DashPredicate> selectors;
 
     public DashOrPredicate(@Deserialize("selectors") List<DashPredicate> selectors) {
         this.selectors = selectors;

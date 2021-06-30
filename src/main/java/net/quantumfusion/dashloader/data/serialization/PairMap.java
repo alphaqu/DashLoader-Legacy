@@ -10,7 +10,7 @@ import java.util.function.BiConsumer;
 public class PairMap<K, V> {
 
     @Serialize(order = 0)
-    public List<Entry<K, V>> data;
+    public final List<Entry<K, V>> data;
 
     public PairMap(@Deserialize("data") List<Entry<K, V>> data) {
         this.data = data;

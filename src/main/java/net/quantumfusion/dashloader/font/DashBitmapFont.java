@@ -12,7 +12,7 @@ public class DashBitmapFont implements DashFont {
     @Serialize(order = 0)
     public final int image;
     @Serialize(order = 1)
-    public Pointer2ObjectMap<DashBitmapFontGlyph> glyphs;
+    public final Pointer2ObjectMap<DashBitmapFontGlyph> glyphs;
 
     public DashBitmapFont(@Deserialize("image") int image,
                           @Deserialize("glyphs") Pointer2ObjectMap<DashBitmapFontGlyph> glyphs) {

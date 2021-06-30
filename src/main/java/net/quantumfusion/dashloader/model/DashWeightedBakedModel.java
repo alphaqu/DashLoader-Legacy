@@ -14,7 +14,7 @@ import java.util.List;
 public class DashWeightedBakedModel implements DashModel {
 
     @Serialize(order = 0)
-    public List<DashWeightedModelEntry> models;
+    public final List<DashWeightedModelEntry> models;
 
     public DashWeightedBakedModel(@Deserialize("models") List<DashWeightedModelEntry> models) {
         this.models = models;

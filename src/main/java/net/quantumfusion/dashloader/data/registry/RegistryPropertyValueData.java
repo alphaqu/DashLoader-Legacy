@@ -10,7 +10,7 @@ import net.quantumfusion.dashloader.data.serialization.Pointer2ObjectMap;
 public class RegistryPropertyValueData {
     @Serialize(order = 0)
     @SerializeSubclasses(path = {0}, extraSubclassesId = "values")
-    public Pointer2ObjectMap<DashPropertyValue> propertyValues;
+    public final Pointer2ObjectMap<DashPropertyValue> propertyValues;
 
     public RegistryPropertyValueData(@Deserialize("propertyValues") Pointer2ObjectMap<DashPropertyValue> propertyValues) {
         this.propertyValues = propertyValues;

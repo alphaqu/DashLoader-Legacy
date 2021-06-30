@@ -2,14 +2,13 @@ package net.quantumfusion.dashloader.mixin.accessor;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.IntList;
-import net.minecraft.client.font.FontStorage;
-import net.minecraft.client.font.Glyph;
-import net.minecraft.client.font.GlyphRenderer;
-import net.minecraft.client.font.RenderableGlyph;
+import net.minecraft.client.font.*;
 import net.minecraft.util.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
+
+import java.util.List;
 
 @Mixin(FontStorage.class)
 public interface FontStorageAccessor {
@@ -32,16 +31,20 @@ public interface FontStorageAccessor {
     @Accessor
     Int2ObjectMap<IntList> getCharactersByWidth();
 
-
     @Accessor
     Glyph getSPACE();
 
-    @Invoker
-    GlyphRenderer getGlyphRenderer(RenderableGlyph c);
+
+    @Accessor
+    List<Font> getFonts();
+
 
     @Invoker
-    void closeFonts();
+    GlyphRenderer callGetGlyphRenderer(RenderableGlyph c);
 
     @Invoker
-    void closeGlyphAtlases();
+    void callCloseFonts();
+
+    @Invoker
+    void callCloseGlyphAtlases();
 }

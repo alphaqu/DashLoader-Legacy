@@ -50,15 +50,15 @@ public class DashRegistry {
     private static int tasksDone = 0;
     private final Map<Integer, DashModel> models;
     public Map<Class, FactoryType> apiFailed = new ConcurrentHashMap<>();
-    public Map<Integer, BlockState> blockstatesOut;
-    public Map<Integer, Predicate<BlockState>> predicateOut;
-    public Map<Integer, Identifier> identifiersOut;
-    public Map<Integer, BakedModel> modelsOut;
-    public Map<Integer, Sprite> spritesOut;
-    public Map<Integer, Font> fontsOut;
-    public Map<Integer, NativeImage> imagesOut;
-    public Map<Integer, Property<?>> propertiesOut;
-    public Map<Integer, Comparable<?>> propertyValuesOut;
+    public Int2ObjectMap<BlockState> blockstatesOut;
+    public Int2ObjectMap<Predicate<BlockState>> predicateOut;
+    public Int2ObjectMap<Identifier> identifiersOut;
+    public Int2ObjectMap<BakedModel> modelsOut;
+    public Int2ObjectMap<Sprite> spritesOut;
+    public Int2ObjectMap<Font> fontsOut;
+    public Int2ObjectMap<NativeImage> imagesOut;
+    public Int2ObjectMap<Property<?>> propertiesOut;
+    public Int2ObjectMap<Comparable<?>> propertyValuesOut;
     DashLoader loader;
     private Int2ObjectMap<DashBlockState> blockstates;
     private Int2ObjectMap<DashSprite> sprites;
@@ -262,59 +262,31 @@ public class DashRegistry {
     }
 
     public final BlockState getBlockstate(final int pointer) {
-        final BlockState blockstate = blockstatesOut.get(pointer);
-        if (blockstate == null) {
-            DashLoader.LOGGER.error("Blockstate not found in data. PINTR: " + pointer);
-        }
-        return blockstate;
+        return logIfNullThenReturn(blockstatesOut, pointer, "BlockState");
     }
 
     public final Sprite getSprite(final int pointer) {
-        final Sprite sprite = spritesOut.get(pointer);
-        if (sprite == null) {
-            DashLoader.LOGGER.error("Sprite not found in data. PINTR: " + pointer);
-        }
-        return sprite;
+        return logIfNullThenReturn(spritesOut, pointer, "Sprite");
     }
 
     public final Identifier getIdentifier(final int pointer) {
-        final Identifier identifier = identifiersOut.get(pointer);
-        if (identifier == null) {
-            DashLoader.LOGGER.error("Identifier not found in data. PINTR: " + pointer);
-        }
-        return identifier;
+        return logIfNullThenReturn(identifiersOut, pointer, "Identifier");
     }
 
     public final BakedModel getModel(final int pointer) {
-        final BakedModel bakedModel = modelsOut.get(pointer);
-        if (bakedModel == null) {
-            DashLoader.LOGGER.error("Model not found in data. PINTR: " + pointer);
-        }
-        return bakedModel;
+        return logIfNullThenReturn(modelsOut, pointer, "BakedModel");
     }
 
     public final Font getFont(final int pointer) {
-        final Font font = fontsOut.get(pointer);
-        if (font == null) {
-            DashLoader.LOGGER.error("Font not found in data. PINTR: " + pointer);
-        }
-        return font;
+        return logIfNullThenReturn(fontsOut, pointer, "Font");
     }
 
     public final NativeImage getImage(final int pointer) {
-        final NativeImage image = imagesOut.get(pointer);
-        if (image == null) {
-            DashLoader.LOGGER.error("NativeImage not found in data. PINTR: " + pointer);
-        }
-        return image;
+        return logIfNullThenReturn(imagesOut, pointer, "NativeImage");
     }
 
     public final Predicate<BlockState> getPredicate(final int pointer) {
-        final Predicate<BlockState> predicate = predicateOut.get(pointer);
-        if (predicate == null) {
-            DashLoader.LOGGER.error("Predicate not found in data. PINTR: " + pointer);
-        }
-        return predicate;
+        return logIfNullThenReturn(predicateOut, pointer, "Predicate");
     }
 
     public final Pair<Property<?>, Comparable<?>> getProperty(final int propertyPointer, final int valuePointer) {
@@ -324,6 +296,17 @@ public class DashRegistry {
             DashLoader.LOGGER.error("Property not found in data. PINTR: " + propertyPointer + "/" + valuePointer);
         }
         return Pair.of(property, value);
+    }
+
+
+    private <T> T logIfNullThenReturn(final Int2ObjectMap<T> map, final int ptr, final String typeStr) {
+        final T t = map.get(ptr);
+        if (t == null) {
+            //reified type parameters when?  - leocth
+            //DashLoader.LOGGER.error(T.class.getSimpleName() + " not found in data. PINTR: " + ptr);
+            DashLoader.LOGGER.error(typeStr + " not found in data. PINTR: " + ptr);
+        }
+        return t;
     }
 
     public void toUndash() {
@@ -352,7 +335,7 @@ public class DashRegistry {
             sprites = null;
             fonts = null;
 
-            modelsOut = new HashMap<>((int) Math.ceil(modelsToDeserialize.size() / 0.75));
+            modelsOut = new Int2ObjectOpenHashMap<>((int) Math.ceil(modelsToDeserialize.size() / 0.75));
             final short[] currentStage = {0};
             modelsToDeserialize.forEach(modelCategory -> {
                 log(logger, "Loading " + modelCategory.size() + " Models: " + "[" + currentStage[0] + "]");

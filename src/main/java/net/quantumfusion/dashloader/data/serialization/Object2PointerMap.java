@@ -13,7 +13,7 @@ public class Object2PointerMap<O> {
 
 
     @Serialize(order = 0)
-    public List<Entry<O>> data;
+    public final List<Entry<O>> data;
 
     public Object2PointerMap(@Deserialize("data") List<Entry<O>> data) {
         this.data = data;

@@ -10,7 +10,7 @@ import net.quantumfusion.dashloader.font.DashFont;
 public class RegistryFontData {
     @Serialize(order = 0)
     @SerializeSubclasses(path = {0}, extraSubclassesId = "fonts")
-    public Pointer2ObjectMap<DashFont> fonts;
+    public final Pointer2ObjectMap<DashFont> fonts;
 
     public RegistryFontData(@Deserialize("fonts") Pointer2ObjectMap<DashFont> fonts) {
         this.fonts = fonts;

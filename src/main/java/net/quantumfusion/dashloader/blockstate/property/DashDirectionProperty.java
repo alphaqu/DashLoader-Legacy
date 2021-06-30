@@ -13,7 +13,7 @@ public class DashDirectionProperty implements DashProperty {
 
 
     @Serialize(order = 0)
-    public String name;
+    public final String name;
 
     public DashDirectionProperty(@Deserialize("name") String name) {
         this.name = name;

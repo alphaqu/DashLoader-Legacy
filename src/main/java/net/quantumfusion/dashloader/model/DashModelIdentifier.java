@@ -14,7 +14,7 @@ import net.quantumfusion.dashloader.mixin.accessor.ModelIdentifierAccessor;
 public class DashModelIdentifier implements DashID {
     @Serialize(order = 0)
     @SerializeFixedSize(3)
-    public String[] strings;
+    public final String[] strings;
 
     public DashModelIdentifier(@Deserialize("strings") String[] strings) {
         this.strings = strings;

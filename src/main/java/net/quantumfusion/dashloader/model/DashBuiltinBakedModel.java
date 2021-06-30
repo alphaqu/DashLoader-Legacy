@@ -15,13 +15,13 @@ import net.quantumfusion.dashloader.model.components.DashModelTransformation;
 public class DashBuiltinBakedModel implements DashModel {
     @Serialize(order = 0)
     @SerializeNullable
-    public DashModelTransformation transformation;
+    public final DashModelTransformation transformation;
     @Serialize(order = 1)
-    public DashModelOverrideList itemPropertyOverrides;
+    public final DashModelOverrideList itemPropertyOverrides;
     @Serialize(order = 2)
-    public int spritePointer;
+    public final int spritePointer;
     @Serialize(order = 3)
-    public boolean sideLit;
+    public final boolean sideLit;
 
     public DashBuiltinBakedModel(
             @Deserialize("transformation") DashModelTransformation transformation,
@@ -34,8 +34,6 @@ public class DashBuiltinBakedModel implements DashModel {
         this.sideLit = sideLit;
     }
 
-    public DashBuiltinBakedModel() {
-    }
 
     public DashBuiltinBakedModel(BuiltinBakedModel builtinBakedModel, DashRegistry registry) {
         BuiltinBakedModelAccessor access = ((BuiltinBakedModelAccessor) builtinBakedModel);

@@ -15,7 +15,7 @@ public class RegistryIdentifierData {
             DashIdentifier.class,
             DashModelIdentifier.class
     })
-    public Pointer2ObjectMap<DashID> identifiers;
+    public final Pointer2ObjectMap<DashID> identifiers;
 
     public RegistryIdentifierData(@Deserialize("identifiers") Pointer2ObjectMap<DashID> identifiers) {
         this.identifiers = identifiers;

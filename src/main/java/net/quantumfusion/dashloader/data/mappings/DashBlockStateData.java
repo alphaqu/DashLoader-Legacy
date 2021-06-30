@@ -14,7 +14,7 @@ import net.quantumfusion.dashloader.data.serialization.Pointer2PointerMap;
 public class DashBlockStateData implements Dashable {
 
     @Serialize(order = 0)
-    public Pointer2PointerMap blockstates;
+    public final Pointer2PointerMap blockstates;
 
     public DashBlockStateData(@Deserialize("blockstates") Pointer2PointerMap blockstates) {
         this.blockstates = blockstates;

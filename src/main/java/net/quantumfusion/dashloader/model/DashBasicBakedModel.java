@@ -25,25 +25,23 @@ import java.util.Map;
 
 public class DashBasicBakedModel implements DashModel {
     @Serialize(order = 0)
-    public List<DashBakedQuad> quads;
+    public final List<DashBakedQuad> quads;
     @Serialize(order = 1)
-    public PairMap<DashDirection, List<DashBakedQuad>> faceQuads;
+    public final PairMap<DashDirection, List<DashBakedQuad>> faceQuads;
     @Serialize(order = 2)
-    public boolean usesAo;
+    public final boolean usesAo;
     @Serialize(order = 3)
-    public boolean hasDepth;
+    public final boolean hasDepth;
     @Serialize(order = 4)
-    public boolean isSideLit;
+    public final boolean isSideLit;
     @Serialize(order = 5)
     @SerializeNullable
-    public DashModelTransformation transformation;
+    public final DashModelTransformation transformation;
     @Serialize(order = 6)
-    public DashModelOverrideList itemPropertyOverrides;
+    public final DashModelOverrideList itemPropertyOverrides;
     @Serialize(order = 7)
-    public int spritePointer;
+    public final int spritePointer;
 
-    public DashBasicBakedModel() {
-    }
 
     public DashBasicBakedModel(@Deserialize("quads") List<DashBakedQuad> quads,
                                @Deserialize("faceQuads") PairMap<DashDirection, List<DashBakedQuad>> faceQuads,

@@ -18,7 +18,7 @@ import java.util.Map;
 public class DashFontManagerData implements Dashable {
 
     @Serialize(order = 0)
-    public Pointer2ObjectMap<List<Integer>> fontMap;
+    public final Pointer2ObjectMap<List<Integer>> fontMap;
 
     public DashFontManagerData(@Deserialize("fontMap") Pointer2ObjectMap<List<Integer>> fontMap) {
         this.fontMap = fontMap;

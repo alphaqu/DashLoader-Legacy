@@ -8,21 +8,21 @@ import net.quantumfusion.dashloader.mixin.accessor.BitmapFontGlyphAccessor;
 
 public class DashBitmapFontGlyph {
     @Serialize(order = 0)
-    public float scaleFactor;
+    public final float scaleFactor;
     @Serialize(order = 1)
-    public int image;
+    public final int image;
     @Serialize(order = 2)
-    public int x;
+    public final int x;
     @Serialize(order = 3)
-    public int y;
+    public final int y;
     @Serialize(order = 4)
-    public int width;
+    public final int width;
     @Serialize(order = 5)
-    public int height;
+    public final int height;
     @Serialize(order = 6)
-    public int advance;
+    public final int advance;
     @Serialize(order = 7)
-    public int ascent;
+    public final int ascent;
 
     public DashBitmapFontGlyph(@Deserialize("scaleFactor") float scaleFactor,
                                @Deserialize("image") int image,

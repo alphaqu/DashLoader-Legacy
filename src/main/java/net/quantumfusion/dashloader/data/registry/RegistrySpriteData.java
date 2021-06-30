@@ -8,7 +8,7 @@ import net.quantumfusion.dashloader.image.DashSprite;
 
 public class RegistrySpriteData {
     @Serialize(order = 0)
-    public Pointer2ObjectMap<DashSprite> sprites;
+    public final Pointer2ObjectMap<DashSprite> sprites;
 
     public RegistrySpriteData(@Deserialize("sprites") Pointer2ObjectMap<DashSprite> sprites) {
         this.sprites = sprites;

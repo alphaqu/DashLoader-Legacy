@@ -13,7 +13,7 @@ import java.util.List;
 public class RegistryModelData {
     @Serialize(order = 0)
     @SerializeSubclasses(path = {0, 0}, extraSubclassesId = "models")
-    public Pointer2ObjectMap<Pointer2ObjectMap<DashModel>> models;
+    public final Pointer2ObjectMap<Pointer2ObjectMap<DashModel>> models;
 
     public RegistryModelData(@Deserialize("models") Pointer2ObjectMap<Pointer2ObjectMap<DashModel>> models) {
         this.models = models;

@@ -24,10 +24,10 @@ public class DashSimplePredicate implements DashPredicate {
     private static final Splitter VALUE_SPLITTER = Splitter.on('|').omitEmptyStrings();
 
     @Serialize(order = 0)
-    public Pointer2PointerMap properties;
+    public final Pointer2PointerMap properties;
 
     @Serialize(order = 1)
-    public boolean negate;
+    public final boolean negate;
 
     public DashSimplePredicate(@Deserialize("properties") Pointer2PointerMap properties,
                                @Deserialize("negate") boolean negate) {
@@ -39,24 +39,21 @@ public class DashSimplePredicate implements DashPredicate {
     public DashSimplePredicate(SimpleMultipartModelSelector simpleMultipartModelSelector, StateManager<Block, BlockState> stateManager, DashRegistry registry) {
         SimpleMultipartModelSelectorAccessor access = ((SimpleMultipartModelSelectorAccessor) simpleMultipartModelSelector);
         Property<?> stateManagerProperty = stateManager.getProperty(access.getKey());
-        if (stateManagerProperty == null) {
-            System.out.println("no no no no no no no no no no no no no");
-        } else {
-            String string = access.getValueString();
-            negate = !string.isEmpty() && string.charAt(0) == '!';
-            if (negate) {
-                string = string.substring(1);
-            }
-            List<String> list = VALUE_SPLITTER.splitToList(string);
-            properties = new Pointer2PointerMap();
-            if (list.size() == 1) {
-                Pair<Integer, Integer> predicateProperty = createPredicateInfo(stateManager, stateManagerProperty, string, registry);
-                properties.put(predicateProperty.getLeft(), predicateProperty.getRight());
-            } else {
-                List<Pair<Integer, Integer>> predicateProperties = list.stream().map((stringx) -> createPredicateInfo(stateManager, stateManagerProperty, stringx, registry)).collect(Collectors.toList());
-                predicateProperties.forEach(pair -> properties.put(pair.getLeft(), pair.getRight()));
-            }
+        properties = new Pointer2PointerMap();
+        String string = access.getValueString();
+        negate = !string.isEmpty() && string.charAt(0) == '!';
+        if (negate) {
+            string = string.substring(1);
         }
+        List<String> list = VALUE_SPLITTER.splitToList(string);
+        if (list.size() == 1) {
+            Pair<Integer, Integer> predicateProperty = createPredicateInfo(stateManager, stateManagerProperty, string, registry);
+            properties.put(predicateProperty.getLeft(), predicateProperty.getRight());
+        } else {
+            List<Pair<Integer, Integer>> predicateProperties = list.stream().map((stringx) -> createPredicateInfo(stateManager, stateManagerProperty, stringx, registry)).collect(Collectors.toList());
+            predicateProperties.forEach(pair -> properties.put(pair.getLeft(), pair.getRight()));
+        }
+
     }
 
 
@@ -87,9 +84,7 @@ public class DashSimplePredicate implements DashPredicate {
 
 
     private Predicate<BlockState> createPredicate(Map.Entry<? extends Property<?>, ? extends Comparable<?>> entry) {
-        final Property<?> property = entry.getKey();
-        final Comparable<?> value = entry.getValue();
-        return (blockState) -> blockState.get(property).equals(value);
+        return (blockState) -> blockState.get(entry.getKey()).equals(entry.getValue());
     }
 
 }

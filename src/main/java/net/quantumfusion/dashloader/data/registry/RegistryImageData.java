@@ -8,7 +8,7 @@ import net.quantumfusion.dashloader.image.DashImage;
 
 public class RegistryImageData {
     @Serialize(order = 0)
-    public Pointer2ObjectMap<DashImage> images;
+    public final Pointer2ObjectMap<DashImage> images;
 
     public RegistryImageData(@Deserialize("images") Pointer2ObjectMap<DashImage> images) {
         this.images = images;

@@ -9,13 +9,13 @@ import net.quantumfusion.dashloader.data.DashDirection;
 
 public class DashBakedQuad {
     @Serialize(order = 0)
-    public int[] vertexData;
+    public final int[] vertexData;
     @Serialize(order = 1)
-    public int colorIndex;
+    public final int colorIndex;
     @Serialize(order = 2)
-    public DashDirection face;
+    public final DashDirection face;
     @Serialize(order = 3)
-    public boolean shade;
+    public final boolean shade;
 
     public DashBakedQuad(@Deserialize("vertexData") int[] vertexData,
                          @Deserialize("colorIndex") int colorIndex,

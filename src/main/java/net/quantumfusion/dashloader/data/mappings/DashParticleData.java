@@ -21,10 +21,10 @@ import java.util.Map;
 public class DashParticleData implements Dashable {
 
     @Serialize(order = 0)
-    public Pointer2ObjectMap<List<Integer>> particles;
+    public final Pointer2ObjectMap<List<Integer>> particles;
 
     @Serialize(order = 1)
-    public DashSpriteAtlasTexture atlasTexture;
+    public final DashSpriteAtlasTexture atlasTexture;
 
     public DashParticleData(@Deserialize("particles") Pointer2ObjectMap<List<Integer>> particles,
                             @Deserialize("atlasTexture") DashSpriteAtlasTexture atlasTexture) {

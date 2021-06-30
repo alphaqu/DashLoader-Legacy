@@ -10,7 +10,7 @@ import net.quantumfusion.dashloader.model.predicates.DashPredicate;
 public class RegistryPredicateData {
     @Serialize(order = 0)
     @SerializeSubclasses(path = {0}, extraSubclassesId = "predicates")
-    public Pointer2ObjectMap<DashPredicate> predicates;
+    public final Pointer2ObjectMap<DashPredicate> predicates;
 
     public RegistryPredicateData(@Deserialize("predicates") Pointer2ObjectMap<DashPredicate> predicates) {
         this.predicates = predicates;

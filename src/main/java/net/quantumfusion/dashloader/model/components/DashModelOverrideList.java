@@ -6,7 +6,6 @@ import net.minecraft.client.render.model.json.ModelOverrideList;
 import net.minecraft.util.Identifier;
 import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.mixin.accessor.ModelOverrideListAccessor;
-import net.quantumfusion.dashloader.util.UnsafeHelper;
 
 public class DashModelOverrideList {
     @Serialize(order = 0)
@@ -36,7 +35,7 @@ public class DashModelOverrideList {
     }
 
     public ModelOverrideList toUndash(DashRegistry registry) {
-        toApply = UnsafeHelper.allocateInstance(ModelOverrideList.class);
+        toApply = ModelOverrideListAccessor.newModelOverrideList();
         final int length = conditionTypes.length;
         final Identifier[] identifiers = new Identifier[length];
         for (int i = 0; i < length; i++) {

@@ -12,7 +12,7 @@ import java.util.function.Consumer;
 
 public class Pointer2ObjectMap<O> {
     @Serialize(order = 0)
-    public List<Entry<O>> data;
+    public final List<Entry<O>> data;
 
     public Pointer2ObjectMap(@Deserialize("data") List<Entry<O>> data) {
         this.data = data;

@@ -10,13 +10,13 @@ import java.util.Objects;
 public class DashIntProperty implements DashProperty {
 
     @Serialize(order = 0)
-    public String name;
+    public final String name;
 
     @Serialize(order = 1)
-    public int lowest;
+    public final int lowest;
 
     @Serialize(order = 2)
-    public int highest;
+    public final int highest;
 
 
     public DashIntProperty(@Deserialize("name") String name,
@@ -29,16 +29,18 @@ public class DashIntProperty implements DashProperty {
 
     public DashIntProperty(IntProperty property) {
         name = property.getName();
-        this.lowest = -1;
-        this.highest = -1;
+        int lowest = -1;
+        int highest = -1;
         for (Integer integer : property.getValues()) {
             if (integer > highest || highest == -1) {
-                this.highest = integer;
+                highest = integer;
             }
             if (integer < lowest || lowest == -1) {
-                this.lowest = integer;
+                lowest = integer;
             }
         }
+        this.lowest = lowest;
+        this.highest = highest;
     }
 
     @Override

@@ -17,7 +17,7 @@ public class DashModelData implements Dashable {
 
 
     @Serialize(order = 0)
-    public Pointer2PointerMap models;
+    public final Pointer2PointerMap models;
 
 
     public DashModelData(@Deserialize("models") Pointer2PointerMap models) {

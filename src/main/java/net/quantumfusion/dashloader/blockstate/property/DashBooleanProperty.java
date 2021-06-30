@@ -10,7 +10,7 @@ import java.util.Objects;
 public class DashBooleanProperty implements DashProperty {
 
     @Serialize(order = 0)
-    public String name;
+    public final String name;
 
     public DashBooleanProperty(@Deserialize("name") String name) {
         this.name = name;

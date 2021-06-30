@@ -27,10 +27,10 @@ public class DashMultipartBakedModel implements DashModel {
 
     //identifier baked model
     @Serialize(order = 0)
-    public Pointer2PointerMap components;
+    public final Pointer2PointerMap components;
 
     @Serialize(order = 1)
-    public Pointer2ObjectMap<byte[]> stateCache;
+    public final Pointer2ObjectMap<byte[]> stateCache;
 
     MultipartBakedModel toApply;
 

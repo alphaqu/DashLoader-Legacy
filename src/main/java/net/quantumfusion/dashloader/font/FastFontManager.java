@@ -117,7 +117,7 @@ public class FastFontManager {
                     fontMap.put(fontStorage, fonts);
                 });
 
-                fontMap.entrySet().parallelStream().forEach(entry -> computeFontStorages(((FontStorageAccessor) entry.getKey()), entry.getValue()));
+                fontMap.entrySet().parallelStream().forEach(entry -> computeFontStorages(((FontStorageAccessor) entry.getKey()), Lists.reverse(entry.getValue())));
             } else {
                 map.forEach((identifier, list) -> {
                     FontStorage fontStorage = new FontStorage(fontManager.getTextureManager(), identifier);
@@ -141,13 +141,13 @@ public class FastFontManager {
     }
 
     private void prepareFontStorage(FontStorageAccessor access) {
-        access.closeFonts();
-        access.closeGlyphAtlases();
+        access.callCloseFonts();
+        access.callCloseGlyphAtlases();
         access.getGlyphRendererCache().clear();
         access.getGlyphCache().clear();
         access.getCharactersByWidth().clear();
-        access.setBlankGlyphRenderer(access.getGlyphRenderer(BlankGlyph.INSTANCE));
-        access.setWhiteRectangleGlyphRenderer(access.getGlyphRenderer(WhiteRectangleGlyph.INSTANCE));
+        access.setBlankGlyphRenderer(access.callGetGlyphRenderer(BlankGlyph.INSTANCE));
+        access.setWhiteRectangleGlyphRenderer(access.callGetGlyphRenderer(WhiteRectangleGlyph.INSTANCE));
     }
 
     private void computeFontStorages(FontStorageAccessor access, List<Font> fonts) {
@@ -171,6 +171,6 @@ public class FastFontManager {
             }
 
         });
-        fonts.stream().filter(set::contains).forEach(fonts::add);
+        fonts.stream().filter(set::contains).forEach(access.getFonts()::add);
     }
 }

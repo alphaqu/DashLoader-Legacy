@@ -17,7 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class DashShaderData {
     @Serialize(order = 0)
-    public Map<String, DashShader> shaders;
+    public final Map<String, DashShader> shaders;
 
 
     public DashShaderData(@Deserialize("shaders") Map<String, DashShader> shaders) {

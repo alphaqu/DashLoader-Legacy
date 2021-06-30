@@ -11,7 +11,7 @@ import java.util.function.Consumer;
 
 public class Pointer2PointerMap {
     @Serialize(order = 0)
-    public List<Entry> data;
+    public final List<Entry> data;
 
     public Pointer2PointerMap(@Deserialize("data") List<Entry> data) {
         this.data = data;

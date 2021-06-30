@@ -19,7 +19,7 @@ import java.util.Map;
 
 public class DashSpriteAtlasData {
     @Serialize(order = 0)
-    public Object2PointerMap<DashSpriteAtlasTexture> atlases;
+    public final Object2PointerMap<DashSpriteAtlasTexture> atlases;
 
     public DashSpriteAtlasData(@Deserialize("atlases") Object2PointerMap<DashSpriteAtlasTexture> atlases) {
         this.atlases = atlases;

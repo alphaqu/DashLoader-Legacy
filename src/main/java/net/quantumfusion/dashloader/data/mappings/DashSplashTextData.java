@@ -9,7 +9,7 @@ import java.util.List;
 
 public class DashSplashTextData {
     @Serialize(order = 0)
-    public List<String> splashList;
+    public final List<String> splashList;
 
     public DashSplashTextData(@Deserialize("splashList") List<String> splashList) {
         this.splashList = splashList;
