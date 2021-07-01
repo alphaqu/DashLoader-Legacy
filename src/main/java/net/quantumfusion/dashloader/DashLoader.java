@@ -149,6 +149,13 @@ public class DashLoader {
         } catch (Exception e) {
             state = DashCacheState.CRASHLOADER;
             LOGGER.error("DashLoader has devolved to CrashLoader???", e);
+            if (!FabricLoader.getInstance().isDevelopmentEnvironment()) {
+                try {
+                    Files.deleteIfExists(getModBoundDir());
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
+            }
         }
     }
 
