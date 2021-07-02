@@ -16,8 +16,6 @@
     "SpriteAtlasHolderMixin",
     "SpriteAtlasTextureMixin",
     "SpriteInterpolationMixin",
-    "StateManagerMixin",
-    "StateMixin",
     "accessor.AbstractTextureAccessor",
     "accessor.AndMultipartModelSelectorAccessor",
     "accessor.AnimationResourceMetadataAccessor",
