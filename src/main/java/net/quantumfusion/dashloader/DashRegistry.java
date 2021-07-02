@@ -312,6 +312,7 @@ public class DashRegistry {
     public void toUndash() {
         Logger logger = LogManager.getLogger();
         try {
+            tasksDone = 0;
             totalTasks = 4 + modelsToDeserialize.size();
             log(logger, "Loading Simple Objects");
             identifiersOut = ThreadHelper.execParallel(identifiers, this);

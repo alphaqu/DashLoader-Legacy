@@ -3,6 +3,8 @@ package net.quantumfusion.dashloader.data;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.font.Font;
@@ -19,6 +21,7 @@ import net.minecraft.util.Identifier;
 import net.quantumfusion.dashloader.image.DashSpriteAtlasTextureData;
 import net.quantumfusion.dashloader.mixin.accessor.ParticleManagerSimpleSpriteProviderAccessor;
 import org.apache.commons.lang3.tuple.Pair;
+import org.lwjgl.stb.STBTTFontinfo;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,6 +33,7 @@ public class VanillaData {
     private final Map<SpriteAtlasTexture, DashSpriteAtlasTextureData> atlasData = new HashMap<>();
     private final Map<BakedModel, Pair<List<MultipartModelSelector>, StateManager<Block, BlockState>>> multipartData = new HashMap<>();
     private final Int2ObjectMap<List<String>> programData = new Int2ObjectOpenHashMap<>();
+    private final Object2ObjectMap<STBTTFontinfo, Identifier> fontData = new Object2ObjectOpenHashMap<>();
 
     private SpriteAtlasManager atlasManager;
     private Object2IntMap<BlockState> stateLookup;
@@ -42,6 +46,22 @@ public class VanillaData {
 
 
     public VanillaData() {
+    }
+
+
+    public void clearData() {
+        extraAtlases.clear();
+        atlasData.clear();
+        multipartData.clear();
+        programData.clear();
+        atlasManager = null;
+        stateLookup = null;
+        models = null;
+        particles = null;
+        particleAtlas = null;
+        fonts = null;
+        splashText = null;
+        shaders = null;
     }
 
     public void loadCacheData(SpriteAtlasManager atlasManager,
@@ -102,6 +122,15 @@ public class VanillaData {
         this.particles = new HashMap<>();
         particles.forEach((identifier, simpleSpriteProvider) -> this.particles.put(identifier, ((ParticleManagerSimpleSpriteProviderAccessor) simpleSpriteProvider).getSprites()));
         particleAtlas = atlas;
+    }
+
+
+    public void addTypeFontAsset(STBTTFontinfo stbttFontinfo, Identifier path) {
+        fontData.put(stbttFontinfo, path);
+    }
+
+    public Object2ObjectMap<STBTTFontinfo, Identifier> getFontData() {
+        return fontData;
     }
 
     public void setSplashTextAssets(List<String> splashText) {

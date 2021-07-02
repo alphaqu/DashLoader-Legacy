@@ -159,6 +159,11 @@ public class DashLoader {
         }
     }
 
+    public void finish() {
+        VANILLA_DATA.clearData();
+
+    }
+
 
     public void saveDashCache() {
         Instant start = Instant.now();
@@ -182,12 +187,15 @@ public class DashLoader {
     }
 
     private void initThreadPool() {
+        final ForkJoinPool.ForkJoinWorkerThreadFactory factory = ForkJoinPool.defaultForkJoinWorkerThreadFactory;
+        final Thread.UncaughtExceptionHandler uncaughtExceptionHandler = (thread, exception) -> LOGGER.fatal("Thread {} failed. Reason: ", thread.getName(), exception);
         THREAD_POOL = new ForkJoinPool(Runtime.getRuntime().availableProcessors(), pool -> {
-            final ForkJoinWorkerThread worker = ForkJoinPool.defaultForkJoinWorkerThreadFactory.newThread(pool);
+            final ForkJoinWorkerThread worker = factory.newThread(pool);
             worker.setName("dashloader-thread-" + worker.getPoolIndex());
             worker.setContextClassLoader(classLoader);
             return worker;
-        }, null, true);
+        }, uncaughtExceptionHandler, true);
+
     }
 
     private void shutdownThreadPool() {
@@ -219,12 +227,23 @@ public class DashLoader {
     public static class TaskHandler {
         public static int TOTALTASKS = 9;
         private static float taskStep = 1f / TOTALTASKS;
-        private String task;
         private final Logger logger;
+        private String task;
         private int tasksComplete;
 
         private int subTotalTasks = 1;
         private int subTasksComplete = 0;
+
+        public TaskHandler(Logger logger) {
+            task = "Starting DashLoader";
+            tasksComplete = 0;
+            this.logger = logger;
+        }
+
+        public static void setTotalTasks(int tasks) {
+            TOTALTASKS = tasks;
+            taskStep = 1f / TOTALTASKS;
+        }
 
         public void logAndTask(String s) {
             logger.info(s);
@@ -236,11 +255,6 @@ public class DashLoader {
             tasksComplete = 0;
             subTotalTasks = 1;
             subTasksComplete = 0;
-        }
-
-        public static void setTotalTasks(int tasks) {
-            TOTALTASKS = tasks;
-            taskStep = 1f / TOTALTASKS;
         }
 
         public void completedTask() {
@@ -270,12 +284,6 @@ public class DashLoader {
 
         public double getProgress() {
             return (subTasksComplete == subTotalTasks && tasksComplete == TOTALTASKS) ? 1 : (tasksComplete == 0 ? 0 : tasksComplete / (float) TOTALTASKS) + (((float) subTasksComplete / subTotalTasks) * taskStep);
-        }
-
-        public TaskHandler(Logger logger) {
-            task = "Starting DashLoader";
-            tasksComplete = 0;
-            this.logger = logger;
         }
     }
 

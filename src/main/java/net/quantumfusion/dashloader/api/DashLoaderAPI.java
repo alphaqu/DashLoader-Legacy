@@ -7,10 +7,7 @@ import net.minecraft.client.font.Font;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.json.MultipartModelSelector;
 import net.minecraft.state.property.Property;
-import net.quantumfusion.dashloader.api.font.BitmapFontFactory;
-import net.quantumfusion.dashloader.api.font.BlankFontFactory;
-import net.quantumfusion.dashloader.api.font.FontFactory;
-import net.quantumfusion.dashloader.api.font.UnicodeFontFactory;
+import net.quantumfusion.dashloader.api.font.*;
 import net.quantumfusion.dashloader.api.model.*;
 import net.quantumfusion.dashloader.api.predicate.AndPredicateFactory;
 import net.quantumfusion.dashloader.api.predicate.OrPredicateFactory;
@@ -96,6 +93,7 @@ public class DashLoaderAPI {
         }, () -> {
             addFontType(new BitmapFontFactory());
             addFontType(new BlankFontFactory());
+            addFontType(new TrueTypeFontFactory());
             addFontType(new UnicodeFontFactory());
         });
     }

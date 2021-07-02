@@ -16,7 +16,9 @@ import net.minecraft.util.profiler.Profiler;
 import net.minecraft.util.registry.Registry;
 import net.quantumfusion.dashloader.DashLoader;
 import net.quantumfusion.dashloader.api.feature.Feature;
+import net.quantumfusion.dashloader.data.VanillaData;
 import net.quantumfusion.dashloader.mixin.accessor.ParticleManagerSimpleSpriteProviderAccessor;
+import net.quantumfusion.dashloader.util.enums.DashCacheState;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -57,12 +59,12 @@ public abstract class ParticleManagerMixin {
     @Inject(method = "reload(Lnet/minecraft/resource/ResourceReloader$Synchronizer;Lnet/minecraft/resource/ResourceManager;Lnet/minecraft/util/profiler/Profiler;Lnet/minecraft/util/profiler/Profiler;Ljava/util/concurrent/Executor;Ljava/util/concurrent/Executor;)Ljava/util/concurrent/CompletableFuture;",
             at = @At(value = "HEAD"), cancellable = true)
     private void reloadParticlesFast(ResourceReloader.Synchronizer synchronizer, ResourceManager manager, Profiler prepareProfiler, Profiler applyProfiler, Executor prepareExecutor, Executor applyExecutor, CallbackInfoReturnable<CompletableFuture<Void>> cir) {
-        if (DashLoader.getVanillaData().getParticles() != null) {
-            DashLoader.getInstance().getMappings().registerAtlases(textureManager, Feature.PARTICLES);
+        final DashLoader instance = DashLoader.getInstance();
+        final VanillaData vanillaData = DashLoader.getVanillaData();
+        if (vanillaData.getParticles() != null && instance.state == DashCacheState.LOADED) {
+            instance.getMappings().registerAtlases(textureManager, Feature.PARTICLES);
             cir.setReturnValue(
-                    CompletableFuture.runAsync(() -> {
-                        DashLoader.getVanillaData().getParticles().forEach((identifier, sprites) -> spriteAwareFactories.get(identifier).setSprites(sprites));
-                    }).thenCompose(synchronizer::whenPrepared));
+                    CompletableFuture.runAsync(() -> vanillaData.getParticles().forEach((identifier, sprites) -> spriteAwareFactories.get(identifier).setSprites(sprites))).thenCompose(synchronizer::whenPrepared));
             ;
         } else {
             Map<Identifier, List<Identifier>> map = Maps.newConcurrentMap();
@@ -100,7 +102,7 @@ public abstract class ParticleManagerMixin {
                 });
                 applyProfiler.pop();
                 applyProfiler.endTick();
-                DashLoader.getVanillaData().setParticleManagerAssets(spriteAwareFactories, particleAtlasTexture);
+                vanillaData.setParticleManagerAssets(spriteAwareFactories, particleAtlasTexture);
             }, applyExecutor));
         }
         cir.cancel();

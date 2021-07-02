@@ -17,6 +17,8 @@ import java.util.concurrent.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import static net.quantumfusion.dashloader.DashLoader.LOGGER;
+
 public class ThreadHelper {
 
 
@@ -32,6 +34,7 @@ public class ThreadHelper {
     public static <V, D extends Dashable> Int2ObjectMap<V> execParallel(Int2ObjectMap<D> dashables, DashRegistry registry) {
         final Int2ObjectMap<V> answerMap = new Int2ObjectOpenHashMap<>((int) Math.ceil(dashables.size() / 0.75));
         final Collection<Pointer2ObjectMap.Entry<V>> invoke = DashLoader.THREAD_POOL.invoke(new UndashTask<>(new ArrayList<>(dashables.int2ObjectEntrySet()), 100, registry));
+
         invoke.forEach((answer) -> answerMap.put(answer.key, answer.value));
         return answerMap;
     }
@@ -91,6 +94,16 @@ public class ThreadHelper {
                 final UndashTask<K, D> first = new UndashTask<>(tasks.subList(0, half), threshold, registry);
                 final UndashTask<K, D> second = new UndashTask<>(tasks.subList(half, size), threshold, registry);
                 invokeAll(first, second);
+                final Throwable exception = first.getException();
+                final Throwable exception1 = second.getException();
+                if (exception != null) {
+                    LOGGER.fatal("Thread failed. Reason: ", exception);
+                }
+
+                if (exception1 != null) {
+                    LOGGER.fatal("Thread failed. Reason: ", exception1);
+                }
+
                 return combine(first.join(), second.join());
             }
         }
