@@ -1,6 +1,7 @@
 package net.quantumfusion.dashloader;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -93,15 +94,15 @@ public class DashRegistry {
     }
 
     public DashRegistry(DashLoader loader) {
-        blockstates = new Int2ObjectOpenHashMap<>();
-        sprites = new Int2ObjectOpenHashMap<>();
-        identifiers = new Int2ObjectOpenHashMap<>();
-        models = new Int2ObjectOpenHashMap<>();
-        fonts = new Int2ObjectOpenHashMap<>();
-        predicates = new Int2ObjectOpenHashMap<>();
-        images = new Int2ObjectOpenHashMap<>();
-        properties = new Int2ObjectOpenHashMap<>();
-        propertyValues = new Int2ObjectOpenHashMap<>();
+        blockstates = Int2ObjectMaps.synchronize(new Int2ObjectOpenHashMap<>());
+        sprites = Int2ObjectMaps.synchronize(new Int2ObjectOpenHashMap<>());
+        identifiers = Int2ObjectMaps.synchronize(new Int2ObjectOpenHashMap<>());
+        models = Int2ObjectMaps.synchronize(new Int2ObjectOpenHashMap<>());
+        fonts = Int2ObjectMaps.synchronize(new Int2ObjectOpenHashMap<>());
+        predicates = Int2ObjectMaps.synchronize(new Int2ObjectOpenHashMap<>());
+        images = Int2ObjectMaps.synchronize(new Int2ObjectOpenHashMap<>());
+        properties = Int2ObjectMaps.synchronize(new Int2ObjectOpenHashMap<>());
+        propertyValues = Int2ObjectMaps.synchronize(new Int2ObjectOpenHashMap<>());
         modelsToDeserialize = new ArrayList<>();
         this.loader = loader;
     }
@@ -151,7 +152,7 @@ public class DashRegistry {
     }
 
 
-    public Integer createBlockStatePointer(BlockState blockState) {
+    public int createBlockStatePointer(BlockState blockState) {
         final int hash = blockState.hashCode();
         if (blockstates.get(hash) == null) {
             blockstates.put(hash, new DashBlockState(blockState, this));
@@ -163,7 +164,7 @@ public class DashRegistry {
         if (bakedModel == null) {
             return null;
         }
-        final Integer hash = bakedModel.hashCode();
+        final int hash = bakedModel.hashCode();
         if (models.get(hash) == null) {
             ModelFactory model = loader.getApi().modelMappings.get(bakedModel.getClass());
             if (model != null) {
@@ -175,7 +176,7 @@ public class DashRegistry {
         return hash;
     }
 
-    public final Integer createSpritePointer(final Sprite sprite) {
+    public final int createSpritePointer(final Sprite sprite) {
         final int hash = sprite.hashCode();
         if (sprites.get(hash) == null) {
             sprites.put(hash, new DashSprite(sprite, this));
@@ -183,7 +184,7 @@ public class DashRegistry {
         return hash;
     }
 
-    public final Integer createIdentifierPointer(final Identifier identifier) {
+    public final int createIdentifierPointer(final Identifier identifier) {
         final int hash = identifier.hashCode();
         if (identifiers.get(hash) == null) {
             if (identifier instanceof ModelIdentifier) {
@@ -195,7 +196,7 @@ public class DashRegistry {
         return hash;
     }
 
-    public final Integer createImagePointer(final NativeImage image) {
+    public final int createImagePointer(final NativeImage image) {
         final int hash = image.hashCode();
         if (images.get(hash) == null) {
             images.put(hash, new DashImage(image));
@@ -203,7 +204,7 @@ public class DashRegistry {
         return hash;
     }
 
-    public final Integer createPredicatePointer(final MultipartModelSelector selector, final StateManager<Block, BlockState> stateManager) {
+    public final int createPredicatePointer(final MultipartModelSelector selector, final StateManager<Block, BlockState> stateManager) {
         final int hash = selector.hashCode();
         if (predicates.get(hash) == null) {
             predicates.put(hash, obtainPredicate(selector, stateManager));
@@ -227,7 +228,7 @@ public class DashRegistry {
     }
 
 
-    public final Integer createFontPointer(final Font font) {
+    public final int createFontPointer(final Font font) {
         final int hash = font.hashCode();
         if (fonts.get(hash) == null) {
             FontFactory fontFactory = loader.getApi().fontMappings.get(font.getClass());
@@ -239,6 +240,7 @@ public class DashRegistry {
         }
         return hash;
     }
+
 
     public final Pair<Integer, Integer> createPropertyPointer(final Property<?> property, final Comparable<?> value) {
         final int hashV = value.hashCode();
@@ -315,10 +317,8 @@ public class DashRegistry {
             tasksDone = 0;
             totalTasks = 4 + modelsToDeserialize.size();
             log(logger, "Loading Simple Objects");
-            identifiersOut = ThreadHelper.execParallel(identifiers, this);
-            imagesOut = ThreadHelper.execParallel(images, this);
-            identifiers = null;
-            images = null;
+            identifiersOut = parallelToUndash(identifiers);
+            imagesOut = parallelToUndash(images);
 
             log(logger, "Loading Properties");
             propertiesOut = ThreadHelper.execParallel(properties, this);
@@ -327,14 +327,10 @@ public class DashRegistry {
             propertyValues = null;
 
             log(logger, "Loading Advanced Objects");
-            blockstatesOut = ThreadHelper.execParallel(blockstates, this);
-            predicateOut = ThreadHelper.execParallel(predicates, this);
-            spritesOut = ThreadHelper.execParallel(sprites, this);
-            fontsOut = ThreadHelper.execParallel(fonts, this);
-            blockstates = null;
-            predicates = null;
-            sprites = null;
-            fonts = null;
+            blockstatesOut = parallelToUndash(blockstates);
+            predicateOut = parallelToUndash(predicates);
+            spritesOut = parallelToUndash(sprites);
+            fontsOut = parallelToUndash(fonts);
 
             modelsOut = new Int2ObjectOpenHashMap<>((int) Math.ceil(modelsToDeserialize.size() / 0.75));
             final short[] currentStage = {0};
@@ -349,6 +345,13 @@ public class DashRegistry {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+
+    private <D extends Dashable, O> Int2ObjectMap<O> parallelToUndash(Int2ObjectMap<D> in) {
+        final Int2ObjectMap<O> out = ThreadHelper.execParallel(in, this);
+        in.clear();
+        return out;
     }
 
     private void log(Logger logger, String s) {

@@ -9,6 +9,7 @@ import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.Dashable;
 import net.quantumfusion.dashloader.data.VanillaData;
 import net.quantumfusion.dashloader.data.serialization.Pointer2PointerMap;
+import net.quantumfusion.dashloader.util.ThreadHelper;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,7 +30,7 @@ public class DashModelData implements Dashable {
         final int size = models.size();
         this.models = new Pointer2PointerMap(size);
         taskHandler.setSubtasks(size);
-        models.forEach((identifier, bakedModel) -> {
+        ThreadHelper.execForEach(models, (identifier, bakedModel) -> {
             if (bakedModel != null) {
                 this.models.put(registry.createIdentifierPointer(identifier), registry.createModelPointer(bakedModel));
             }

@@ -9,6 +9,7 @@ import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.Dashable;
 import net.quantumfusion.dashloader.data.VanillaData;
 import net.quantumfusion.dashloader.data.serialization.Pointer2ObjectMap;
+import net.quantumfusion.dashloader.util.ThreadHelper;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,7 +33,7 @@ public class DashFontManagerData implements Dashable {
             amount += value.size();
         }
         taskHandler.setSubtasks(amount);
-        fonts.forEach((identifier, fontList) -> {
+        ThreadHelper.execForEach(fonts, (identifier, fontList) -> {
             List<Integer> fontsOut = new ArrayList<>();
             fontList.forEach(font -> {
                 fontsOut.add(registry.createFontPointer(font));
@@ -40,7 +41,6 @@ public class DashFontManagerData implements Dashable {
             });
             fontMap.put(registry.createIdentifierPointer(identifier), fontsOut);
         });
-
     }
 
     public Map<Identifier, List<Font>> toUndash(DashRegistry registry) {

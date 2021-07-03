@@ -52,6 +52,13 @@ public class DashHelper {
         return convertMap(in, (k, v) -> Pair.of(k, func.apply(v)));
     }
 
+    public static <V, OV> void convertArrays(V[] in, OV[] out, Function<V, OV> func) {
+        for (int i = 0; i < in.length; i++) {
+            out[i] = func.apply(in[i]);
+        }
+    }
+
+
     public static <K, V> PairMap<K, V> listPairToPM(List<Pair<K, V>> in) {
         final PairMap<K, V> pairMap = new PairMap<>();
         in.forEach(kvPair -> pairMap.put(kvPair.getKey(), kvPair.getValue()));

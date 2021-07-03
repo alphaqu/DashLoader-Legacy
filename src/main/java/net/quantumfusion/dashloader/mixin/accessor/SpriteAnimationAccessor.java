@@ -23,7 +23,7 @@ public interface SpriteAnimationAccessor {
     @Accessor
     int getFrameCount();
 
-    @Accessor("interpolation")
+    @Accessor
     Sprite.Interpolation getInterpolation();
 
 }

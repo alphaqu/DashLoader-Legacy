@@ -6,21 +6,22 @@ import io.activej.serializer.annotations.SerializeNullable;
 import net.minecraft.client.texture.Sprite;
 import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.mixin.accessor.SpriteAnimationAccessor;
-import net.quantumfusion.dashloader.util.DashHelper;
 
-import java.util.ArrayList;
 import java.util.List;
+
+import static net.quantumfusion.dashloader.util.DashHelper.convertList;
+import static net.quantumfusion.dashloader.util.DashHelper.nullable;
 
 public class DashSpriteAnimation {
     @Serialize(order = 0)
-    public final DashSpriteAnimationFrame[] frames;
+    public final List<DashSpriteAnimationFrame> frames;
     @Serialize(order = 1)
     public final int frameCount;
     @Serialize(order = 2)
     @SerializeNullable
     public final DashSpriteInterpolation interpolation;
 
-    public DashSpriteAnimation(@Deserialize("frames") DashSpriteAnimationFrame[] frames,
+    public DashSpriteAnimation(@Deserialize("frames") List<DashSpriteAnimationFrame> frames,
                                @Deserialize("frameCount") int frameCount,
                                @Deserialize("interpolation") DashSpriteInterpolation interpolation) {
         this.frames = frames;
@@ -31,21 +32,18 @@ public class DashSpriteAnimation {
 
     public DashSpriteAnimation(Sprite.Animation animation, DashRegistry registry) {
         SpriteAnimationAccessor access = ((SpriteAnimationAccessor) animation);
-        frames = new DashSpriteAnimationFrame[access.getFrames().size()];
-        List<Sprite.AnimationFrame> accessFrames = access.getFrames();
-        for (int i = 0, accessFramesSize = accessFrames.size(); i < accessFramesSize; i++) {
-            frames[i] = new DashSpriteAnimationFrame(accessFrames.get(i));
-        }
+        frames = convertList(access.getFrames(), DashSpriteAnimationFrame::new);
         frameCount = access.getFrameCount();
-        interpolation = DashHelper.nullable(access.getInterpolation(), registry, DashSpriteInterpolation::new);
+        interpolation = nullable(access.getInterpolation(), registry, DashSpriteInterpolation::new);
     }
 
 
     public Sprite.Animation toUndash(Sprite owner, DashRegistry registry) {
-        List<Sprite.AnimationFrame> out = new ArrayList<>(frames.length);
-        for (DashSpriteAnimationFrame frame : frames) {
-            out.add(frame.toUndash(registry));
-        }
-        return SpriteAnimationAccessor.init(owner, out, frameCount, interpolation == null ? null : interpolation.toUndash(owner, registry));
+        return SpriteAnimationAccessor.init(
+                owner,
+                convertList(frames, frame -> frame.toUndash(registry)),
+                frameCount,
+                nullable(interpolation, interpolation -> interpolation.toUndash(owner, registry))
+        );
     }
 }

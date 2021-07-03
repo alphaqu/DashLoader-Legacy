@@ -187,14 +187,16 @@ public class DashLoader {
     }
 
     private void initThreadPool() {
-        final ForkJoinPool.ForkJoinWorkerThreadFactory factory = ForkJoinPool.defaultForkJoinWorkerThreadFactory;
-        final Thread.UncaughtExceptionHandler uncaughtExceptionHandler = (thread, exception) -> LOGGER.fatal("Thread {} failed. Reason: ", thread.getName(), exception);
-        THREAD_POOL = new ForkJoinPool(Runtime.getRuntime().availableProcessors(), pool -> {
-            final ForkJoinWorkerThread worker = factory.newThread(pool);
-            worker.setName("dashloader-thread-" + worker.getPoolIndex());
-            worker.setContextClassLoader(classLoader);
-            return worker;
-        }, uncaughtExceptionHandler, true);
+        if (THREAD_POOL == null || THREAD_POOL.isTerminated()) {
+            final ForkJoinPool.ForkJoinWorkerThreadFactory factory = ForkJoinPool.defaultForkJoinWorkerThreadFactory;
+            final Thread.UncaughtExceptionHandler uncaughtExceptionHandler = (thread, exception) -> LOGGER.fatal("Thread {} failed. Reason: ", thread.getName(), exception);
+            THREAD_POOL = new ForkJoinPool(Runtime.getRuntime().availableProcessors(), pool -> {
+                final ForkJoinWorkerThread worker = factory.newThread(pool);
+                worker.setName("dashloader-thread-" + worker.getPoolIndex());
+                worker.setContextClassLoader(classLoader);
+                return worker;
+            }, uncaughtExceptionHandler, true);
+        }
 
     }
 

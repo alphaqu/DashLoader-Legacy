@@ -11,6 +11,7 @@ import net.quantumfusion.dashloader.data.VanillaData;
 import net.quantumfusion.dashloader.data.serialization.Object2PointerMap;
 import net.quantumfusion.dashloader.image.DashSpriteAtlasTexture;
 import net.quantumfusion.dashloader.mixin.accessor.SpriteAtlasManagerAccessor;
+import net.quantumfusion.dashloader.util.ThreadHelper;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
@@ -27,19 +28,19 @@ public class DashSpriteAtlasData {
 
     public DashSpriteAtlasData(VanillaData data, DashRegistry registry, DashLoader.TaskHandler taskHandler) {
         atlases = new Object2PointerMap<>();
-
         final Map<Identifier, SpriteAtlasTexture> atlases = ((SpriteAtlasManagerAccessor) data.getAtlasManager()).getAtlases();
         final List<SpriteAtlasTexture> extraAtlases = data.getExtraAtlases();
         taskHandler.setSubtasks(atlases.size() + extraAtlases.size());
-        atlases.forEach((identifier, spriteAtlasTexture) -> {
+        ThreadHelper.execForEach(atlases, (identifier, spriteAtlasTexture) -> {
             this.atlases.put(new DashSpriteAtlasTexture(spriteAtlasTexture, data.getAtlasData(spriteAtlasTexture), registry), 0);
             taskHandler.completedSubTask();
         });
-        extraAtlases.forEach(spriteAtlasTexture -> {
+        ThreadHelper.execForEach(extraAtlases, spriteAtlasTexture -> {
             this.atlases.put(new DashSpriteAtlasTexture(spriteAtlasTexture, data.getAtlasData(spriteAtlasTexture), registry), 1);
             taskHandler.completedSubTask();
         });
     }
+
 
     public Pair<SpriteAtlasManager, List<SpriteAtlasTexture>> toUndash(DashRegistry loader) {
         ArrayList<SpriteAtlasTexture> out = new ArrayList<>(atlases.size());

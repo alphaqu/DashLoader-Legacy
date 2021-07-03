@@ -11,6 +11,7 @@ import net.quantumfusion.dashloader.Dashable;
 import net.quantumfusion.dashloader.data.VanillaData;
 import net.quantumfusion.dashloader.data.serialization.Pointer2ObjectMap;
 import net.quantumfusion.dashloader.image.DashSpriteAtlasTexture;
+import net.quantumfusion.dashloader.util.ThreadHelper;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
@@ -36,7 +37,7 @@ public class DashParticleData implements Dashable {
         this.particles = new Pointer2ObjectMap<>();
         final Map<Identifier, List<Sprite>> particles = data.getParticles();
         taskHandler.setSubtasks(particles.size() + 1);
-        particles.forEach((identifier, spriteList) -> {
+        ThreadHelper.execForEach(particles, (identifier, spriteList) -> {
             List<Integer> out = new ArrayList<>();
             spriteList.forEach(sprite -> out.add(registry.createSpritePointer(sprite)));
             this.particles.put(registry.createIdentifierPointer(identifier), out);

@@ -15,7 +15,7 @@ import net.quantumfusion.dashloader.DashLoader;
 import net.quantumfusion.dashloader.mixin.accessor.FontManagerAccessor;
 import net.quantumfusion.dashloader.mixin.accessor.FontStorageAccessor;
 import net.quantumfusion.dashloader.mixin.accessor.UnicodeTextureFontAccessor;
-import net.quantumfusion.dashloader.util.duck.FontManagerMixinValues;
+import net.quantumfusion.dashloader.util.duck.MixinValues;
 import net.quantumfusion.dashloader.util.enums.DashCacheState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -31,8 +31,11 @@ import java.util.function.IntFunction;
 public class FontManagerOverride {
 
 
-    @Inject(method = "prepare",
-            at = @At(value = "HEAD"), cancellable = true)
+    @Inject(
+            method = {"method_18638", "prepare"},
+            at = @At(value = "HEAD"),
+            cancellable = true
+    )
     private void overridePrepare(ResourceManager resourceManager, Profiler profiler, CallbackInfoReturnable<Map<Identifier, List<Font>>> cir) {
         final Map<Identifier, List<Font>> fontsOut = DashLoader.getVanillaData().getFonts();
         if (fontsOut != null && DashLoader.getInstance().state == DashCacheState.LOADED) {
@@ -47,13 +50,16 @@ public class FontManagerOverride {
     }
 
 
-    @Inject(at = @At(value = "HEAD"),
-            method = "apply", cancellable = true)
+    @Inject(
+            method = {"method_18635", "apply"},
+            at = @At(value = "HEAD"),
+            cancellable = true
+    )
     private void overrideApply(Map<Identifier, List<Font>> map, ResourceManager resourceManager, Profiler profiler, CallbackInfo ci) {
         if (DashLoader.getVanillaData().getFonts() != null && DashLoader.getInstance().state == DashCacheState.LOADED) {
             profiler.startTick();
             profiler.push("closing");
-            final FontManagerAccessor fontManagerAccessor = (FontManagerAccessor) FontManagerMixinValues.fontManager;
+            final FontManagerAccessor fontManagerAccessor = (FontManagerAccessor) MixinValues.fontManager;
             fontManagerAccessor.getFontStorages().values().forEach(FontStorage::close);
             fontManagerAccessor.getFontStorages().clear();
             profiler.swap("reloading");
@@ -72,7 +78,7 @@ public class FontManagerOverride {
         }
     }
 
-    @Inject(method = "apply", at = @At(value = "TAIL"), cancellable = true)
+    @Inject(method = {"method_18635", "apply"}, at = @At(value = "TAIL"), cancellable = true)
     private void applyInject(Map<Identifier, List<Font>> map, ResourceManager resourceManager, Profiler profiler, CallbackInfo ci) {
         DashLoader.getVanillaData().setFontAssets(map);
     }
@@ -116,7 +122,7 @@ public class FontManagerOverride {
     private static class LeoFontSolution {
         @Inject(method = "<init>", at = @At(value = "TAIL"))
         private void initInject(TextureManager manager, CallbackInfo ci) {
-            FontManagerMixinValues.fontManager = ((FontManager) (Object) this);
+            MixinValues.fontManager = ((FontManager) (Object) this);
         }
     }
 

@@ -13,20 +13,20 @@ public class IOHelper {
 
     public static int[] toArray(IntBuffer buffer, int size) {
         int[] bufferOut = new int[size];
-        buffer.put(bufferOut);
+        buffer.get(bufferOut);
         return bufferOut;
     }
 
     public static float[] toArray(FloatBuffer buffer, int size) {
         float[] bufferOut = new float[size];
-        buffer.put(bufferOut);
+        buffer.get(bufferOut);
         return bufferOut;
     }
 
 
     public static byte[] toArray(ByteBuffer buffer, int size) {
         byte[] bufferOut = new byte[size];
-        buffer.put(bufferOut);
+        buffer.get(bufferOut);
         return bufferOut;
     }
 

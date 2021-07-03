@@ -7,15 +7,9 @@ import net.minecraft.util.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(Sprite.class)
 public interface SpriteAccessor {
-
-    @Invoker("<init>")
-    static Sprite newSprite(SpriteAtlasTexture spriteAtlasTexture, Sprite.Info info, int maxLevel, int atlasWidth, int atlasHeight, int x, int y, NativeImage nativeImage) {
-        throw new AssertionError();
-    }
 
     @Accessor
     @Mutable
@@ -26,67 +20,50 @@ public interface SpriteAccessor {
     void setId(Identifier id);
 
     @Accessor
-    Sprite.Animation getAnimation();
-
-    @Accessor
     @Mutable
     void setAnimation(Sprite.Animation animation);
 
-    @Accessor("images")
+    @Accessor
     NativeImage[] getImages();
 
-    @Accessor("images")
+    @Accessor
     @Mutable
     void setImages(NativeImage[] images);
-
-    @Accessor("x")
-    int getX();
 
     @Accessor("x")
     @Mutable
     void setX(int x);
 
-    @Accessor("y")
-    int getY();
 
     @Accessor("y")
     @Mutable
     void setY(int y);
 
-    @Accessor("uMin")
-    float getUMin();
 
-    @Accessor("uMin")
+    @Accessor
     @Mutable
     void setUMin(float uMin);
 
-    @Accessor("uMax")
-    float getUMax();
-
-    @Accessor("uMax")
+    @Accessor
     @Mutable
     void setUMax(float uMax);
 
-    @Accessor("vMin")
-    float getVMin();
 
-    @Accessor("vMin")
+    @Accessor
     @Mutable
     void setVMin(float vMin);
 
-    @Accessor("vMax")
-    float getVMax();
 
-    @Accessor("vMax")
+    @Accessor
     @Mutable
     void setVMax(float vMax);
 
 
-    @Accessor("width")
+    @Accessor
     @Mutable
     void setWidth(int width);
 
-    @Accessor("height")
+    @Accessor
     @Mutable
     void setHeight(int height);
 

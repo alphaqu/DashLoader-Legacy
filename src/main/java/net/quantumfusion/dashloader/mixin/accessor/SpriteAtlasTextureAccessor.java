@@ -27,7 +27,7 @@ public interface SpriteAtlasTextureAccessor {
 
     @Accessor
     @Mutable
-    void setAnimatedSprites(List<Sprite.Animation> animatedSprites);
+    void setAnimatedSprites(List<TextureTickListener> animatedSprites);
 
     @Accessor
     Set<Identifier> getSpritesToLoad();

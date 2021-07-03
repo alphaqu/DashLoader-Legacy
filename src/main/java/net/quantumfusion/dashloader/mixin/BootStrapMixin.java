@@ -2,6 +2,7 @@ package net.quantumfusion.dashloader.mixin;
 
 
 import net.minecraft.Bootstrap;
+import net.minecraft.client.render.entity.EntityRenderers;
 import net.quantumfusion.dashloader.util.DashReport;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -23,8 +24,12 @@ public class BootStrapMixin {
 
     @Inject(method = "initialize", at = @At(value = "TAIL"), cancellable = true)
     private static void logInitializeEnd(CallbackInfo ci) {
-        DashReport.addEntry(new DashReport.Entry(start, "Bootstrap", false));
-        DashReport.addTime(Instant.now(), "After Bootstrap");
+        final String aDefault = EntityRenderers.DEFAULT;
+        //noinspection EqualsWithItself, stfu intelij
+        if (aDefault.equals(aDefault)) {
+            DashReport.addEntry(new DashReport.Entry(start, "Bootstrap", false));
+            DashReport.addTime(Instant.now(), "After Bootstrap");
+        }
     }
 
 

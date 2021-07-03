@@ -9,11 +9,10 @@ import net.quantumfusion.dashloader.data.serialization.Pointer2ObjectMap;
 import net.quantumfusion.dashloader.model.DashModel;
 import org.apache.commons.lang3.tuple.Pair;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.*;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -30,6 +29,23 @@ public class ThreadHelper {
         final List<Future<T>> futures = DashLoader.THREAD_POOL.invokeAll(callable);
         sleepUntilTrue(() -> futures.stream().allMatch(Future::isDone));
     }
+
+    public static <K, V> void execForEach(Map<K, V> map, BiConsumer<K, V> consumer) {
+        map.forEach(consumer);
+//        Collection<Callable<Object>> callable = new ArrayList<>();
+//        map.forEach((k, v) -> callable.add(Executors.callable(() -> consumer.accept(k,v))));
+//        final Collection<Future<Object>> futures = DashLoader.THREAD_POOL.invokeAll(callable);
+//        sleepUntilTrue(() -> futures.stream().allMatch(Future::isDone));
+    }
+
+    public static <V> void execForEach(Collection<V> map, Consumer<V> consumer) {
+        map.forEach(consumer);
+//        Collection<Callable<Object>> callable = new ArrayList<>();
+//        map.forEach((v) -> callable.add(Executors.callable(() -> consumer.accept(v))));
+//        final Collection<Future<Object>> futures = DashLoader.THREAD_POOL.invokeAll(callable);
+//        sleepUntilTrue(() -> futures.stream().allMatch(Future::isDone));
+    }
+
 
     public static <V, D extends Dashable> Int2ObjectMap<V> execParallel(Int2ObjectMap<D> dashables, DashRegistry registry) {
         final Int2ObjectMap<V> answerMap = new Int2ObjectOpenHashMap<>((int) Math.ceil(dashables.size() / 0.75));

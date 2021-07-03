@@ -10,6 +10,8 @@ import net.quantumfusion.dashloader.Dashable;
 import net.quantumfusion.dashloader.mixin.accessor.SpriteAccessor;
 import net.quantumfusion.dashloader.util.UnsafeHelper;
 
+import static net.quantumfusion.dashloader.util.DashHelper.nullable;
+
 public class DashSprite implements Dashable {
     @Serialize(order = 0)
     @SerializeNullable
@@ -60,7 +62,7 @@ public class DashSprite implements Dashable {
     public DashSprite(Sprite sprite, DashRegistry registry) {
         final NativeImage[] images = ((SpriteAccessor) sprite).getImages();
         this.images = new int[images.length];
-        for (int i = 0, imagesLength = images.length; i < imagesLength; i++) {
+        for (int i = 0; i < images.length; i++) {
             this.images[i] = registry.createImagePointer(images[i]);
         }
         x = sprite.getX();
@@ -71,15 +73,14 @@ public class DashSprite implements Dashable {
         uMax = sprite.getMaxU();
         vMin = sprite.getMinV();
         vMax = sprite.getMaxV();
-        final Sprite.Animation animation = (Sprite.Animation) sprite.getAnimation();
-        this.animation = animation == null ? null : new DashSpriteAnimation(animation, registry);
+        this.animation = nullable((Sprite.Animation) sprite.getAnimation(), animation1 -> new DashSpriteAnimation(animation1, registry));
     }
 
     public final Sprite toUndash(final DashRegistry registry) {
         final Sprite out = UnsafeHelper.allocateInstance(Sprite.class);
         final SpriteAccessor spriteAccessor = ((SpriteAccessor) out);
         final NativeImage[] imagesOut = new NativeImage[images.length];
-        for (int i = 0, imagesLength = images.length; i < imagesLength; i++) {
+        for (int i = 0; i < images.length; i++) {
             imagesOut[i] = registry.getImage(images[i]);
         }
         spriteAccessor.setImages(imagesOut);
@@ -91,7 +92,7 @@ public class DashSprite implements Dashable {
         spriteAccessor.setUMax(uMax);
         spriteAccessor.setVMin(vMin);
         spriteAccessor.setVMax(vMax);
-        spriteAccessor.setAnimation(animation == null ? null : animation.toUndash(out, registry));
+        spriteAccessor.setAnimation(nullable(animation, animation -> animation.toUndash(out, registry)));
         return out;
     }
 

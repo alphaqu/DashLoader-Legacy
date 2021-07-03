@@ -10,6 +10,7 @@ import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.Dashable;
 import net.quantumfusion.dashloader.data.VanillaData;
 import net.quantumfusion.dashloader.data.serialization.Pointer2PointerMap;
+import net.quantumfusion.dashloader.util.ThreadHelper;
 
 public class DashBlockStateData implements Dashable {
 
@@ -24,7 +25,7 @@ public class DashBlockStateData implements Dashable {
         this.blockstates = new Pointer2PointerMap();
         final Object2IntMap<BlockState> stateLookup = data.getStateLookup();
         taskHandler.setSubtasks(stateLookup.size());
-        stateLookup.forEach((blockState, integer) -> {
+        ThreadHelper.execForEach(stateLookup, (blockState, integer) -> {
             this.blockstates.put(registry.createBlockStatePointer(blockState), integer);
             taskHandler.completedSubTask();
         });

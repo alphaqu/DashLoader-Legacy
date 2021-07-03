@@ -12,7 +12,6 @@ import org.lwjgl.system.MemoryStack;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.IntBuffer;
 
 import static org.lwjgl.system.MemoryUtil.memAddress;
 
@@ -21,19 +20,42 @@ public class DashImage implements Dashable {
     @Serialize(order = 0)
     public final byte[] image;
 
-    public DashImage(NativeImage image) {
-        byte[] image1 = null;
+    @Serialize(order = 1)
+    public final NativeImage.Format format;
+
+    @Serialize(order = 2)
+    public final boolean useSTB;
+
+    @Serialize(order = 3)
+    public final int width;
+
+    @Serialize(order = 4)
+    public final int height;
+
+
+    public DashImage(NativeImage nativeImage) {
         try {
-            image1 = image.getBytes();
+            NativeImageAccessor nativeImageAccess = (NativeImageAccessor) (Object) nativeImage;
+            this.format = nativeImage.getFormat();
+            this.width = nativeImage.getWidth();
+            this.height = nativeImage.getHeight();
+            this.image = nativeImage.getBytes();
+            this.useSTB = nativeImageAccess.getIsStbImage();
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new DashException("Failed to create image. Reason: ", e);
         }
-        this.image = image1;
     }
 
-
-    public DashImage(@Deserialize("image") byte[] image) {
+    public DashImage(@Deserialize("image") byte[] image,
+                     @Deserialize("format") NativeImage.Format format,
+                     @Deserialize("useSTB") boolean useSTB,
+                     @Deserialize("width") int width,
+                     @Deserialize("height") int height) {
         this.image = image;
+        this.format = format;
+        this.useSTB = useSTB;
+        this.width = width;
+        this.height = height;
     }
 
     /**
@@ -45,17 +67,20 @@ public class DashImage implements Dashable {
     @Override
     public final NativeImage toUndash(final DashRegistry registry) {
         try (MemoryStack stack = MemoryStack.stackPush()) {
-            final IntBuffer x = stack.mallocInt(1);
-            final IntBuffer y = stack.mallocInt(1);
-            final IntBuffer channels = stack.mallocInt(1);
             final ByteBuffer buf = stack.malloc(image.length);
             buf.put(image);
             buf.flip();
-            final long pointer = STBImage.nstbi_load_from_memory(memAddress(buf), buf.remaining(), memAddress(x), memAddress(y), memAddress(channels), 4);
+            long pointer = STBImage.nstbi_load_from_memory(
+                    memAddress(buf),
+                    buf.remaining(),
+                    stack.nmalloc(4, 1 << 2),
+                    stack.nmalloc(4, 1 << 2),
+                    stack.nmalloc(4, 1 << 2),
+                    format.getChannelCount());
             if (pointer == 0L) {
                 throw new DashException("Could not load image: " + STBImage.stbi_failure_reason());
             }
-            return NativeImageAccessor.init(NativeImage.Format.ABGR, x.get(0), y.get(0), true, pointer);
+            return NativeImageAccessor.init(format, this.width, this.height, useSTB, pointer);
         }
     }
 
