@@ -3,15 +3,16 @@ package net.quantumfusion.dashloader.model;
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import io.activej.serializer.annotations.SerializeNullable;
-import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.BuiltinBakedModel;
 import net.minecraft.client.render.model.json.ModelTransformation;
 import net.minecraft.client.texture.Sprite;
 import net.quantumfusion.dashloader.DashRegistry;
+import net.quantumfusion.dashloader.api.annotation.DashObject;
 import net.quantumfusion.dashloader.mixin.accessor.BuiltinBakedModelAccessor;
 import net.quantumfusion.dashloader.model.components.DashModelOverrideList;
 import net.quantumfusion.dashloader.model.components.DashModelTransformation;
 
+@DashObject(BuiltinBakedModel.class)
 public class DashBuiltinBakedModel implements DashModel {
     @Serialize(order = 0)
     @SerializeNullable
@@ -35,7 +36,7 @@ public class DashBuiltinBakedModel implements DashModel {
     }
 
 
-    public DashBuiltinBakedModel(BuiltinBakedModel builtinBakedModel, DashRegistry registry) {
+    public DashBuiltinBakedModel(BuiltinBakedModel builtinBakedModel, DashRegistry registry, ModelVariables variables) {
         BuiltinBakedModelAccessor access = ((BuiltinBakedModelAccessor) builtinBakedModel);
         final ModelTransformation transformation = access.getTransformation();
         this.transformation = transformation == ModelTransformation.NONE ? null : DashModelTransformation.createDashModelTransformation(transformation);
@@ -46,7 +47,7 @@ public class DashBuiltinBakedModel implements DashModel {
 
 
     @Override
-    public BakedModel toUndash(DashRegistry registry) {
+    public BuiltinBakedModel toUndash(DashRegistry registry) {
         Sprite sprite = registry.getSprite(spritePointer);
         return new BuiltinBakedModel(transformation == null ? ModelTransformation.NONE : transformation.toUndash(), itemPropertyOverrides.toUndash(registry), sprite, sideLit);
     }

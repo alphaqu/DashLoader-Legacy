@@ -3,12 +3,13 @@ package net.quantumfusion.dashloader.blockstate.property;
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import net.minecraft.state.property.DirectionProperty;
-import net.minecraft.state.property.Property;
 import net.minecraft.util.math.Direction;
 import net.quantumfusion.dashloader.DashRegistry;
+import net.quantumfusion.dashloader.api.annotation.DashObject;
 
 import java.util.Objects;
 
+@DashObject(DirectionProperty.class)
 public class DashDirectionProperty implements DashProperty {
 
 
@@ -19,12 +20,12 @@ public class DashDirectionProperty implements DashProperty {
         this.name = name;
     }
 
-    public DashDirectionProperty(DirectionProperty property) {
+    public DashDirectionProperty(DirectionProperty property, DashRegistry registry, Integer thing) {
         name = property.getName();
     }
 
     @Override
-    public Property toUndash(DashRegistry registry) {
+    public DirectionProperty toUndash(DashRegistry registry) {
         return DirectionProperty.of(name, Direction.values());
     }
 

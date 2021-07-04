@@ -3,7 +3,9 @@ package net.quantumfusion.dashloader.blockstate.property.value;
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import net.quantumfusion.dashloader.DashRegistry;
+import net.quantumfusion.dashloader.api.annotation.DashObject;
 
+@DashObject(Enum.class)
 public class DashEnumValue implements DashPropertyValue {
     @Serialize(order = 0)
     public final String value;
@@ -15,6 +17,10 @@ public class DashEnumValue implements DashPropertyValue {
                          @Deserialize("enumPointer") int enumPointer) {
         this.value = value;
         this.enumPointer = enumPointer;
+    }
+
+    public DashEnumValue(Enum<?> enuum, DashRegistry registry, Integer propertyPointer) {
+        this(enuum.name(), propertyPointer);
     }
 
     @Override

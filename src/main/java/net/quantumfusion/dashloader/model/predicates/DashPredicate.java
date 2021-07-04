@@ -2,11 +2,16 @@ package net.quantumfusion.dashloader.model.predicates;
 
 import net.minecraft.block.BlockState;
 import net.quantumfusion.dashloader.DashRegistry;
-import net.quantumfusion.dashloader.Dashable;
+import net.quantumfusion.dashloader.api.Factory;
+import net.quantumfusion.dashloader.api.FactoryType;
 
 import java.util.function.Predicate;
 
-public interface DashPredicate extends Dashable {
-    Predicate<BlockState> toUndash(DashRegistry registry);
+public interface DashPredicate extends Factory<Predicate<BlockState>> {
+   Predicate<BlockState> toUndash(DashRegistry registry);
 
+   @Override
+   default FactoryType getFactoryType() {
+      return FactoryType.PREDICATE;
+   }
 }

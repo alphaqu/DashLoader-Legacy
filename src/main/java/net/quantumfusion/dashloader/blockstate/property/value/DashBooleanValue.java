@@ -3,7 +3,9 @@ package net.quantumfusion.dashloader.blockstate.property.value;
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import net.quantumfusion.dashloader.DashRegistry;
+import net.quantumfusion.dashloader.api.annotation.DashObject;
 
+@DashObject(Boolean.class)
 public class DashBooleanValue implements DashPropertyValue {
     @Serialize(order = 0)
     public final boolean value;
@@ -12,8 +14,12 @@ public class DashBooleanValue implements DashPropertyValue {
         this.value = value;
     }
 
+    public DashBooleanValue(Boolean value, DashRegistry registry, Integer propertyPointer) {
+        this(value);
+    }
+
     @Override
-    public Comparable toUndash(DashRegistry registry) {
+    public Boolean toUndash(DashRegistry registry) {
         return value;
     }
 }

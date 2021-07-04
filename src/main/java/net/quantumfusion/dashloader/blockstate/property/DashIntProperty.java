@@ -4,9 +4,11 @@ import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import net.minecraft.state.property.IntProperty;
 import net.quantumfusion.dashloader.DashRegistry;
+import net.quantumfusion.dashloader.api.annotation.DashObject;
 
 import java.util.Objects;
 
+@DashObject(IntProperty.class)
 public class DashIntProperty implements DashProperty {
 
     @Serialize(order = 0)
@@ -27,7 +29,7 @@ public class DashIntProperty implements DashProperty {
         this.highest = highest;
     }
 
-    public DashIntProperty(IntProperty property) {
+    public DashIntProperty(IntProperty property, DashRegistry registry, Integer thing) {
         name = property.getName();
         int lowest = -1;
         int highest = -1;

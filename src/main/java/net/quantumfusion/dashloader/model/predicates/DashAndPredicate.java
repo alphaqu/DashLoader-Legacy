@@ -3,17 +3,18 @@ package net.quantumfusion.dashloader.model.predicates;
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import io.activej.serializer.annotations.SerializeSubclasses;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.render.model.json.AndMultipartModelSelector;
 import net.minecraft.state.StateManager;
 import net.quantumfusion.dashloader.DashRegistry;
+import net.quantumfusion.dashloader.api.annotation.DashObject;
 import net.quantumfusion.dashloader.mixin.accessor.AndMultipartModelSelectorAccessor;
 import net.quantumfusion.dashloader.util.DashHelper;
 
 import java.util.List;
 import java.util.function.Predicate;
 
+@DashObject(AndMultipartModelSelector.class)
 public class DashAndPredicate implements DashPredicate {
     @Serialize(order = 0)
     @SerializeSubclasses(path = {0}, extraSubclassesId = "predicates")
@@ -23,7 +24,7 @@ public class DashAndPredicate implements DashPredicate {
         this.selectors = selectors;
     }
 
-    public DashAndPredicate(AndMultipartModelSelector selector, StateManager<Block, BlockState> stateManager, DashRegistry registry) {
+    public DashAndPredicate(AndMultipartModelSelector selector, DashRegistry registry, StateManager stateManager) {
         AndMultipartModelSelectorAccessor access = ((AndMultipartModelSelectorAccessor) selector);
         selectors = DashHelper.convertList(access.getSelectors(), selector1 -> registry.obtainPredicate(selector1, stateManager));
     }

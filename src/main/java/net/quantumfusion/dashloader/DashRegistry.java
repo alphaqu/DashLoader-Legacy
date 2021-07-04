@@ -15,10 +15,6 @@ import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.Identifier;
 import net.quantumfusion.dashloader.api.FactoryType;
-import net.quantumfusion.dashloader.api.font.FontFactory;
-import net.quantumfusion.dashloader.api.model.ModelFactory;
-import net.quantumfusion.dashloader.api.predicate.PredicateFactory;
-import net.quantumfusion.dashloader.api.property.PropertyFactory;
 import net.quantumfusion.dashloader.blockstate.DashBlockState;
 import net.quantumfusion.dashloader.blockstate.property.DashProperty;
 import net.quantumfusion.dashloader.blockstate.property.value.DashPropertyValue;
@@ -32,6 +28,7 @@ import net.quantumfusion.dashloader.image.DashImage;
 import net.quantumfusion.dashloader.image.DashSprite;
 import net.quantumfusion.dashloader.model.DashModel;
 import net.quantumfusion.dashloader.model.DashModelIdentifier;
+import net.quantumfusion.dashloader.model.ModelVariables;
 import net.quantumfusion.dashloader.model.predicates.DashPredicate;
 import net.quantumfusion.dashloader.model.predicates.DashStaticPredicate;
 import net.quantumfusion.dashloader.util.ThreadHelper;
@@ -40,6 +37,7 @@ import org.apache.commons.lang3.tuple.Triple;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.lang.invoke.MethodHandle;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
@@ -50,7 +48,7 @@ public class DashRegistry {
     private static int totalTasks = 6;
     private static int tasksDone = 0;
     private final Map<Integer, DashModel> models;
-    public Map<Class, FactoryType> apiFailed = new ConcurrentHashMap<>();
+    public Map<Class<?>, FactoryType> apiFailed = new ConcurrentHashMap<>();
     public Int2ObjectMap<BlockState> blockstatesOut;
     public Int2ObjectMap<Predicate<BlockState>> predicateOut;
     public Int2ObjectMap<Identifier> identifiersOut;
@@ -76,12 +74,13 @@ public class DashRegistry {
     public DashRegistry(Int2ObjectMap<DashBlockState> blockstates,
                         Int2ObjectMap<DashSprite> sprites,
                         Int2ObjectMap<DashID> identifiers,
-                        Int2ObjectMap<DashModel> models,
                         Int2ObjectMap<DashFont> fonts,
                         Int2ObjectMap<DashImage> images,
                         Int2ObjectMap<DashPredicate> predicates,
                         Int2ObjectMap<DashProperty> properties,
-                        Int2ObjectMap<DashPropertyValue> propertyValues) {
+                        Int2ObjectMap<DashPropertyValue> propertyValues,
+                        Map<Integer, DashModel> models
+    ) {
         this.blockstates = blockstates;
         this.sprites = sprites;
         this.identifiers = identifiers;
@@ -166,9 +165,9 @@ public class DashRegistry {
         }
         final int hash = bakedModel.hashCode();
         if (models.get(hash) == null) {
-            ModelFactory model = loader.getApi().modelMappings.get(bakedModel.getClass());
-            if (model != null) {
-                models.put(hash, model.toDash(bakedModel, this, DashLoader.getVanillaData().getModelData(bakedModel)));
+            MethodHandle factory = loader.getApi().modelMappings.get(bakedModel.getClass());
+            if (factory != null) {
+                models.put(hash, toDash(factory, bakedModel, this, new ModelVariables(DashLoader.getVanillaData().getModelData(bakedModel))));
             } else {
                 apiFailed.putIfAbsent(bakedModel.getClass(), FactoryType.MODEL);
             }
@@ -217,9 +216,9 @@ public class DashRegistry {
         if (selector == MultipartModelSelector.FALSE || isTrue) {
             return new DashStaticPredicate(isTrue);
         } else {
-            PredicateFactory predicateFactory = loader.getApi().predicateMappings.get(selector.getClass());
+            MethodHandle predicateFactory = loader.getApi().predicateMappings.get(selector.getClass());
             if (predicateFactory != null) {
-                return predicateFactory.toDash(selector, this, stateManager);
+                return toDash(predicateFactory, selector, this, stateManager);
             } else {
                 apiFailed.putIfAbsent(selector.getClass(), FactoryType.PREDICATE);
             }
@@ -231,9 +230,9 @@ public class DashRegistry {
     public final int createFontPointer(final Font font) {
         final int hash = font.hashCode();
         if (fonts.get(hash) == null) {
-            FontFactory fontFactory = loader.getApi().fontMappings.get(font.getClass());
+            MethodHandle fontFactory = loader.getApi().fontMappings.get(font.getClass());
             if (fontFactory != null) {
-                fonts.put(hash, fontFactory.toDash(font, this, null));
+                fonts.put(hash, toDash(fontFactory, font, this));
             } else {
                 apiFailed.putIfAbsent(font.getClass(), FactoryType.FONT);
             }
@@ -242,26 +241,62 @@ public class DashRegistry {
     }
 
 
+    @SuppressWarnings("unchecked") //stfu
+    private <O> O toDash(MethodHandle factory, Object... param) {
+        try {
+            return (O) factory.invokeWithArguments(param);
+        } catch (Throwable throwable) {
+            throw new DashException("Failed creating DashObject " + throwable);
+        }
+    }
+
+    //TODO make this slightly less jank
     public final Pair<Integer, Integer> createPropertyPointer(final Property<?> property, final Comparable<?> value) {
         final int hashV = value.hashCode();
         final int hashP = property.hashCode();
         final boolean propVal = !propertyValues.containsKey(hashV);
         final boolean prop = !properties.containsKey(hashP);
         if (propVal || prop) {
-            PropertyFactory propertyFactory = loader.getApi().propertyMappings.get(property.getClass());
-            if (propertyFactory != null) {
-                if (propVal) {
-                    propertyValues.put(hashV, propertyFactory.toDash(value, this, hashP));
+            DashProperty possibleProperty = null; // if value has an overwriten MethodHandle then this will make it skip the getting of the factory once.
+            if (prop) {
+                MethodHandle propFactory = loader.getApi().propertyMappings.get(property.getClass());
+                if (propFactory != null) {
+                    possibleProperty = properties.put(hashP, toDash(propFactory, property, this, hashV));
+                } else {
+                    apiFailed.put(property.getClass(), FactoryType.PROPERTY);
+                    return Pair.of(hashP, hashV);
                 }
-                if (prop) {
-                    properties.put(hashP, propertyFactory.toDash(property, this, hashV));
+            }
+
+            if (propVal) {
+                final MethodHandle factory = loader.getApi().propertyValueMappings.get(value.getClass());
+                if (factory != null) {
+                    propertyValues.put(hashV, toDash(factory, value, this, hashP));
+                } else {
+                    //gets the property again if it did not go through that time
+                    if (possibleProperty == null) {
+                        MethodHandle propFactory = loader.getApi().propertyMappings.get(property.getClass());
+                        if (propFactory != null) {
+                            possibleProperty = properties.put(hashP, toDash(propFactory, property, this, hashV));
+                        } else {
+                            apiFailed.put(property.getClass(), FactoryType.PROPERTY);
+                            return Pair.of(hashP, hashV);
+                        }
+                    }
+
+                    //sees if it has an overwriten method handle.
+                    final MethodHandle forcedPropertyValue = possibleProperty.overrideMethodHandleForValue();
+                    if (forcedPropertyValue != null) {
+                        propertyValues.put(hashV, toDash(forcedPropertyValue, value, this, hashP));
+                    } else {
+                        apiFailed.put(value.getClass(), FactoryType.PROPERTY_VALUE);
+                    }
                 }
-            } else {
-                apiFailed.put(property.getClass(), FactoryType.PROPERTY);
             }
         }
         return Pair.of(hashP, hashV);
     }
+
 
     public final BlockState getBlockstate(final int pointer) {
         return logIfNullThenReturn(blockstatesOut, pointer, "BlockState");
@@ -348,7 +383,7 @@ public class DashRegistry {
     }
 
 
-    private <D extends Dashable, O> Int2ObjectMap<O> parallelToUndash(Int2ObjectMap<D> in) {
+    private <D extends Dashable<O>, O> Int2ObjectMap<O> parallelToUndash(Int2ObjectMap<D> in) {
         final Int2ObjectMap<O> out = ThreadHelper.execParallel(in, this);
         in.clear();
         return out;

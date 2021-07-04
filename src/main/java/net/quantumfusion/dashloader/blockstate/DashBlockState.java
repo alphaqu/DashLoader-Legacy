@@ -13,7 +13,7 @@ import net.quantumfusion.dashloader.data.serialization.Pointer2PointerMap;
 import net.quantumfusion.dashloader.mixin.accessor.StateAccessor;
 import org.apache.commons.lang3.tuple.Pair;
 
-public class DashBlockState implements Dashable {
+public class DashBlockState implements Dashable<BlockState> {
 
     @Serialize(order = 0)
     public final int owner;

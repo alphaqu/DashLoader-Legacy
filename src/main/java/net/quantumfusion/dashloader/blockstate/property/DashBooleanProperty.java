@@ -4,9 +4,11 @@ import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import net.minecraft.state.property.BooleanProperty;
 import net.quantumfusion.dashloader.DashRegistry;
+import net.quantumfusion.dashloader.api.annotation.DashObject;
 
 import java.util.Objects;
 
+@DashObject(BooleanProperty.class)
 public class DashBooleanProperty implements DashProperty {
 
     @Serialize(order = 0)
@@ -17,7 +19,7 @@ public class DashBooleanProperty implements DashProperty {
     }
 
 
-    public DashBooleanProperty(BooleanProperty property) {
+    public DashBooleanProperty(BooleanProperty property, DashRegistry registry, Integer thing) {
         name = property.getName();
     }
 

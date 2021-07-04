@@ -15,7 +15,7 @@ import java.nio.ByteBuffer;
 
 import static org.lwjgl.system.MemoryUtil.memAddress;
 
-public class DashImage implements Dashable {
+public class DashImage implements Dashable<NativeImage> {
 
     @Serialize(order = 0)
     public final byte[] image;

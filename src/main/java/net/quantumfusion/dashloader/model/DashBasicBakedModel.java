@@ -3,13 +3,13 @@ package net.quantumfusion.dashloader.model;
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import io.activej.serializer.annotations.SerializeNullable;
-import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.BakedQuad;
 import net.minecraft.client.render.model.BasicBakedModel;
 import net.minecraft.client.render.model.json.ModelTransformation;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.util.math.Direction;
 import net.quantumfusion.dashloader.DashRegistry;
+import net.quantumfusion.dashloader.api.annotation.DashObject;
 import net.quantumfusion.dashloader.data.DashDirection;
 import net.quantumfusion.dashloader.data.serialization.PairMap;
 import net.quantumfusion.dashloader.mixin.accessor.BasicBakedModelAccessor;
@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+@DashObject(BasicBakedModel.class)
 public class DashBasicBakedModel implements DashModel {
     @Serialize(order = 0)
     public final List<DashBakedQuad> quads;
@@ -62,7 +63,7 @@ public class DashBasicBakedModel implements DashModel {
     }
 
     public DashBasicBakedModel(BasicBakedModel basicBakedModel,
-                               DashRegistry registry) {
+                               DashRegistry registry, ModelVariables variables) {
         BasicBakedModelAccessor access = ((BasicBakedModelAccessor) basicBakedModel);
         quads = new ArrayList<>();
         access.getQuads().forEach(bakedQuad -> quads.add(new DashBakedQuad(bakedQuad)));
@@ -82,7 +83,7 @@ public class DashBasicBakedModel implements DashModel {
 
 
     @Override
-    public BakedModel toUndash(final DashRegistry registry) {
+    public BasicBakedModel toUndash(final DashRegistry registry) {
         final Sprite sprite = registry.getSprite(spritePointer);
         final List<BakedQuad> quadsOut = DashHelper.convertList(quads, (dashBakedQuad) -> dashBakedQuad.toUndash(sprite, registry));
 

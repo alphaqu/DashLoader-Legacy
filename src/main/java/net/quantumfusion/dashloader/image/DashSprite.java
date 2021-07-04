@@ -12,7 +12,7 @@ import net.quantumfusion.dashloader.util.UnsafeHelper;
 
 import static net.quantumfusion.dashloader.util.DashHelper.nullable;
 
-public class DashSprite implements Dashable {
+public class DashSprite implements Dashable<Sprite> {
     @Serialize(order = 0)
     @SerializeNullable
     public final DashSpriteAnimation animation;

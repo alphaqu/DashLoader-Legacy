@@ -1,13 +1,21 @@
 package net.quantumfusion.dashloader.font;
 
 import net.minecraft.client.font.BlankFont;
-import net.minecraft.client.font.Font;
 import net.quantumfusion.dashloader.DashRegistry;
+import net.quantumfusion.dashloader.api.annotation.DashObject;
 
+@DashObject(BlankFont.class)
 public class DashBlankFont implements DashFont {
 
+
+    public DashBlankFont() {
+    }
+
+    public DashBlankFont(BlankFont blankFont, DashRegistry registry) {
+    }
+
     @Override
-    public Font toUndash(DashRegistry registry) {
+    public BlankFont toUndash(DashRegistry registry) {
         return new BlankFont();
     }
 }

@@ -5,12 +5,12 @@ import io.activej.serializer.annotations.Serialize;
 import it.unimi.dsi.fastutil.ints.IntArraySet;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.Font;
 import net.minecraft.client.font.TrueTypeFont;
 import net.minecraft.resource.Resource;
 import net.minecraft.util.Identifier;
 import net.quantumfusion.dashloader.DashLoader;
 import net.quantumfusion.dashloader.DashRegistry;
+import net.quantumfusion.dashloader.api.annotation.DashObject;
 import net.quantumfusion.dashloader.mixin.accessor.TrueTypeFontAccessor;
 import net.quantumfusion.dashloader.util.IOHelper;
 import net.quantumfusion.dashloader.util.UnsafeHelper;
@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Set;
 
-
+@DashObject(TrueTypeFont.class)
 public class DashTrueTypeFont implements DashFont {
     @Serialize(order = 0)
     public final byte[] ttfBuffer;
@@ -55,7 +55,7 @@ public class DashTrueTypeFont implements DashFont {
         this.ascent = ascent;
     }
 
-    public DashTrueTypeFont(TrueTypeFont font) {
+    public DashTrueTypeFont(TrueTypeFont font, DashRegistry registry) {
         TrueTypeFontAccessor fontAccess = (TrueTypeFontAccessor) font;
         final Object2ObjectMap<STBTTFontinfo, Identifier> fontData = DashLoader.getVanillaData().getFontData();
         byte[] data = null;
@@ -75,7 +75,7 @@ public class DashTrueTypeFont implements DashFont {
     }
 
     @Override
-    public Font toUndash(DashRegistry registry) {
+    public TrueTypeFont toUndash(DashRegistry registry) {
         STBTTFontinfo sTBTTFontinfo = STBTTFontinfo.malloc();
         ByteBuffer byteBuffer2 = ByteBuffer.allocateDirect(ttfBuffer.length);
         byteBuffer2.put(ttfBuffer);

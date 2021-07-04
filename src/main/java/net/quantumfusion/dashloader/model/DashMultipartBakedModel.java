@@ -3,14 +3,12 @@ package net.quantumfusion.dashloader.model;
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenCustomHashMap;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.MultipartBakedModel;
-import net.minecraft.client.render.model.json.MultipartModelSelector;
-import net.minecraft.state.StateManager;
 import net.minecraft.util.Util;
 import net.quantumfusion.dashloader.DashRegistry;
+import net.quantumfusion.dashloader.api.annotation.DashObject;
 import net.quantumfusion.dashloader.data.serialization.Pointer2ObjectMap;
 import net.quantumfusion.dashloader.data.serialization.Pointer2PointerMap;
 import net.quantumfusion.dashloader.mixin.accessor.MultipartBakedModelAccessor;
@@ -23,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
+@DashObject(MultipartBakedModel.class)
 public class DashMultipartBakedModel implements DashModel {
 
     //identifier baked model
@@ -40,7 +39,7 @@ public class DashMultipartBakedModel implements DashModel {
         this.stateCache = stateCache;
     }
 
-    public DashMultipartBakedModel(MultipartBakedModel model, DashRegistry registry, Pair<List<MultipartModelSelector>, StateManager<Block, BlockState>> selectors) {
+    public DashMultipartBakedModel(MultipartBakedModel model, DashRegistry registry, ModelVariables variables) {
         MultipartBakedModelAccessor access = ((MultipartBakedModelAccessor) model);
 
         List<Pair<Predicate<BlockState>, BakedModel>> accessComponents = access.getComponents();
@@ -48,7 +47,7 @@ public class DashMultipartBakedModel implements DashModel {
         this.components = new Pointer2PointerMap(size);
         for (int i = 0; i < size; i++) {
             final BakedModel right = accessComponents.get(i).getRight();
-            components.put(registry.createPredicatePointer(selectors.getKey().get(i), selectors.getValue()), registry.createModelPointer(right));
+            components.put(registry.createPredicatePointer(variables.selector.getKey().get(i), variables.selector.getValue()), registry.createModelPointer(right));
         }
 
 
@@ -61,7 +60,7 @@ public class DashMultipartBakedModel implements DashModel {
     private static final Class<MultipartBakedModel> cls = MultipartBakedModel.class;
 
     @Override
-    public BakedModel toUndash(DashRegistry registry) {
+    public MultipartBakedModel toUndash(DashRegistry registry) {
         MultipartBakedModel model = UnsafeHelper.allocateInstance(cls);
         Map<BlockState, BitSet> stateCacheOut = new Object2ObjectOpenCustomHashMap<>(Util.identityHashStrategy());
         stateCache.forEach((entry) -> stateCacheOut.put(registry.getBlockstate(entry.key), BitSet.valueOf(entry.value)));

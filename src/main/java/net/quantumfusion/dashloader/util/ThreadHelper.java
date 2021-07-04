@@ -47,10 +47,10 @@ public class ThreadHelper {
     }
 
 
-    public static <V, D extends Dashable> Int2ObjectMap<V> execParallel(Int2ObjectMap<D> dashables, DashRegistry registry) {
-        final Int2ObjectMap<V> answerMap = new Int2ObjectOpenHashMap<>((int) Math.ceil(dashables.size() / 0.75));
-        final Collection<Pointer2ObjectMap.Entry<V>> invoke = DashLoader.THREAD_POOL.invoke(new UndashTask<>(new ArrayList<>(dashables.int2ObjectEntrySet()), 100, registry));
-
+    public static <D extends Dashable<R>, R> Int2ObjectMap<R> execParallel(Int2ObjectMap<D> dashables, DashRegistry registry) {
+        final Int2ObjectMap<R> answerMap = new Int2ObjectOpenHashMap<>((int) Math.ceil(dashables.size() / 0.75));
+        final UndashTask<R, D> task = new UndashTask<>(new ArrayList<>(dashables.int2ObjectEntrySet()), 100, registry);
+        final ArrayList<Pointer2ObjectMap.Entry<R>> invoke = DashLoader.THREAD_POOL.invoke(task);
         invoke.forEach((answer) -> answerMap.put(answer.key, answer.value));
         return answerMap;
     }
@@ -87,7 +87,7 @@ public class ThreadHelper {
         }
     }
 
-    public static class UndashTask<K, D extends Dashable> extends RecursiveTask<ArrayList<Pointer2ObjectMap.Entry<K>>> {
+    public static class UndashTask<R, D extends Dashable<R>> extends RecursiveTask<ArrayList<Pointer2ObjectMap.Entry<R>>> {
         private final List<Int2ObjectMap.Entry<D>> tasks;
         private final int threshold;
         private final DashRegistry registry;
@@ -101,14 +101,14 @@ public class ThreadHelper {
 
 
         @Override
-        protected ArrayList<Pointer2ObjectMap.Entry<K>> compute() {
+        protected ArrayList<Pointer2ObjectMap.Entry<R>> compute() {
             final int size = tasks.size();
             if (size < threshold) {
                 return computeDirectly();
             } else {
                 final int half = size / 2;
-                final UndashTask<K, D> first = new UndashTask<>(tasks.subList(0, half), threshold, registry);
-                final UndashTask<K, D> second = new UndashTask<>(tasks.subList(half, size), threshold, registry);
+                final UndashTask<R, D> first = new UndashTask<>(tasks.subList(0, half), threshold, registry);
+                final UndashTask<R, D> second = new UndashTask<>(tasks.subList(half, size), threshold, registry);
                 invokeAll(first, second);
                 final Throwable exception = first.getException();
                 final Throwable exception1 = second.getException();
@@ -124,15 +124,18 @@ public class ThreadHelper {
             }
         }
 
-        public final ArrayList<Pointer2ObjectMap.Entry<K>> combine(final ArrayList<Pointer2ObjectMap.Entry<K>> list, final ArrayList<Pointer2ObjectMap.Entry<K>> list2) {
+        public final ArrayList<Pointer2ObjectMap.Entry<R>> combine(final ArrayList<Pointer2ObjectMap.Entry<R>> list, final ArrayList<Pointer2ObjectMap.Entry<R>> list2) {
             list.ensureCapacity(list.size() * 2);
             list.addAll(list2);
             return list;
         }
 
-        protected final ArrayList<Pointer2ObjectMap.Entry<K>> computeDirectly() {
-            final ArrayList<Pointer2ObjectMap.Entry<K>> count = new ArrayList<>(tasks.size());
-            tasks.forEach(dashable -> count.add(new Pointer2ObjectMap.Entry<>(dashable.getIntKey(), dashable.getValue().toUndash(registry))));
+        protected final ArrayList<Pointer2ObjectMap.Entry<R>> computeDirectly() {
+            final ArrayList<Pointer2ObjectMap.Entry<R>> count = new ArrayList<>(tasks.size());
+            tasks.forEach(dashable -> {
+                final Pointer2ObjectMap.Entry<R> oEntry = new Pointer2ObjectMap.Entry<>(dashable.getIntKey(), dashable.getValue().toUndash(registry));
+                count.add(oEntry);
+            });
             return count;
         }
 

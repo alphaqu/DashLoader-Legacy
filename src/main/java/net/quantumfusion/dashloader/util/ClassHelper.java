@@ -15,4 +15,11 @@ public final class ClassHelper {
         }
         return null;
     }
+
+
+    public static String printArray(Class<?>[] classes) {
+        StringBuilder builder = new StringBuilder();
+        for (Class<?> aClass : classes) builder.append(aClass.getSimpleName());
+        return builder.toString();
+    }
 }

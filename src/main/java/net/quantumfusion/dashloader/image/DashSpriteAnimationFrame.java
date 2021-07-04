@@ -7,7 +7,7 @@ import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.Dashable;
 import net.quantumfusion.dashloader.mixin.accessor.SpriteAnimationFrameAccessor;
 
-public class DashSpriteAnimationFrame implements Dashable {
+public class DashSpriteAnimationFrame implements Dashable<Sprite.AnimationFrame> {
     @Serialize(order = 0)
     public final int index;
     @Serialize(order = 1)
@@ -26,7 +26,7 @@ public class DashSpriteAnimationFrame implements Dashable {
     }
 
     @Override
-    public <K> K toUndash(DashRegistry registry) {
-        return (K) SpriteAnimationFrameAccessor.newSpriteFrame(index, time);
+    public Sprite.AnimationFrame toUndash(DashRegistry registry) {
+        return SpriteAnimationFrameAccessor.newSpriteFrame(index, time);
     }
 }

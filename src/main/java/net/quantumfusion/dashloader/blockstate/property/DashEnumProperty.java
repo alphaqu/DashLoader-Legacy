@@ -3,13 +3,19 @@ package net.quantumfusion.dashloader.blockstate.property;
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import net.minecraft.state.property.EnumProperty;
-import net.minecraft.state.property.Property;
 import net.minecraft.util.StringIdentifiable;
 import net.quantumfusion.dashloader.DashRegistry;
+import net.quantumfusion.dashloader.api.FactoryType;
+import net.quantumfusion.dashloader.api.annotation.DashObject;
+import net.quantumfusion.dashloader.blockstate.property.value.DashEnumValue;
 
+import java.lang.invoke.MethodHandle;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static net.quantumfusion.dashloader.api.DashLoaderAPI.createConstructor;
+
+@DashObject(EnumProperty.class)
 public class DashEnumProperty implements DashProperty {
 
     private static final Map<String, Class> cache = new ConcurrentHashMap<>();
@@ -31,7 +37,7 @@ public class DashEnumProperty implements DashProperty {
         this.name = name;
     }
 
-    public DashEnumProperty(EnumProperty property) {
+    public DashEnumProperty(EnumProperty property, DashRegistry registry, Integer value) {
         className = property.getType().getName();
         name = property.getName();
         values = new ArrayList<>();
@@ -39,7 +45,7 @@ public class DashEnumProperty implements DashProperty {
     }
 
     @Override
-    public Property<?> toUndash(DashRegistry registry) {
+    public EnumProperty<?> toUndash(DashRegistry registry) {
         return get();
     }
 
@@ -60,6 +66,16 @@ public class DashEnumProperty implements DashProperty {
         return null;
     }
 
+
+    @Override
+    public MethodHandle overrideMethodHandleForValue() {
+        try {
+            return createConstructor(DashEnumValue.class, Enum.class, FactoryType.PROPERTY_VALUE);
+        } catch (NoSuchMethodException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
     @Override
     public boolean equals(Object o) {
