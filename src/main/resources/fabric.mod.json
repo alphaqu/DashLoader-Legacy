@@ -37,7 +37,6 @@
     "connected_block_textures": "*",
     "enhancedblockentities": "*",
     "hydrogen": "*",
-    "indrev": "*",
     "lambdabettergrass": "*",
     "optifabric": "*",
     "sodium": "<=0.1.0"

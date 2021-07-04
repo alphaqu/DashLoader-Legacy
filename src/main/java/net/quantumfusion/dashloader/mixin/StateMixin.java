@@ -20,8 +20,10 @@ public class StateMixin<S> {
     @Inject(method = "with", at = @At(value = "HEAD"), cancellable = true)
     private <T extends Comparable<T>, V extends T> void withInject(Property<T> property, V value, CallbackInfoReturnable<S> cir) {
         if (withTable == null) {
+            if(StateMultithreading.tasks != null && DashLoader.THREAD_POOL != null && !DashLoader.THREAD_POOL.isTerminated()) {
             DashLoader.THREAD_POOL.invokeAll(StateMultithreading.tasks);
             StateMultithreading.tasks.clear();
+            }
         }
     }
 
