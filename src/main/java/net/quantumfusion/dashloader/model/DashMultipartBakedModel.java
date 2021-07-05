@@ -10,8 +10,8 @@ import net.minecraft.client.render.model.MultipartBakedModel;
 import net.minecraft.client.render.model.json.MultipartModelSelector;
 import net.minecraft.state.StateManager;
 import net.minecraft.util.Util;
+import net.quantumfusion.dashloader.DashLoader;
 import net.quantumfusion.dashloader.DashRegistry;
-import net.quantumfusion.dashloader.api.ExtraVariables;
 import net.quantumfusion.dashloader.api.annotation.DashConstructor;
 import net.quantumfusion.dashloader.api.annotation.DashObject;
 import net.quantumfusion.dashloader.api.enums.ConstructorMode;
@@ -46,9 +46,8 @@ public class DashMultipartBakedModel implements DashModel {
     }
 
     @DashConstructor(ConstructorMode.FULL)
-    public DashMultipartBakedModel(MultipartBakedModel model, DashRegistry registry, ExtraVariables extraVariables) {
-        final Object extraVariable1 = extraVariables.getExtraVariable1();
-        final Pair<List<MultipartModelSelector>, StateManager<Block, BlockState>> selectors = ((Pair<List<MultipartModelSelector>, StateManager<Block, BlockState>>) extraVariable1);
+    public DashMultipartBakedModel(MultipartBakedModel model, DashRegistry registry) {
+        final Pair<List<MultipartModelSelector>, StateManager<Block, BlockState>> selectors = DashLoader.getVanillaData().getModelData(model);
         MultipartBakedModelAccessor access = ((MultipartBakedModelAccessor) model);
         List<Pair<Predicate<BlockState>, BakedModel>> accessComponents = access.getComponents();
         final int size = accessComponents.size();

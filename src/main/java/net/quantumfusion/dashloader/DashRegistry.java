@@ -166,7 +166,7 @@ public class DashRegistry {
         if (models.get(hash) == null) {
             FactoryConstructor factory = loader.getApi().modelMappings.get(bakedModel.getClass());
             if (factory != null) {
-                models.put(hash, (DashModel) factory.createObject(bakedModel, this, DashLoader.getVanillaData().getModelData(bakedModel)));
+                models.put(hash, (DashModel) factory.createObject(bakedModel, this));
             } else {
                 apiFailed.putIfAbsent(bakedModel.getClass(), FactoryType.MODEL);
             }
@@ -210,6 +210,11 @@ public class DashRegistry {
         return hash;
     }
 
+    /**
+     * @param selector     The Original Object
+     * @param stateManager The StateManager that is bound to your multipart.
+     * @return A DashPredicate
+     */
     public final DashPredicate obtainPredicate(final MultipartModelSelector selector, final StateManager<Block, BlockState> stateManager) {
         final boolean isTrue = selector == MultipartModelSelector.TRUE;
         if (selector == MultipartModelSelector.FALSE || isTrue) {
