@@ -36,7 +36,7 @@ public class DashBuiltinBakedModel implements DashModel {
     }
 
 
-    public DashBuiltinBakedModel(BuiltinBakedModel builtinBakedModel, DashRegistry registry, ModelVariables variables) {
+    public DashBuiltinBakedModel(BuiltinBakedModel builtinBakedModel, DashRegistry registry) {
         BuiltinBakedModelAccessor access = ((BuiltinBakedModelAccessor) builtinBakedModel);
         final ModelTransformation transformation = access.getTransformation();
         this.transformation = transformation == ModelTransformation.NONE ? null : DashModelTransformation.createDashModelTransformation(transformation);

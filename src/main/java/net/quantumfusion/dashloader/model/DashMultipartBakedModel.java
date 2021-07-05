@@ -3,12 +3,18 @@ package net.quantumfusion.dashloader.model;
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenCustomHashMap;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.MultipartBakedModel;
+import net.minecraft.client.render.model.json.MultipartModelSelector;
+import net.minecraft.state.StateManager;
 import net.minecraft.util.Util;
 import net.quantumfusion.dashloader.DashRegistry;
+import net.quantumfusion.dashloader.api.ExtraVariables;
+import net.quantumfusion.dashloader.api.annotation.DashConstructor;
 import net.quantumfusion.dashloader.api.annotation.DashObject;
+import net.quantumfusion.dashloader.api.enums.ConstructorMode;
 import net.quantumfusion.dashloader.data.serialization.Pointer2ObjectMap;
 import net.quantumfusion.dashloader.data.serialization.Pointer2PointerMap;
 import net.quantumfusion.dashloader.mixin.accessor.MultipartBakedModelAccessor;
@@ -39,15 +45,17 @@ public class DashMultipartBakedModel implements DashModel {
         this.stateCache = stateCache;
     }
 
-    public DashMultipartBakedModel(MultipartBakedModel model, DashRegistry registry, ModelVariables variables) {
+    @DashConstructor(ConstructorMode.FULL)
+    public DashMultipartBakedModel(MultipartBakedModel model, DashRegistry registry, ExtraVariables extraVariables) {
+        final Object extraVariable1 = extraVariables.getExtraVariable1();
+        final Pair<List<MultipartModelSelector>, StateManager<Block, BlockState>> selectors = ((Pair<List<MultipartModelSelector>, StateManager<Block, BlockState>>) extraVariable1);
         MultipartBakedModelAccessor access = ((MultipartBakedModelAccessor) model);
-
         List<Pair<Predicate<BlockState>, BakedModel>> accessComponents = access.getComponents();
         final int size = accessComponents.size();
         this.components = new Pointer2PointerMap(size);
         for (int i = 0; i < size; i++) {
             final BakedModel right = accessComponents.get(i).getRight();
-            components.put(registry.createPredicatePointer(variables.selector.getKey().get(i), variables.selector.getValue()), registry.createModelPointer(right));
+            components.put(registry.createPredicatePointer(selectors.getKey().get(i), selectors.getValue()), registry.createModelPointer(right));
         }
 
 

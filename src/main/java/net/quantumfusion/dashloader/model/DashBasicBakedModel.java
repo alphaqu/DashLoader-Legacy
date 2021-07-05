@@ -62,8 +62,7 @@ public class DashBasicBakedModel implements DashModel {
         this.spritePointer = spritePointer;
     }
 
-    public DashBasicBakedModel(BasicBakedModel basicBakedModel,
-                               DashRegistry registry, ModelVariables variables) {
+    public DashBasicBakedModel(BasicBakedModel basicBakedModel, DashRegistry registry) {
         BasicBakedModelAccessor access = ((BasicBakedModelAccessor) basicBakedModel);
         quads = new ArrayList<>();
         access.getQuads().forEach(bakedQuad -> quads.add(new DashBakedQuad(bakedQuad)));

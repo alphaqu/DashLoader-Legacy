@@ -4,16 +4,15 @@ import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import net.minecraft.state.property.EnumProperty;
 import net.minecraft.util.StringIdentifiable;
+import net.quantumfusion.dashloader.DashLoader;
 import net.quantumfusion.dashloader.DashRegistry;
-import net.quantumfusion.dashloader.api.FactoryType;
+import net.quantumfusion.dashloader.api.FactoryConstructor;
+import net.quantumfusion.dashloader.api.annotation.DashConstructor;
 import net.quantumfusion.dashloader.api.annotation.DashObject;
-import net.quantumfusion.dashloader.blockstate.property.value.DashEnumValue;
+import net.quantumfusion.dashloader.api.enums.ConstructorMode;
 
-import java.lang.invoke.MethodHandle;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-
-import static net.quantumfusion.dashloader.api.DashLoaderAPI.createConstructor;
 
 @DashObject(EnumProperty.class)
 public class DashEnumProperty implements DashProperty {
@@ -37,7 +36,8 @@ public class DashEnumProperty implements DashProperty {
         this.name = name;
     }
 
-    public DashEnumProperty(EnumProperty property, DashRegistry registry, Integer value) {
+    @DashConstructor(ConstructorMode.OBJECT)
+    public DashEnumProperty(EnumProperty property) {
         className = property.getType().getName();
         name = property.getName();
         values = new ArrayList<>();
@@ -68,13 +68,8 @@ public class DashEnumProperty implements DashProperty {
 
 
     @Override
-    public MethodHandle overrideMethodHandleForValue() {
-        try {
-            return createConstructor(DashEnumValue.class, Enum.class, FactoryType.PROPERTY_VALUE);
-        } catch (NoSuchMethodException | IllegalAccessException e) {
-            e.printStackTrace();
-        }
-        return null;
+    public FactoryConstructor overrideMethodHandleForValue() {
+        return DashLoader.getInstance().getApi().propertyValueMappings.get(Enum.class);
     }
 
     @Override

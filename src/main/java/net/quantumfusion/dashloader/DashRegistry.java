@@ -14,7 +14,8 @@ import net.minecraft.client.util.ModelIdentifier;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.Identifier;
-import net.quantumfusion.dashloader.api.FactoryType;
+import net.quantumfusion.dashloader.api.FactoryConstructor;
+import net.quantumfusion.dashloader.api.enums.FactoryType;
 import net.quantumfusion.dashloader.blockstate.DashBlockState;
 import net.quantumfusion.dashloader.blockstate.property.DashProperty;
 import net.quantumfusion.dashloader.blockstate.property.value.DashPropertyValue;
@@ -28,7 +29,6 @@ import net.quantumfusion.dashloader.image.DashImage;
 import net.quantumfusion.dashloader.image.DashSprite;
 import net.quantumfusion.dashloader.model.DashModel;
 import net.quantumfusion.dashloader.model.DashModelIdentifier;
-import net.quantumfusion.dashloader.model.ModelVariables;
 import net.quantumfusion.dashloader.model.predicates.DashPredicate;
 import net.quantumfusion.dashloader.model.predicates.DashStaticPredicate;
 import net.quantumfusion.dashloader.util.ThreadHelper;
@@ -37,7 +37,6 @@ import org.apache.commons.lang3.tuple.Triple;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.lang.invoke.MethodHandle;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
@@ -165,9 +164,9 @@ public class DashRegistry {
         }
         final int hash = bakedModel.hashCode();
         if (models.get(hash) == null) {
-            MethodHandle factory = loader.getApi().modelMappings.get(bakedModel.getClass());
+            FactoryConstructor factory = loader.getApi().modelMappings.get(bakedModel.getClass());
             if (factory != null) {
-                models.put(hash, toDash(factory, bakedModel, this, new ModelVariables(DashLoader.getVanillaData().getModelData(bakedModel))));
+                models.put(hash, (DashModel) factory.createObject(bakedModel, this, DashLoader.getVanillaData().getModelData(bakedModel)));
             } else {
                 apiFailed.putIfAbsent(bakedModel.getClass(), FactoryType.MODEL);
             }
@@ -216,9 +215,9 @@ public class DashRegistry {
         if (selector == MultipartModelSelector.FALSE || isTrue) {
             return new DashStaticPredicate(isTrue);
         } else {
-            MethodHandle predicateFactory = loader.getApi().predicateMappings.get(selector.getClass());
+            FactoryConstructor predicateFactory = loader.getApi().predicateMappings.get(selector.getClass());
             if (predicateFactory != null) {
-                return toDash(predicateFactory, selector, this, stateManager);
+                return (DashPredicate) predicateFactory.createObject(selector, this, stateManager);
             } else {
                 apiFailed.putIfAbsent(selector.getClass(), FactoryType.PREDICATE);
             }
@@ -230,24 +229,14 @@ public class DashRegistry {
     public final int createFontPointer(final Font font) {
         final int hash = font.hashCode();
         if (fonts.get(hash) == null) {
-            MethodHandle fontFactory = loader.getApi().fontMappings.get(font.getClass());
+            FactoryConstructor fontFactory = loader.getApi().fontMappings.get(font.getClass());
             if (fontFactory != null) {
-                fonts.put(hash, toDash(fontFactory, font, this));
+                fonts.put(hash, (DashFont) fontFactory.createObject(font, this));
             } else {
                 apiFailed.putIfAbsent(font.getClass(), FactoryType.FONT);
             }
         }
         return hash;
-    }
-
-
-    @SuppressWarnings("unchecked") //stfu
-    private <O> O toDash(MethodHandle factory, Object... param) {
-        try {
-            return (O) factory.invokeWithArguments(param);
-        } catch (Throwable throwable) {
-            throw new DashException("Failed creating DashObject " + throwable);
-        }
     }
 
     //TODO make this slightly less jank
@@ -259,9 +248,9 @@ public class DashRegistry {
         if (propVal || prop) {
             DashProperty possibleProperty = null; // if value has an overwriten MethodHandle then this will make it skip the getting of the factory once.
             if (prop) {
-                MethodHandle propFactory = loader.getApi().propertyMappings.get(property.getClass());
+                FactoryConstructor propFactory = loader.getApi().propertyMappings.get(property.getClass());
                 if (propFactory != null) {
-                    possibleProperty = properties.put(hashP, toDash(propFactory, property, this, hashV));
+                    possibleProperty = properties.put(hashP, (DashProperty) propFactory.createObject(property, this, hashV));
                 } else {
                     apiFailed.put(property.getClass(), FactoryType.PROPERTY);
                     return Pair.of(hashP, hashV);
@@ -269,15 +258,15 @@ public class DashRegistry {
             }
 
             if (propVal) {
-                final MethodHandle factory = loader.getApi().propertyValueMappings.get(value.getClass());
+                final FactoryConstructor factory = loader.getApi().propertyValueMappings.get(value.getClass());
                 if (factory != null) {
-                    propertyValues.put(hashV, toDash(factory, value, this, hashP));
+                    propertyValues.put(hashV, (DashPropertyValue) factory.createObject(value, this, hashP));
                 } else {
                     //gets the property again if it did not go through that time
                     if (possibleProperty == null) {
-                        MethodHandle propFactory = loader.getApi().propertyMappings.get(property.getClass());
+                        FactoryConstructor propFactory = loader.getApi().propertyMappings.get(property.getClass());
                         if (propFactory != null) {
-                            possibleProperty = properties.put(hashP, toDash(propFactory, property, this, hashV));
+                            possibleProperty = properties.put(hashP, (DashProperty) propFactory.createObject(property, this, hashV));
                         } else {
                             apiFailed.put(property.getClass(), FactoryType.PROPERTY);
                             return Pair.of(hashP, hashV);
@@ -285,9 +274,9 @@ public class DashRegistry {
                     }
 
                     //sees if it has an overwriten method handle.
-                    final MethodHandle forcedPropertyValue = possibleProperty.overrideMethodHandleForValue();
+                    final FactoryConstructor forcedPropertyValue = possibleProperty.overrideMethodHandleForValue();
                     if (forcedPropertyValue != null) {
-                        propertyValues.put(hashV, toDash(forcedPropertyValue, value, this, hashP));
+                        propertyValues.put(hashV, (DashPropertyValue) forcedPropertyValue.createObject(value, this, hashP));
                     } else {
                         apiFailed.put(value.getClass(), FactoryType.PROPERTY_VALUE);
                     }

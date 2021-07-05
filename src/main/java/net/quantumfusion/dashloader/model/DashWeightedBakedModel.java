@@ -21,7 +21,7 @@ public class DashWeightedBakedModel implements DashModel {
         this.models = models;
     }
 
-    public DashWeightedBakedModel(WeightedBakedModel model, DashRegistry registry, ModelVariables variables) {
+    public DashWeightedBakedModel(WeightedBakedModel model, DashRegistry registry) {
         this.models = DashHelper.convertList(
                 ((WeightedBakedModelAccessor) model).getModels(),
                 entry -> new DashWeightedModelEntry(entry, registry));

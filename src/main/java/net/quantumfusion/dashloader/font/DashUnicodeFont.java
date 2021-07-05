@@ -7,6 +7,7 @@ import net.minecraft.client.texture.NativeImage;
 import net.minecraft.util.Identifier;
 import net.quantumfusion.dashloader.DashRegistry;
 import net.quantumfusion.dashloader.api.annotation.DashObject;
+import net.quantumfusion.dashloader.api.enums.FactoryType;
 import net.quantumfusion.dashloader.data.serialization.Pointer2PointerMap;
 import net.quantumfusion.dashloader.mixin.accessor.UnicodeTextureFontAccessor;
 import net.quantumfusion.dashloader.util.UnsafeHelper;
@@ -14,7 +15,7 @@ import net.quantumfusion.dashloader.util.UnsafeHelper;
 import java.util.HashMap;
 import java.util.Map;
 
-@DashObject(UnicodeTextureFont.class)
+@DashObject(value = UnicodeTextureFont.class, overrideType = FactoryType.FONT)
 public class DashUnicodeFont implements DashFont {
     @Serialize(order = 0)
     public final Pointer2PointerMap images;
@@ -32,6 +33,7 @@ public class DashUnicodeFont implements DashFont {
         this.images = images;
         this.sizes = sizes;
         this.template = template;
+
     }
 
     public DashUnicodeFont(UnicodeTextureFont rawFont, DashRegistry registry) {

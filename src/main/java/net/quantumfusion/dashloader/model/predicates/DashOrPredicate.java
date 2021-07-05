@@ -3,11 +3,15 @@ package net.quantumfusion.dashloader.model.predicates;
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import io.activej.serializer.annotations.SerializeSubclasses;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.render.model.json.OrMultipartModelSelector;
 import net.minecraft.state.StateManager;
 import net.quantumfusion.dashloader.DashRegistry;
+import net.quantumfusion.dashloader.api.ExtraVariables;
+import net.quantumfusion.dashloader.api.annotation.DashConstructor;
 import net.quantumfusion.dashloader.api.annotation.DashObject;
+import net.quantumfusion.dashloader.api.enums.ConstructorMode;
 import net.quantumfusion.dashloader.mixin.accessor.OrMultipartModelSelectorAccessor;
 
 import java.util.ArrayList;
@@ -26,7 +30,9 @@ public class DashOrPredicate implements DashPredicate {
         this.selectors = selectors;
     }
 
-    public DashOrPredicate(OrMultipartModelSelector selector, DashRegistry registry, StateManager stateManager) {
+    @DashConstructor(ConstructorMode.FULL)
+    public DashOrPredicate(OrMultipartModelSelector selector, DashRegistry registry, ExtraVariables extraVariables) {
+        StateManager<Block, BlockState> stateManager = (StateManager<Block, BlockState>) extraVariables.getExtraVariable1();
         OrMultipartModelSelectorAccessor access = (OrMultipartModelSelectorAccessor) selector;
         selectors = new ArrayList<>();
         access.getSelectors().forEach(selector1 -> selectors.add(registry.obtainPredicate(selector1, stateManager)));

@@ -5,7 +5,9 @@ import io.activej.serializer.annotations.Serialize;
 import net.minecraft.state.property.DirectionProperty;
 import net.minecraft.util.math.Direction;
 import net.quantumfusion.dashloader.DashRegistry;
+import net.quantumfusion.dashloader.api.annotation.DashConstructor;
 import net.quantumfusion.dashloader.api.annotation.DashObject;
+import net.quantumfusion.dashloader.api.enums.ConstructorMode;
 
 import java.util.Objects;
 
@@ -20,7 +22,8 @@ public class DashDirectionProperty implements DashProperty {
         this.name = name;
     }
 
-    public DashDirectionProperty(DirectionProperty property, DashRegistry registry, Integer thing) {
+    @DashConstructor(ConstructorMode.OBJECT)
+    public DashDirectionProperty(DirectionProperty property) {
         name = property.getName();
     }
 

@@ -9,7 +9,10 @@ import net.minecraft.client.render.model.json.SimpleMultipartModelSelector;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Property;
 import net.quantumfusion.dashloader.DashRegistry;
+import net.quantumfusion.dashloader.api.ExtraVariables;
+import net.quantumfusion.dashloader.api.annotation.DashConstructor;
 import net.quantumfusion.dashloader.api.annotation.DashObject;
+import net.quantumfusion.dashloader.api.enums.ConstructorMode;
 import net.quantumfusion.dashloader.data.serialization.Pointer2PointerMap;
 import net.quantumfusion.dashloader.mixin.accessor.SimpleMultipartModelSelectorAccessor;
 import org.apache.commons.lang3.tuple.Pair;
@@ -38,7 +41,9 @@ public class DashSimplePredicate implements DashPredicate {
     }
 
 
-    public DashSimplePredicate(SimpleMultipartModelSelector simpleMultipartModelSelector, DashRegistry registry, StateManager<Block, BlockState> stateManager) {
+    @DashConstructor(ConstructorMode.FULL)
+    public DashSimplePredicate(SimpleMultipartModelSelector simpleMultipartModelSelector, DashRegistry registry, ExtraVariables extraVariables) {
+        StateManager<Block, BlockState> stateManager = (StateManager<Block, BlockState>) extraVariables.getExtraVariable1();
         SimpleMultipartModelSelectorAccessor access = ((SimpleMultipartModelSelectorAccessor) simpleMultipartModelSelector);
         Property<?> stateManagerProperty = stateManager.getProperty(access.getKey());
         properties = new Pointer2PointerMap();

@@ -8,7 +8,10 @@ import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.json.MultipartModelSelector;
 import net.minecraft.state.property.Property;
 import net.quantumfusion.dashloader.DashRegistry;
+import net.quantumfusion.dashloader.api.annotation.DashConstructor;
 import net.quantumfusion.dashloader.api.annotation.DashObject;
+import net.quantumfusion.dashloader.api.enums.ConstructorMode;
+import net.quantumfusion.dashloader.api.enums.FactoryType;
 import net.quantumfusion.dashloader.blockstate.property.DashBooleanProperty;
 import net.quantumfusion.dashloader.blockstate.property.DashDirectionProperty;
 import net.quantumfusion.dashloader.blockstate.property.DashEnumProperty;
@@ -29,25 +32,23 @@ import net.quantumfusion.dashloader.model.predicates.DashAndPredicate;
 import net.quantumfusion.dashloader.model.predicates.DashOrPredicate;
 import net.quantumfusion.dashloader.model.predicates.DashSimplePredicate;
 import net.quantumfusion.dashloader.model.predicates.DashStaticPredicate;
-import net.quantumfusion.dashloader.util.ClassHelper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
+import java.lang.reflect.Constructor;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 
 public class DashLoaderAPI {
     public static final Logger LOGGER = LogManager.getLogger();
-    private static final Class<?>[] defaultParameters = new Class[]{DashRegistry.class};
-    public final Map<Class<? extends BakedModel>, MethodHandle> modelMappings;
-    public final Map<Class<? extends Property<?>>, MethodHandle> propertyMappings;
-    public final Map<Class<? extends Comparable<?>>, MethodHandle> propertyValueMappings;
-    public final Map<Class<? extends Font>, MethodHandle> fontMappings;
-    public final Map<Class<? extends MultipartModelSelector>, MethodHandle> predicateMappings;
+    public static final Class<?>[] defaultParameters = new Class[]{DashRegistry.class};
+
+    public final Map<Class<? extends BakedModel>, FactoryConstructor> modelMappings;
+    public final Map<Class<? extends Property<?>>, FactoryConstructor> propertyMappings;
+    public final Map<Class<? extends Comparable<?>>, FactoryConstructor> propertyValueMappings;
+    public final Map<Class<? extends Font>, FactoryConstructor> fontMappings;
+    public final Map<Class<? extends MultipartModelSelector>, FactoryConstructor> predicateMappings;
     public List<Class<?>> modelTypes;
     public List<Class<?>> predicateTypes;
     public List<Class<?>> fontTypes;
@@ -68,6 +69,28 @@ public class DashLoaderAPI {
         propertyValueTypes = new ArrayList<>();
     }
 
+    public static FactoryConstructor createConstructor(Class<?> dashClass, Class<?> rawClass) throws NoSuchMethodException, IllegalAccessException {
+        final Constructor<?>[] constructors = dashClass.getConstructors();
+        for (Constructor<?> constructor : constructors) {
+            if (constructor.isAnnotationPresent(DashConstructor.class)) {
+                final DashConstructor[] dashConstructors = constructor.getAnnotationsByType(DashConstructor.class);
+                if (dashConstructors.length != 0) {
+                    final ConstructorMode value = dashConstructors[0].value();
+                    try {
+                        return FactoryConstructor.createConstructor(value, dashClass, rawClass);
+                    } catch (NoSuchMethodException e) {
+                        throw new NoSuchMethodException(value.getExpectedMethod(dashClass, rawClass));
+                    }
+                }
+            }
+        }
+        try {
+            return FactoryConstructor.createConstructor(ConstructorMode.DEFAULT_PARAMETERS, dashClass, rawClass);
+        } catch (NoSuchMethodException e) {
+            throw new NoSuchMethodException(ConstructorMode.DEFAULT_PARAMETERS.getExpectedMethod(dashClass, rawClass));
+        }
+    }
+
     private void clearAPI() {
         modelMappings.clear();
         propertyMappings.clear();
@@ -81,9 +104,8 @@ public class DashLoaderAPI {
         propertyValueTypes.clear();
     }
 
-
     @SuppressWarnings("unchecked")
-    private void addType(FactoryType type, Class<?> dashClass, Class<?> targetClass, MethodHandle constructor) {
+    private void addType(FactoryType type, Class<?> dashClass, Class<?> targetClass, FactoryConstructor constructor) {
         switch (type) {
             case PROPERTY_VALUE -> {
                 propertyValueTypes.add(dashClass);
@@ -109,16 +131,6 @@ public class DashLoaderAPI {
         LOGGER.info("Added custom DashObject: {} {}", type, dashClass.getSimpleName());
     }
 
-    public static MethodHandle createConstructor(Class<?> dashClass, Class<?> rawClass, FactoryType type) throws NoSuchMethodException, IllegalAccessException {
-        final Class<?>[] extraParameters = type.extraParameters;
-        List<Class<?>> parameters = new ArrayList<>();
-        parameters.add(rawClass);
-        parameters.addAll(Arrays.stream(defaultParameters).toList());
-        parameters.addAll(Arrays.stream(extraParameters).toList());
-        return MethodHandles.publicLookup().findConstructor(dashClass, MethodType.methodType(void.class, parameters));
-    }
-
-
     private FactoryType getTypeFromFactoryInterface(Class<?> closs) {
         for (FactoryType value : FactoryType.values()) {
             if (value.factoryInterface == closs) {
@@ -128,7 +140,6 @@ public class DashLoaderAPI {
         LOGGER.error("Cannot find Factory Type from {} class parameter.", closs.getSimpleName());
         return null;
     }
-
 
     public void registerDashObject(Class<?> closs) {
         final Class<?>[] interfaces = closs.getInterfaces();
@@ -154,31 +165,15 @@ public class DashLoaderAPI {
         }
         for (Class<?> rawClass : annotation.value()) {
             try {
-                addType(type, closs, rawClass, createConstructor(closs, rawClass, type));
+                addType(type, closs, rawClass, createConstructor(closs, rawClass));
             } catch (NoSuchMethodException e) {
-                StringBuilder expectedMethod = new StringBuilder();
-                expectedMethod.append("public ");
-                expectedMethod.append(closs.getSimpleName());
-                expectedMethod.append('(');
-                expectedMethod.append(thisAndCamelCase(rawClass.getSimpleName()));
-                expectedMethod.append(thisAndCamelCase(ClassHelper.printArray(defaultParameters)));
-                expectedMethod.append(thisAndCamelCase(ClassHelper.printArray(type.extraParameters)));
-                expectedMethod.deleteCharAt(expectedMethod.length() - 1);
-                expectedMethod.deleteCharAt(expectedMethod.length() - 1);
-                expectedMethod.append(')');
-
-                LOGGER.error("Creation Constructor not found in {}, Expected constructor signature -> {}",
-                        closs.getSimpleName(),
-                        expectedMethod.toString(), e);
+                LOGGER.error("Constructor not matching/found. Expected: {}", e.getMessage());
             } catch (IllegalAccessException e) {
                 LOGGER.error("Constructor not accessible in {}", closs.getSimpleName());
             }
         }
     }
 
-    private String thisAndCamelCase(String string) {
-        return string + ' ' + (Character.toLowerCase(string.charAt(0)) + string.substring(1)) + ", ";
-    }
 
     private void initNativeAPI() {
         registerDashObject(DashBasicBakedModel.class);
