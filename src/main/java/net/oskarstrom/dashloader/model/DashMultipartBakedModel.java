@@ -12,9 +12,7 @@ import net.minecraft.state.StateManager;
 import net.minecraft.util.Util;
 import net.oskarstrom.dashloader.DashLoader;
 import net.oskarstrom.dashloader.DashRegistry;
-import net.oskarstrom.dashloader.api.annotation.DashConstructor;
 import net.oskarstrom.dashloader.api.annotation.DashObject;
-import net.oskarstrom.dashloader.api.enums.ConstructorMode;
 import net.oskarstrom.dashloader.data.serialization.Pointer2ObjectMap;
 import net.oskarstrom.dashloader.data.serialization.Pointer2PointerMap;
 import net.oskarstrom.dashloader.mixin.accessor.MultipartBakedModelAccessor;
@@ -45,7 +43,6 @@ public class DashMultipartBakedModel implements DashModel {
         this.stateCache = stateCache;
     }
 
-    @DashConstructor(ConstructorMode.FULL)
     public DashMultipartBakedModel(MultipartBakedModel model, DashRegistry registry) {
         final Pair<List<MultipartModelSelector>, StateManager<Block, BlockState>> selectors = DashLoader.getVanillaData().getModelData(model);
         MultipartBakedModelAccessor access = ((MultipartBakedModelAccessor) model);

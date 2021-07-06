@@ -10,7 +10,8 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface DashObject {
-    Class<?>[] value();
+    Class<?> value();
+
 
     FactoryType overrideType() default FactoryType.DEFAULT;
 }

@@ -44,11 +44,11 @@ public enum Feature {
      * if DashLoader should use a slightly more optimized load method.
      */
     LANGUAGE_FASTLOAD("misc.LanguageMixin", Impact.MINOR, 0),
-
     /**
      * if DashLoader should add the watermark in the main menu screen.
      */
     WATERMARK("misc.TitleScreenMixin", Impact.NONE, 0);
+
 
     String mixin;
     Impact impact;

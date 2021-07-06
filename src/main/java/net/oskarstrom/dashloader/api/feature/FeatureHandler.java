@@ -16,7 +16,7 @@ public class FeatureHandler {
         mixinCache = new HashMap<>();
         nameCache = new HashMap<>();
         for (Feature value : Feature.values()) {
-            FeatureHandler.mixinCache.put("net.quantumfusion.dashloader.mixin.feature." + value.mixin, value);
+            FeatureHandler.mixinCache.put("net.oskarstrom.dashloader.mixin.feature." + value.mixin, value);
             FeatureHandler.nameCache.put(value.name(), value);
         }
     }
@@ -33,7 +33,9 @@ public class FeatureHandler {
     }
 
     public static void disableFeature(Feature feature) {
-        data |= 1L << feature.ordinal();
+        if (feature != null) {
+            data |= 1L << feature.ordinal();
+        }
     }
 
     public static void disableFeature(String feature) {

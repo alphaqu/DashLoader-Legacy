@@ -26,7 +26,7 @@ repositories {
 }
 
 dependencies {
-    implementation "io.activej:activej-serializer:$activej_version"
+    modApi  "io.activej:activej-serializer:$activej_version"
     include "io.activej:activej-serializer:$activej_version"
     include "io.activej:activej-codegen:$activej_version"
     include "org.slf4j:slf4j-api:1.7.29"
@@ -37,7 +37,7 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
     //snakeyaml
-    implementation "org.yaml:snakeyaml:1.27"
+    modImplementation "org.yaml:snakeyaml:1.27"
     include "org.yaml:snakeyaml:1.27"
 
     // Uncomment to add Sodium to the dev environment

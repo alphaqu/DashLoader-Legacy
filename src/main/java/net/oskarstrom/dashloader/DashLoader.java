@@ -2,17 +2,14 @@ package net.oskarstrom.dashloader;
 
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 import net.oskarstrom.dashloader.api.DashLoaderAPI;
 import net.oskarstrom.dashloader.api.feature.FeatureHandler;
-import net.oskarstrom.dashloader.client.DashCacheOverlay;
 import net.oskarstrom.dashloader.data.DashRegistryData;
 import net.oskarstrom.dashloader.data.VanillaData;
 import net.oskarstrom.dashloader.data.registry.RegistryImageData;
 import net.oskarstrom.dashloader.data.registry.RegistryModelData;
 import net.oskarstrom.dashloader.data.serializers.DashSerializers;
-import net.oskarstrom.dashloader.mixin.accessor.MinecraftClientAccessor;
 import net.oskarstrom.dashloader.util.ClassLoaderWrapper;
 import net.oskarstrom.dashloader.util.DashReport;
 import net.oskarstrom.dashloader.util.ThreadHelper;
@@ -101,9 +98,6 @@ public class DashLoader {
 
     public void reload(Collection<String> resourcePacks) {
         if (shouldReload) {
-            final MinecraftClient client = MinecraftClient.getInstance();
-            client.setOverlay(new DashCacheOverlay(client));
-            ((MinecraftClientAccessor) client).callRender(false);
             final Instant time = Instant.now();
             DashReport.addTime(time, "From reload");
             state = DashCacheState.EMPTY;

@@ -152,25 +152,21 @@ public class DashLoaderAPI {
             LOGGER.error("Custom DashObject implementation does not have DashObject Annotation. Class: {}", closs.getSimpleName());
             return;
         }
-        final FactoryType type;
-        final FactoryType factoryType = annotation.overrideType();
-        if (factoryType == FactoryType.DEFAULT) {
+        FactoryType type = annotation.overrideType();
+        if (type == FactoryType.DEFAULT) {
             type = getTypeFromFactoryInterface(interfaces[0]);
-        } else {
-            type = factoryType;
         }
         if (type == null) {
             LOGGER.error("Factory type could not be identified. Class: {}", closs.getSimpleName());
             return;
         }
-        for (Class<?> rawClass : annotation.value()) {
-            try {
-                addType(type, closs, rawClass, createConstructor(closs, rawClass));
-            } catch (NoSuchMethodException e) {
-                LOGGER.error("Constructor not matching/found. Expected: {}", e.getMessage());
-            } catch (IllegalAccessException e) {
-                LOGGER.error("Constructor not accessible in {}", closs.getSimpleName());
-            }
+        final Class<?> rawClass = annotation.value();
+        try {
+            addType(type, closs, rawClass, createConstructor(closs, rawClass));
+        } catch (NoSuchMethodException e) {
+            LOGGER.error("Constructor not matching/found. Expected: {}", e.getMessage());
+        } catch (IllegalAccessException e) {
+            LOGGER.error("Constructor not accessible in {}", closs.getSimpleName());
         }
     }
 
