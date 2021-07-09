@@ -67,7 +67,7 @@ public class DashImage implements Dashable<NativeImage> {
     @Override
     public final NativeImage toUndash(final DashRegistry registry) {
         try (MemoryStack stack = MemoryStack.stackPush()) {
-            final ByteBuffer buf = stack.malloc(image.length);
+            final ByteBuffer buf = ByteBuffer.allocateDirect(image.length);
             buf.put(image);
             buf.flip();
             long pointer = STBImage.nstbi_load_from_memory(

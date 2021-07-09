@@ -81,7 +81,7 @@ public class DashSerializer<O> {
             output.close();
             taskHandler.completedSubTask();
             DashLoader.LOGGER.info("    Finished " + name + " Serialization.");
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         taskHandler.completedTask();
@@ -98,7 +98,7 @@ public class DashSerializer<O> {
                 throw new DashException(name + " Deserialization failed");
             }
             return out;
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         throw new DashException(name + " File failed");

@@ -46,10 +46,17 @@ public class ThreadHelper {
 
 
     public static <D extends Dashable<R>, R> Int2ObjectMap<R> execParallel(Int2ObjectMap<D> dashables, DashRegistry registry) {
+
         final Int2ObjectMap<R> answerMap = new Int2ObjectOpenHashMap<>((int) Math.ceil(dashables.size() / 0.75));
+
+        //uncomment for single threading in-case a thread is dying, for debug
+//        dashables.forEach((integer, d) -> answerMap.put(integer,d.toUndash(registry)));
+
         final UndashTask<R, D> task = new UndashTask<>(new ArrayList<>(dashables.int2ObjectEntrySet()), 100, registry);
         final ArrayList<Pointer2ObjectMap.Entry<R>> invoke = DashLoader.THREAD_POOL.invoke(task);
         invoke.forEach((answer) -> answerMap.put(answer.key, answer.value));
+
+
         return answerMap;
     }
 
