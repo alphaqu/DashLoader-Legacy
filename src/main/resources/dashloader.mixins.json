@@ -5,7 +5,6 @@
   "plugin": "net.oskarstrom.dashloader.mixin.MixinPlugin",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
-    "BlocksMixin",
     "BootStrapMixin",
     "GlStateManagerMixin",
     "MainMixin",
