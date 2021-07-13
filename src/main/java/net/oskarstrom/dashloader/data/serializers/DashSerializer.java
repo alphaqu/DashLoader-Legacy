@@ -55,6 +55,7 @@ public class DashSerializer<O> {
             }
         } else {
             try {
+                Thread.currentThread().setContextClassLoader(DashLoader.getInstance().getAssignedClassLoader());
                 final BinarySerializer<O> build = createSerializerFunction.apply(SerializerBuilder.create().withGeneratedBytecodePath(loader.getModBoundDir()));
                 renameRawSerializer(identifier, build);
                 serializer = build;

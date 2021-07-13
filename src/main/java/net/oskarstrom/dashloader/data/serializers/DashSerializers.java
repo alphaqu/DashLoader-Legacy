@@ -30,11 +30,13 @@ public class DashSerializers {
                     .withSubclasses("predicates", api.predicateTypes)
                     .withSubclasses("properties", api.propertyTypes)
                     .withSubclasses("values", api.propertyValueTypes)
+                    .withSubclasses("data", api.dataTypes)
                     .build(DashRegistryData.class);
         }));
         MODEL_SERIALIZER = addSerializer(new DashSerializer<>(loader, "model", (builder) -> {
             final DashLoaderAPI api = loader.getApi();
             api.initAPI();
+            Thread.currentThread().setContextClassLoader(DashLoader.getInstance().getAssignedClassLoader());
             return builder
                     .withSubclasses("models", api.modelTypes)
                     .build(RegistryModelData.class);

@@ -36,9 +36,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
+import java.util.function.Consumer;
 
 public class DashLoaderAPI {
     public static final Logger LOGGER = LogManager.getLogger();
@@ -49,11 +51,13 @@ public class DashLoaderAPI {
     public final Map<Class<? extends Comparable<?>>, FactoryConstructor> propertyValueMappings;
     public final Map<Class<? extends Font>, FactoryConstructor> fontMappings;
     public final Map<Class<? extends MultipartModelSelector>, FactoryConstructor> predicateMappings;
+    public final List<DataClass> dataClasses;
     public List<Class<?>> modelTypes;
     public List<Class<?>> predicateTypes;
     public List<Class<?>> fontTypes;
     public List<Class<?>> propertyTypes;
     public List<Class<?>> propertyValueTypes;
+    public List<Class<?>> dataTypes;
     private boolean initialized = false;
 
     public DashLoaderAPI() {
@@ -62,11 +66,28 @@ public class DashLoaderAPI {
         propertyValueMappings = Collections.synchronizedMap(new HashMap<>());
         predicateMappings = Collections.synchronizedMap(new HashMap<>());
         fontMappings = Collections.synchronizedMap(new HashMap<>());
+        dataClasses = Collections.synchronizedList(new ArrayList<>());
         modelTypes = new ArrayList<>();
         predicateTypes = new ArrayList<>();
         fontTypes = new ArrayList<>();
         propertyTypes = new ArrayList<>();
         propertyValueTypes = new ArrayList<>();
+        dataTypes = new ArrayList<>();
+    }
+
+    private void clearAPI() {
+        modelMappings.clear();
+        propertyMappings.clear();
+        propertyValueMappings.clear();
+        fontMappings.clear();
+        predicateMappings.clear();
+        modelTypes.clear();
+        predicateTypes.clear();
+        fontTypes.clear();
+        propertyTypes.clear();
+        propertyValueTypes.clear();
+        dataTypes.clear();
+        dataClasses.clear();
     }
 
     public static FactoryConstructor createConstructor(Class<?> dashClass, Class<?> rawClass) throws NoSuchMethodException, IllegalAccessException {
@@ -89,19 +110,6 @@ public class DashLoaderAPI {
         } catch (NoSuchMethodException e) {
             throw new NoSuchMethodException(ConstructorMode.DEFAULT_PARAMETERS.getExpectedMethod(dashClass, rawClass));
         }
-    }
-
-    private void clearAPI() {
-        modelMappings.clear();
-        propertyMappings.clear();
-        propertyValueMappings.clear();
-        fontMappings.clear();
-        predicateMappings.clear();
-        modelTypes.clear();
-        predicateTypes.clear();
-        fontTypes.clear();
-        propertyTypes.clear();
-        propertyValueTypes.clear();
     }
 
     @SuppressWarnings("unchecked")
@@ -198,6 +206,21 @@ public class DashLoaderAPI {
         registerDashObject(DashUnicodeFont.class);
     }
 
+    private void registerDataClass(Class<?> closs) {
+        if (Arrays.stream(closs.getInterfaces()).anyMatch(aClass -> aClass == DataClass.class)) {
+            try {
+                final DataClass dataClass = (DataClass) closs.getDeclaredConstructor().newInstance();
+                dataTypes.add(closs);
+                dataClasses.add(dataClass);
+                LOGGER.info("Added custom DataObject: {}", closs.getSimpleName());
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                e.printStackTrace();
+            }
+        } else {
+            LOGGER.error("Reload Object {} not implementing DataClass", closs.getSimpleName());
+        }
+    }
+
     public void initAPI() {
         if (!initialized) {
             Instant start = Instant.now();
@@ -205,7 +228,8 @@ public class DashLoaderAPI {
             initNativeAPI();
             FabricLoader.getInstance().getAllMods().parallelStream().forEach(modContainer -> {
                 final ModMetadata metadata = modContainer.getMetadata();
-                processModData(metadata.getCustomValue("dashloader:customobject"), metadata);
+                applyForClassesInValue(metadata, "dashloader:customobject", this::registerDashObject);
+                applyForClassesInValue(metadata, "dashloader:customdata", this::registerDataClass);
             });
             sortTypes();
             LOGGER.info("[" + Duration.between(start, Instant.now()).toMillis() + "ms] Initialized api.");
@@ -219,19 +243,21 @@ public class DashLoaderAPI {
         fontTypes.sort(Comparator.comparing(Class::getSimpleName));
         propertyTypes.sort(Comparator.comparing(Class::getSimpleName));
         propertyValueTypes.sort(Comparator.comparing(Class::getSimpleName));
+        dataTypes.sort(Comparator.comparing(Class::getSimpleName));
     }
 
-    private void processModData(CustomValue value, ModMetadata modMetadata) {
+    private void applyForClassesInValue(ModMetadata modMetadata, String valueName, Consumer<Class<?>> func) {
+        CustomValue value = modMetadata.getCustomValue(valueName);
         if (value != null) {
-            value.getAsArray().forEach(object -> {
-                final String dashObject = object.getAsString();
+            for (CustomValue customValue : value.getAsArray()) {
+                final String dashObject = customValue.getAsString();
                 try {
-                    final Class<?> aClass = Class.forName(dashObject);
-                    registerDashObject(aClass);
+                    final Class<?> closs = Class.forName(dashObject);
+                    func.accept(closs);
                 } catch (ClassNotFoundException e) {
-                    LOGGER.error("Custom Dashable Object not found in mod {}. Value: {}", modMetadata.getId(), object);
+                    LOGGER.error("Object not found in mod {}. Value: {}", modMetadata.getId(), customValue);
                 }
-            });
+            }
         }
     }
 

@@ -14,6 +14,7 @@ import net.minecraft.client.util.ModelIdentifier;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.Identifier;
+import net.oskarstrom.dashloader.api.DataClass;
 import net.oskarstrom.dashloader.api.FactoryConstructor;
 import net.oskarstrom.dashloader.api.enums.FactoryType;
 import net.oskarstrom.dashloader.blockstate.DashBlockState;
@@ -66,6 +67,7 @@ public class DashRegistry {
     private Int2ObjectMap<DashPredicate> predicates;
     private Int2ObjectMap<DashProperty> properties;
     private Int2ObjectMap<DashPropertyValue> propertyValues;
+    private List<DataClass> dataClasses;
 
     private List<Int2ObjectMap<DashModel>> modelsToDeserialize;
 
@@ -114,7 +116,8 @@ public class DashRegistry {
                         new RegistryPropertyData(new Pointer2ObjectMap<>(properties)),
                         new RegistryPropertyValueData(new Pointer2ObjectMap<>(propertyValues)),
                         new RegistrySpriteData(new Pointer2ObjectMap<>(sprites)),
-                        new RegistryPredicateData(new Pointer2ObjectMap<>(predicates))
+                        new RegistryPredicateData(new Pointer2ObjectMap<>(predicates)),
+                        loader.getApi().dataClasses
                 ),
                 new RegistryImageData(new Pointer2ObjectMap<>(images)),
                 getModels());
@@ -128,6 +131,7 @@ public class DashRegistry {
         properties = registryData.propertyRegistryData.toUndash();
         propertyValues = registryData.propertyValueRegistryData.toUndash();
         identifiers = registryData.identifierRegistryData.toUndash();
+        dataClasses = registryData.dataClassList;
     }
 
     public void loadImageData(RegistryImageData dashImageData) {
@@ -345,6 +349,9 @@ public class DashRegistry {
         try {
             tasksDone = 0;
             totalTasks = 4 + modelsToDeserialize.size();
+            for (DataClass dataClass : dataClasses) {
+                dataClass.reload(this);
+            }
             log(logger, "Loading Simple Objects");
             identifiersOut = parallelToUndash(identifiers);
             imagesOut = parallelToUndash(images);
@@ -368,6 +375,9 @@ public class DashRegistry {
                 modelsOut.putAll(ThreadHelper.execParallel(modelCategory, this));
                 currentStage[0]++;
             });
+            for (DataClass dataClass : dataClasses) {
+                dataClass.apply(this);
+            }
             log(logger, "Applying Model Overrides");
             modelsToDeserialize.forEach(modelcategory -> DashLoader.THREAD_POOL.invoke(new ThreadHelper.UndashTask.ApplyTask(new ArrayList<>(modelcategory.values()), 100, this)));
             modelsToDeserialize = null;

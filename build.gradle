@@ -11,7 +11,7 @@ version = project.mod_version
 group = project.maven_group
 
 minecraft {
-    accessWidener =  file("src/main/resources/dashloader.accesswidener")
+    accessWidener = file("src/main/resources/dashloader.accesswidener")
 }
 
 repositories {
@@ -23,10 +23,19 @@ repositories {
         name = "Auoeke's Maven"
         url = "https://auoeke.jfrog.io/artifactory/maven"
     }
+    maven {
+        name = "Technici4n"
+        url = "https://raw.githubusercontent.com/Technici4n/Technici4n-maven/master/"
+        content {
+            includeGroup "net.fabricmc.fabric-api"
+            includeGroup "dev.technici4n"
+            includeGroup "dev.latvian.mods"
+        }
+    }
 }
 
 dependencies {
-    modApi  "io.activej:activej-serializer:$activej_version"
+    modApi "io.activej:activej-serializer:$activej_version"
     include "io.activej:activej-serializer:$activej_version"
     include "io.activej:activej-codegen:$activej_version"
     include "org.slf4j:slf4j-api:1.7.29"
@@ -40,6 +49,11 @@ dependencies {
     modImplementation "org.yaml:snakeyaml:1.27"
     include "org.yaml:snakeyaml:1.27"
 
+
+    //Uncomment to add Fabric api
+    modImplementation "net.fabricmc.fabric-api:fabric-api:0.36.1+1.17"
+    modImplementation("net.fabricmc.fabric-api:fabric-api-lookup-api-v1:1.3.0+b246072f13")
+    modImplementation("net.fabricmc.fabric-api:fabric-transfer-api-v1:0.4.0-pre.02+47ae1cc013")
     // Uncomment to add Sodium to the dev environment
     // modImplementation "com.github.CaffeineMC:sodium-fabric:${project.sodium_version}"
 

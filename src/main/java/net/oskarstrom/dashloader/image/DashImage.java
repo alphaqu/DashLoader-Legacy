@@ -9,11 +9,10 @@ import net.oskarstrom.dashloader.Dashable;
 import net.oskarstrom.dashloader.mixin.accessor.NativeImageAccessor;
 import org.lwjgl.stb.STBImage;
 import org.lwjgl.system.MemoryStack;
+import org.lwjgl.system.MemoryUtil;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-
-import static org.lwjgl.system.MemoryUtil.memAddress;
 
 public class DashImage implements Dashable<NativeImage> {
 
@@ -70,17 +69,16 @@ public class DashImage implements Dashable<NativeImage> {
             final ByteBuffer buf = ByteBuffer.allocateDirect(image.length);
             buf.put(image);
             buf.flip();
-            long pointer = STBImage.nstbi_load_from_memory(
-                    memAddress(buf),
-                    buf.remaining(),
-                    stack.nmalloc(4, 1 << 2),
-                    stack.nmalloc(4, 1 << 2),
-                    stack.nmalloc(4, 1 << 2),
+            ByteBuffer buffer = STBImage.stbi_load_from_memory(
+                    buf,
+                    stack.mallocInt(1),
+                    stack.mallocInt(1),
+                    stack.mallocInt(1),
                     format.getChannelCount());
-            if (pointer == 0L) {
+            if (buffer == null) {
                 throw new DashException("Could not load image: " + STBImage.stbi_failure_reason());
             }
-            return NativeImageAccessor.init(format, this.width, this.height, useSTB, pointer);
+            return NativeImageAccessor.init(format, this.width, this.height, useSTB, MemoryUtil.memAddress(buffer));
         }
     }
 

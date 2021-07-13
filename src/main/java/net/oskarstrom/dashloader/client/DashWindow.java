@@ -6,6 +6,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.oskarstrom.dashloader.DashLoader;
+import net.oskarstrom.dashloader.DashRegistry;
 
 public class DashWindow extends Screen {
     private final int endFrames = 120;
@@ -13,6 +14,7 @@ public class DashWindow extends Screen {
     private float currentProgress = 0f;
     private int framesLeftToEnd;
     private boolean started = false;
+    private DashRegistry dashRegistry;
 
     public DashWindow(Text title, Screen previousScreen) {
         super(title);
@@ -35,7 +37,7 @@ public class DashWindow extends Screen {
                 client.openScreen(previousScreen);
             }
         }
-        if (!started) { //boys talk with me im still here
+        if (!started) {
             final Thread thread = new Thread(() -> {
                 DashLoader.getInstance().saveDashCache();
             });

@@ -2,7 +2,11 @@ package net.oskarstrom.dashloader.data;
 
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
+import io.activej.serializer.annotations.SerializeSubclasses;
+import net.oskarstrom.dashloader.api.DataClass;
 import net.oskarstrom.dashloader.data.registry.*;
+
+import java.util.List;
 
 public class DashRegistryData {
     @Serialize(order = 0)
@@ -19,6 +23,9 @@ public class DashRegistryData {
     public final RegistrySpriteData spriteRegistryData;
     @Serialize(order = 6)
     public final RegistryPredicateData predicateRegistryData;
+    @Serialize(order = 7)
+    @SerializeSubclasses(extraSubclassesId = "data", path = {0})
+    public final List<DataClass> dataClassList;
 
 
     public DashRegistryData(@Deserialize("blockStateRegistryData") RegistryBlockStateData blockStateRegistryData,
@@ -27,7 +34,8 @@ public class DashRegistryData {
                             @Deserialize("propertyRegistryData") RegistryPropertyData propertyRegistryData,
                             @Deserialize("propertyValueRegistryData") RegistryPropertyValueData propertyValueRegistryData,
                             @Deserialize("spriteRegistryData") RegistrySpriteData spriteRegistryData,
-                            @Deserialize("predicateRegistryData") RegistryPredicateData predicateRegistryData
+                            @Deserialize("predicateRegistryData") RegistryPredicateData predicateRegistryData,
+                            @Deserialize("dataClassList") List<DataClass> dataClassList
     ) {
         this.blockStateRegistryData = blockStateRegistryData;
         this.fontRegistryData = fontRegistryData;
@@ -36,6 +44,7 @@ public class DashRegistryData {
         this.propertyValueRegistryData = propertyValueRegistryData;
         this.spriteRegistryData = spriteRegistryData;
         this.predicateRegistryData = predicateRegistryData;
+        this.dataClassList = dataClassList;
     }
 
 }

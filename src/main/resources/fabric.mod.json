@@ -27,7 +27,10 @@
   "custom": {
     "sodium:options": {
       "mixin.features.model": false
-    }
+    },
+    "dashloader:customdata": [
+      "net.oskarstrom.dashloader.api.EmptyData"
+    ]
   },
   "depends": {
     "fabricloader": ">=0.11.3",
