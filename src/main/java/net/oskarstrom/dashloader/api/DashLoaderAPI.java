@@ -75,21 +75,6 @@ public class DashLoaderAPI {
         dataTypes = new ArrayList<>();
     }
 
-    private void clearAPI() {
-        modelMappings.clear();
-        propertyMappings.clear();
-        propertyValueMappings.clear();
-        fontMappings.clear();
-        predicateMappings.clear();
-        modelTypes.clear();
-        predicateTypes.clear();
-        fontTypes.clear();
-        propertyTypes.clear();
-        propertyValueTypes.clear();
-        dataTypes.clear();
-        dataClasses.clear();
-    }
-
     public static FactoryConstructor createConstructor(Class<?> dashClass, Class<?> rawClass) throws NoSuchMethodException, IllegalAccessException {
         final Constructor<?>[] constructors = dashClass.getConstructors();
         for (Constructor<?> constructor : constructors) {
@@ -110,6 +95,21 @@ public class DashLoaderAPI {
         } catch (NoSuchMethodException e) {
             throw new NoSuchMethodException(ConstructorMode.DEFAULT_PARAMETERS.getExpectedMethod(dashClass, rawClass));
         }
+    }
+
+    private void clearAPI() {
+        modelMappings.clear();
+        propertyMappings.clear();
+        propertyValueMappings.clear();
+        fontMappings.clear();
+        predicateMappings.clear();
+        modelTypes.clear();
+        predicateTypes.clear();
+        fontTypes.clear();
+        propertyTypes.clear();
+        propertyValueTypes.clear();
+        dataTypes.clear();
+        dataClasses.clear();
     }
 
     @SuppressWarnings("unchecked")
@@ -226,10 +226,13 @@ public class DashLoaderAPI {
             Instant start = Instant.now();
             clearAPI();
             initNativeAPI();
-            FabricLoader.getInstance().getAllMods().parallelStream().forEach(modContainer -> {
+            FabricLoader.getInstance().getAllMods().forEach(modContainer -> {
                 final ModMetadata metadata = modContainer.getMetadata();
-                applyForClassesInValue(metadata, "dashloader:customobject", this::registerDashObject);
-                applyForClassesInValue(metadata, "dashloader:customdata", this::registerDataClass);
+                if (metadata.getCustomValues().size() != 0) {
+                    LOGGER.info("Scanning {} for DashValues", metadata.getName());
+                    applyForClassesInValue(metadata, "dashloader:customobject", this::registerDashObject);
+                    applyForClassesInValue(metadata, "dashloader:customdata", this::registerDataClass);
+                }
             });
             sortTypes();
             LOGGER.info("[" + Duration.between(start, Instant.now()).toMillis() + "ms] Initialized api.");

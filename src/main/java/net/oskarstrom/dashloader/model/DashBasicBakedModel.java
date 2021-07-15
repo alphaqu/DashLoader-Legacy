@@ -65,12 +65,11 @@ public class DashBasicBakedModel implements DashModel {
     public DashBasicBakedModel(BasicBakedModel basicBakedModel, DashRegistry registry) {
         BasicBakedModelAccessor access = ((BasicBakedModelAccessor) basicBakedModel);
         quads = new ArrayList<>();
-        access.getQuads().forEach(bakedQuad -> quads.add(new DashBakedQuad(bakedQuad)));
+        access.getQuads().forEach(bakedQuad -> quads.add(new DashBakedQuad(bakedQuad, registry)));
         final Map<Direction, List<BakedQuad>> faceQuads = access.getFaceQuads();
         this.faceQuads = DashHelper.convertMapToPM(
                 faceQuads,
-                (direction, bakedQuads)
-                        -> Pair.of(new DashDirection(direction), DashHelper.convertList(bakedQuads, DashBakedQuad::new)));
+                (direction, bakedQuads) -> Pair.of(new DashDirection(direction), DashHelper.convertList(bakedQuads, quad -> new DashBakedQuad(quad, registry))));
         itemPropertyOverrides = new DashModelOverrideList(access.getItemPropertyOverrides(), registry);
         usesAo = access.getUsesAo();
         hasDepth = access.getHasDepth();
@@ -84,11 +83,11 @@ public class DashBasicBakedModel implements DashModel {
     @Override
     public BasicBakedModel toUndash(final DashRegistry registry) {
         final Sprite sprite = registry.getSprite(spritePointer);
-        final List<BakedQuad> quadsOut = DashHelper.convertList(quads, (dashBakedQuad) -> dashBakedQuad.toUndash(sprite, registry));
+        final List<BakedQuad> quadsOut = DashHelper.convertList(quads, (dashBakedQuad) -> dashBakedQuad.toUndash(registry));
 
         final Map<Direction, List<BakedQuad>> faceQuadsOut = DashHelper.convertPairMapToMap(faceQuads, (dashDirection, dashBakedQuads) ->
                 Pair.of(dashDirection.toUndash(registry), DashHelper.convertList(dashBakedQuads, dashBakedQuad ->
-                        dashBakedQuad.toUndash(sprite, registry))));
+                        dashBakedQuad.toUndash(registry))));
 
         return new BasicBakedModel(quadsOut, faceQuadsOut, usesAo, isSideLit, hasDepth, sprite, transformation == null ? ModelTransformation.NONE : transformation.toUndash(), itemPropertyOverrides.toUndash(registry));
     }

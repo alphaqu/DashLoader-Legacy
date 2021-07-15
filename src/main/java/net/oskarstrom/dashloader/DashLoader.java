@@ -305,23 +305,23 @@ public class DashLoader {
         }
 
         public void setMods(FabricLoader loader) {
-            long modInfoData = 0;
+            long modInfoData = 420;
             for (ModContainer mod : loader.getAllMods()) {
                 for (char c : mod.getMetadata().getVersion().getFriendlyString().toCharArray()) {
                     modInfoData += c;
                 }
             }
-            modInfo = Long.toHexString(modInfoData);
+            modInfo = Long.toHexString(modInfoData + 0x69);
         }
 
         public void setResourcePacks(Collection<String> resourcePacks) {
-            long resourcePackData = 0;
+            long resourcePackData = 420;
             for (String resourcePack : resourcePacks) {
                 for (char c : resourcePack.toCharArray()) {
                     resourcePackData += c;
                 }
             }
-            this.resourcePacks = Long.toHexString(resourcePackData);
+            this.resourcePacks = Long.toHexString(resourcePackData + 0x69);
         }
 
 
