@@ -290,9 +290,7 @@ public class DashRegistry {
         try {
             tasksDone = 0;
             totalTasks = 9;
-            for (DataClass dataClass : dataClasses) {
-                dataClass.reload(this);
-            }
+            dataClasses.forEach(dataClass -> dataClass.reload(this));
             undashTask(identifiers, logger, "Identifiers");
             undashTask(images, logger, "Images");
             undashTask(properties, logger, "Properties");
@@ -303,9 +301,7 @@ public class DashRegistry {
             undashTask(bakedQuads, logger, "Quads");
             undashTask(fonts, logger, "Fonts");
             undashTask(models, logger, "Models");
-            for (DataClass dataClass : dataClasses) {
-                dataClass.apply(this);
-            }
+            dataClasses.forEach(dataClass -> dataClass.apply(this));
             log(logger, "Applying Model Overrides");
             models.getModelsToDeserialize().forEach(modelcategory -> DashLoader.THREAD_POOL.invoke(new ThreadHelper.UndashTask.ApplyTask(new ArrayList<>(modelcategory.values()), 100, this)));
         } catch (Exception e) {
@@ -327,7 +323,7 @@ public class DashRegistry {
         if (apiFailed.size() != 0) {
             logger.error("Found incompatible objects that were not able to be serialized.");
             int[] ints = new int[1];
-            apiFailed.entrySet().stream().sorted(Comparator.comparing(e -> e.getValue().name)).forEach(entry -> {
+            apiFailed.entrySet().stream().sorted(Comparator.comparing(e -> e.getKey().getName())).forEach(entry -> {
                 ints[0]++;
                 logger.error("[" + entry.getValue().name() + "] Object: " + entry.getKey().getName());
             });

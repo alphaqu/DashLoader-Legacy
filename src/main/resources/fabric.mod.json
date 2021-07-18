@@ -26,7 +26,8 @@
   ],
   "custom": {
     "sodium:options": {
-      "mixin.features.model": false
+      "mixin.features.model": false,
+      "mixin.features.shader": false
     },
     "dashloader:customobject": [
       "net.oskarstrom.dashloader.api.EmptyData"
