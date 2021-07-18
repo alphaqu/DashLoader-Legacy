@@ -3,6 +3,7 @@ package net.oskarstrom.dashloader.model.components;
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import io.activej.serializer.annotations.SerializeNullable;
+import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.json.ModelOverrideList;
 import net.oskarstrom.dashloader.DashRegistry;
 import net.oskarstrom.dashloader.mixin.accessor.ModelOverrideListBakedOverrideAccessor;
@@ -29,7 +30,8 @@ public class DashModelOverrideListBakedOverride {
         for (int i = 0; i < conditions.length; i++) {
             this.conditions[i] = new DashModelOverrideListInlinedCondition(conditions[i]);
         }
-        this.model = registry.createModelPointer(((ModelOverrideListBakedOverrideAccessor) override).getModel());
+        final BakedModel model = ((ModelOverrideListBakedOverrideAccessor) override).getModel();
+        this.model = model == null ? null : registry.models.register(model);
     }
 
     public ModelOverrideList.BakedOverride toUndash(DashRegistry registry) {
@@ -37,6 +39,6 @@ public class DashModelOverrideListBakedOverride {
         for (int i = 0; i < this.conditions.length; i++) {
             conditions[i] = this.conditions[i].toUndash();
         }
-        return ModelOverrideListBakedOverrideAccessor.newModelOverrideListBakedOverride(conditions, model == null ? null : registry.getModel(model));
+        return ModelOverrideListBakedOverrideAccessor.newModelOverrideListBakedOverride(conditions, model == null ? null : registry.models.getObject(model));
     }
 }

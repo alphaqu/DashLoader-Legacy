@@ -4,21 +4,17 @@ import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import net.minecraft.state.property.EnumProperty;
 import net.minecraft.util.StringIdentifiable;
-import net.oskarstrom.dashloader.DashLoader;
 import net.oskarstrom.dashloader.DashRegistry;
-import net.oskarstrom.dashloader.api.FactoryConstructor;
-import net.oskarstrom.dashloader.api.annotation.DashConstructor;
 import net.oskarstrom.dashloader.api.annotation.DashObject;
-import net.oskarstrom.dashloader.api.enums.ConstructorMode;
+import net.oskarstrom.dashloader.util.ClassHelper;
 
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 
 @DashObject(EnumProperty.class)
 public class DashEnumProperty implements DashProperty {
-
-    private static final Map<String, Class> cache = new ConcurrentHashMap<>();
-
     @Serialize(order = 0)
     public final List<String> values;
     @Serialize(order = 1)
@@ -36,7 +32,6 @@ public class DashEnumProperty implements DashProperty {
         this.name = name;
     }
 
-    @DashConstructor(ConstructorMode.OBJECT)
     public DashEnumProperty(EnumProperty property) {
         className = property.getType().getName();
         name = property.getName();
@@ -50,26 +45,8 @@ public class DashEnumProperty implements DashProperty {
     }
 
     public <T extends Enum<T> & StringIdentifiable> EnumProperty<T> get() {
-        type = getClass(className);
+        type = ClassHelper.getClass(className);
         return EnumProperty.of(name, (Class<T>) type, Arrays.asList(((Class<T>) type).getEnumConstants()));
-    }
-
-    private Class getClass(final String className) {
-        final Class closs = cache.get(className);
-        if (closs != null) return closs;
-        try {
-            final Class clz = Class.forName(className);
-            cache.put(className, clz);
-            return clz;
-        } catch (Exception ignored) {
-        }
-        return null;
-    }
-
-
-    @Override
-    public FactoryConstructor overrideMethodHandleForValue() {
-        return DashLoader.getInstance().getApi().propertyValueMappings.get(Enum.class);
     }
 
     @Override

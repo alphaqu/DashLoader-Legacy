@@ -4,9 +4,7 @@ import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import net.minecraft.state.property.IntProperty;
 import net.oskarstrom.dashloader.DashRegistry;
-import net.oskarstrom.dashloader.api.annotation.DashConstructor;
 import net.oskarstrom.dashloader.api.annotation.DashObject;
-import net.oskarstrom.dashloader.api.enums.ConstructorMode;
 
 import java.util.Objects;
 
@@ -31,7 +29,6 @@ public class DashIntProperty implements DashProperty {
         this.highest = highest;
     }
 
-    @DashConstructor(ConstructorMode.OBJECT)
     public DashIntProperty(IntProperty property) {
         name = property.getName();
         int lowest = -1;

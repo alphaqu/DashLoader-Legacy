@@ -10,9 +10,7 @@ import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Property;
 import net.oskarstrom.dashloader.DashRegistry;
 import net.oskarstrom.dashloader.api.ExtraVariables;
-import net.oskarstrom.dashloader.api.annotation.DashConstructor;
 import net.oskarstrom.dashloader.api.annotation.DashObject;
-import net.oskarstrom.dashloader.api.enums.ConstructorMode;
 import net.oskarstrom.dashloader.data.serialization.Pointer2PointerMap;
 import net.oskarstrom.dashloader.mixin.accessor.SimpleMultipartModelSelectorAccessor;
 import org.apache.commons.lang3.tuple.Pair;
@@ -41,7 +39,6 @@ public class DashSimplePredicate implements DashPredicate {
     }
 
 
-    @DashConstructor(ConstructorMode.FULL)
     public DashSimplePredicate(SimpleMultipartModelSelector simpleMultipartModelSelector, DashRegistry registry, ExtraVariables extraVariables) {
         StateManager<Block, BlockState> stateManager = (StateManager<Block, BlockState>) extraVariables.getExtraVariable1();
         SimpleMultipartModelSelectorAccessor access = ((SimpleMultipartModelSelectorAccessor) simpleMultipartModelSelector);
@@ -69,14 +66,14 @@ public class DashSimplePredicate implements DashPredicate {
         if (!optional.isPresent()) {
             throw new RuntimeException(String.format("Unknown value '%s' '%s'", valueString, stateFactory.getOwner().toString()));
         } else {
-            return registry.createPropertyPointer(property, (Comparable<?>) optional.get());
+            return Pair.of(registry.properties.register(property), registry.propertyValues.register((Comparable<?>) optional.get()));
         }
     }
 
     @Override
     public Predicate<BlockState> toUndash(DashRegistry registry) {
         List<Map.Entry<? extends Property<?>, ? extends Comparable<?>>> out = new ArrayList<>();
-        properties.forEach((entry) -> out.add(registry.getProperty(entry.key, entry.value)));
+        properties.forEach((entry) -> out.add(Pair.of(registry.properties.getObject(entry.key), registry.propertyValues.getObject(entry.value))));
         Predicate<BlockState> outPredicate;
         if (out.size() == 1) {
             final Map.Entry<? extends Property<?>, ? extends Comparable<?>> entry = out.get(0);

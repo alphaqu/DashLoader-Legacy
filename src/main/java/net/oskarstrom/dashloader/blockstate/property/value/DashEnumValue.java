@@ -3,10 +3,8 @@ package net.oskarstrom.dashloader.blockstate.property.value;
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import net.oskarstrom.dashloader.DashRegistry;
-import net.oskarstrom.dashloader.api.ExtraVariables;
-import net.oskarstrom.dashloader.api.annotation.DashConstructor;
 import net.oskarstrom.dashloader.api.annotation.DashObject;
-import net.oskarstrom.dashloader.api.enums.ConstructorMode;
+import net.oskarstrom.dashloader.util.ClassHelper;
 
 @DashObject(Enum.class)
 public class DashEnumValue implements DashPropertyValue {
@@ -14,25 +12,26 @@ public class DashEnumValue implements DashPropertyValue {
     public final String value;
 
     @Serialize(order = 1)
-    public final int enumPointer;
+    public final String enumClass;
 
     public DashEnumValue(@Deserialize("value") String value,
-                         @Deserialize("enumPointer") int enumPointer) {
+                         @Deserialize("enumClass") String enumClass) {
         this.value = value;
-        this.enumPointer = enumPointer;
+        this.enumClass = enumClass;
     }
 
-    @DashConstructor(ConstructorMode.OBJECT_EXTRA)
-    public DashEnumValue(Enum<?> enuum, ExtraVariables propertyPointer) {
-        this(enuum.name(), (Integer) propertyPointer.getExtraVariable1());
+    public DashEnumValue(Enum<?> enuum) {
+        this(enuum.name(), enuum.getDeclaringClass().getName());
     }
 
     @Override
     public Enum<?> toUndash(DashRegistry registry) {
-        return get(registry);
+        return get();
     }
 
-    public <T extends Enum<T>> T get(DashRegistry registry) {
-        return Enum.valueOf((Class<T>) registry.propertiesOut.get(enumPointer).getType(), value);
+
+    public <T extends Enum<T>> T get() {
+        final Class<T> enumClass = ClassHelper.castClass(ClassHelper.getClass(this.enumClass));
+        return Enum.valueOf(enumClass, value);
     }
 }

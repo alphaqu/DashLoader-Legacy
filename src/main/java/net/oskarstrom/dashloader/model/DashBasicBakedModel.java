@@ -13,7 +13,6 @@ import net.oskarstrom.dashloader.api.annotation.DashObject;
 import net.oskarstrom.dashloader.data.DashDirection;
 import net.oskarstrom.dashloader.data.serialization.PairMap;
 import net.oskarstrom.dashloader.mixin.accessor.BasicBakedModelAccessor;
-import net.oskarstrom.dashloader.model.components.DashBakedQuad;
 import net.oskarstrom.dashloader.model.components.DashModelOverrideList;
 import net.oskarstrom.dashloader.model.components.DashModelTransformation;
 import net.oskarstrom.dashloader.util.DashHelper;
@@ -26,9 +25,9 @@ import java.util.Map;
 @DashObject(BasicBakedModel.class)
 public class DashBasicBakedModel implements DashModel {
     @Serialize(order = 0)
-    public final List<DashBakedQuad> quads;
+    public final List<Integer> quads;
     @Serialize(order = 1)
-    public final PairMap<DashDirection, List<DashBakedQuad>> faceQuads;
+    public final PairMap<DashDirection, List<Integer>> faceQuads;
     @Serialize(order = 2)
     public final boolean usesAo;
     @Serialize(order = 3)
@@ -44,8 +43,8 @@ public class DashBasicBakedModel implements DashModel {
     public final int spritePointer;
 
 
-    public DashBasicBakedModel(@Deserialize("quads") List<DashBakedQuad> quads,
-                               @Deserialize("faceQuads") PairMap<DashDirection, List<DashBakedQuad>> faceQuads,
+    public DashBasicBakedModel(@Deserialize("quads") List<Integer> quads,
+                               @Deserialize("faceQuads") PairMap<DashDirection, List<Integer>> faceQuads,
                                @Deserialize("usesAo") boolean usesAo,
                                @Deserialize("hasDepth") boolean hasDepth,
                                @Deserialize("isSideLit") boolean isSideLit,
@@ -65,29 +64,27 @@ public class DashBasicBakedModel implements DashModel {
     public DashBasicBakedModel(BasicBakedModel basicBakedModel, DashRegistry registry) {
         BasicBakedModelAccessor access = ((BasicBakedModelAccessor) basicBakedModel);
         quads = new ArrayList<>();
-        access.getQuads().forEach(bakedQuad -> quads.add(new DashBakedQuad(bakedQuad, registry)));
+        access.getQuads().forEach(bakedQuad -> quads.add(registry.bakedQuads.register(bakedQuad)));
         final Map<Direction, List<BakedQuad>> faceQuads = access.getFaceQuads();
         this.faceQuads = DashHelper.convertMapToPM(
                 faceQuads,
-                (direction, bakedQuads) -> Pair.of(new DashDirection(direction), DashHelper.convertList(bakedQuads, quad -> new DashBakedQuad(quad, registry))));
+                (direction, bakedQuads) -> Pair.of(new DashDirection(direction), DashHelper.convertList(bakedQuads, registry.bakedQuads::register)));
         itemPropertyOverrides = new DashModelOverrideList(access.getItemPropertyOverrides(), registry);
         usesAo = access.getUsesAo();
         hasDepth = access.getHasDepth();
         isSideLit = access.getIsSideLit();
         final ModelTransformation transformation = access.getTransformation();
         this.transformation = transformation == ModelTransformation.NONE ? null : DashModelTransformation.createDashModelTransformation(transformation);
-        spritePointer = registry.createSpritePointer(access.getSprite());
+        spritePointer = registry.sprites.register(access.getSprite());
     }
 
 
     @Override
     public BasicBakedModel toUndash(final DashRegistry registry) {
-        final Sprite sprite = registry.getSprite(spritePointer);
-        final List<BakedQuad> quadsOut = DashHelper.convertList(quads, (dashBakedQuad) -> dashBakedQuad.toUndash(registry));
-
+        final Sprite sprite = registry.sprites.getObject(spritePointer);
+        final List<BakedQuad> quadsOut = DashHelper.convertList(quads, registry.bakedQuads::getObject);
         final Map<Direction, List<BakedQuad>> faceQuadsOut = DashHelper.convertPairMapToMap(faceQuads, (dashDirection, dashBakedQuads) ->
-                Pair.of(dashDirection.toUndash(registry), DashHelper.convertList(dashBakedQuads, dashBakedQuad ->
-                        dashBakedQuad.toUndash(registry))));
+                Pair.of(dashDirection.toUndash(registry), DashHelper.convertList(dashBakedQuads, registry.bakedQuads::getObject)));
 
         return new BasicBakedModel(quadsOut, faceQuadsOut, usesAo, isSideLit, hasDepth, sprite, transformation == null ? ModelTransformation.NONE : transformation.toUndash(), itemPropertyOverrides.toUndash(registry));
     }
@@ -97,9 +94,4 @@ public class DashBasicBakedModel implements DashModel {
         itemPropertyOverrides.applyOverrides(registry);
     }
 
-
-    @Override
-    public int getStage() {
-        return 0;
-    }
 }

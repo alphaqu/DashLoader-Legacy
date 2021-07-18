@@ -10,9 +10,7 @@ import net.minecraft.resource.Resource;
 import net.minecraft.util.Identifier;
 import net.oskarstrom.dashloader.DashLoader;
 import net.oskarstrom.dashloader.DashRegistry;
-import net.oskarstrom.dashloader.api.annotation.DashConstructor;
 import net.oskarstrom.dashloader.api.annotation.DashObject;
-import net.oskarstrom.dashloader.api.enums.ConstructorMode;
 import net.oskarstrom.dashloader.mixin.accessor.TrueTypeFontAccessor;
 import net.oskarstrom.dashloader.util.IOHelper;
 import net.oskarstrom.dashloader.util.UnsafeHelper;
@@ -57,7 +55,6 @@ public class DashTrueTypeFont implements DashFont {
         this.ascent = ascent;
     }
 
-    @DashConstructor(ConstructorMode.OBJECT)
     public DashTrueTypeFont(TrueTypeFont font) {
         TrueTypeFontAccessor fontAccess = (TrueTypeFontAccessor) font;
         final Object2ObjectMap<STBTTFontinfo, Identifier> fontData = DashLoader.getVanillaData().getFontData();

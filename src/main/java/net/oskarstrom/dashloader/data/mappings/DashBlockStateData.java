@@ -26,14 +26,14 @@ public class DashBlockStateData implements Dashable {
         final Object2IntMap<BlockState> stateLookup = data.getStateLookup();
         taskHandler.setSubtasks(stateLookup.size());
         ThreadHelper.execForEach(stateLookup, (blockState, integer) -> {
-            this.blockstates.put(registry.createBlockStatePointer(blockState), integer);
+            this.blockstates.put(registry.blockstates.register(blockState), integer);
             taskHandler.completedSubTask();
         });
     }
 
     public Object2IntMap<BlockState> toUndash(DashRegistry registry) {
         final Object2IntOpenHashMap<BlockState> stateLookupOut = new Object2IntOpenHashMap<>();
-        blockstates.forEach((entry) -> stateLookupOut.put(registry.getBlockstate(entry.key), entry.value));
+        blockstates.forEach((entry) -> stateLookupOut.put(registry.blockstates.getObject(entry.key), entry.value));
         return stateLookupOut;
     }
 

@@ -11,6 +11,7 @@ import java.util.function.Function;
 
 import static net.oskarstrom.dashloader.api.DashLoaderAPI.defaultParameters;
 
+
 public enum ConstructorMode {
 
     /**

@@ -6,9 +6,7 @@ import io.activej.serializer.annotations.SerializeNullable;
 import net.minecraft.state.property.DirectionProperty;
 import net.minecraft.util.math.Direction;
 import net.oskarstrom.dashloader.DashRegistry;
-import net.oskarstrom.dashloader.api.annotation.DashConstructor;
 import net.oskarstrom.dashloader.api.annotation.DashObject;
-import net.oskarstrom.dashloader.api.enums.ConstructorMode;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,7 +29,6 @@ public class DashDirectionProperty implements DashProperty {
         this.directions = directions;
     }
 
-    @DashConstructor(ConstructorMode.OBJECT)
     public DashDirectionProperty(DirectionProperty property) {
         name = property.getName();
         final Collection<Direction> values = property.getValues();

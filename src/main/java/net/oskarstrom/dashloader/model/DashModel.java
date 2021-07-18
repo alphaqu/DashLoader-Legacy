@@ -11,6 +11,8 @@ public interface DashModel extends Factory<BakedModel> {
     }
 
 
-    int getStage();
+    default int getStage() {
+        return 0;
+    }
 
 }

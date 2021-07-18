@@ -63,7 +63,7 @@ public class DashSprite implements Dashable<Sprite> {
         final NativeImage[] images = ((SpriteAccessor) sprite).getImages();
         this.images = new int[images.length];
         for (int i = 0; i < images.length; i++) {
-            this.images[i] = registry.createImagePointer(images[i]);
+            this.images[i] = registry.images.register(images[i]);
         }
         x = sprite.getX();
         y = sprite.getY();
@@ -81,7 +81,7 @@ public class DashSprite implements Dashable<Sprite> {
         final SpriteAccessor spriteAccessor = ((SpriteAccessor) out);
         final NativeImage[] imagesOut = new NativeImage[images.length];
         for (int i = 0; i < images.length; i++) {
-            imagesOut[i] = registry.getImage(images[i]);
+            imagesOut[i] = registry.images.getObject(images[i]);
         }
         spriteAccessor.setImages(imagesOut);
         spriteAccessor.setX(x);

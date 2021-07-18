@@ -24,6 +24,8 @@ public class DashRegistryData {
     @Serialize(order = 6)
     public final RegistryPredicateData predicateRegistryData;
     @Serialize(order = 7)
+    public final RegistryBakedQuadData registryBakedQuadData;
+    @Serialize(order = 8)
     @SerializeSubclasses(extraSubclassesId = "data", path = {0})
     public final List<DataClass> dataClassList;
 
@@ -35,6 +37,7 @@ public class DashRegistryData {
                             @Deserialize("propertyValueRegistryData") RegistryPropertyValueData propertyValueRegistryData,
                             @Deserialize("spriteRegistryData") RegistrySpriteData spriteRegistryData,
                             @Deserialize("predicateRegistryData") RegistryPredicateData predicateRegistryData,
+                            @Deserialize("registryBakedQuadData") RegistryBakedQuadData registryBakedQuadData,
                             @Deserialize("dataClassList") List<DataClass> dataClassList
     ) {
         this.blockStateRegistryData = blockStateRegistryData;
@@ -44,6 +47,7 @@ public class DashRegistryData {
         this.propertyValueRegistryData = propertyValueRegistryData;
         this.spriteRegistryData = spriteRegistryData;
         this.predicateRegistryData = predicateRegistryData;
+        this.registryBakedQuadData = registryBakedQuadData;
         this.dataClassList = dataClassList;
     }
 

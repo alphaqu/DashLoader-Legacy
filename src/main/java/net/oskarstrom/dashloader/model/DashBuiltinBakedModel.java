@@ -41,14 +41,14 @@ public class DashBuiltinBakedModel implements DashModel {
         final ModelTransformation transformation = access.getTransformation();
         this.transformation = transformation == ModelTransformation.NONE ? null : DashModelTransformation.createDashModelTransformation(transformation);
         itemPropertyOverrides = new DashModelOverrideList(access.getItemPropertyOverrides(), registry);
-        spritePointer = registry.createSpritePointer(access.getSprite());
+        spritePointer = registry.sprites.register(access.getSprite());
         sideLit = access.getSideLit();
     }
 
 
     @Override
     public BuiltinBakedModel toUndash(DashRegistry registry) {
-        Sprite sprite = registry.getSprite(spritePointer);
+        Sprite sprite = registry.sprites.getObject(spritePointer);
         return new BuiltinBakedModel(transformation == null ? ModelTransformation.NONE : transformation.toUndash(), itemPropertyOverrides.toUndash(registry), sprite, sideLit);
     }
 
@@ -57,9 +57,4 @@ public class DashBuiltinBakedModel implements DashModel {
         itemPropertyOverrides.applyOverrides(registry);
     }
 
-
-    @Override
-    public int getStage() {
-        return 0;
-    }
 }

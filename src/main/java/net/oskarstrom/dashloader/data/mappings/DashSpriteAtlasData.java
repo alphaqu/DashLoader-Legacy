@@ -45,7 +45,6 @@ public class DashSpriteAtlasData {
     public Pair<SpriteAtlasManager, List<SpriteAtlasTexture>> toUndash(DashRegistry loader) {
         ArrayList<SpriteAtlasTexture> out = new ArrayList<>(atlases.size());
         ArrayList<SpriteAtlasTexture> toRegister = new ArrayList<>(atlases.size());
-
         atlases.forEach((entry) -> {
             final DashSpriteAtlasTexture key = entry.key;
             if (entry.value == 0) {

@@ -11,7 +11,6 @@ import net.oskarstrom.dashloader.DashRegistry;
 import net.oskarstrom.dashloader.Dashable;
 import net.oskarstrom.dashloader.data.serialization.Pointer2PointerMap;
 import net.oskarstrom.dashloader.mixin.accessor.StateAccessor;
-import org.apache.commons.lang3.tuple.Pair;
 
 public class DashBlockState implements Dashable<BlockState> {
 
@@ -32,18 +31,17 @@ public class DashBlockState implements Dashable<BlockState> {
         StateAccessor<Block, BlockState> accessState = ((StateAccessor<Block, BlockState>) blockState);
         entriesEncoded = new Pointer2PointerMap();
         accessState.getEntries().forEach((property, comparable) -> {
-            final Pair<Integer, Integer> propertyPointer = registry.createPropertyPointer(property, comparable);
-            entriesEncoded.put(propertyPointer.getLeft(), propertyPointer.getRight());
+            entriesEncoded.put(registry.properties.register(property), registry.propertyValues.register(comparable));
         });
-        owner = registry.createIdentifierPointer(Registry.BLOCK.getId(blockState.getBlock()));
+        owner = registry.identifiers.register(Registry.BLOCK.getId(blockState.getBlock()));
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public final BlockState toUndash(final DashRegistry registry) {
         final ImmutableMap.Builder<Property<?>, Comparable<?>> builder = ImmutableMap.builder();
-        entriesEncoded.forEach((entry) -> builder.put(registry.getProperty(entry.key, entry.value)));
-        return new BlockState(Registry.BLOCK.get(registry.getIdentifier(owner)), builder.build(), null);
+        entriesEncoded.forEach((entry) -> builder.put(registry.properties.getObject(entry.key), registry.propertyValues.getObject(entry.value)));
+        return new BlockState(Registry.BLOCK.get(registry.identifiers.getObject(owner)), builder.build(), null);
     }
 
 }

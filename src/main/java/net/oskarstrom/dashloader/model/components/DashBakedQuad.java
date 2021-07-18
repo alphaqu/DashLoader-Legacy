@@ -4,9 +4,10 @@ import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import net.minecraft.client.render.model.BakedQuad;
 import net.oskarstrom.dashloader.DashRegistry;
+import net.oskarstrom.dashloader.Dashable;
 import net.oskarstrom.dashloader.data.DashDirection;
 
-public class DashBakedQuad {
+public class DashBakedQuad implements Dashable<BakedQuad> {
     @Serialize(order = 0)
     public final int[] vertexData;
     @Serialize(order = 1)
@@ -35,10 +36,10 @@ public class DashBakedQuad {
         colorIndex = bakedQuad.getColorIndex();
         face = new DashDirection(bakedQuad.getFace());
         shade = bakedQuad.hasShade();
-        sprite = registry.createSpritePointer(bakedQuad.getSprite());
+        sprite = registry.sprites.register(bakedQuad.getSprite());
     }
 
     public BakedQuad toUndash(DashRegistry registry) {
-        return new BakedQuad(vertexData, colorIndex, face.toUndash(registry), registry.getSprite(sprite), shade);
+        return new BakedQuad(vertexData, colorIndex, face.toUndash(registry), registry.sprites.getObject(sprite), shade);
     }
 }

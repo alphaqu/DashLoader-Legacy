@@ -30,7 +30,7 @@ public class DashModelOverrideList {
         final Identifier[] conditionTypes = ((ModelOverrideListAccessor) modelOverrideList).getConditionTypes();
         this.conditionTypes = new int[conditionTypes.length];
         for (int i = 0; i < conditionTypes.length; i++) {
-            this.conditionTypes[i] = registry.createIdentifierPointer(conditionTypes[i]);
+            this.conditionTypes[i] = registry.identifiers.register(conditionTypes[i]);
         }
     }
 
@@ -39,7 +39,7 @@ public class DashModelOverrideList {
         final int length = conditionTypes.length;
         final Identifier[] identifiers = new Identifier[length];
         for (int i = 0; i < length; i++) {
-            identifiers[i] = registry.getIdentifier(conditionTypes[i]);
+            identifiers[i] = registry.identifiers.getObject(conditionTypes[i]);
         }
         ((ModelOverrideListAccessor) toApply).setConditionTypes(identifiers);
         return toApply;

@@ -39,8 +39,8 @@ public class DashParticleData implements Dashable {
         taskHandler.setSubtasks(particles.size() + 1);
         ThreadHelper.execForEach(particles, (identifier, spriteList) -> {
             List<Integer> out = new ArrayList<>();
-            spriteList.forEach(sprite -> out.add(registry.createSpritePointer(sprite)));
-            this.particles.put(registry.createIdentifierPointer(identifier), out);
+            spriteList.forEach(sprite -> out.add(registry.sprites.register(sprite)));
+            this.particles.put(registry.identifiers.register(identifier), out);
             taskHandler.completedSubTask();
         });
         final SpriteAtlasTexture particleAtlas = data.getParticleAtlas();
@@ -54,8 +54,8 @@ public class DashParticleData implements Dashable {
         Map<Identifier, List<Sprite>> out = new HashMap<>();
         particles.forEach((entry) -> {
             List<Sprite> outInner = new ArrayList<>();
-            entry.value.forEach(integer1 -> outInner.add(registry.getSprite(integer1)));
-            out.put(registry.getIdentifier(entry.key), outInner);
+            entry.value.forEach(integer1 -> outInner.add(registry.sprites.getObject(integer1)));
+            out.put(registry.identifiers.getObject(entry.key), outInner);
         });
         return Pair.of(out, atlasTexture.toUndash(registry));
     }

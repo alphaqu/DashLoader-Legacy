@@ -51,14 +51,11 @@ public class DashMultipartBakedModel implements DashModel {
         this.components = new Pointer2PointerMap(size);
         for (int i = 0; i < size; i++) {
             final BakedModel right = accessComponents.get(i).getRight();
-            components.put(registry.createPredicatePointer(selectors.getKey().get(i), selectors.getValue()), registry.createModelPointer(right));
+            components.put(registry.predicates.register(selectors.getKey().get(i), selectors.getValue()), registry.models.register(right));
         }
-
-
         final Map<BlockState, BitSet> stateCache = access.getStateCache();
         this.stateCache = new Pointer2ObjectMap<>(stateCache.size());
-        stateCache.forEach((blockState, bitSet) -> this.stateCache.put(registry.createBlockStatePointer(blockState), bitSet.toByteArray()));
-
+        stateCache.forEach((blockState, bitSet) -> this.stateCache.put(registry.blockstates.register(blockState), bitSet.toByteArray()));
     }
 
     private static final Class<MultipartBakedModel> cls = MultipartBakedModel.class;
@@ -67,7 +64,7 @@ public class DashMultipartBakedModel implements DashModel {
     public MultipartBakedModel toUndash(DashRegistry registry) {
         MultipartBakedModel model = UnsafeHelper.allocateInstance(cls);
         Map<BlockState, BitSet> stateCacheOut = new Object2ObjectOpenCustomHashMap<>(Util.identityHashStrategy());
-        stateCache.forEach((entry) -> stateCacheOut.put(registry.getBlockstate(entry.key), BitSet.valueOf(entry.value)));
+        stateCache.forEach((entry) -> stateCacheOut.put(registry.blockstates.getObject(entry.key), BitSet.valueOf(entry.value)));
         ((MultipartBakedModelAccessor) model).setStateCache(stateCacheOut);
         toApply = model;
         return model;
@@ -76,7 +73,7 @@ public class DashMultipartBakedModel implements DashModel {
     @Override
     public void apply(DashRegistry registry) {
         List<Pair<Predicate<BlockState>, BakedModel>> componentsOut = new ArrayList<>();
-        components.forEach((entry) -> componentsOut.add(Pair.of(registry.getPredicate(entry.key), registry.getModel(entry.value))));
+        components.forEach((entry) -> componentsOut.add(Pair.of(registry.predicates.getObject(entry.key), registry.models.getObject(entry.value))));
         MultipartBakedModelAccessor access = ((MultipartBakedModelAccessor) toApply);
         BakedModel bakedModel = (BakedModel) ((Pair) componentsOut.iterator().next()).getRight();
         access.setComponents(componentsOut);

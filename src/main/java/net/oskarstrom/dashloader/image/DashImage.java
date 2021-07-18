@@ -7,9 +7,13 @@ import net.oskarstrom.dashloader.DashException;
 import net.oskarstrom.dashloader.DashRegistry;
 import net.oskarstrom.dashloader.Dashable;
 import net.oskarstrom.dashloader.mixin.accessor.NativeImageAccessor;
+import net.oskarstrom.dashloader.util.IOHelper;
+import org.lwjgl.stb.STBIWriteCallback;
 import org.lwjgl.stb.STBImage;
+import org.lwjgl.stb.STBImageWrite;
 import org.lwjgl.system.MemoryUtil;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
@@ -37,7 +41,7 @@ public class DashImage implements Dashable<NativeImage> {
             this.format = nativeImage.getFormat();
             this.width = nativeImage.getWidth();
             this.height = nativeImage.getHeight();
-            this.image = nativeImage.getBytes();
+            this.image = write(nativeImageAccess.getPointer());
             this.useSTB = nativeImageAccess.getIsStbImage();
         } catch (IOException e) {
             throw new DashException("Failed to create image. Reason: ", e);
@@ -56,6 +60,20 @@ public class DashImage implements Dashable<NativeImage> {
         this.height = height;
     }
 
+
+    private byte[] write(long pointer) throws IOException {
+        final int channelCount = this.format.getChannelCount();
+        final GLCallback writeCallback = new GLCallback();
+        try {
+            if (STBImageWrite.nstbi_write_png_to_func(writeCallback.address(), 0L, width, height, channelCount, pointer, 0) != 0) {
+                return writeCallback.getBytes();
+            }
+        } finally {
+            writeCallback.free();
+        }
+        throw new DashException("Failed to serialize image. Reason: " + STBImage.stbi_failure_reason());
+    }
+
     /**
      * <h2>I can bet that next dashloader version will change this again. This method needs some serious over engineering.</h2>
      *
@@ -64,17 +82,9 @@ public class DashImage implements Dashable<NativeImage> {
      */
     @Override
     public final NativeImage toUndash(final DashRegistry registry) {
-//        try (MemoryStack stack = MemoryStack.stackPush()) {
         final ByteBuffer buf = ByteBuffer.allocateDirect(image.length);
         buf.put(image);
         buf.flip();
-//            ByteBuffer buffer = STBImage.stbi_load_from_memory(
-//                    buf,
-//                    stack.mallocInt(1),
-//                    stack.mallocInt(1),
-//                    stack.mallocInt(1),
-//                    format.getChannelCount());
-
         ByteBuffer buffer = STBImage.stbi_load_from_memory(
                 buf,
                 new int[1],
@@ -84,8 +94,30 @@ public class DashImage implements Dashable<NativeImage> {
         if (buffer == null) {
             throw new DashException("Could not load image: " + STBImage.stbi_failure_reason());
         }
-            return NativeImageAccessor.init(format, this.width, this.height, useSTB, MemoryUtil.memAddress(buffer));
-//        }
+        return NativeImageAccessor.init(format, this.width, this.height, useSTB, MemoryUtil.memAddress(buffer));
+    }
+
+    private static class GLCallback extends STBIWriteCallback {
+        private final ByteArrayOutputStream output;
+
+
+        private GLCallback() {
+            this.output = new ByteArrayOutputStream();
+        }
+
+        public void invoke(long context, long data, int size) {
+            try {
+                output.write(IOHelper.toArray(getData(data, size), size));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        public byte[] getBytes() {
+            return output.toByteArray();
+        }
+
+
     }
 
 

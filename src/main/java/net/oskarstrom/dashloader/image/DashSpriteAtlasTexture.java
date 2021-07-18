@@ -49,8 +49,8 @@ public class DashSpriteAtlasTexture {
         SpriteAtlasTextureAccessor spriteTextureAccess = ((SpriteAtlasTextureAccessor) spriteAtlasTexture);
         this.data = data;
         sprites = new Pointer2PointerMap();
-        spriteTextureAccess.getSprites().forEach((identifier, sprite) -> sprites.put(registry.createIdentifierPointer(identifier), registry.createSpritePointer(sprite)));
-        id = registry.createIdentifierPointer(spriteAtlasTexture.getId());
+        spriteTextureAccess.getSprites().forEach((identifier, sprite) -> sprites.put(registry.identifiers.register(identifier), registry.sprites.register(sprite)));
+        id = registry.identifiers.register(spriteAtlasTexture.getId());
         maxTextureSize = spriteTextureAccess.getMaxTextureSize();
         bilinear = ((AbstractTextureAccessor) spriteAtlasTexture).getBilinear();
         mipmap = ((AbstractTextureAccessor) spriteAtlasTexture).getMipmap();
@@ -63,7 +63,7 @@ public class DashSpriteAtlasTexture {
         access.setMipmap(mipmap);
         final SpriteAtlasTextureAccessor spriteAtlasTextureAccessor = ((SpriteAtlasTextureAccessor) spriteAtlasTexture);
         final Map<Identifier, Sprite> out = new HashMap<>(sprites.size());
-        sprites.forEach((entry) -> out.put(registry.getIdentifier(entry.key), loadSprite(entry.value, registry, spriteAtlasTexture)));
+        sprites.forEach((entry) -> out.put(registry.identifiers.getObject(entry.key), loadSprite(entry.value, registry, spriteAtlasTexture)));
         final List<TextureTickListener> outAnimatedSprites = new ArrayList<>();
         out.values().forEach(sprite -> {
             final TextureTickListener animation = sprite.getAnimation();
@@ -74,14 +74,14 @@ public class DashSpriteAtlasTexture {
         spriteAtlasTextureAccessor.setAnimatedSprites(outAnimatedSprites);
         spriteAtlasTextureAccessor.setSpritesToLoad(new HashSet<>());
         spriteAtlasTextureAccessor.setSprites(out);
-        spriteAtlasTextureAccessor.setId(registry.getIdentifier(id));
+        spriteAtlasTextureAccessor.setId(registry.identifiers.getObject(id));
         spriteAtlasTextureAccessor.setMaxTextureSize(maxTextureSize);
         DashLoader.getVanillaData().addAtlasData(spriteAtlasTexture, data);
         return spriteAtlasTexture;
     }
 
     private Sprite loadSprite(int spritePointer, DashRegistry registry, SpriteAtlasTexture spriteAtlasTexture) {
-        Sprite sprite = registry.getSprite(spritePointer);
+        Sprite sprite = registry.sprites.getObject(spritePointer);
         ((SpriteAccessor) sprite).setAtlas(spriteAtlasTexture);
         return sprite;
     }

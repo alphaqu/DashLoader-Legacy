@@ -4,6 +4,7 @@ import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import io.activej.serializer.annotations.SerializeSubclasses;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import net.oskarstrom.dashloader.data.registry.storage.impl.PredicateFactoryRegistryStorage;
 import net.oskarstrom.dashloader.data.serialization.Pointer2ObjectMap;
 import net.oskarstrom.dashloader.model.predicates.DashPredicate;
 
@@ -16,6 +17,10 @@ public class RegistryPredicateData {
         this.predicates = predicates;
     }
 
+
+    public RegistryPredicateData(PredicateFactoryRegistryStorage storage) {
+        predicates = storage.export();
+    }
 
     public Int2ObjectMap<DashPredicate> toUndash() {
         return predicates.convert();

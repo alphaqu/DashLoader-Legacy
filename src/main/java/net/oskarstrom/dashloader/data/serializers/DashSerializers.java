@@ -7,6 +7,7 @@ import net.oskarstrom.dashloader.data.DashRegistryData;
 import net.oskarstrom.dashloader.data.registry.RegistryImageData;
 import net.oskarstrom.dashloader.data.registry.RegistryModelData;
 import net.oskarstrom.dashloader.util.TimeHelper;
+import net.oskarstrom.dashloader.util.enums.DashCachePaths;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -22,27 +23,25 @@ public class DashSerializers {
 
     static {
         final DashLoader loader = DashLoader.getInstance();
-        REGISTRY_SERIALIZER = addSerializer(new DashSerializer<>(loader, "registry", (builder) -> {
+        REGISTRY_SERIALIZER = addSerializer(new DashSerializer<>(loader, "registry", DashCachePaths.REGISTRY_CACHE.getPath(), (builder) -> {
             final DashLoaderAPI api = loader.getApi();
             api.initAPI();
-            return builder
-                    .withSubclasses("fonts", api.fontTypes)
-                    .withSubclasses("predicates", api.predicateTypes)
-                    .withSubclasses("properties", api.propertyTypes)
-                    .withSubclasses("values", api.propertyValueTypes)
-                    .withSubclasses("data", api.dataTypes)
-                    .build(DashRegistryData.class);
+            api.applyTypes(builder, "fonts");
+            api.applyTypes(builder, "predicates");
+            api.applyTypes(builder, "properties");
+            api.applyTypes(builder, "values");
+            api.applyTypes(builder, "data");
+            return builder.build(DashRegistryData.class);
         }));
-        MODEL_SERIALIZER = addSerializer(new DashSerializer<>(loader, "model", (builder) -> {
+        MODEL_SERIALIZER = addSerializer(new DashSerializer<>(loader, "model", DashCachePaths.REGISTRY_MODEL_CACHE.getPath(), (builder) -> {
             final DashLoaderAPI api = loader.getApi();
             api.initAPI();
             Thread.currentThread().setContextClassLoader(DashLoader.getInstance().getAssignedClassLoader());
-            return builder
-                    .withSubclasses("models", api.modelTypes)
-                    .build(RegistryModelData.class);
+            api.applyTypes(builder, "models");
+            return builder.build(RegistryModelData.class);
         }));
-        IMAGE_SERIALIZER = addSerializer(new DashSerializer<>(loader, "image", (builder) -> builder.build(RegistryImageData.class)));
-        MAPPING_SERIALIZER = addSerializer(new DashSerializer<>(loader, "mapping", builder -> builder.build(DashMappings.class)));
+        IMAGE_SERIALIZER = addSerializer(new DashSerializer<>(loader, "image", DashCachePaths.REGISTRY_IMAGE_CACHE.getPath(), (builder) -> builder.build(RegistryImageData.class)));
+        MAPPING_SERIALIZER = addSerializer(new DashSerializer<>(loader, "mapping", DashCachePaths.MAPPINGS_CACHE.getPath(), builder -> builder.build(DashMappings.class)));
     }
 
     private static <O> DashSerializer<O> addSerializer(DashSerializer<O> serializer) {
@@ -55,7 +54,6 @@ public class DashSerializers {
         //create serializer objects
         //initialize the serializers
         if (!createSerializers(false)) {
-            clearSerializers();
             createSerializers(true);
         }
         DashLoader.LOGGER.info("[{}ms] Initialized Serializers", TimeHelper.getMs(start));
@@ -69,12 +67,6 @@ public class DashSerializers {
             }
         }
         return true;
-    }
-
-    public static void clearSerializers() {
-        for (DashSerializer<?> serializer : SERIALIZERS) {
-            serializer.markCacheAsNull();
-        }
     }
 
 

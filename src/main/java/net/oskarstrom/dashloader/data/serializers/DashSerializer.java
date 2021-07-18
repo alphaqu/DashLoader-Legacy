@@ -10,7 +10,6 @@ import net.oskarstrom.dashloader.util.ClassLoaderWrapper;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,17 +24,16 @@ public class DashSerializer<O> {
     private final DashLoader loader;
 
 
-    Function<SerializerBuilder, BinarySerializer<O>> createSerializerFunction;
-    BinarySerializer<O> serializer;
-    String identifier;
-    @Nullable
-    File serializerCache;
+    private final Function<SerializerBuilder, BinarySerializer<O>> createSerializerFunction;
+    private final String identifier;
+    private BinarySerializer<O> serializer;
+    private Path cachePath;
 
-
-    public DashSerializer(DashLoader loader, String identifier, Function<SerializerBuilder, BinarySerializer<O>> createSerializerFunction) {
+    public DashSerializer(DashLoader loader, String identifier, Path cachePath, Function<SerializerBuilder, BinarySerializer<O>> createSerializerFunction) {
         this.createSerializerFunction = createSerializerFunction;
         this.identifier = identifier;
         this.loader = loader;
+        this.cachePath = cachePath;
     }
 
     public boolean createSerializer(boolean forceRecache) {
@@ -45,7 +43,6 @@ public class DashSerializer<O> {
                 try {
                     final File serializerFile = serializerPath.toFile();
                     if (serializerFile.exists()) {
-                        serializerCache = serializerFile;
                         serializer = loadSerializerCache(DashLoader.getInstance().getAssignedClassLoader(), serializerFile);
                         return true;
                     }
@@ -69,13 +66,13 @@ public class DashSerializer<O> {
         return false;
     }
 
-    public void serializeObject(O clazz, Path path, String name) {
+    public void serializeObject(O clazz, String name) {
         final DashLoader.TaskHandler taskHandler = DashLoader.TASK_HANDLER;
         try {
             taskHandler.setCurrentTask("Serializing " + name);
             taskHandler.setSubtasks(3);
             DashLoader.LOGGER.info("  Starting " + name + " Serialization.");
-            StreamOutput output = StreamOutput.create(Files.newOutputStream(path, StandardOpenOption.CREATE, StandardOpenOption.WRITE));
+            StreamOutput output = StreamOutput.create(Files.newOutputStream(cachePath, StandardOpenOption.CREATE, StandardOpenOption.WRITE));
             taskHandler.completedSubTask();
             output.serialize(serializer, clazz);
             taskHandler.completedSubTask();
@@ -89,12 +86,12 @@ public class DashSerializer<O> {
     }
 
     @NotNull
-    public O deserializeObject(Path path, String name) {
+    public O deserializeObject(String name) {
         try {
             if (serializer == null) {
                 throw new DashException(name + " Serializer not created.");
             }
-            O out = StreamInput.create(Files.newInputStream(path), 1048576).deserialize(serializer);
+            O out = StreamInput.create(Files.newInputStream(cachePath), 1048576).deserialize(serializer);
             if (out == null) {
                 throw new DashException(name + " Deserialization failed");
             }
@@ -133,10 +130,6 @@ public class DashSerializer<O> {
             }
         }
         return null;
-    }
-
-    public void markCacheAsNull() {
-        serializerCache = null;
     }
 
     private <K> void renameRawSerializer(String name, BinarySerializer<K> serializer) throws IOException {

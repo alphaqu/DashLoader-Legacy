@@ -28,7 +28,7 @@
     "sodium:options": {
       "mixin.features.model": false
     },
-    "dashloader:customdata": [
+    "dashloader:customobject": [
       "net.oskarstrom.dashloader.api.EmptyData"
     ]
   },

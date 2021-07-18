@@ -4,11 +4,14 @@ import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import io.activej.serializer.annotations.SerializeSubclasses;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import net.oskarstrom.dashloader.data.registry.storage.impl.ModelFactoryRegistryStorage;
 import net.oskarstrom.dashloader.data.serialization.Pointer2ObjectMap;
 import net.oskarstrom.dashloader.model.DashModel;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class RegistryModelData {
     @Serialize(order = 0)
@@ -19,6 +22,15 @@ public class RegistryModelData {
         this.models = models;
     }
 
+    public RegistryModelData(ModelFactoryRegistryStorage storage) {
+        Map<Integer, Pointer2ObjectMap<DashModel>> modelsToAdd = new HashMap<>();
+        for (Int2ObjectMap.Entry<DashModel> entry : storage.getRegistryStorage().int2ObjectEntrySet()) {
+            final DashModel value = entry.getValue();
+            modelsToAdd.computeIfAbsent(value.getStage(), Pointer2ObjectMap::new).put(entry.getIntKey(), value);
+        }
+        models = new Pointer2ObjectMap<>(modelsToAdd);
+
+    }
 
     public List<Int2ObjectMap<DashModel>> toUndash() {
         List<Int2ObjectMap<DashModel>> list = new ArrayList<>(models.size());

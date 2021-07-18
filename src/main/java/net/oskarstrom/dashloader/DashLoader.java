@@ -5,7 +5,7 @@ import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.text.Text;
 import net.oskarstrom.dashloader.api.DashLoaderAPI;
 import net.oskarstrom.dashloader.api.DataClass;
-import net.oskarstrom.dashloader.api.enums.FactoryType;
+import net.oskarstrom.dashloader.api.enums.DashDataType;
 import net.oskarstrom.dashloader.api.feature.FeatureHandler;
 import net.oskarstrom.dashloader.data.DashRegistryData;
 import net.oskarstrom.dashloader.data.VanillaData;
@@ -34,7 +34,7 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinWorkerThread;
 
 public class DashLoader {
-    public static final Logger LOGGER = LogManager.getLogger();
+    public static final Logger LOGGER = LogManager.getLogger("DashLoader");
     public static final String VERSION = FabricLoader.getInstance().getModContainer("dashloader").get().getMetadata().getVersion().getFriendlyString();
     public static final TaskHandler TASK_HANDLER = new TaskHandler(LOGGER);
     private static final Path CONFIG = FabricLoader.getInstance().getConfigDir().normalize();
@@ -94,7 +94,6 @@ public class DashLoader {
         metadata.setMods(instance);
         state = DashCacheState.EMPTY;
         initThreadPool();
-        DashSerializers.initSerializers();
         DashReport.addEntry(new DashReport.Entry(start, "Initialization", true));
         LOGGER.info("Initialized DashLoader");
     }
@@ -109,6 +108,7 @@ public class DashLoader {
             }
             metadata.setResourcePacks(resourcePacks);
             LOGGER.info("Reloading DashLoader. [mod-hash: {}] [resource-hash: {}]", metadata.modInfo, metadata.resourcePacks);
+            DashSerializers.initSerializers();
             if (Arrays.stream(DashCachePaths.values()).allMatch(dashCachePaths -> Files.exists(dashCachePaths.getPath()))) {
                 loadDashCache();
             }
@@ -124,10 +124,10 @@ public class DashLoader {
         try {
             DashRegistry registry = new DashRegistry(this);
             ThreadHelper.exec(
-                    () -> registry.loadData(DashSerializers.REGISTRY_SERIALIZER.deserializeObject(DashCachePaths.REGISTRY_CACHE.getPath(), "Cache")),
-                    () -> registry.loadModelData(DashSerializers.MODEL_SERIALIZER.deserializeObject(DashCachePaths.REGISTRY_MODEL_CACHE.getPath(), "Model Cache")),
-                    () -> registry.loadImageData(DashSerializers.IMAGE_SERIALIZER.deserializeObject(DashCachePaths.REGISTRY_IMAGE_CACHE.getPath(), "Image Cache")),
-                    () -> mappings = (DashSerializers.MAPPING_SERIALIZER.deserializeObject(DashCachePaths.MAPPINGS_CACHE.getPath(), "Mapping"))
+                    () -> registry.loadData(DashSerializers.REGISTRY_SERIALIZER.deserializeObject("Cache")),
+                    () -> registry.loadModelData(DashSerializers.MODEL_SERIALIZER.deserializeObject("Model Cache")),
+                    () -> registry.loadImageData(DashSerializers.IMAGE_SERIALIZER.deserializeObject("Image Cache")),
+                    () -> mappings = (DashSerializers.MAPPING_SERIALIZER.deserializeObject("Mapping"))
             );
             assert mappings != null;
 
@@ -154,11 +154,6 @@ public class DashLoader {
         }
     }
 
-    public void finish() {
-        VANILLA_DATA.clearData();
-
-    }
-
 
     public DashRegistry saveDashCache() {
         Instant start = Instant.now();
@@ -170,25 +165,22 @@ public class DashLoader {
         DashRegistry registry = new DashRegistry(this);
         DashMappings mappings = new DashMappings();
         mappings.loadVanillaData(VANILLA_DATA, registry, TASK_HANDLER);
-        final Map<Class<?>, FactoryType> apiFailed = registry.apiFailed;
+        final Map<Class<?>, DashDataType> apiFailed = registry.apiFailed;
         if (apiFailed.size() == 0) {
-
             final Triple<DashRegistryData, RegistryImageData, RegistryModelData> data = registry.createData();
             for (DataClass dataClass : data.getLeft().dataClassList) {
                 dataClass.serialize(registry);
             }
-            DashSerializers.REGISTRY_SERIALIZER.serializeObject(data.getLeft(), DashCachePaths.REGISTRY_CACHE.getPath(), "Cache");
-            DashSerializers.IMAGE_SERIALIZER.serializeObject(data.getMiddle(), DashCachePaths.REGISTRY_IMAGE_CACHE.getPath(), "Image Cache");
-            DashSerializers.MODEL_SERIALIZER.serializeObject(data.getRight(), DashCachePaths.REGISTRY_MODEL_CACHE.getPath(), "Model Cache");
-            DashSerializers.MAPPING_SERIALIZER.serializeObject(mappings, DashCachePaths.MAPPINGS_CACHE.getPath(), "Mapping");
+            DashSerializers.REGISTRY_SERIALIZER.serializeObject(data.getLeft(), "Cache");
+            DashSerializers.IMAGE_SERIALIZER.serializeObject(data.getMiddle(), "Image Cache");
+            DashSerializers.MODEL_SERIALIZER.serializeObject(data.getRight(), "Model Cache");
+            DashSerializers.MAPPING_SERIALIZER.serializeObject(mappings, "Mapping");
             shutdownThreadPool();
             TASK_HANDLER.setCurrentTask("Caching is now complete.");
             LOGGER.info("Created cache in " + TimeHelper.getDecimalS(start, Instant.now()) + "s");
         } else {
-
+            registry.apiReport(LOGGER);
         }
-
-        registry.apiReport(LOGGER);
         return registry;
     }
 
@@ -328,6 +320,5 @@ public class DashLoader {
         public String getId() {
             return modInfo + "-" + resourcePacks;
         }
-
     }
 }

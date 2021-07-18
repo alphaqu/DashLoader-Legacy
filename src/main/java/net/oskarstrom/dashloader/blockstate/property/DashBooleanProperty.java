@@ -4,9 +4,7 @@ import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import net.minecraft.state.property.BooleanProperty;
 import net.oskarstrom.dashloader.DashRegistry;
-import net.oskarstrom.dashloader.api.annotation.DashConstructor;
 import net.oskarstrom.dashloader.api.annotation.DashObject;
-import net.oskarstrom.dashloader.api.enums.ConstructorMode;
 
 import java.util.Objects;
 
@@ -21,8 +19,6 @@ public class DashBooleanProperty implements DashProperty {
         this.name = name;
     }
 
-
-    @DashConstructor(ConstructorMode.OBJECT)
     public DashBooleanProperty(BooleanProperty property) {
         name = property.getName();
     }

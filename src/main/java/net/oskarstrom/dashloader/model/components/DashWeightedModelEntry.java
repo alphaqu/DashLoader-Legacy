@@ -22,12 +22,12 @@ public class DashWeightedModelEntry {
     }
 
     public DashWeightedModelEntry(Weighted.Present<BakedModel> entry, DashRegistry registry) {
-        this.model = registry.createModelPointer(entry.getData());
+        this.model = registry.models.register(entry.getData());
         weight = entry.getWeight().getValue();
     }
 
     public Weighted.Present<BakedModel> toUndash(DashRegistry registry) {
-        return WeightedBakedModelEntryAccessor.init(registry.getModel(model), Weight.of(weight));
+        return WeightedBakedModelEntryAccessor.init(registry.models.getObject(model), Weight.of(weight));
     }
 
 

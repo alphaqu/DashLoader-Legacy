@@ -9,9 +9,7 @@ import net.minecraft.client.render.model.json.AndMultipartModelSelector;
 import net.minecraft.state.StateManager;
 import net.oskarstrom.dashloader.DashRegistry;
 import net.oskarstrom.dashloader.api.ExtraVariables;
-import net.oskarstrom.dashloader.api.annotation.DashConstructor;
 import net.oskarstrom.dashloader.api.annotation.DashObject;
-import net.oskarstrom.dashloader.api.enums.ConstructorMode;
 import net.oskarstrom.dashloader.mixin.accessor.AndMultipartModelSelectorAccessor;
 import net.oskarstrom.dashloader.util.DashHelper;
 
@@ -28,11 +26,10 @@ public class DashAndPredicate implements DashPredicate {
         this.selectors = selectors;
     }
 
-    @DashConstructor(ConstructorMode.FULL)
     public DashAndPredicate(AndMultipartModelSelector selector, DashRegistry registry, ExtraVariables extraVariables) {
         StateManager<Block, BlockState> stateManager = (StateManager<Block, BlockState>) extraVariables.getExtraVariable1();
         AndMultipartModelSelectorAccessor access = ((AndMultipartModelSelectorAccessor) selector);
-        selectors = DashHelper.convertList(access.getSelectors(), selector1 -> registry.obtainPredicate(selector1, stateManager));
+        selectors = DashHelper.convertList(access.getSelectors(), selector1 -> registry.predicates.obtainPredicate(selector1, stateManager));
     }
 
     @Override

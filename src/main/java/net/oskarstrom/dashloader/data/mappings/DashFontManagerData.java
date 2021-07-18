@@ -36,10 +36,10 @@ public class DashFontManagerData implements Dashable {
         ThreadHelper.execForEach(fonts, (identifier, fontList) -> {
             List<Integer> fontsOut = new ArrayList<>();
             fontList.forEach(font -> {
-                fontsOut.add(registry.createFontPointer(font));
+                fontsOut.add(registry.fonts.register(font));
                 taskHandler.completedSubTask();
             });
-            fontMap.put(registry.createIdentifierPointer(identifier), fontsOut);
+            fontMap.put(registry.identifiers.register(identifier), fontsOut);
         });
     }
 
@@ -47,8 +47,8 @@ public class DashFontManagerData implements Dashable {
         Map<Identifier, List<Font>> out = new HashMap<>();
         fontMap.forEach((entry) -> {
             List<Font> fontsOut = new ArrayList<>();
-            entry.value.forEach(fontPointer -> fontsOut.add(registry.getFont(fontPointer)));
-            out.put(registry.getIdentifier(entry.key), fontsOut);
+            entry.value.forEach(fontPointer -> fontsOut.add(registry.fonts.getObject(fontPointer)));
+            out.put(registry.identifiers.getObject(entry.key), fontsOut);
         });
         return out;
     }

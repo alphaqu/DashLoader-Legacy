@@ -4,7 +4,9 @@ import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import io.activej.serializer.annotations.SerializeSubclasses;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import net.minecraft.state.property.Property;
 import net.oskarstrom.dashloader.blockstate.property.DashProperty;
+import net.oskarstrom.dashloader.data.registry.storage.AbstractRegistryStorage;
 import net.oskarstrom.dashloader.data.serialization.Pointer2ObjectMap;
 
 public class RegistryPropertyData {
@@ -14,6 +16,10 @@ public class RegistryPropertyData {
 
     public RegistryPropertyData(@Deserialize("property") Pointer2ObjectMap<DashProperty> property) {
         this.property = property;
+    }
+
+    public RegistryPropertyData(AbstractRegistryStorage<Property<?>, DashProperty> storage) {
+        property = storage.export();
     }
 
     public Int2ObjectMap<DashProperty> toUndash() {

@@ -21,7 +21,7 @@ public class DashSpriteInterpolation {
         final NativeImage[] imagesIn = ((SpriteInterpolationAccessor) (Object) interpolation).getImages();
         this.images = new int[imagesIn.length];
         for (int i = 0; i < imagesIn.length; i++) {
-            this.images[i] = registry.createImagePointer(imagesIn[i]);
+            this.images[i] = registry.images.register(imagesIn[i]);
         }
 
     }
@@ -31,7 +31,7 @@ public class DashSpriteInterpolation {
         final SpriteInterpolationAccessor spriteInterpolationAccessor = ((SpriteInterpolationAccessor) (Object) spriteInterpolation);
         final NativeImage[] nativeImages = new NativeImage[images.length];
         for (int i = 0; i < images.length; i++) {
-            nativeImages[i] = registry.getImage(images[i]);
+            nativeImages[i] = registry.images.getObject(images[i]);
         }
         spriteInterpolationAccessor.setImages(nativeImages);
         ((SpriteInterpolationDuck) (Object) spriteInterpolation).interpolation(owner);

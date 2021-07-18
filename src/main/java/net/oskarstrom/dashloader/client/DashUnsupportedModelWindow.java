@@ -6,7 +6,7 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.oskarstrom.dashloader.DashRegistry;
-import net.oskarstrom.dashloader.api.enums.FactoryType;
+import net.oskarstrom.dashloader.api.enums.DashDataType;
 
 import javax.swing.text.StyledEditorKit;
 import java.util.Map;
@@ -17,10 +17,10 @@ public class DashUnsupportedModelWindow extends Screen {
     public DashUnsupportedModelWindow(Text title, DashRegistry registry) {
         super(title);
         this.registry = registry;
-        registry.apiFailed.put(DashRegistry.class, FactoryType.MODEL);
-        registry.apiFailed.put(UnicodeTextureFont.class, FactoryType.FONT);
-        registry.apiFailed.put(StyledEditorKit.BoldAction.class, FactoryType.PROPERTY_VALUE);
-        registry.apiFailed.put(Boolean.class, FactoryType.PROPERTY_VALUE);
+        registry.apiFailed.put(DashRegistry.class, DashDataType.MODEL);
+        registry.apiFailed.put(UnicodeTextureFont.class, DashDataType.FONT);
+        registry.apiFailed.put(StyledEditorKit.BoldAction.class, DashDataType.PROPERTY_VALUE);
+        registry.apiFailed.put(Boolean.class, DashDataType.PROPERTY_VALUE);
 
     }
 
@@ -61,7 +61,7 @@ public class DashUnsupportedModelWindow extends Screen {
         fill(matrices, x, y1, x1, y3, 0x70000000);
         drawCenteredText(matrices, textRenderer, "DashLoader found: " + registry.apiFailed.size() + " incompatible objects.", scaledWidth / 2, inBetween(y1, y3) - (textRenderer.fontHeight / 2), 0xffffff);
         int currentY = y + 16;
-        for (Map.Entry<Class<?>, FactoryType> failedEntry : registry.apiFailed.entrySet()) {
+        for (Map.Entry<Class<?>, DashDataType> failedEntry : registry.apiFailed.entrySet()) {
             drawTextWithShadow(matrices, textRenderer, Text.of(failedEntry.getKey().getName()), x + 16, currentY, 0xffffff);
             final Text text = Text.of(failedEntry.getValue().name);
             drawTextWithShadow(matrices, textRenderer, text, (x1 - 16 - textRenderer.getWidth(text)), currentY, 0xffffff);

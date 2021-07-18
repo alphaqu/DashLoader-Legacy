@@ -1,8 +1,14 @@
 package net.oskarstrom.dashloader.util;
 
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public final class ClassHelper {
+
+    public static final Map<String, Class<?>> cache = new ConcurrentHashMap<>();
+
+
     @SuppressWarnings("unchecked")
     public static <T> Class<T> castClass(Class<?> aClass) {
         return (Class<T>) aClass;
@@ -13,6 +19,19 @@ public final class ClassHelper {
         try {
             return Class.forName(name);
         } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static Class<?> getClass(final String className) {
+        final Class<?> closs = cache.get(className);
+        if (closs != null) return closs;
+        try {
+            final Class<?> clz = Class.forName(className);
+            cache.put(className, clz);
+            return clz;
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return null;

@@ -32,7 +32,7 @@ public class DashModelData implements Dashable {
         taskHandler.setSubtasks(size);
         ThreadHelper.execForEach(models, (identifier, bakedModel) -> {
             if (bakedModel != null) {
-                this.models.put(registry.createIdentifierPointer(identifier), registry.createModelPointer(bakedModel));
+                this.models.put(registry.identifiers.register(identifier), registry.models.register(bakedModel));
             }
             taskHandler.completedSubTask();
         });
@@ -41,7 +41,7 @@ public class DashModelData implements Dashable {
 
     public Map<Identifier, BakedModel> toUndash(final DashRegistry registry) {
         final HashMap<Identifier, BakedModel> out = new HashMap<>();
-        models.forEach((entry) -> out.put(registry.getIdentifier(entry.key), registry.getModel(entry.value)));
+        models.forEach((entry) -> out.put(registry.identifiers.getObject(entry.key), registry.models.getObject(entry.value)));
         return out;
     }
 

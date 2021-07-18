@@ -7,7 +7,7 @@ import net.minecraft.client.texture.NativeImage;
 import net.minecraft.util.Identifier;
 import net.oskarstrom.dashloader.DashRegistry;
 import net.oskarstrom.dashloader.api.annotation.DashObject;
-import net.oskarstrom.dashloader.api.enums.FactoryType;
+import net.oskarstrom.dashloader.api.enums.DashDataType;
 import net.oskarstrom.dashloader.data.serialization.Pointer2PointerMap;
 import net.oskarstrom.dashloader.mixin.accessor.UnicodeTextureFontAccessor;
 import net.oskarstrom.dashloader.util.UnsafeHelper;
@@ -15,7 +15,7 @@ import net.oskarstrom.dashloader.util.UnsafeHelper;
 import java.util.HashMap;
 import java.util.Map;
 
-@DashObject(value = UnicodeTextureFont.class, overrideType = FactoryType.FONT)
+@DashObject(value = UnicodeTextureFont.class, overrideType = DashDataType.FONT)
 public class DashUnicodeFont implements DashFont {
     @Serialize(order = 0)
     public final Pointer2PointerMap images;
@@ -39,7 +39,7 @@ public class DashUnicodeFont implements DashFont {
     public DashUnicodeFont(UnicodeTextureFont rawFont, DashRegistry registry) {
         images = new Pointer2PointerMap();
         UnicodeTextureFontAccessor font = ((UnicodeTextureFontAccessor) rawFont);
-        font.getImages().forEach((identifier, nativeImage) -> images.put(registry.createIdentifierPointer(identifier), registry.createImagePointer(nativeImage)));
+        font.getImages().forEach((identifier, nativeImage) -> images.put(registry.identifiers.register(identifier), registry.images.register(nativeImage)));
         this.sizes = font.getSizes();
         this.template = font.getTemplate();
     }
@@ -47,7 +47,7 @@ public class DashUnicodeFont implements DashFont {
 
     public UnicodeTextureFont toUndash(DashRegistry registry) {
         Map<Identifier, NativeImage> out = new HashMap<>(images.size());
-        images.forEach((entry) -> out.put(registry.getIdentifier(entry.key), registry.getImage(entry.value)));
+        images.forEach((entry) -> out.put(registry.identifiers.getObject(entry.key), registry.images.getObject(entry.value)));
         UnicodeTextureFont font = UnsafeHelper.allocateInstance(UnicodeTextureFont.class);
         UnicodeTextureFontAccessor accessor = ((UnicodeTextureFontAccessor) font);
         accessor.setSizes(sizes);
