@@ -13,7 +13,7 @@ public class FactoryRegistryStorage<O, D extends Factory<O>> extends AbstractReg
     private final DashDataType type;
 
     public FactoryRegistryStorage(Class<?> originalObjectClass, DashRegistry registry, DashDataType type) {
-        super(originalObjectClass, registry);
+        super.init(registry, originalObjectClass);
         this.factoryMappings = DashLoader.getInstance().getApi().mappings.get(type);
         this.type = type;
     }
@@ -21,7 +21,7 @@ public class FactoryRegistryStorage<O, D extends Factory<O>> extends AbstractReg
     @Override
     public int register(O originalObject) {
         final int ptr = originalObject.hashCode();
-        if (!contains(ptr)) {
+        if (missing(ptr)) {
             final D fromFactory = createFromFactory(originalObject);
             if (fromFactory != null) {
                 registerDashObject(ptr, fromFactory);

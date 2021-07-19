@@ -1,6 +1,6 @@
 package net.oskarstrom.dashloader.api.enums;
 
-import net.oskarstrom.dashloader.api.DataClass;
+import net.oskarstrom.dashloader.api.DashDataClass;
 import net.oskarstrom.dashloader.blockstate.property.DashProperty;
 import net.oskarstrom.dashloader.blockstate.property.value.DashPropertyValue;
 import net.oskarstrom.dashloader.font.DashFont;
@@ -13,7 +13,7 @@ public enum DashDataType {
     PROPERTY_VALUE("Property Value", "values", DashPropertyValue.class, true),
     PREDICATE("Predicate", "predicates", DashPredicate.class, true),
     FONT("Font", "fonts", DashFont.class, true),
-    DATA("Data", "data", DataClass.class, false),
+    DATA("Data", "data", DashDataClass.class, false),
     DEFAULT("something went wrong", "omegakek", null, true);
 
     public String name;

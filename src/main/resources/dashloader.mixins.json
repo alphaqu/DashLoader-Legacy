@@ -6,7 +6,6 @@
   "compatibilityLevel": "JAVA_16",
   "mixins": [
     "BootStrapMixin",
-    "GlStateManagerMixin",
     "MainMixin",
     "MinecraftClientMixin",
     "MultipartUnbakedModelMixin",
@@ -66,15 +65,14 @@
     "feature.cache.BakedModelManagerOverride",
     "feature.cache.FontManagerOverride",
     "feature.cache.FontManagerOverride$LeoFontSolution",
-    "feature.cache.GameRendererMixin",
     "feature.cache.ParticleManagerMixin",
     "feature.cache.SplashTextResourceSupplierMixin",
-    "feature.misc.LanguageMixin",
     "feature.misc.ModelIdentifierMixin",
     "feature.misc.SoundManagerMixin",
-    "feature.misc.SuffixArrayMixin",
     "feature.misc.TitleScreenMixin",
-    "feature.misc.UnicodeTextureFontMixin"
+    "feature.misc.UnicodeTextureFontMixin",
+    "feature.shader.GameRendererMixin",
+    "feature.shader.GlStateManagerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -1,4 +1,4 @@
-package net.oskarstrom.dashloader.mixin.feature.cache;
+package net.oskarstrom.dashloader.mixin.feature.shader;
 
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.render.Shader;

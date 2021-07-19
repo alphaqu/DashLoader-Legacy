@@ -47,7 +47,14 @@ public class FeatureHandler {
     }
 
     public static boolean active(String mixin) {
-        final Feature feature = mixinCache.get(mixin);
+        Feature feature = mixinCache.get(mixin);
+        if (feature == null) {
+            for (Map.Entry<String, Feature> stringFeatureEntry : mixinCache.entrySet()) {
+                if (mixin.startsWith(stringFeatureEntry.getKey())) {
+                    feature = stringFeatureEntry.getValue();
+                }
+            }
+        }
         return feature == null || feature.active();
     }
 

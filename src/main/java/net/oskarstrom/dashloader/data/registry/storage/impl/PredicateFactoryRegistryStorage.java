@@ -20,7 +20,7 @@ public class PredicateFactoryRegistryStorage extends FactoryRegistryStorage<Pred
 
     public int register(MultipartModelSelector selector, StateManager<Block, BlockState> stateManager) {
         final int ptr = selector.hashCode();
-        if (!contains(ptr)) {
+        if (missing(ptr)) {
             registerDashObject(ptr, obtainPredicate(selector, stateManager));
         }
         return ptr;

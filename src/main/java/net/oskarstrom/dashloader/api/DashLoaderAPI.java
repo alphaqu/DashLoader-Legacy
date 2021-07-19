@@ -45,7 +45,7 @@ public class DashLoaderAPI {
     public static final Class<?>[] defaultParameters = new Class[]{DashRegistry.class};
 
     public final Map<DashDataType, Map<Class<?>, FactoryConstructor>> mappings;
-    public final List<DataClass> dataClasses;
+    public final List<DashDataClass> dataClasses;
     public Map<String, List<Class<?>>> types;
     private boolean initialized = false;
 
@@ -101,7 +101,7 @@ public class DashLoaderAPI {
 
     private void addDataObjectToType(DashDataType type, Class<?> dataClass) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         addType(type, dataClass);
-        dataClasses.add((DataClass) dataClass.getDeclaredConstructor().newInstance());
+        dataClasses.add((DashDataClass) dataClass.getDeclaredConstructor().newInstance());
         LOGGER.info("Added custom DashDataObject: {}", dataClass.getSimpleName());
     }
 

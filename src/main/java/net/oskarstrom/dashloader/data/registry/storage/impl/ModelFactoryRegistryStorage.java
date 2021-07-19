@@ -48,6 +48,9 @@ public class ModelFactoryRegistryStorage extends FactoryRegistryStorage<BakedMod
     @Override
     public int getSize() {
         int models = 0;
+        if (modelsToDeserialize == null) {
+            throw new NullPointerException("Models not populated");
+        }
         for (Int2ObjectMap<DashModel> dashModelInt2ObjectMap : modelsToDeserialize) {
             models += dashModelInt2ObjectMap.size();
         }

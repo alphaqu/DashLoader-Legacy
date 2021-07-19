@@ -1,4 +1,4 @@
-package net.oskarstrom.dashloader.mixin;
+package net.oskarstrom.dashloader.mixin.feature.shader;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import net.oskarstrom.dashloader.DashLoader;

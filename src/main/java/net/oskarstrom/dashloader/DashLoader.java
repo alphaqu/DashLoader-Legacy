@@ -3,8 +3,8 @@ package net.oskarstrom.dashloader;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.text.Text;
+import net.oskarstrom.dashloader.api.DashDataClass;
 import net.oskarstrom.dashloader.api.DashLoaderAPI;
-import net.oskarstrom.dashloader.api.DataClass;
 import net.oskarstrom.dashloader.api.enums.DashDataType;
 import net.oskarstrom.dashloader.api.feature.FeatureHandler;
 import net.oskarstrom.dashloader.data.DashRegistryData;
@@ -29,9 +29,12 @@ import java.security.SecureClassLoader;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinWorkerThread;
+
+import static net.oskarstrom.dashloader.util.DashHelper.registryForEach;
 
 public class DashLoader {
     public static final Logger LOGGER = LogManager.getLogger("DashLoader");
@@ -155,22 +158,23 @@ public class DashLoader {
     }
 
 
-    public DashRegistry saveDashCache() {
+    public void saveDashCache() {
         Instant start = Instant.now();
         TASK_HANDLER.reset();
         TaskHandler.setTotalTasks(FeatureHandler.calculateTasks());
         initThreadPool();
         api.initAPI();
         TASK_HANDLER.completedTask();
+        final List<DashDataClass> dataClasses = api.dataClasses;
+        dataClasses.forEach(DashDataClass::saveInit);
         DashRegistry registry = new DashRegistry(this);
         DashMappings mappings = new DashMappings();
+        registryForEach(dataClasses, registry, DashDataClass::saveReload);
         mappings.loadVanillaData(VANILLA_DATA, registry, TASK_HANDLER);
         final Map<Class<?>, DashDataType> apiFailed = registry.apiFailed;
         if (apiFailed.size() == 0) {
             final Triple<DashRegistryData, RegistryImageData, RegistryModelData> data = registry.createData();
-            for (DataClass dataClass : data.getLeft().dataClassList) {
-                dataClass.serialize(registry);
-            }
+            registryForEach(dataClasses, registry, DashDataClass::saveApply);
             DashSerializers.REGISTRY_SERIALIZER.serializeObject(data.getLeft(), "Cache");
             DashSerializers.IMAGE_SERIALIZER.serializeObject(data.getMiddle(), "Image Cache");
             DashSerializers.MODEL_SERIALIZER.serializeObject(data.getRight(), "Model Cache");
@@ -181,7 +185,6 @@ public class DashLoader {
         } else {
             registry.apiReport(LOGGER);
         }
-        return registry;
     }
 
     private void initThreadPool() {

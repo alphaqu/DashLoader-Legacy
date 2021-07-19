@@ -4,7 +4,7 @@ import net.oskarstrom.dashloader.DashRegistry;
 import net.oskarstrom.dashloader.api.annotation.DashObject;
 
 @DashObject
-public class EmptyData implements DataClass {
+public class EmptyDashData implements DashDataClass {
     @Override
     public void reload(DashRegistry registry) {
 

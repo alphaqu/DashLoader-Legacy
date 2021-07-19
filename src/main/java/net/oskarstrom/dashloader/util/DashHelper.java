@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -98,6 +99,11 @@ public class DashHelper {
             out.put(apply.getKey(), apply.getValue());
         });
         return out;
+    }
+
+
+    public static <T> void registryForEach(Iterable<T> iterable, DashRegistry registry, BiConsumer<T, DashRegistry> action) {
+        iterable.forEach(t -> action.accept(t, registry));
     }
 
 }

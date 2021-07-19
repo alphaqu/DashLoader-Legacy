@@ -14,7 +14,7 @@ public class PropertyValueFactoryRegistryStorage extends FactoryRegistryStorage<
     @Override
     public int register(Comparable<?> originalObject) {
         final int ptr = originalObject.hashCode();
-        if (!contains(ptr)) {
+        if (missing(ptr)) {
             if (originalObject instanceof Enum<?> enumObject) {
                 registerDashObject(ptr, new DashEnumValue(enumObject));
                 return ptr;

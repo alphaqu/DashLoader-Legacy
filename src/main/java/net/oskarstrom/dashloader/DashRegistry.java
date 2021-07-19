@@ -11,7 +11,7 @@ import net.minecraft.client.texture.Sprite;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.Identifier;
-import net.oskarstrom.dashloader.api.DataClass;
+import net.oskarstrom.dashloader.api.DashDataClass;
 import net.oskarstrom.dashloader.api.enums.DashDataType;
 import net.oskarstrom.dashloader.blockstate.DashBlockState;
 import net.oskarstrom.dashloader.blockstate.property.DashProperty;
@@ -41,6 +41,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 
 public class DashRegistry {
@@ -58,9 +59,9 @@ public class DashRegistry {
     public final ModelFactoryRegistryStorage models;
     public final PropertyValueFactoryRegistryStorage propertyValues;
     public final PredicateFactoryRegistryStorage predicates;
-    public final List<DataClass> dataClasses;
+    public final List<DashDataClass> dataClasses;
+    private final DashLoader loader;
     public Map<Class<?>, DashDataType> apiFailed = new ConcurrentHashMap<>();
-    DashLoader loader;
 
 
     public DashRegistry(DashLoader loader) {
@@ -113,6 +114,53 @@ public class DashRegistry {
 
     public void loadModelData(RegistryModelData registryModelData) {
         models.populateModels(registryModelData.toUndash());
+    }
+
+    public void toUndash() {
+        Logger logger = LogManager.getLogger();
+        try {
+            tasksDone = 0;
+            totalTasks = 11;
+            dataClasses.forEach(dataClass -> dataClass.reload(this));
+            undashTask(identifiers, logger, "Identifiers");
+            undashTask(images, logger, "Images");
+            undashTask(properties, logger, "Properties");
+            undashTask(propertyValues, logger, "Property Values");
+            undashTask(blockstates, logger, "Blockstates");
+            undashTask(predicates, logger, "Predicates");
+            undashTask(sprites, logger, "Sprites");
+            undashTask(bakedQuads, logger, "Quads");
+            undashTask(fonts, logger, "Fonts");
+            undashTask(models, logger, "Models");
+            dataClasses.forEach(dataClass -> dataClass.apply(this));
+            log(logger, "Applying Model Overrides");
+
+            models.getModelsToDeserialize().forEach(modelcategory -> ThreadHelper.applyExec(modelcategory, dashModel -> dashModel.apply(this)));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private <D extends Dashable<O>, O> void undashTask(AbstractRegistryStorage<O, D> storage, Logger logger, String name) {
+        log(logger, "Loading {} {}", storage.getSize(), name);
+        storage.toUndash(logger);
+    }
+
+    public void log(Logger logger, String s, Object... params) {
+        tasksDone++;
+        logger.info("[" + tasksDone + "/" + totalTasks + "] " + s, params);
+    }
+
+    public void apiReport(Logger logger) {
+        if (apiFailed.size() != 0) {
+            logger.error("Found incompatible objects that were not able to be serialized.");
+            AtomicInteger stage = new AtomicInteger();
+            apiFailed.entrySet().stream().sorted(Comparator.comparing(e -> e.getKey().getName())).forEach(entry -> {
+                stage.incrementAndGet();
+                logger.error("[" + entry.getValue().name() + "] Object: " + entry.getKey().getName());
+            });
+            logger.error("In total there are " + stage.get() + " incompatible objects. Please contact the mod developers to add support.");
+        }
     }
 
 
@@ -258,7 +306,7 @@ public class DashRegistry {
      * @deprecated This has been Deprecated and will be removed in 2.2, Use the new method {@link FactoryRegistryStorage#register(Object)} instead.
      */
     @Deprecated(since = "2.1", forRemoval = true)
-    public final int createModelPointer(final BakedModel bakedModel) {
+    public final Integer createModelPointer(final BakedModel bakedModel) {
         return models.register(bakedModel);
     }
 
@@ -279,55 +327,10 @@ public class DashRegistry {
      * Properties and Comparables are now split.
      * Use the new method {@link FactoryRegistryStorage#register(Object)} instead.
      */
+    @Deprecated(since = "2.1", forRemoval = true)
     public final Pair<Integer, Integer> createPropertyPointer(final Property<?> property, final Comparable<?> value) {
         final int prop = properties.register(property);
         final int val = propertyValues.register(value);
         return Pair.of(prop, val);
-    }
-
-    public void toUndash() {
-        Logger logger = LogManager.getLogger();
-        try {
-            tasksDone = 0;
-            totalTasks = 9;
-            dataClasses.forEach(dataClass -> dataClass.reload(this));
-            undashTask(identifiers, logger, "Identifiers");
-            undashTask(images, logger, "Images");
-            undashTask(properties, logger, "Properties");
-            undashTask(propertyValues, logger, "Property Values");
-            undashTask(blockstates, logger, "Blockstates");
-            undashTask(predicates, logger, "Predicates");
-            undashTask(sprites, logger, "Sprites");
-            undashTask(bakedQuads, logger, "Quads");
-            undashTask(fonts, logger, "Fonts");
-            undashTask(models, logger, "Models");
-            dataClasses.forEach(dataClass -> dataClass.apply(this));
-            log(logger, "Applying Model Overrides");
-            models.getModelsToDeserialize().forEach(modelcategory -> DashLoader.THREAD_POOL.invoke(new ThreadHelper.UndashTask.ApplyTask(new ArrayList<>(modelcategory.values()), 100, this)));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private <D extends Dashable<O>, O> void undashTask(AbstractRegistryStorage<O, D> storage, Logger logger, String name) {
-        log(logger, "Loading {} {}", storage.getSize(), name);
-        storage.toUndash(logger);
-    }
-
-    public void log(Logger logger, String s, Object... params) {
-        tasksDone++;
-        logger.info("[" + tasksDone + "/" + totalTasks + "] " + s, params);
-    }
-
-    public void apiReport(Logger logger) {
-        if (apiFailed.size() != 0) {
-            logger.error("Found incompatible objects that were not able to be serialized.");
-            int[] ints = new int[1];
-            apiFailed.entrySet().stream().sorted(Comparator.comparing(e -> e.getKey().getName())).forEach(entry -> {
-                ints[0]++;
-                logger.error("[" + entry.getValue().name() + "] Object: " + entry.getKey().getName());
-            });
-            logger.error("In total there are " + ints[0] + " incompatible objects. Please contact the mod developers to add support.");
-        }
     }
 }

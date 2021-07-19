@@ -62,8 +62,10 @@ public class BakedModelManagerOverride {
         profiler.startTick();
         ModelLoader modelLoader;
         if (DashLoader.getInstance().state != DashCacheState.LOADED) {
+            DashLoader.LOGGER.info("DashLoader not loaded, Initializing minecraft ModelLoader to create assets for caching.");
             modelLoader = new ModelLoader(resourceManager, this.colorMap, profiler, this.mipmapLevels);
         } else {
+            DashLoader.LOGGER.info("Skipping the ModelLoader as DashLoader has assets loaded.");
             //hipidy hopedy this is now dashes property
             modelLoader = null;
         }
@@ -79,7 +81,6 @@ public class BakedModelManagerOverride {
         profiler.push("upload");
         DashLoader loader = DashLoader.getInstance();
         if (loader.state != DashCacheState.LOADED) {
-            DashLoader.LOGGER.info("DashLoader not loaded, Initializing minecraft ModelLoader to create assets for caching.");
             //serialization
             this.atlasManager = modelLoader.upload(this.textureManager, profiler);
             this.models = modelLoader.getBakedModelMap();

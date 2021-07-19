@@ -1,5 +1,7 @@
 package net.oskarstrom.dashloader.data.registry.storage;
 
+import io.activej.serializer.annotations.Deserialize;
+import io.activej.serializer.annotations.Serialize;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -15,16 +17,25 @@ import org.apache.logging.log4j.Logger;
  * @param <D> Dash Object
  */
 public abstract class AbstractRegistryStorage<O, D extends Dashable<O>> {
+    @Serialize(order = 0)
+    protected final Int2ObjectMap<D> registryStorage;
     protected Class<?> originalObjectClass;
     protected DashRegistry registry;
     protected Int2ObjectMap<O> registryStorageUndashed;
-    protected final Int2ObjectMap<D> registryStorage;
 
-    public AbstractRegistryStorage(Class<?> originalObjectClass, DashRegistry registry) {
-        this.originalObjectClass = originalObjectClass;
-        this.registry = registry;
+    public AbstractRegistryStorage() {
         this.registryStorage = Int2ObjectMaps.synchronize(new Int2ObjectOpenHashMap<>());
         this.registryStorageUndashed = Int2ObjectMaps.synchronize(new Int2ObjectOpenHashMap<>());
+    }
+
+    public AbstractRegistryStorage(@Deserialize("registryStorage") Int2ObjectMap<D> registryStorage) {
+        this.registryStorage = registryStorage;
+        this.registryStorageUndashed = Int2ObjectMaps.synchronize(new Int2ObjectOpenHashMap<>());
+    }
+
+    public void init(DashRegistry registry, Class<?> originalObjectClass) {
+        this.originalObjectClass = originalObjectClass;
+        this.registry = registry;
     }
 
     public void populate(Pointer2ObjectMap<D> dashables) {
@@ -47,10 +58,8 @@ public abstract class AbstractRegistryStorage<O, D extends Dashable<O>> {
         registryStorage.put(ptr, dashObject);
     }
 
-    ;
-
-    protected final boolean contains(int ptr) {
-        return registryStorage.containsKey(ptr);
+    protected final boolean missing(int ptr) {
+        return !registryStorage.containsKey(ptr);
     }
 
     public void toUndash(Logger logger) {

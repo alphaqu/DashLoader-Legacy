@@ -23,7 +23,7 @@ public enum Feature {
     /**
      * Cache shaders.
      */
-    SHADERS("cache.GameRendererMixin", Impact.MEDIUM, 1),
+    SHADERS("shader", Impact.MEDIUM, 1),
     /**
      * If DashLoader should disable the file.exist check on the sound engine.
      */
@@ -36,14 +36,6 @@ public enum Feature {
      * if DashLoader should use a much faster getId() method for UnicodeTextureFonts.
      */
     UNICODETEXTUREFONT_FASTGETID("misc.UnicodeTextureFontMixin", Impact.HIGH, 0),
-    /**
-     * if DashLoader should use a faster build() method for the SuffixArray class
-     */
-    SUFFIXARRAY_FASTBUILD("misc.SuffixArrayMixin", Impact.SMALL, 0),
-    /**
-     * if DashLoader should use a slightly more optimized load method.
-     */
-    LANGUAGE_FASTLOAD("misc.LanguageMixin", Impact.MINOR, 0),
     /**
      * if DashLoader should add the watermark in the main menu screen.
      */

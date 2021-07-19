@@ -3,7 +3,7 @@ package net.oskarstrom.dashloader.data;
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import io.activej.serializer.annotations.SerializeSubclasses;
-import net.oskarstrom.dashloader.api.DataClass;
+import net.oskarstrom.dashloader.api.DashDataClass;
 import net.oskarstrom.dashloader.data.registry.*;
 
 import java.util.List;
@@ -27,7 +27,7 @@ public class DashRegistryData {
     public final RegistryBakedQuadData registryBakedQuadData;
     @Serialize(order = 8)
     @SerializeSubclasses(extraSubclassesId = "data", path = {0})
-    public final List<DataClass> dataClassList;
+    public final List<DashDataClass> dataClassList;
 
 
     public DashRegistryData(@Deserialize("blockStateRegistryData") RegistryBlockStateData blockStateRegistryData,
@@ -38,7 +38,7 @@ public class DashRegistryData {
                             @Deserialize("spriteRegistryData") RegistrySpriteData spriteRegistryData,
                             @Deserialize("predicateRegistryData") RegistryPredicateData predicateRegistryData,
                             @Deserialize("registryBakedQuadData") RegistryBakedQuadData registryBakedQuadData,
-                            @Deserialize("dataClassList") List<DataClass> dataClassList
+                            @Deserialize("dataClassList") List<DashDataClass> dataClassList
     ) {
         this.blockStateRegistryData = blockStateRegistryData;
         this.fontRegistryData = fontRegistryData;
