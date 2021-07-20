@@ -21,31 +21,30 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class SplashScreenMixin {
 
 
-    @Shadow
-    @Final
-    private MinecraftClient client;
+	private static boolean printed = false;
+	@Shadow
+	@Final
+	private MinecraftClient client;
 
-    private static boolean printed = false;
-
-    @Inject(method = "render(Lnet/minecraft/client/util/math/MatrixStack;IIF)V",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Util;getMeasuringTimeMs()J", shift = At.Shift.BEFORE, ordinal = 1), cancellable = true)
-    private void render(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo ci) {
-        if (DashLoader.getInstance().state == DashCacheState.LOADED) {
-            this.client.setOverlay(null);
-            if (client.currentScreen != null) {
-                if (client.currentScreen instanceof TitleScreen) {
-                    client.currentScreen = new TitleScreen(false);
-                }
-                this.client.currentScreen.init(this.client, this.client.getWindow().getScaledWidth(), this.client.getWindow().getScaledHeight());
-            }
-        } else {
-            this.client.setOverlay(null);
-            client.openScreen(new DashWindow(Text.of("dash"), client.currentScreen));
-        }
-        if (!printed) {
-            DashReport.printReport();
-            printed = true;
-        }
-        ci.cancel();
-    }
+	@Inject(method = "render(Lnet/minecraft/client/util/math/MatrixStack;IIF)V",
+			at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Util;getMeasuringTimeMs()J", shift = At.Shift.BEFORE, ordinal = 1), cancellable = true)
+	private void render(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo ci) {
+		if (DashLoader.getInstance().state == DashCacheState.LOADED) {
+			this.client.setOverlay(null);
+			if (client.currentScreen != null) {
+				if (client.currentScreen instanceof TitleScreen) {
+					client.currentScreen = new TitleScreen(false);
+				}
+				this.client.currentScreen.init(this.client, this.client.getWindow().getScaledWidth(), this.client.getWindow().getScaledHeight());
+			}
+		} else {
+			this.client.setOverlay(null);
+			client.openScreen(new DashWindow(Text.of("dash"), client.currentScreen));
+		}
+		if (!printed) {
+			DashReport.printReport();
+			printed = true;
+		}
+		ci.cancel();
+	}
 }

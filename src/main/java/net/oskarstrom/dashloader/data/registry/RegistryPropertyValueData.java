@@ -9,19 +9,19 @@ import net.oskarstrom.dashloader.data.registry.storage.impl.PropertyValueFactory
 import net.oskarstrom.dashloader.data.serialization.Pointer2ObjectMap;
 
 public class RegistryPropertyValueData {
-    @Serialize(order = 0)
-    @SerializeSubclasses(path = {0}, extraSubclassesId = "values")
-    public final Pointer2ObjectMap<DashPropertyValue> propertyValues;
+	@Serialize(order = 0)
+	@SerializeSubclasses(path = {0}, extraSubclassesId = "values")
+	public final Pointer2ObjectMap<DashPropertyValue> propertyValues;
 
-    public RegistryPropertyValueData(@Deserialize("propertyValues") Pointer2ObjectMap<DashPropertyValue> propertyValues) {
-        this.propertyValues = propertyValues;
-    }
+	public RegistryPropertyValueData(@Deserialize("propertyValues") Pointer2ObjectMap<DashPropertyValue> propertyValues) {
+		this.propertyValues = propertyValues;
+	}
 
-    public RegistryPropertyValueData(PropertyValueFactoryRegistryStorage storage) {
-        propertyValues = storage.export();
-    }
+	public RegistryPropertyValueData(PropertyValueFactoryRegistryStorage storage) {
+		propertyValues = storage.export();
+	}
 
-    public Int2ObjectMap<DashPropertyValue> toUndash() {
-        return propertyValues.convert();
-    }
+	public Int2ObjectMap<DashPropertyValue> toUndash() {
+		return propertyValues.convert();
+	}
 }

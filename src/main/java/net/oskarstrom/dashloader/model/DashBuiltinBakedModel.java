@@ -14,47 +14,47 @@ import net.oskarstrom.dashloader.model.components.DashModelTransformation;
 
 @DashObject(BuiltinBakedModel.class)
 public class DashBuiltinBakedModel implements DashModel {
-    @Serialize(order = 0)
-    @SerializeNullable
-    public final DashModelTransformation transformation;
-    @Serialize(order = 1)
-    public final DashModelOverrideList itemPropertyOverrides;
-    @Serialize(order = 2)
-    public final int spritePointer;
-    @Serialize(order = 3)
-    public final boolean sideLit;
+	@Serialize(order = 0)
+	@SerializeNullable
+	public final DashModelTransformation transformation;
+	@Serialize(order = 1)
+	public final DashModelOverrideList itemPropertyOverrides;
+	@Serialize(order = 2)
+	public final int spritePointer;
+	@Serialize(order = 3)
+	public final boolean sideLit;
 
-    public DashBuiltinBakedModel(
-            @Deserialize("transformation") DashModelTransformation transformation,
-            @Deserialize("itemPropertyOverrides") DashModelOverrideList itemPropertyOverrides,
-            @Deserialize("spritePointer") int spritePointer,
-            @Deserialize("sideLit") boolean sideLit) {
-        this.transformation = transformation;
-        this.itemPropertyOverrides = itemPropertyOverrides;
-        this.spritePointer = spritePointer;
-        this.sideLit = sideLit;
-    }
-
-
-    public DashBuiltinBakedModel(BuiltinBakedModel builtinBakedModel, DashRegistry registry) {
-        BuiltinBakedModelAccessor access = ((BuiltinBakedModelAccessor) builtinBakedModel);
-        final ModelTransformation transformation = access.getTransformation();
-        this.transformation = transformation == ModelTransformation.NONE ? null : DashModelTransformation.createDashModelTransformation(transformation);
-        itemPropertyOverrides = new DashModelOverrideList(access.getItemPropertyOverrides(), registry);
-        spritePointer = registry.sprites.register(access.getSprite());
-        sideLit = access.getSideLit();
-    }
+	public DashBuiltinBakedModel(
+			@Deserialize("transformation") DashModelTransformation transformation,
+			@Deserialize("itemPropertyOverrides") DashModelOverrideList itemPropertyOverrides,
+			@Deserialize("spritePointer") int spritePointer,
+			@Deserialize("sideLit") boolean sideLit) {
+		this.transformation = transformation;
+		this.itemPropertyOverrides = itemPropertyOverrides;
+		this.spritePointer = spritePointer;
+		this.sideLit = sideLit;
+	}
 
 
-    @Override
-    public BuiltinBakedModel toUndash(DashRegistry registry) {
-        Sprite sprite = registry.sprites.getObject(spritePointer);
-        return new BuiltinBakedModel(transformation == null ? ModelTransformation.NONE : transformation.toUndash(), itemPropertyOverrides.toUndash(registry), sprite, sideLit);
-    }
+	public DashBuiltinBakedModel(BuiltinBakedModel builtinBakedModel, DashRegistry registry) {
+		BuiltinBakedModelAccessor access = ((BuiltinBakedModelAccessor) builtinBakedModel);
+		final ModelTransformation transformation = access.getTransformation();
+		this.transformation = transformation == ModelTransformation.NONE ? null : DashModelTransformation.createDashModelTransformation(transformation);
+		itemPropertyOverrides = new DashModelOverrideList(access.getItemPropertyOverrides(), registry);
+		spritePointer = registry.sprites.register(access.getSprite());
+		sideLit = access.getSideLit();
+	}
 
-    @Override
-    public void apply(DashRegistry registry) {
-        itemPropertyOverrides.applyOverrides(registry);
-    }
+
+	@Override
+	public BuiltinBakedModel toUndash(DashRegistry registry) {
+		Sprite sprite = registry.sprites.getObject(spritePointer);
+		return new BuiltinBakedModel(transformation == null ? ModelTransformation.NONE : transformation.toUndash(), itemPropertyOverrides.toUndash(registry), sprite, sideLit);
+	}
+
+	@Override
+	public void apply(DashRegistry registry) {
+		itemPropertyOverrides.applyOverrides(registry);
+	}
 
 }

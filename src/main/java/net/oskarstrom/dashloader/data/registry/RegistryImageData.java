@@ -9,18 +9,18 @@ import net.oskarstrom.dashloader.data.serialization.Pointer2ObjectMap;
 import net.oskarstrom.dashloader.image.DashImage;
 
 public class RegistryImageData {
-    @Serialize(order = 0)
-    public final Pointer2ObjectMap<DashImage> images;
+	@Serialize(order = 0)
+	public final Pointer2ObjectMap<DashImage> images;
 
-    public RegistryImageData(@Deserialize("images") Pointer2ObjectMap<DashImage> images) {
-        this.images = images;
-    }
+	public RegistryImageData(@Deserialize("images") Pointer2ObjectMap<DashImage> images) {
+		this.images = images;
+	}
 
-    public RegistryImageData(AbstractRegistryStorage<NativeImage, DashImage> storage) {
-        images = storage.export();
-    }
+	public RegistryImageData(AbstractRegistryStorage<NativeImage, DashImage> storage) {
+		images = storage.export();
+	}
 
-    public Int2ObjectMap<DashImage> toUndash() {
-        return images.convert();
-    }
+	public Int2ObjectMap<DashImage> toUndash() {
+		return images.convert();
+	}
 }

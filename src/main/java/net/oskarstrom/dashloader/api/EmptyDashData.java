@@ -5,18 +5,18 @@ import net.oskarstrom.dashloader.api.annotation.DashObject;
 
 @DashObject
 public class EmptyDashData implements DashDataClass {
-    @Override
-    public void reload(DashRegistry registry) {
+	@Override
+	public void reload(DashRegistry registry) {
 
-    }
+	}
 
-    @Override
-    public void apply(DashRegistry registry) {
+	@Override
+	public void apply(DashRegistry registry) {
 
-    }
+	}
 
-    @Override
-    public void serialize(DashRegistry registry) {
+	@Override
+	public void serialize(DashRegistry registry) {
 
-    }
+	}
 }

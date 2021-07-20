@@ -30,7 +30,7 @@
       "mixin.features.shader": false
     },
     "dashloader:customobject": [
-      "net.oskarstrom.dashloader.api.EmptyData"
+      "net.oskarstrom.dashloader.api.EmptyDashData"
     ]
   },
   "depends": {
@@ -40,7 +40,6 @@
   "breaks": {
     "connected_block_textures": "*",
     "enhancedblockentities": "*",
-    "lambdabettergrass": "*",
     "optifabric": "*",
     "sodium": "<=0.1.0"
   }

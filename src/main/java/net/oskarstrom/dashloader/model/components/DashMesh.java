@@ -7,19 +7,19 @@ import net.fabricmc.fabric.impl.client.indigo.renderer.mesh.MeshImpl;
 import net.oskarstrom.dashloader.mixin.accessor.MeshImplAccessor;
 
 public class DashMesh {
-    @Serialize(order = 0)
-    public final int[] data;
+	@Serialize(order = 0)
+	public final int[] data;
 
-    @SuppressWarnings("unused")
-    public DashMesh(@Deserialize("data") int[] data) {
-        this.data = data;
-    }
+	@SuppressWarnings("unused")
+	public DashMesh(@Deserialize("data") int[] data) {
+		this.data = data;
+	}
 
-    public DashMesh(Mesh mesh) {
-        data = ((MeshImpl) mesh).data();
-    }
+	public DashMesh(Mesh mesh) {
+		data = ((MeshImpl) mesh).data();
+	}
 
-    public Mesh toUndash() {
-        return MeshImplAccessor.create(data);
-    }
+	public Mesh toUndash() {
+		return MeshImplAccessor.create(data);
+	}
 }

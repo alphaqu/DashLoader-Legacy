@@ -8,20 +8,20 @@ import net.oskarstrom.dashloader.api.annotation.DashObject;
 
 @DashObject(Direction.class)
 public class DashDirectionValue implements DashPropertyValue {
-    @Serialize(order = 0)
-    public final byte direction;
+	@Serialize(order = 0)
+	public final byte direction;
 
-    public DashDirectionValue(@Deserialize("direction") byte direction) {
-        this.direction = direction;
-    }
+	public DashDirectionValue(@Deserialize("direction") byte direction) {
+		this.direction = direction;
+	}
 
-    public DashDirectionValue(Direction direction) {
-        this.direction = (byte) direction.getId();
-    }
+	public DashDirectionValue(Direction direction) {
+		this.direction = (byte) direction.getId();
+	}
 
 
-    @Override
-    public Direction toUndash(DashRegistry registry) {
-        return Direction.byId(direction);
-    }
+	@Override
+	public Direction toUndash(DashRegistry registry) {
+		return Direction.byId(direction);
+	}
 }

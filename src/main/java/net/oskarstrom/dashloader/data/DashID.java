@@ -6,5 +6,5 @@ import net.oskarstrom.dashloader.Dashable;
 
 public interface DashID extends Dashable<Identifier> {
 
-    Identifier toUndash(DashRegistry registry);
+	Identifier toUndash(DashRegistry registry);
 }

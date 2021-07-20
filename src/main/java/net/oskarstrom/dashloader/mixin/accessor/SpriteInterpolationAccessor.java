@@ -9,10 +9,10 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(value = Sprite.Interpolation.class)
 public interface SpriteInterpolationAccessor {
 
-    @Accessor()
-    NativeImage[] getImages();
+	@Accessor()
+	NativeImage[] getImages();
 
-    @Accessor()
-    @Mutable
-    void setImages(NativeImage[] images);
+	@Accessor()
+	@Mutable
+	void setImages(NativeImage[] images);
 }

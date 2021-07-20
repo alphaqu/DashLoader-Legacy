@@ -7,55 +7,55 @@ import net.oskarstrom.dashloader.DashRegistry;
 import net.oskarstrom.dashloader.mixin.accessor.BitmapFontGlyphAccessor;
 
 public class DashBitmapFontGlyph {
-    @Serialize(order = 0)
-    public final float scaleFactor;
-    @Serialize(order = 1)
-    public final int image;
-    @Serialize(order = 2)
-    public final int x;
-    @Serialize(order = 3)
-    public final int y;
-    @Serialize(order = 4)
-    public final int width;
-    @Serialize(order = 5)
-    public final int height;
-    @Serialize(order = 6)
-    public final int advance;
-    @Serialize(order = 7)
-    public final int ascent;
+	@Serialize(order = 0)
+	public final float scaleFactor;
+	@Serialize(order = 1)
+	public final int image;
+	@Serialize(order = 2)
+	public final int x;
+	@Serialize(order = 3)
+	public final int y;
+	@Serialize(order = 4)
+	public final int width;
+	@Serialize(order = 5)
+	public final int height;
+	@Serialize(order = 6)
+	public final int advance;
+	@Serialize(order = 7)
+	public final int ascent;
 
-    public DashBitmapFontGlyph(@Deserialize("scaleFactor") float scaleFactor,
-                               @Deserialize("image") int image,
-                               @Deserialize("x") int x,
-                               @Deserialize("y") int y,
-                               @Deserialize("width") int width,
-                               @Deserialize("height") int height,
-                               @Deserialize("advance") int advance,
-                               @Deserialize("ascent") int ascent
-    ) {
-        this.scaleFactor = scaleFactor;
-        this.image = image;
-        this.x = x;
-        this.y = y;
-        this.width = width;
-        this.height = height;
-        this.advance = advance;
-        this.ascent = ascent;
-    }
+	public DashBitmapFontGlyph(@Deserialize("scaleFactor") float scaleFactor,
+							   @Deserialize("image") int image,
+							   @Deserialize("x") int x,
+							   @Deserialize("y") int y,
+							   @Deserialize("width") int width,
+							   @Deserialize("height") int height,
+							   @Deserialize("advance") int advance,
+							   @Deserialize("ascent") int ascent
+	) {
+		this.scaleFactor = scaleFactor;
+		this.image = image;
+		this.x = x;
+		this.y = y;
+		this.width = width;
+		this.height = height;
+		this.advance = advance;
+		this.ascent = ascent;
+	}
 
-    public DashBitmapFontGlyph(BitmapFont.BitmapFontGlyph bitmapFontGlyph, DashRegistry registry) {
-        BitmapFontGlyphAccessor font = ((BitmapFontGlyphAccessor) (Object) bitmapFontGlyph);
-        scaleFactor = font.getScaleFactor();
-        image = registry.images.register(font.getImage());
-        x = font.getX();
-        y = font.getY();
-        width = font.getWidth();
-        height = font.getHeight();
-        advance = font.getAdvance();
-        ascent = font.getAscent();
-    }
+	public DashBitmapFontGlyph(BitmapFont.BitmapFontGlyph bitmapFontGlyph, DashRegistry registry) {
+		BitmapFontGlyphAccessor font = ((BitmapFontGlyphAccessor) (Object) bitmapFontGlyph);
+		scaleFactor = font.getScaleFactor();
+		image = registry.images.register(font.getImage());
+		x = font.getX();
+		y = font.getY();
+		width = font.getWidth();
+		height = font.getHeight();
+		advance = font.getAdvance();
+		ascent = font.getAscent();
+	}
 
-    public BitmapFont.BitmapFontGlyph toUndash(DashRegistry registry) {
-        return BitmapFontGlyphAccessor.init(scaleFactor, registry.images.getObject(image), x, y, width, height, advance, ascent);
-    }
+	public BitmapFont.BitmapFontGlyph toUndash(DashRegistry registry) {
+		return BitmapFontGlyphAccessor.init(scaleFactor, registry.images.getObject(image), x, y, width, height, advance, ascent);
+	}
 }

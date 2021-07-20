@@ -12,9 +12,9 @@ import java.time.Instant;
 public class DashClient implements PreLaunchEntrypoint {
 
 
-    @Override
-    public void onPreLaunch() {
-        DashReport.addTime(Instant.now(), "From beginning");
-        new DashLoader(Thread.currentThread().getContextClassLoader());
-    }
+	@Override
+	public void onPreLaunch() {
+		DashReport.addTime(Instant.now(), "From beginning");
+		new DashLoader(Thread.currentThread().getContextClassLoader());
+	}
 }

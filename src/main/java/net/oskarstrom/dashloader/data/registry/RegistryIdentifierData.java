@@ -12,22 +12,22 @@ import net.oskarstrom.dashloader.data.serialization.Pointer2ObjectMap;
 import net.oskarstrom.dashloader.model.DashModelIdentifier;
 
 public class RegistryIdentifierData {
-    @Serialize(order = 0)
-    @SerializeSubclasses(path = {0}, value = {
-            DashIdentifier.class,
-            DashModelIdentifier.class
-    })
-    public final Pointer2ObjectMap<DashID> identifiers;
+	@Serialize(order = 0)
+	@SerializeSubclasses(path = {0}, value = {
+			DashIdentifier.class,
+			DashModelIdentifier.class
+	})
+	public final Pointer2ObjectMap<DashID> identifiers;
 
-    public RegistryIdentifierData(@Deserialize("identifiers") Pointer2ObjectMap<DashID> identifiers) {
-        this.identifiers = identifiers;
-    }
+	public RegistryIdentifierData(@Deserialize("identifiers") Pointer2ObjectMap<DashID> identifiers) {
+		this.identifiers = identifiers;
+	}
 
-    public RegistryIdentifierData(AbstractRegistryStorage<Identifier, DashID> storage) {
-        identifiers = storage.export();
-    }
+	public RegistryIdentifierData(AbstractRegistryStorage<Identifier, DashID> storage) {
+		identifiers = storage.export();
+	}
 
-    public Int2ObjectMap<DashID> toUndash() {
-        return identifiers.convert();
-    }
+	public Int2ObjectMap<DashID> toUndash() {
+		return identifiers.convert();
+	}
 }

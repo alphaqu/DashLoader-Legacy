@@ -16,26 +16,26 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class DashShaderData {
-    @Serialize(order = 0)
-    public final Map<String, DashShader> shaders;
+	@Serialize(order = 0)
+	public final Map<String, DashShader> shaders;
 
 
-    public DashShaderData(@Deserialize("shaders") Map<String, DashShader> shaders) {
-        this.shaders = shaders;
-    }
+	public DashShaderData(@Deserialize("shaders") Map<String, DashShader> shaders) {
+		this.shaders = shaders;
+	}
 
-    public DashShaderData(VanillaData data, DashLoader.TaskHandler taskHandler) {
-        taskHandler.setSubtasks(1);
-        this.shaders = DashHelper.convertMapValues(data.getShaderData(), DashShader::new);
-        taskHandler.completedSubTask();
-    }
+	public DashShaderData(VanillaData data, DashLoader.TaskHandler taskHandler) {
+		taskHandler.setSubtasks(1);
+		this.shaders = DashHelper.convertMapValues(data.getShaderData(), DashShader::new);
+		taskHandler.completedSubTask();
+	}
 
-    public <T> Map<String, Shader> toUndash() {
-        Map<String, Shader> out = new ConcurrentHashMap<>();
-        List<Callable<T>> callables = new ArrayList<>();
-        //noinspection unchecked, stfu
-        shaders.forEach((key, value) -> callables.add(() -> (T) out.put(key, value.toUndash())));
-        ThreadHelper.exec(callables);
-        return out;
-    }
+	public <T> Map<String, Shader> toUndash() {
+		Map<String, Shader> out = new ConcurrentHashMap<>();
+		List<Callable<T>> callables = new ArrayList<>();
+		//noinspection unchecked, stfu
+		shaders.forEach((key, value) -> callables.add(() -> (T) out.put(key, value.toUndash())));
+		ThreadHelper.exec(callables);
+		return out;
+	}
 }

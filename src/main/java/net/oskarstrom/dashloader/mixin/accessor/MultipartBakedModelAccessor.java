@@ -19,42 +19,41 @@ import java.util.function.Predicate;
 @Mixin(MultipartBakedModel.class)
 public interface MultipartBakedModelAccessor {
 
-    @Accessor
-    List<Pair<Predicate<BlockState>, BakedModel>> getComponents();
+	@Accessor
+	List<Pair<Predicate<BlockState>, BakedModel>> getComponents();
 
-    @Accessor
-    Map<BlockState, BitSet> getStateCache();
+	@Accessor
+	@Mutable
+	void setComponents(List<Pair<Predicate<BlockState>, BakedModel>> components);
 
+	@Accessor
+	Map<BlockState, BitSet> getStateCache();
 
-    @Accessor
-    @Mutable
-    void setStateCache(Map<BlockState, BitSet> stateBitSetMap);
+	@Accessor
+	@Mutable
+	void setStateCache(Map<BlockState, BitSet> stateBitSetMap);
 
-    @Accessor
-    @Mutable
-    void setComponents(List<Pair<Predicate<BlockState>, BakedModel>> components);
+	@Accessor
+	@Mutable
+	void setAmbientOcclusion(boolean ambientOcclusion);
 
-    @Accessor
-    @Mutable
-    void setAmbientOcclusion(boolean ambientOcclusion);
+	@Accessor
+	@Mutable
+	void setDepthGui(boolean depthGui);
 
-    @Accessor
-    @Mutable
-    void setDepthGui(boolean depthGui);
+	@Accessor
+	@Mutable
+	void setSideLit(boolean sideLit);
 
-    @Accessor
-    @Mutable
-    void setSideLit(boolean sideLit);
+	@Accessor
+	@Mutable
+	void setSprite(Sprite sprite);
 
-    @Accessor
-    @Mutable
-    void setSprite(Sprite sprite);
+	@Accessor
+	@Mutable
+	void setTransformations(ModelTransformation transformations);
 
-    @Accessor
-    @Mutable
-    void setTransformations(ModelTransformation transformations);
-
-    @Accessor
-    @Mutable
-    void setItemPropertyOverrides(ModelOverrideList itemPropertyOverrides);
+	@Accessor
+	@Mutable
+	void setItemPropertyOverrides(ModelOverrideList itemPropertyOverrides);
 }

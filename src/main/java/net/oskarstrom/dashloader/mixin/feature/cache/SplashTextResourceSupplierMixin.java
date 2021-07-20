@@ -25,36 +25,36 @@ import java.util.stream.Collectors;
 @Mixin(SplashTextResourceSupplier.class)
 public class SplashTextResourceSupplierMixin {
 
-    @Shadow
-    @Final
-    private static Identifier RESOURCE_ID;
+	@Shadow
+	@Final
+	private static Identifier RESOURCE_ID;
 
-    @Inject(method = "prepare(Lnet/minecraft/resource/ResourceManager;Lnet/minecraft/util/profiler/Profiler;)Ljava/util/List;",
-            at = @At(value = "HEAD"),
-            cancellable = true)
-    private void applySplashCache(ResourceManager resourceManager, Profiler profiler, CallbackInfoReturnable<List<String>> cir) {
-        try {
-            final List<String> splashTextOut = DashLoader.getVanillaData().getSplashText();
-            if (splashTextOut != null) {
-                cir.setReturnValue(splashTextOut);
-            } else {
-                Resource resource = MinecraftClient.getInstance().getResourceManager().getResource(RESOURCE_ID);
-                List<String> var7;
-                try {
-                    try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8))) {
-                        var7 = bufferedReader.lines().map(String::trim).filter((string) -> string.hashCode() != 125780783).collect(Collectors.toList());
-                    }
-                } finally {
-                    if (resource != null) {
-                        resource.close();
-                    }
+	@Inject(method = "prepare(Lnet/minecraft/resource/ResourceManager;Lnet/minecraft/util/profiler/Profiler;)Ljava/util/List;",
+			at = @At(value = "HEAD"),
+			cancellable = true)
+	private void applySplashCache(ResourceManager resourceManager, Profiler profiler, CallbackInfoReturnable<List<String>> cir) {
+		try {
+			final List<String> splashTextOut = DashLoader.getVanillaData().getSplashText();
+			if (splashTextOut != null) {
+				cir.setReturnValue(splashTextOut);
+			} else {
+				Resource resource = MinecraftClient.getInstance().getResourceManager().getResource(RESOURCE_ID);
+				List<String> var7;
+				try {
+					try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8))) {
+						var7 = bufferedReader.lines().map(String::trim).filter((string) -> string.hashCode() != 125780783).collect(Collectors.toList());
+					}
+				} finally {
+					if (resource != null) {
+						resource.close();
+					}
 
-                }
-                DashLoader.getVanillaData().setSplashTextAssets(var7);
-                cir.setReturnValue(var7);
-            }
-        } catch (IOException var36) {
-            cir.setReturnValue(Collections.emptyList());
-        }
-    }
+				}
+				DashLoader.getVanillaData().setSplashTextAssets(var7);
+				cir.setReturnValue(var7);
+			}
+		} catch (IOException var36) {
+			cir.setReturnValue(Collections.emptyList());
+		}
+	}
 }

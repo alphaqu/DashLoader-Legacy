@@ -11,15 +11,15 @@ import java.util.List;
 @Mixin(WeightedBakedModel.class)
 public interface WeightedBakedModelAccessor {
 
-    @Accessor("models")
-    List<Weighted.Present<BakedModel>> getModels();
+	@Accessor("models")
+	List<Weighted.Present<BakedModel>> getModels();
 
-    @Accessor
-    void setTotalWeight(int totalWeight);
+	@Accessor
+	void setModels(List<Weighted.Present<BakedModel>> models);
 
-    @Accessor
-    void setModels(List<Weighted.Present<BakedModel>> models);
+	@Accessor
+	void setTotalWeight(int totalWeight);
 
-    @Accessor
-    void setDefaultModel(BakedModel defaultModel);
+	@Accessor
+	void setDefaultModel(BakedModel defaultModel);
 }

@@ -10,13 +10,12 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(State.class)
 public interface StateAccessor<O, S> {
 
-    @Accessor
-    ImmutableMap<Property<?>, Comparable<?>> getEntries();
+	@Accessor
+	ImmutableMap<Property<?>, Comparable<?>> getEntries();
 
-    @Accessor
-    void setWithTable(Table<Property<?>, Comparable<?>, S> withTable);
+	@Accessor
+	Table<Property<?>, Comparable<?>, S> getWithTable();
 
-
-    @Accessor
-    Table<Property<?>, Comparable<?>, S> getWithTable();
+	@Accessor
+	void setWithTable(Table<Property<?>, Comparable<?>, S> withTable);
 }

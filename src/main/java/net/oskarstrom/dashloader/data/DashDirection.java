@@ -7,18 +7,18 @@ import net.oskarstrom.dashloader.DashRegistry;
 import net.oskarstrom.dashloader.Dashable;
 
 public class DashDirection implements Dashable {
-    @Serialize(order = 0)
-    public final byte id;
+	@Serialize(order = 0)
+	public final byte id;
 
-    public DashDirection(@Deserialize("id") byte id) {
-        this.id = id;
-    }
+	public DashDirection(@Deserialize("id") byte id) {
+		this.id = id;
+	}
 
-    public DashDirection(Direction direction) {
-        id = (byte) direction.getId();
-    }
+	public DashDirection(Direction direction) {
+		id = (byte) direction.getId();
+	}
 
-    public Direction toUndash(DashRegistry registry) {
-        return Direction.byId(id);
-    }
+	public Direction toUndash(DashRegistry registry) {
+		return Direction.byId(id);
+	}
 }

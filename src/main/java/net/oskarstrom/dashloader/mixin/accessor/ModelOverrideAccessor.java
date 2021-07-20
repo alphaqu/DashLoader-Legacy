@@ -9,9 +9,9 @@ import java.util.List;
 
 @Mixin(ModelOverride.class)
 public interface ModelOverrideAccessor {
-    @Accessor
-    Identifier getModelId();
+	@Accessor
+	Identifier getModelId();
 
-    @Accessor
-    List<ModelOverride.Condition> getConditions();
+	@Accessor
+	List<ModelOverride.Condition> getConditions();
 }

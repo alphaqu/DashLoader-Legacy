@@ -9,10 +9,10 @@ import java.util.List;
 
 @Mixin(JsonEffectGlShader.class)
 public interface JsonEffectGlShaderAccessor {
-    @Accessor
-    GlBlendState getBlendState();
+	@Accessor
+	GlBlendState getBlendState();
 
-    @Accessor
-    List<String> getAttribNames();
+	@Accessor
+	List<String> getAttribNames();
 
 }

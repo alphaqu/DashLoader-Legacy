@@ -14,5 +14,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.CONSTRUCTOR)
 @Deprecated(since = "2.1", forRemoval = true)
 public @interface DashConstructor {
-    ConstructorMode value();
+	ConstructorMode value();
 }

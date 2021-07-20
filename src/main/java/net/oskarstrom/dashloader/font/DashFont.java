@@ -5,7 +5,7 @@ import net.oskarstrom.dashloader.DashRegistry;
 import net.oskarstrom.dashloader.api.Factory;
 
 public interface DashFont extends Factory<Font> {
-    Font toUndash(DashRegistry registry);
+	Font toUndash(DashRegistry registry);
 
 }
 

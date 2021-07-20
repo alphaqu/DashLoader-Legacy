@@ -11,9 +11,9 @@ import java.util.Map;
 @Mixin(BlockModels.class)
 public interface BlockModelsAccessor {
 
-    @Accessor
-    Map<BlockState, BakedModel> getModels();
+	@Accessor
+	Map<BlockState, BakedModel> getModels();
 
-    @Accessor
-    void setModels(Map<BlockState, BakedModel> models);
+	@Accessor
+	void setModels(Map<BlockState, BakedModel> models);
 }

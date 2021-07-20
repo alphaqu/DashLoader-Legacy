@@ -31,84 +31,84 @@ import java.util.Map;
 @Mixin(BakedModelManager.class)
 public class BakedModelManagerOverride {
 
-    @Shadow
-    @Final
-    private BlockColors colorMap;
-    @Shadow
-    private int mipmapLevels;
-    @Shadow
-    @Nullable
-    private SpriteAtlasManager atlasManager;
-    @Shadow
-    @Final
-    private TextureManager textureManager;
+	@Shadow
+	@Final
+	private BlockColors colorMap;
+	@Shadow
+	private int mipmapLevels;
+	@Shadow
+	@Nullable
+	private SpriteAtlasManager atlasManager;
+	@Shadow
+	@Final
+	private TextureManager textureManager;
 
-    @Shadow
-    private Map<Identifier, BakedModel> models;
+	@Shadow
+	private Map<Identifier, BakedModel> models;
 
-    @Shadow
-    private Object2IntMap<BlockState> stateLookup;
+	@Shadow
+	private Object2IntMap<BlockState> stateLookup;
 
-    @Shadow
-    private BakedModel missingModel;
+	@Shadow
+	private BakedModel missingModel;
 
-    @Shadow
-    @Final
-    private BlockModels blockModelCache;
+	@Shadow
+	@Final
+	private BlockModels blockModelCache;
 
-    @Inject(method = "prepare",
-            at = @At(value = "HEAD"), cancellable = true)
-    private void prepare(ResourceManager resourceManager, Profiler profiler, CallbackInfoReturnable<ModelLoader> cir) {
-        profiler.startTick();
-        ModelLoader modelLoader;
-        if (DashLoader.getInstance().state != DashCacheState.LOADED) {
-            DashLoader.LOGGER.info("DashLoader not loaded, Initializing minecraft ModelLoader to create assets for caching.");
-            modelLoader = new ModelLoader(resourceManager, this.colorMap, profiler, this.mipmapLevels);
-        } else {
-            DashLoader.LOGGER.info("Skipping the ModelLoader as DashLoader has assets loaded.");
-            //hipidy hopedy this is now dashes property
-            modelLoader = null;
-        }
-        profiler.endTick();
-        cir.setReturnValue(modelLoader);
+	@Inject(method = "prepare",
+			at = @At(value = "HEAD"), cancellable = true)
+	private void prepare(ResourceManager resourceManager, Profiler profiler, CallbackInfoReturnable<ModelLoader> cir) {
+		profiler.startTick();
+		ModelLoader modelLoader;
+		if (DashLoader.getInstance().state != DashCacheState.LOADED) {
+			DashLoader.LOGGER.info("DashLoader not loaded, Initializing minecraft ModelLoader to create assets for caching.");
+			modelLoader = new ModelLoader(resourceManager, this.colorMap, profiler, this.mipmapLevels);
+		} else {
+			DashLoader.LOGGER.info("Skipping the ModelLoader as DashLoader has assets loaded.");
+			//hipidy hopedy this is now dashes property
+			modelLoader = null;
+		}
+		profiler.endTick();
+		cir.setReturnValue(modelLoader);
 
-    }
+	}
 
-    @Inject(method = "apply",
-            at = @At(value = "HEAD"), cancellable = true)
-    private void applyStage(ModelLoader modelLoader, ResourceManager resourceManager, Profiler profiler, CallbackInfo ci) {
-        profiler.startTick();
-        profiler.push("upload");
-        DashLoader loader = DashLoader.getInstance();
-        if (loader.state != DashCacheState.LOADED) {
-            //serialization
-            this.atlasManager = modelLoader.upload(this.textureManager, profiler);
-            this.models = modelLoader.getBakedModelMap();
-            this.stateLookup = modelLoader.getStateLookup();
-            DashLoader.getVanillaData().setBakedModelAssets(atlasManager, stateLookup, models);
+	@Inject(method = "apply",
+			at = @At(value = "HEAD"), cancellable = true)
+	private void applyStage(ModelLoader modelLoader, ResourceManager resourceManager, Profiler profiler, CallbackInfo ci) {
+		profiler.startTick();
+		profiler.push("upload");
+		DashLoader loader = DashLoader.getInstance();
+		if (loader.state != DashCacheState.LOADED) {
+			//serialization
+			this.atlasManager = modelLoader.upload(this.textureManager, profiler);
+			this.models = modelLoader.getBakedModelMap();
+			this.stateLookup = modelLoader.getStateLookup();
+			DashLoader.getVanillaData().setBakedModelAssets(atlasManager, stateLookup, models);
 
-        } else {
-            //cache go brr
-            DashLoader.LOGGER.info("Starting apply stage.");
-            //register textures
-            profiler.push("atlas");
-            final DashMappings mappings = loader.getMappings();
-            if (mappings != null) {
-                mappings.registerAtlases(textureManager, Feature.MODEL_LOADER);
-            }
-            profiler.swap("baking");
-            profiler.pop();
-            final VanillaData vanillaData = DashLoader.getVanillaData();
-            this.atlasManager = vanillaData.getAtlasManager();
-            this.models = vanillaData.getModels();
-            this.stateLookup = vanillaData.getStateLookup();
-        }
-        this.missingModel = this.models.get(ModelLoader.MISSING_ID);
-        profiler.swap("cache");
-        this.blockModelCache.reload();
-        profiler.pop();
-        profiler.endTick();
-        ci.cancel();
-    }
+		} else {
+			//cache go brr
+			DashLoader.LOGGER.info("Starting apply stage.");
+			//register textures
+			profiler.push("atlas");
+			final DashMappings mappings = loader.getMappings();
+			if (mappings != null) {
+				mappings.registerAtlases(textureManager, Feature.MODEL_LOADER);
+			}
+			profiler.swap("baking");
+			profiler.pop();
+			final VanillaData vanillaData = DashLoader.getVanillaData();
+			this.atlasManager = vanillaData.getAtlasManager();
+			this.models = vanillaData.getModels();
+			this.stateLookup = vanillaData.getStateLookup();
+		}
+		this.missingModel = this.models.get(ModelLoader.MISSING_ID);
+		profiler.swap("cache");
+		this.blockModelCache.reload();
+		profiler.pop();
+		profiler.endTick();
+		ci.cancel();
+	}
 
 }

@@ -11,23 +11,23 @@ import java.util.Objects;
 public abstract class ModelIdentifierMixin {
 
 
-    @Shadow
-    @Final
-    private String variant;
+	@Shadow
+	@Final
+	private String variant;
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        ModelIdentifier that = (ModelIdentifier) o;
-        return Objects.equals(variant, that.getVariant());
-    }
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		if (!super.equals(o)) return false;
+		ModelIdentifier that = (ModelIdentifier) o;
+		return Objects.equals(variant, that.getVariant());
+	}
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), variant);
-    }
+	@Override
+	public int hashCode() {
+		return Objects.hash(super.hashCode(), variant);
+	}
 
 
 }

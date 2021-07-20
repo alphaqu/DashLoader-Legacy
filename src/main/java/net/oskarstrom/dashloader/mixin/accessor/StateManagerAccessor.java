@@ -11,17 +11,17 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(StateManager.class)
 public interface StateManagerAccessor<O, S extends State<O, S>> {
-    @Accessor
-    @Mutable
-    void setOwner(O owner);
+	@Accessor
+	@Mutable
+	void setOwner(O owner);
 
-    @Accessor
-    @Mutable
-    void setProperties(ImmutableSortedMap<String, Property<?>> properties);
+	@Accessor
+	@Mutable
+	void setProperties(ImmutableSortedMap<String, Property<?>> properties);
 
-    @Accessor
-    @Mutable
-    void setStates(ImmutableList<S> states);
+	@Accessor
+	@Mutable
+	void setStates(ImmutableList<S> states);
 
 
 }

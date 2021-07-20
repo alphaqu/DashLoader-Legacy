@@ -17,33 +17,33 @@ import java.util.Map;
 public class DashModelData implements Dashable {
 
 
-    @Serialize(order = 0)
-    public final Pointer2PointerMap models;
+	@Serialize(order = 0)
+	public final Pointer2PointerMap models;
 
 
-    public DashModelData(@Deserialize("models") Pointer2PointerMap models) {
-        this.models = models;
-    }
+	public DashModelData(@Deserialize("models") Pointer2PointerMap models) {
+		this.models = models;
+	}
 
-    public DashModelData(VanillaData data, DashRegistry registry, DashLoader.TaskHandler taskHandler) {
-        final Map<Identifier, BakedModel> models = data.getModels();
-        final int size = models.size();
-        this.models = new Pointer2PointerMap(size);
-        taskHandler.setSubtasks(size);
-        ThreadHelper.execForEach(models, (identifier, bakedModel) -> {
-            if (bakedModel != null) {
-                this.models.put(registry.identifiers.register(identifier), registry.models.register(bakedModel));
-            }
-            taskHandler.completedSubTask();
-        });
-    }
+	public DashModelData(VanillaData data, DashRegistry registry, DashLoader.TaskHandler taskHandler) {
+		final Map<Identifier, BakedModel> models = data.getModels();
+		final int size = models.size();
+		this.models = new Pointer2PointerMap(size);
+		taskHandler.setSubtasks(size);
+		ThreadHelper.execForEach(models, (identifier, bakedModel) -> {
+			if (bakedModel != null) {
+				this.models.put(registry.identifiers.register(identifier), registry.models.register(bakedModel));
+			}
+			taskHandler.completedSubTask();
+		});
+	}
 
 
-    public Map<Identifier, BakedModel> toUndash(final DashRegistry registry) {
-        final HashMap<Identifier, BakedModel> out = new HashMap<>();
-        models.forEach((entry) -> out.put(registry.identifiers.getObject(entry.key), registry.models.getObject(entry.value)));
-        return out;
-    }
+	public Map<Identifier, BakedModel> toUndash(final DashRegistry registry) {
+		final HashMap<Identifier, BakedModel> out = new HashMap<>();
+		models.forEach((entry) -> out.put(registry.identifiers.getObject(entry.key), registry.models.getObject(entry.value)));
+		return out;
+	}
 
 
 }

@@ -7,8 +7,8 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(EffectProgram.class)
 public interface EffectProgramAccessor {
-    @Invoker("<init>")
-    static EffectProgram create(Program.Type shaderType, int shaderRef, String name) {
-        throw new AssertionError();
-    }
+	@Invoker("<init>")
+	static EffectProgram create(Program.Type shaderType, int shaderRef, String name) {
+		throw new AssertionError();
+	}
 }

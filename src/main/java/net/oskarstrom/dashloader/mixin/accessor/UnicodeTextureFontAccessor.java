@@ -13,29 +13,28 @@ import java.util.Map;
 @Mixin(UnicodeTextureFont.class)
 public interface UnicodeTextureFontAccessor {
 
-    @Accessor
-    byte[] getSizes();
+	@Accessor
+	byte[] getSizes();
 
-    @Accessor
-    String getTemplate();
+	@Mutable
+	@Accessor
+	void setSizes(byte[] sizes);
 
-    @Accessor
-    Map<Identifier, NativeImage> getImages();
+	@Accessor
+	String getTemplate();
 
-    @Mutable
-    @Accessor
-    void setSizes(byte[] sizes);
+	@Accessor
+	@Mutable
+	void setTemplate(String template);
 
+	@Accessor
+	Map<Identifier, NativeImage> getImages();
 
-    @Accessor
-    @Mutable
-    void setTemplate(String template);
+	@Accessor
+	@Mutable
+	void setImages(Map<Identifier, NativeImage> images);
 
-    @Accessor
-    @Mutable
-    void setResourceManager(ResourceManager resourceManager);
-
-    @Accessor
-    @Mutable
-    void setImages(Map<Identifier, NativeImage> images);
+	@Accessor
+	@Mutable
+	void setResourceManager(ResourceManager resourceManager);
 }

@@ -13,14 +13,14 @@ import java.util.concurrent.CompletableFuture;
 @Mixin(MinecraftClient.class)
 public abstract class MinecraftClientMixin {
 
-    @Shadow
-    protected abstract void render(boolean tick);
+	@Shadow
+	protected abstract void render(boolean tick);
 
-    @Inject(method = "reloadResources()Ljava/util/concurrent/CompletableFuture;",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/MinecraftClient;reloadResources(Z)Ljava/util/concurrent/CompletableFuture;"), cancellable = true)
-    private void reloadResourcesOverride(CallbackInfoReturnable<CompletableFuture<Void>> cir) {
-        DashLoader.getInstance().requestReload();
-    }
+	@Inject(method = "reloadResources()Ljava/util/concurrent/CompletableFuture;",
+			at = @At(value = "INVOKE", target = "Lnet/minecraft/client/MinecraftClient;reloadResources(Z)Ljava/util/concurrent/CompletableFuture;"), cancellable = true)
+	private void reloadResourcesOverride(CallbackInfoReturnable<CompletableFuture<Void>> cir) {
+		DashLoader.getInstance().requestReload();
+	}
 
 
 }

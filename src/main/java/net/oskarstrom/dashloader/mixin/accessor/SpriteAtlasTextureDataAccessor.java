@@ -7,14 +7,14 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(SpriteAtlasTexture.Data.class)
 public interface SpriteAtlasTextureDataAccessor {
 
-    @Accessor
-    int getWidth();
+	@Accessor
+	int getWidth();
 
-    @Accessor
-    int getHeight();
+	@Accessor
+	int getHeight();
 
-    @Accessor
-    int getMaxLevel();
+	@Accessor
+	int getMaxLevel();
 
 
 }

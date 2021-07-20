@@ -7,16 +7,16 @@ import net.oskarstrom.dashloader.api.annotation.DashObject;
 
 @DashObject(Integer.class)
 public class DashIntValue implements DashPropertyValue {
-    @Serialize(order = 0)
-    public final Integer value;
+	@Serialize(order = 0)
+	public final Integer value;
 
-    public DashIntValue(@Deserialize("value") Integer value) {
-        this.value = value;
-    }
+	public DashIntValue(@Deserialize("value") Integer value) {
+		this.value = value;
+	}
 
 
-    @Override
-    public Integer toUndash(DashRegistry registry) {
-        return value;
-    }
+	@Override
+	public Integer toUndash(DashRegistry registry) {
+		return value;
+	}
 }

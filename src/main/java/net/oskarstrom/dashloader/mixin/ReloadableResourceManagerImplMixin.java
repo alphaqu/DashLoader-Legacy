@@ -18,9 +18,9 @@ import java.util.stream.Collectors;
 @Mixin(ReloadableResourceManagerImpl.class)
 public class ReloadableResourceManagerImplMixin {
 
-    @Inject(method = "reload",
-            at = @At(value = "RETURN", shift = At.Shift.BEFORE))
-    private void reloadDash(Executor prepareExecutor, Executor applyExecutor, CompletableFuture<Unit> initialStage, List<ResourcePack> packs, CallbackInfoReturnable<ResourceReload> cir) {
-        DashLoader.getInstance().reload(packs.stream().map(ResourcePack::getName).collect(Collectors.toList()));
-    }
+	@Inject(method = "reload",
+			at = @At(value = "RETURN", shift = At.Shift.BEFORE))
+	private void reloadDash(Executor prepareExecutor, Executor applyExecutor, CompletableFuture<Unit> initialStage, List<ResourcePack> packs, CallbackInfoReturnable<ResourceReload> cir) {
+		DashLoader.getInstance().reload(packs.stream().map(ResourcePack::getName).collect(Collectors.toList()));
+	}
 }

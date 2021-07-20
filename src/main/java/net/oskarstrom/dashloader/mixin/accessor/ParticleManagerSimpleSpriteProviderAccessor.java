@@ -10,9 +10,9 @@ import java.util.List;
 @Mixin(ParticleManager.SimpleSpriteProvider.class)
 public interface ParticleManagerSimpleSpriteProviderAccessor {
 
-    @Accessor
-    List<Sprite> getSprites();
+	@Accessor
+	List<Sprite> getSprites();
 
-    @Accessor
-    void setSprites(List<Sprite> sprites);
+	@Accessor
+	void setSprites(List<Sprite> sprites);
 }

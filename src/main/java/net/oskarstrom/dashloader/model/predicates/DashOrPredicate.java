@@ -20,24 +20,24 @@ import java.util.stream.Collectors;
 
 @DashObject(OrMultipartModelSelector.class)
 public class DashOrPredicate implements DashPredicate {
-    @Serialize(order = 0)
-    @SerializeSubclasses(path = {0}, extraSubclassesId = "predicates")
-    public final List<DashPredicate> selectors;
+	@Serialize(order = 0)
+	@SerializeSubclasses(path = {0}, extraSubclassesId = "predicates")
+	public final List<DashPredicate> selectors;
 
-    public DashOrPredicate(@Deserialize("selectors") List<DashPredicate> selectors) {
-        this.selectors = selectors;
-    }
+	public DashOrPredicate(@Deserialize("selectors") List<DashPredicate> selectors) {
+		this.selectors = selectors;
+	}
 
-    public DashOrPredicate(OrMultipartModelSelector selector, DashRegistry registry, ExtraVariables extraVariables) {
-        StateManager<Block, BlockState> stateManager = (StateManager<Block, BlockState>) extraVariables.getExtraVariable1();
-        OrMultipartModelSelectorAccessor access = (OrMultipartModelSelectorAccessor) selector;
-        selectors = new ArrayList<>();
-        access.getSelectors().forEach(selector1 -> selectors.add(registry.predicates.obtainPredicate(selector1, stateManager)));
-    }
+	public DashOrPredicate(OrMultipartModelSelector selector, DashRegistry registry, ExtraVariables extraVariables) {
+		StateManager<Block, BlockState> stateManager = (StateManager<Block, BlockState>) extraVariables.getExtraVariable1();
+		OrMultipartModelSelectorAccessor access = (OrMultipartModelSelectorAccessor) selector;
+		selectors = new ArrayList<>();
+		access.getSelectors().forEach(selector1 -> selectors.add(registry.predicates.obtainPredicate(selector1, stateManager)));
+	}
 
-    @Override
-    public Predicate<BlockState> toUndash(DashRegistry registry) {
-        List<Predicate<BlockState>> list = selectors.stream().map(dashPredicate -> dashPredicate.toUndash(registry)).collect(Collectors.toList());
-        return (blockState) -> list.stream().anyMatch((predicate) -> predicate.test(blockState));
-    }
+	@Override
+	public Predicate<BlockState> toUndash(DashRegistry registry) {
+		List<Predicate<BlockState>> list = selectors.stream().map(dashPredicate -> dashPredicate.toUndash(registry)).collect(Collectors.toList());
+		return (blockState) -> list.stream().anyMatch((predicate) -> predicate.test(blockState));
+	}
 }

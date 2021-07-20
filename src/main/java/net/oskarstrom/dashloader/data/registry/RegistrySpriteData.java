@@ -9,19 +9,19 @@ import net.oskarstrom.dashloader.data.serialization.Pointer2ObjectMap;
 import net.oskarstrom.dashloader.image.DashSprite;
 
 public class RegistrySpriteData {
-    @Serialize(order = 0)
-    public final Pointer2ObjectMap<DashSprite> sprites;
+	@Serialize(order = 0)
+	public final Pointer2ObjectMap<DashSprite> sprites;
 
-    public RegistrySpriteData(@Deserialize("sprites") Pointer2ObjectMap<DashSprite> sprites) {
-        this.sprites = sprites;
-    }
+	public RegistrySpriteData(@Deserialize("sprites") Pointer2ObjectMap<DashSprite> sprites) {
+		this.sprites = sprites;
+	}
 
 
-    public RegistrySpriteData(AbstractRegistryStorage<Sprite, DashSprite> storage) {
-        sprites = storage.export();
-    }
+	public RegistrySpriteData(AbstractRegistryStorage<Sprite, DashSprite> storage) {
+		sprites = storage.export();
+	}
 
-    public Int2ObjectMap<DashSprite> toUndash() {
-        return sprites.convert();
-    }
+	public Int2ObjectMap<DashSprite> toUndash() {
+		return sprites.convert();
+	}
 }

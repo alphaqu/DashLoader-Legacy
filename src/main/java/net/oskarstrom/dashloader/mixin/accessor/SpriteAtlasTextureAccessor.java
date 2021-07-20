@@ -15,39 +15,39 @@ import java.util.Set;
 @Mixin(SpriteAtlasTexture.class)
 public interface SpriteAtlasTextureAccessor {
 
-    @Accessor
-    Map<Identifier, Sprite> getSprites();
+	@Accessor
+	Map<Identifier, Sprite> getSprites();
 
-    @Accessor
-    @Mutable
-    void setSprites(Map<Identifier, Sprite> sprites);
+	@Accessor
+	@Mutable
+	void setSprites(Map<Identifier, Sprite> sprites);
 
-    @Accessor
-    List<TextureTickListener> getAnimatedSprites();
+	@Accessor
+	List<TextureTickListener> getAnimatedSprites();
 
-    @Accessor
-    @Mutable
-    void setAnimatedSprites(List<TextureTickListener> animatedSprites);
+	@Accessor
+	@Mutable
+	void setAnimatedSprites(List<TextureTickListener> animatedSprites);
 
-    @Accessor
-    Set<Identifier> getSpritesToLoad();
+	@Accessor
+	Set<Identifier> getSpritesToLoad();
 
-    @Accessor
-    @Mutable
-    void setSpritesToLoad(Set<Identifier> spritesToLoad);
+	@Accessor
+	@Mutable
+	void setSpritesToLoad(Set<Identifier> spritesToLoad);
 
-    @Accessor
-    Identifier getId();
+	@Accessor
+	Identifier getId();
 
-    @Accessor
-    @Mutable
-    void setId(Identifier id);
+	@Accessor
+	@Mutable
+	void setId(Identifier id);
 
-    @Accessor
-    int getMaxTextureSize();
+	@Accessor
+	int getMaxTextureSize();
 
-    @Accessor
-    @Mutable
-    void setMaxTextureSize(int maxTextureSize);
+	@Accessor
+	@Mutable
+	void setMaxTextureSize(int maxTextureSize);
 
 }

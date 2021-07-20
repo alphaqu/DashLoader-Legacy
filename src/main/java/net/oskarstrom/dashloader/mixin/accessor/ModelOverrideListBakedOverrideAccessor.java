@@ -9,15 +9,15 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(ModelOverrideList.BakedOverride.class)
 public interface ModelOverrideListBakedOverrideAccessor {
-    @Accessor
-    ModelOverrideList.InlinedCondition[] getConditions();
+	@Invoker("<init>")
+	static ModelOverrideList.BakedOverride newModelOverrideListBakedOverride(ModelOverrideList.InlinedCondition[] conditions, @Nullable BakedModel model) {
+		throw new AssertionError();
+	}
 
-    @Accessor
-    BakedModel getModel();
+	@Accessor
+	ModelOverrideList.InlinedCondition[] getConditions();
 
-    @Invoker("<init>")
-    static ModelOverrideList.BakedOverride newModelOverrideListBakedOverride(ModelOverrideList.InlinedCondition[] conditions, @Nullable BakedModel model) {
-        throw new AssertionError();
-    }
+	@Accessor
+	BakedModel getModel();
 
 }

@@ -6,8 +6,8 @@ import net.oskarstrom.dashloader.api.annotation.DashObject;
 
 @DashObject(BlankFont.class)
 public class DashBlankFont implements DashFont {
-    @Override
-    public BlankFont toUndash(DashRegistry registry) {
-        return new BlankFont();
-    }
+	@Override
+	public BlankFont toUndash(DashRegistry registry) {
+		return new BlankFont();
+	}
 }

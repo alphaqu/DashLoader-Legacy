@@ -11,15 +11,15 @@ import org.spongepowered.asm.mixin.Shadow;
 public class SpriteInterpolationMixin implements SpriteInterpolationDuck {
 
 
-    @SuppressWarnings("ShadowTarget")
-    @Shadow
-    @Final
-    @Mutable
-    private Sprite field_21757;
+	@SuppressWarnings("ShadowTarget")
+	@Shadow
+	@Final
+	@Mutable
+	private Sprite field_21757;
 
 
-    @Override
-    public void interpolation(Sprite owner) {
-        field_21757 = owner;
-    }
+	@Override
+	public void interpolation(Sprite owner) {
+		field_21757 = owner;
+	}
 }

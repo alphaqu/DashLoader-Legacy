@@ -9,9 +9,9 @@ import org.apache.commons.lang3.tuple.Pair;
 import java.util.List;
 
 public class ModelVariables {
-    public Pair<List<MultipartModelSelector>, StateManager<Block, BlockState>> selector;
+	public Pair<List<MultipartModelSelector>, StateManager<Block, BlockState>> selector;
 
-    public ModelVariables(Pair<List<MultipartModelSelector>, StateManager<Block, BlockState>> selector) {
-        this.selector = selector;
-    }
+	public ModelVariables(Pair<List<MultipartModelSelector>, StateManager<Block, BlockState>> selector) {
+		this.selector = selector;
+	}
 }

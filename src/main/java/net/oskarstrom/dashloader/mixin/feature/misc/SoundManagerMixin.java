@@ -11,13 +11,13 @@ import org.spongepowered.asm.mixin.Overwrite;
 public class SoundManagerMixin {
 
 
-    /**
-     * Save time by not checking sounds.
-     *
-     * @author notequalalpha
-     */
-    @Overwrite
-    static boolean isSoundResourcePresent(Sound sound, Identifier identifier, ResourceManager resourceManager) {
-        return true;
-    }
+	/**
+	 * Save time by not checking sounds.
+	 *
+	 * @author notequalalpha
+	 */
+	@Overwrite
+	public static boolean isSoundResourcePresent(Sound sound, Identifier identifier, ResourceManager resourceManager) {
+		return true;
+	}
 }

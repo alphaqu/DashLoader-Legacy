@@ -10,15 +10,15 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(BitmapFont.class)
 public interface BitmapFontAccessor {
 
-    @Invoker("<init>")
-    static BitmapFont init(NativeImage image, Int2ObjectMap<BitmapFont.BitmapFontGlyph> glyphs) {
-        throw new AssertionError();
-    }
+	@Invoker("<init>")
+	static BitmapFont init(NativeImage image, Int2ObjectMap<BitmapFont.BitmapFontGlyph> glyphs) {
+		throw new AssertionError();
+	}
 
-    @Accessor
-    Int2ObjectMap<BitmapFont.BitmapFontGlyph> getGlyphs();
+	@Accessor
+	Int2ObjectMap<BitmapFont.BitmapFontGlyph> getGlyphs();
 
-    @Accessor
-    NativeImage getImage();
+	@Accessor
+	NativeImage getImage();
 
 }

@@ -17,42 +17,42 @@ import java.util.Map;
 
 @DashObject(value = UnicodeTextureFont.class, overrideType = DashDataType.FONT)
 public class DashUnicodeFont implements DashFont {
-    @Serialize(order = 0)
-    public final Pointer2PointerMap images;
+	@Serialize(order = 0)
+	public final Pointer2PointerMap images;
 
-    @Serialize(order = 1)
-    public final byte[] sizes;
+	@Serialize(order = 1)
+	public final byte[] sizes;
 
-    @Serialize(order = 2)
-    public final String template;
-
-
-    public DashUnicodeFont(@Deserialize("images") Pointer2PointerMap images,
-                           @Deserialize("sizes") byte[] sizes,
-                           @Deserialize("template") String template) {
-        this.images = images;
-        this.sizes = sizes;
-        this.template = template;
-
-    }
-
-    public DashUnicodeFont(UnicodeTextureFont rawFont, DashRegistry registry) {
-        images = new Pointer2PointerMap();
-        UnicodeTextureFontAccessor font = ((UnicodeTextureFontAccessor) rawFont);
-        font.getImages().forEach((identifier, nativeImage) -> images.put(registry.identifiers.register(identifier), registry.images.register(nativeImage)));
-        this.sizes = font.getSizes();
-        this.template = font.getTemplate();
-    }
+	@Serialize(order = 2)
+	public final String template;
 
 
-    public UnicodeTextureFont toUndash(DashRegistry registry) {
-        Map<Identifier, NativeImage> out = new HashMap<>(images.size());
-        images.forEach((entry) -> out.put(registry.identifiers.getObject(entry.key), registry.images.getObject(entry.value)));
-        UnicodeTextureFont font = UnsafeHelper.allocateInstance(UnicodeTextureFont.class);
-        UnicodeTextureFontAccessor accessor = ((UnicodeTextureFontAccessor) font);
-        accessor.setSizes(sizes);
-        accessor.setImages(out);
-        accessor.setTemplate(template);
-        return font;
-    }
+	public DashUnicodeFont(@Deserialize("images") Pointer2PointerMap images,
+						   @Deserialize("sizes") byte[] sizes,
+						   @Deserialize("template") String template) {
+		this.images = images;
+		this.sizes = sizes;
+		this.template = template;
+
+	}
+
+	public DashUnicodeFont(UnicodeTextureFont rawFont, DashRegistry registry) {
+		images = new Pointer2PointerMap();
+		UnicodeTextureFontAccessor font = ((UnicodeTextureFontAccessor) rawFont);
+		font.getImages().forEach((identifier, nativeImage) -> images.put(registry.identifiers.register(identifier), registry.images.register(nativeImage)));
+		this.sizes = font.getSizes();
+		this.template = font.getTemplate();
+	}
+
+
+	public UnicodeTextureFont toUndash(DashRegistry registry) {
+		Map<Identifier, NativeImage> out = new HashMap<>(images.size());
+		images.forEach((entry) -> out.put(registry.identifiers.getObject(entry.key), registry.images.getObject(entry.value)));
+		UnicodeTextureFont font = UnsafeHelper.allocateInstance(UnicodeTextureFont.class);
+		UnicodeTextureFontAccessor accessor = ((UnicodeTextureFontAccessor) font);
+		accessor.setSizes(sizes);
+		accessor.setImages(out);
+		accessor.setTemplate(template);
+		return font;
+	}
 }

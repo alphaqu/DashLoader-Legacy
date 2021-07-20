@@ -8,12 +8,12 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(Identifier.class)
 public interface IdentifierAccessor {
 
-    @Invoker("<init>")
-    static Identifier init(String[] strings) {
-        throw new AssertionError();
-    }
+	@Invoker("<init>")
+	static Identifier init(String[] strings) {
+		throw new AssertionError();
+	}
 
 
-    @Accessor("path")
-    void setPath(String path);
+	@Accessor("path")
+	void setPath(String path);
 }

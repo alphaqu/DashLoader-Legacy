@@ -18,12 +18,12 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 public class TrueTypeFontLoaderMixin {
 
 
-    @Shadow
-    @Final
-    private Identifier filename;
+	@Shadow
+	@Final
+	private Identifier filename;
 
-    @Inject(method = "load", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/TextureUtil;readResource(Ljava/io/InputStream;)Ljava/nio/ByteBuffer;"), locals = LocalCapture.CAPTURE_FAILSOFT)
-    private void loadInject(ResourceManager manager, CallbackInfoReturnable<Font> cir, STBTTFontinfo sTBTTFontinfo) {
-        DashLoader.getVanillaData().addTypeFontAsset(sTBTTFontinfo, filename);
-    }
+	@Inject(method = "load", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/TextureUtil;readResource(Ljava/io/InputStream;)Ljava/nio/ByteBuffer;"), locals = LocalCapture.CAPTURE_FAILSOFT)
+	private void loadInject(ResourceManager manager, CallbackInfoReturnable<Font> cir, STBTTFontinfo sTBTTFontinfo) {
+		DashLoader.getVanillaData().addTypeFontAsset(sTBTTFontinfo, filename);
+	}
 }

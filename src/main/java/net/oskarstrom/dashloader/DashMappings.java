@@ -25,163 +25,163 @@ import java.util.List;
 import java.util.Map;
 
 public class DashMappings {
-    @Serialize(order = 0)
-    @SerializeNullable
-    public DashBlockStateData blockStateData;
+	@Serialize(order = 0)
+	@SerializeNullable
+	public DashBlockStateData blockStateData;
 
-    @Serialize(order = 1)
-    @SerializeNullable
-    public DashFontManagerData fontManagerData;
+	@Serialize(order = 1)
+	@SerializeNullable
+	public DashFontManagerData fontManagerData;
 
-    @Serialize(order = 2)
-    @SerializeNullable
-    public DashModelData modelData;
+	@Serialize(order = 2)
+	@SerializeNullable
+	public DashModelData modelData;
 
-    @Serialize(order = 3)
-    @SerializeNullable
-    public DashParticleData particleData;
+	@Serialize(order = 3)
+	@SerializeNullable
+	public DashParticleData particleData;
 
-    @Serialize(order = 4)
-    @SerializeNullable
-    public DashSplashTextData splashTextData;
+	@Serialize(order = 4)
+	@SerializeNullable
+	public DashSplashTextData splashTextData;
 
-    @Serialize(order = 5)
-    @SerializeNullable
-    public DashSpriteAtlasData spriteAtlasData;
+	@Serialize(order = 5)
+	@SerializeNullable
+	public DashSpriteAtlasData spriteAtlasData;
 
-    @Serialize(order = 6)
-    @SerializeNullable
-    public DashShaderData shaderData;
+	@Serialize(order = 6)
+	@SerializeNullable
+	public DashShaderData shaderData;
 
-    private List<Pair<Feature, Pair<SpriteAtlasTexture, DashSpriteAtlasTextureData>>> atlasesToRegister;
-
-
-    public DashMappings() {
-    }
-
-    @SuppressWarnings("unused") //active j
-    public DashMappings(@Deserialize("blockStateData") DashBlockStateData blockStateData,
-                        @Deserialize("fontManagerData") DashFontManagerData fontManagerData,
-                        @Deserialize("modelData") DashModelData modelData,
-                        @Deserialize("particleData") DashParticleData particleData,
-                        @Deserialize("splashTextData") DashSplashTextData splashTextData,
-                        @Deserialize("spriteAtlasData") DashSpriteAtlasData spriteAtlasData,
-                        @Deserialize("shaderData") DashShaderData shaderData) {
-        this.blockStateData = blockStateData;
-        this.fontManagerData = fontManagerData;
-        this.modelData = modelData;
-        this.particleData = particleData;
-        this.splashTextData = splashTextData;
-        this.spriteAtlasData = spriteAtlasData;
-        this.shaderData = shaderData;
-    }
-
-    public void loadVanillaData(VanillaData data, DashRegistry registry, DashLoader.TaskHandler taskHandler) {
-        if (Feature.MODEL_LOADER.active()) {
-            taskHandler.logAndTask("Mapping Blockstates");
-            blockStateData = new DashBlockStateData(data, registry, taskHandler);
-
-            taskHandler.logAndTask("Mapping Models");
-            modelData = new DashModelData(data, registry, taskHandler);
-
-            taskHandler.logAndTask("Mapping Atlas");
-            spriteAtlasData = new DashSpriteAtlasData(data, registry, taskHandler);
-        }
-
-        if (Feature.PARTICLES.active()) {
-            taskHandler.logAndTask("Mapping Particles");
-            particleData = new DashParticleData(data, registry, taskHandler);
-        }
-
-        if (Feature.FONTS.active()) {
-            taskHandler.logAndTask("Mapping Fonts");
-            fontManagerData = new DashFontManagerData(data, registry, taskHandler);
-        }
-
-        if (Feature.SPLASH_TEXT.active()) {
-            taskHandler.logAndTask("Mapping Splash Text");
-            splashTextData = new DashSplashTextData(data, taskHandler);
-        }
-
-        if (Feature.SHADERS.active()) {
-            taskHandler.logAndTask("Mapping Shaders");
-            shaderData = new DashShaderData(data, taskHandler);
-        }
-    }
-
-    public void toUndash(DashRegistry registry, VanillaData vanillaData) {
-        final Pair<SpriteAtlasManager, List<SpriteAtlasTexture>> spriteData =
-                DashHelper.nullable(spriteAtlasData, spriteAtlasData -> spriteAtlasData.toUndash(registry));
+	private List<Pair<Feature, Pair<SpriteAtlasTexture, DashSpriteAtlasTextureData>>> atlasesToRegister;
 
 
-        final Pair<Map<Identifier, List<Sprite>>, SpriteAtlasTexture> particleData = DashHelper.nullable(this.particleData, data -> data.toUndash(registry));
-        vanillaData.loadCacheData(
-                DashHelper.nullable(spriteData, Pair::getLeft),
-                DashHelper.nullable(blockStateData, data -> data.toUndash(registry)),
-                DashHelper.nullable(modelData, data -> data.toUndash(registry)),
-                DashHelper.nullable(particleData, Pair::getLeft),
-                DashHelper.nullable(fontManagerData, data -> data.toUndash(registry)),
-                DashHelper.nullable(splashTextData, DashSplashTextData::toUndash),
-                DashHelper.nullable(shaderData, DashShaderData::toUndash)
-        );
-        atlasesToRegister = new ArrayList<>();
-        if (spriteData != null) {
-            spriteData.getValue().forEach(atlasTexture -> atlasesToRegister.add(Pair.of(Feature.MODEL_LOADER, Pair.of(atlasTexture, vanillaData.getAtlasData(atlasTexture)))));
-        }
+	public DashMappings() {
+	}
 
-        if (particleData != null) {
-            SpriteAtlasTexture texture = particleData.getRight();
-            atlasesToRegister.add(Pair.of(Feature.PARTICLES, Pair.of(texture, vanillaData.getAtlasData(texture))));
-        }
+	@SuppressWarnings("unused") //active j
+	public DashMappings(@Deserialize("blockStateData") DashBlockStateData blockStateData,
+						@Deserialize("fontManagerData") DashFontManagerData fontManagerData,
+						@Deserialize("modelData") DashModelData modelData,
+						@Deserialize("particleData") DashParticleData particleData,
+						@Deserialize("splashTextData") DashSplashTextData splashTextData,
+						@Deserialize("spriteAtlasData") DashSpriteAtlasData spriteAtlasData,
+						@Deserialize("shaderData") DashShaderData shaderData) {
+		this.blockStateData = blockStateData;
+		this.fontManagerData = fontManagerData;
+		this.modelData = modelData;
+		this.particleData = particleData;
+		this.splashTextData = splashTextData;
+		this.spriteAtlasData = spriteAtlasData;
+		this.shaderData = shaderData;
+	}
 
-        modelData = null;
-        spriteAtlasData = null;
-        blockStateData = null;
-        fontManagerData = null;
-        splashTextData = null;
-    }
+	public void loadVanillaData(VanillaData data, DashRegistry registry, DashLoader.TaskHandler taskHandler) {
+		if (Feature.MODEL_LOADER.active()) {
+			taskHandler.logAndTask("Mapping Blockstates");
+			blockStateData = new DashBlockStateData(data, registry, taskHandler);
 
-    public void registerAtlases(TextureManager textureManager, Feature feature) {
-        atlasesToRegister.forEach((pair) -> {
-            if (pair.getLeft() == feature) {
-                final Pair<SpriteAtlasTexture, DashSpriteAtlasTextureData> atlas = pair.getRight();
-                registerAtlas(atlas.getLeft(), atlas.getRight(), textureManager);
-            }
-        });
-    }
+			taskHandler.logAndTask("Mapping Models");
+			modelData = new DashModelData(data, registry, taskHandler);
 
-    public void registerAtlas(SpriteAtlasTexture atlasTexture, DashSpriteAtlasTextureData data, TextureManager textureManager) {
-        //atlas registration
-        final Identifier id = atlasTexture.getId();
-        final int glId = TextureUtil.generateTextureId();
-        final int width = data.width;
-        final int maxLevel = data.maxLevel;
-        final int height = data.height;
-        ((AbstractTextureAccessor) atlasTexture).setGlId(glId);
-        //ding dong lwjgl here are their styles
+			taskHandler.logAndTask("Mapping Atlas");
+			spriteAtlasData = new DashSpriteAtlasData(data, registry, taskHandler);
+		}
 
-        TextureUtil.prepareImage(glId, maxLevel, width, height);
-        ((SpriteAtlasTextureAccessor) atlasTexture).getSprites().forEach((identifier, sprite) -> {
-            final SpriteAccessor access = (SpriteAccessor) sprite;
-            access.setAtlas(atlasTexture);
-            access.setId(identifier);
-            sprite.upload();
-        });
+		if (Feature.PARTICLES.active()) {
+			taskHandler.logAndTask("Mapping Particles");
+			particleData = new DashParticleData(data, registry, taskHandler);
+		}
 
-        //helu textures here are the atlases
-        textureManager.registerTexture(id, atlasTexture);
-        atlasTexture.setFilter(false, maxLevel > 0);
-        DashLoader.LOGGER.info("Allocated: {}x{}x{} {}-atlas", width, height, maxLevel, id);
-    }
+		if (Feature.FONTS.active()) {
+			taskHandler.logAndTask("Mapping Fonts");
+			fontManagerData = new DashFontManagerData(data, registry, taskHandler);
+		}
 
-    @Nullable
-    public SpriteAtlasTexture getAtlas(Identifier identifier) {
-        for (Pair<Feature, Pair<SpriteAtlasTexture, DashSpriteAtlasTextureData>> pair : atlasesToRegister) {
-            final SpriteAtlasTexture atlas = pair.getRight().getLeft();
-            if (identifier.equals(atlas.getId())) {
-                return atlas;
-            }
-        }
-        return null;
-    }
+		if (Feature.SPLASH_TEXT.active()) {
+			taskHandler.logAndTask("Mapping Splash Text");
+			splashTextData = new DashSplashTextData(data, taskHandler);
+		}
+
+		if (Feature.SHADERS.active()) {
+			taskHandler.logAndTask("Mapping Shaders");
+			shaderData = new DashShaderData(data, taskHandler);
+		}
+	}
+
+	public void toUndash(DashRegistry registry, VanillaData vanillaData) {
+		final Pair<SpriteAtlasManager, List<SpriteAtlasTexture>> spriteData =
+				DashHelper.nullable(spriteAtlasData, spriteAtlasData -> spriteAtlasData.toUndash(registry));
+
+
+		final Pair<Map<Identifier, List<Sprite>>, SpriteAtlasTexture> particleData = DashHelper.nullable(this.particleData, data -> data.toUndash(registry));
+		vanillaData.loadCacheData(
+				DashHelper.nullable(spriteData, Pair::getLeft),
+				DashHelper.nullable(blockStateData, data -> data.toUndash(registry)),
+				DashHelper.nullable(modelData, data -> data.toUndash(registry)),
+				DashHelper.nullable(particleData, Pair::getLeft),
+				DashHelper.nullable(fontManagerData, data -> data.toUndash(registry)),
+				DashHelper.nullable(splashTextData, DashSplashTextData::toUndash),
+				DashHelper.nullable(shaderData, DashShaderData::toUndash)
+		);
+		atlasesToRegister = new ArrayList<>();
+		if (spriteData != null) {
+			spriteData.getValue().forEach(atlasTexture -> atlasesToRegister.add(Pair.of(Feature.MODEL_LOADER, Pair.of(atlasTexture, vanillaData.getAtlasData(atlasTexture)))));
+		}
+
+		if (particleData != null) {
+			SpriteAtlasTexture texture = particleData.getRight();
+			atlasesToRegister.add(Pair.of(Feature.PARTICLES, Pair.of(texture, vanillaData.getAtlasData(texture))));
+		}
+
+		modelData = null;
+		spriteAtlasData = null;
+		blockStateData = null;
+		fontManagerData = null;
+		splashTextData = null;
+	}
+
+	public void registerAtlases(TextureManager textureManager, Feature feature) {
+		atlasesToRegister.forEach((pair) -> {
+			if (pair.getLeft() == feature) {
+				final Pair<SpriteAtlasTexture, DashSpriteAtlasTextureData> atlas = pair.getRight();
+				registerAtlas(atlas.getLeft(), atlas.getRight(), textureManager);
+			}
+		});
+	}
+
+	public void registerAtlas(SpriteAtlasTexture atlasTexture, DashSpriteAtlasTextureData data, TextureManager textureManager) {
+		//atlas registration
+		final Identifier id = atlasTexture.getId();
+		final int glId = TextureUtil.generateTextureId();
+		final int width = data.width;
+		final int maxLevel = data.maxLevel;
+		final int height = data.height;
+		((AbstractTextureAccessor) atlasTexture).setGlId(glId);
+		//ding dong lwjgl here are their styles
+
+		TextureUtil.prepareImage(glId, maxLevel, width, height);
+		((SpriteAtlasTextureAccessor) atlasTexture).getSprites().forEach((identifier, sprite) -> {
+			final SpriteAccessor access = (SpriteAccessor) sprite;
+			access.setAtlas(atlasTexture);
+			access.setId(identifier);
+			sprite.upload();
+		});
+
+		//helu textures here are the atlases
+		textureManager.registerTexture(id, atlasTexture);
+		atlasTexture.setFilter(false, maxLevel > 0);
+		DashLoader.LOGGER.info("Allocated: {}x{}x{} {}-atlas", width, height, maxLevel, id);
+	}
+
+	@Nullable
+	public SpriteAtlasTexture getAtlas(Identifier identifier) {
+		for (Pair<Feature, Pair<SpriteAtlasTexture, DashSpriteAtlasTextureData>> pair : atlasesToRegister) {
+			final SpriteAtlasTexture atlas = pair.getRight().getLeft();
+			if (identifier.equals(atlas.getId())) {
+				return atlas;
+			}
+		}
+		return null;
+	}
 }

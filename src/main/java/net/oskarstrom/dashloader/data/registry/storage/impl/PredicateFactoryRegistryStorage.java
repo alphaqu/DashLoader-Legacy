@@ -14,30 +14,30 @@ import java.util.function.Predicate;
 
 public class PredicateFactoryRegistryStorage extends FactoryRegistryStorage<Predicate<BlockState>, DashPredicate> {
 
-    public PredicateFactoryRegistryStorage(Class<?> originalObjectClass, DashRegistry registry, DashDataType type) {
-        super(originalObjectClass, registry, type);
-    }
+	public PredicateFactoryRegistryStorage(Class<?> originalObjectClass, DashRegistry registry, DashDataType type) {
+		super(originalObjectClass, registry, type);
+	}
 
-    public int register(MultipartModelSelector selector, StateManager<Block, BlockState> stateManager) {
-        final int ptr = selector.hashCode();
-        if (missing(ptr)) {
-            registerDashObject(ptr, obtainPredicate(selector, stateManager));
-        }
-        return ptr;
-    }
+	public int register(MultipartModelSelector selector, StateManager<Block, BlockState> stateManager) {
+		final int ptr = selector.hashCode();
+		if (missing(ptr)) {
+			registerDashObject(ptr, obtainPredicate(selector, stateManager));
+		}
+		return ptr;
+	}
 
-    @Override
-    public int register(Predicate<BlockState> originalObject) {
-        throw new UnsupportedOperationException("Use register(MultipartModelSelector selector, StateManager<Block, BlockState> stateManager) instead.");
-    }
+	@Override
+	public int register(Predicate<BlockState> originalObject) {
+		throw new UnsupportedOperationException("Use register(MultipartModelSelector selector, StateManager<Block, BlockState> stateManager) instead.");
+	}
 
-    public DashPredicate obtainPredicate(final MultipartModelSelector selector, final StateManager<Block, BlockState> stateManager) {
-        final boolean isTrue = selector == MultipartModelSelector.TRUE;
-        if (selector == MultipartModelSelector.FALSE || isTrue) {
-            return new DashStaticPredicate(isTrue);
-        } else {
-            return createFromFactory(selector, stateManager);
-        }
-    }
+	public DashPredicate obtainPredicate(final MultipartModelSelector selector, final StateManager<Block, BlockState> stateManager) {
+		final boolean isTrue = selector == MultipartModelSelector.TRUE;
+		if (selector == MultipartModelSelector.FALSE || isTrue) {
+			return new DashStaticPredicate(isTrue);
+		} else {
+			return createFromFactory(selector, stateManager);
+		}
+	}
 
 }

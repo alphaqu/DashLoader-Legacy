@@ -14,27 +14,27 @@ import net.oskarstrom.dashloader.util.ThreadHelper;
 
 public class DashBlockStateData implements Dashable {
 
-    @Serialize(order = 0)
-    public final Pointer2PointerMap blockstates;
+	@Serialize(order = 0)
+	public final Pointer2PointerMap blockstates;
 
-    public DashBlockStateData(@Deserialize("blockstates") Pointer2PointerMap blockstates) {
-        this.blockstates = blockstates;
-    }
+	public DashBlockStateData(@Deserialize("blockstates") Pointer2PointerMap blockstates) {
+		this.blockstates = blockstates;
+	}
 
-    public DashBlockStateData(VanillaData data, DashRegistry registry, final DashLoader.TaskHandler taskHandler) {
-        this.blockstates = new Pointer2PointerMap();
-        final Object2IntMap<BlockState> stateLookup = data.getStateLookup();
-        taskHandler.setSubtasks(stateLookup.size());
-        ThreadHelper.execForEach(stateLookup, (blockState, integer) -> {
-            this.blockstates.put(registry.blockstates.register(blockState), integer);
-            taskHandler.completedSubTask();
-        });
-    }
+	public DashBlockStateData(VanillaData data, DashRegistry registry, final DashLoader.TaskHandler taskHandler) {
+		this.blockstates = new Pointer2PointerMap();
+		final Object2IntMap<BlockState> stateLookup = data.getStateLookup();
+		taskHandler.setSubtasks(stateLookup.size());
+		ThreadHelper.execForEach(stateLookup, (blockState, integer) -> {
+			this.blockstates.put(registry.blockstates.register(blockState), integer);
+			taskHandler.completedSubTask();
+		});
+	}
 
-    public Object2IntMap<BlockState> toUndash(DashRegistry registry) {
-        final Object2IntOpenHashMap<BlockState> stateLookupOut = new Object2IntOpenHashMap<>();
-        blockstates.forEach((entry) -> stateLookupOut.put(registry.blockstates.getObject(entry.key), entry.value));
-        return stateLookupOut;
-    }
+	public Object2IntMap<BlockState> toUndash(DashRegistry registry) {
+		final Object2IntOpenHashMap<BlockState> stateLookupOut = new Object2IntOpenHashMap<>();
+		blockstates.forEach((entry) -> stateLookupOut.put(registry.blockstates.getObject(entry.key), entry.value));
+		return stateLookupOut;
+	}
 
 }

@@ -7,8 +7,8 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(MeshImpl.class)
 public interface MeshImplAccessor {
 
-    @Invoker("<init>")
-    static MeshImpl create(int[] data) {
-        throw new AssertionError();
-    }
+	@Invoker("<init>")
+	static MeshImpl create(int[] data) {
+		throw new AssertionError();
+	}
 }

@@ -10,8 +10,8 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface DashObject {
-    Class<?> value() default NullPointerException.class;
+	Class<?> value() default NullPointerException.class;
 
 
-    DashDataType overrideType() default DashDataType.DEFAULT;
+	DashDataType overrideType() default DashDataType.DEFAULT;
 }

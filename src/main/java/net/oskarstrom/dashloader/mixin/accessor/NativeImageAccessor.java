@@ -9,18 +9,18 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 public interface NativeImageAccessor {
 
 
-    @Invoker("<init>")
-    static NativeImage init(NativeImage.Format format, int width, int height, boolean useStb, long pointer) {
-        throw new AssertionError();
-    }
+	@Invoker("<init>")
+	static NativeImage init(NativeImage.Format format, int width, int height, boolean useStb, long pointer) {
+		throw new AssertionError();
+	}
 
-    @Accessor
-    long getPointer();
+	@Accessor
+	long getPointer();
 
-    @Accessor
-    long getSizeBytes();
+	@Accessor
+	long getSizeBytes();
 
 
-    @Accessor
-    boolean getIsStbImage();
+	@Accessor
+	boolean getIsStbImage();
 }

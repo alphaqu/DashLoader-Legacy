@@ -13,38 +13,38 @@ import java.util.List;
 @Mixin(FontStorage.class)
 public interface FontStorageAccessor {
 
-    @Accessor
-    Identifier getId();
+	@Accessor
+	Identifier getId();
 
-    @Accessor
-    void setBlankGlyphRenderer(GlyphRenderer renderer);
+	@Accessor
+	void setBlankGlyphRenderer(GlyphRenderer renderer);
 
-    @Accessor
-    void setWhiteRectangleGlyphRenderer(GlyphRenderer renderer);
+	@Accessor
+	void setWhiteRectangleGlyphRenderer(GlyphRenderer renderer);
 
-    @Accessor
-    Int2ObjectMap<GlyphRenderer> getGlyphRendererCache();
+	@Accessor
+	Int2ObjectMap<GlyphRenderer> getGlyphRendererCache();
 
-    @Accessor
-    Int2ObjectMap<Glyph> getGlyphCache();
+	@Accessor
+	Int2ObjectMap<Glyph> getGlyphCache();
 
-    @Accessor
-    Int2ObjectMap<IntList> getCharactersByWidth();
+	@Accessor
+	Int2ObjectMap<IntList> getCharactersByWidth();
 
-    @Accessor
-    Glyph getSPACE();
-
-
-    @Accessor
-    List<Font> getFonts();
+	@Accessor
+	Glyph getSPACE();
 
 
-    @Invoker
-    GlyphRenderer callGetGlyphRenderer(RenderableGlyph c);
+	@Accessor
+	List<Font> getFonts();
 
-    @Invoker
-    void callCloseFonts();
 
-    @Invoker
-    void callCloseGlyphAtlases();
+	@Invoker
+	GlyphRenderer callGetGlyphRenderer(RenderableGlyph c);
+
+	@Invoker
+	void callCloseFonts();
+
+	@Invoker
+	void callCloseGlyphAtlases();
 }

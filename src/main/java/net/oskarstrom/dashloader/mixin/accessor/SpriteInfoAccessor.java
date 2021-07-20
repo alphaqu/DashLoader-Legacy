@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(Sprite.Info.class)
 public interface SpriteInfoAccessor {
 
-    @Accessor
-    AnimationResourceMetadata getAnimationData();
+	@Accessor
+	AnimationResourceMetadata getAnimationData();
 
 }

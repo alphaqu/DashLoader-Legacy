@@ -14,26 +14,26 @@ import java.util.List;
 @DashObject(WeightedBakedModel.class)
 public class DashWeightedBakedModel implements DashModel {
 
-    @Serialize(order = 0)
-    public final List<DashWeightedModelEntry> models;
+	@Serialize(order = 0)
+	public final List<DashWeightedModelEntry> models;
 
-    public DashWeightedBakedModel(@Deserialize("models") List<DashWeightedModelEntry> models) {
-        this.models = models;
-    }
+	public DashWeightedBakedModel(@Deserialize("models") List<DashWeightedModelEntry> models) {
+		this.models = models;
+	}
 
-    public DashWeightedBakedModel(WeightedBakedModel model, DashRegistry registry) {
-        this.models = DashHelper.convertList(
-                ((WeightedBakedModelAccessor) model).getModels(),
-                entry -> new DashWeightedModelEntry(entry, registry));
-    }
+	public DashWeightedBakedModel(WeightedBakedModel model, DashRegistry registry) {
+		this.models = DashHelper.convertList(
+				((WeightedBakedModelAccessor) model).getModels(),
+				entry -> new DashWeightedModelEntry(entry, registry));
+	}
 
-    @Override
-    public WeightedBakedModel toUndash(DashRegistry registry) {
-        return new WeightedBakedModel(DashHelper.convertList(models, entry -> entry.toUndash(registry)));
-    }
+	@Override
+	public WeightedBakedModel toUndash(DashRegistry registry) {
+		return new WeightedBakedModel(DashHelper.convertList(models, entry -> entry.toUndash(registry)));
+	}
 
-    @Override
-    public int getStage() {
-        return 1;
-    }
+	@Override
+	public int getStage() {
+		return 1;
+	}
 }

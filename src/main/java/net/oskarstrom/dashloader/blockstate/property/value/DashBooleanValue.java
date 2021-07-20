@@ -7,16 +7,16 @@ import net.oskarstrom.dashloader.api.annotation.DashObject;
 
 @DashObject(Boolean.class)
 public class DashBooleanValue implements DashPropertyValue {
-    @Serialize(order = 0)
-    public final Boolean value;
+	@Serialize(order = 0)
+	public final Boolean value;
 
-    public DashBooleanValue(@Deserialize("value") Boolean value) {
-        this.value = value;
-    }
+	public DashBooleanValue(@Deserialize("value") Boolean value) {
+		this.value = value;
+	}
 
 
-    @Override
-    public Boolean toUndash(DashRegistry registry) {
-        return value;
-    }
+	@Override
+	public Boolean toUndash(DashRegistry registry) {
+		return value;
+	}
 }

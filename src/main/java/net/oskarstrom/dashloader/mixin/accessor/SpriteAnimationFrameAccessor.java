@@ -8,14 +8,14 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(Sprite.AnimationFrame.class)
 public interface SpriteAnimationFrameAccessor {
 
-    @Invoker("<init>")
-    static Sprite.AnimationFrame newSpriteFrame(int index, int time) {
-        throw new AssertionError();
-    }
+	@Invoker("<init>")
+	static Sprite.AnimationFrame newSpriteFrame(int index, int time) {
+		throw new AssertionError();
+	}
 
-    @Accessor
-    int getIndex();
+	@Accessor
+	int getIndex();
 
-    @Accessor
-    int getTime();
+	@Accessor
+	int getTime();
 }

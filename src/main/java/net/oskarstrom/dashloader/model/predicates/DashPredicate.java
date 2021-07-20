@@ -7,6 +7,6 @@ import net.oskarstrom.dashloader.api.Factory;
 import java.util.function.Predicate;
 
 public interface DashPredicate extends Factory<Predicate<BlockState>> {
-   Predicate<BlockState> toUndash(DashRegistry registry);
+	Predicate<BlockState> toUndash(DashRegistry registry);
 
 }

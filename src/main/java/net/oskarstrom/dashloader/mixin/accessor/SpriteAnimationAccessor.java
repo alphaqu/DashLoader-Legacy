@@ -12,18 +12,18 @@ import java.util.List;
 public interface SpriteAnimationAccessor {
 
 
-    @Invoker("<init>")
-    static Sprite.Animation init(Sprite parent, List<Sprite.AnimationFrame> list, int i, @Nullable Sprite.Interpolation interpolation) {
-        throw new AssertionError();
-    }
+	@Invoker("<init>")
+	static Sprite.Animation init(Sprite parent, List<Sprite.AnimationFrame> list, int i, @Nullable Sprite.Interpolation interpolation) {
+		throw new AssertionError();
+	}
 
-    @Accessor
-    List<Sprite.AnimationFrame> getFrames();
+	@Accessor
+	List<Sprite.AnimationFrame> getFrames();
 
-    @Accessor
-    int getFrameCount();
+	@Accessor
+	int getFrameCount();
 
-    @Accessor
-    Sprite.Interpolation getInterpolation();
+	@Accessor
+	Sprite.Interpolation getInterpolation();
 
 }

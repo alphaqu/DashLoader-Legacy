@@ -18,23 +18,23 @@ import java.util.function.Predicate;
 
 @DashObject(AndMultipartModelSelector.class)
 public class DashAndPredicate implements DashPredicate {
-    @Serialize(order = 0)
-    @SerializeSubclasses(path = {0}, extraSubclassesId = "predicates")
-    public final List<DashPredicate> selectors;
+	@Serialize(order = 0)
+	@SerializeSubclasses(path = {0}, extraSubclassesId = "predicates")
+	public final List<DashPredicate> selectors;
 
-    public DashAndPredicate(@Deserialize("selectors") List<DashPredicate> selectors) {
-        this.selectors = selectors;
-    }
+	public DashAndPredicate(@Deserialize("selectors") List<DashPredicate> selectors) {
+		this.selectors = selectors;
+	}
 
-    public DashAndPredicate(AndMultipartModelSelector selector, DashRegistry registry, ExtraVariables extraVariables) {
-        StateManager<Block, BlockState> stateManager = (StateManager<Block, BlockState>) extraVariables.getExtraVariable1();
-        AndMultipartModelSelectorAccessor access = ((AndMultipartModelSelectorAccessor) selector);
-        selectors = DashHelper.convertList(access.getSelectors(), selector1 -> registry.predicates.obtainPredicate(selector1, stateManager));
-    }
+	public DashAndPredicate(AndMultipartModelSelector selector, DashRegistry registry, ExtraVariables extraVariables) {
+		StateManager<Block, BlockState> stateManager = (StateManager<Block, BlockState>) extraVariables.getExtraVariable1();
+		AndMultipartModelSelectorAccessor access = ((AndMultipartModelSelectorAccessor) selector);
+		selectors = DashHelper.convertList(access.getSelectors(), selector1 -> registry.predicates.obtainPredicate(selector1, stateManager));
+	}
 
-    @Override
-    public Predicate<BlockState> toUndash(DashRegistry registry) {
-        List<Predicate<BlockState>> list = DashHelper.convertList(selectors, predicate -> predicate.toUndash(registry));
-        return (blockState) -> list.stream().allMatch((predicate) -> predicate.test(blockState));
-    }
+	@Override
+	public Predicate<BlockState> toUndash(DashRegistry registry) {
+		List<Predicate<BlockState>> list = DashHelper.convertList(selectors, predicate -> predicate.toUndash(registry));
+		return (blockState) -> list.stream().allMatch((predicate) -> predicate.test(blockState));
+	}
 }

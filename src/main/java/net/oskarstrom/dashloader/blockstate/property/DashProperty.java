@@ -6,10 +6,10 @@ import net.oskarstrom.dashloader.api.Factory;
 import net.oskarstrom.dashloader.api.FactoryConstructor;
 
 public interface DashProperty extends Factory<Property<?>> {
-    Property<?> toUndash(DashRegistry registry);
+	Property<?> toUndash(DashRegistry registry);
 
-    default FactoryConstructor overrideMethodHandleForValue() {
-        return null;
-    }
+	default FactoryConstructor overrideMethodHandleForValue() {
+		return null;
+	}
 
 }
