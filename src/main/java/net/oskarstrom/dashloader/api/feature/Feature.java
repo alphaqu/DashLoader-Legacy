@@ -39,7 +39,11 @@ public enum Feature {
 	/**
 	 * if DashLoader should add the watermark in the main menu screen.
 	 */
-	WATERMARK("misc.TitleScreenMixin", Impact.NONE, 0);
+	WATERMARK("misc.TitleScreenMixin", Impact.NONE, 0),
+	/**
+	 * if DashLoader should use .getPath() instead of .getCanonicalPath() (About a 2x improvement in getResource())
+	 */
+	RESOURCEPACK_FASTVALIDPATH("misc.DirectoryResourcePack", Impact.HIGH, 0);
 
 
 	String mixin;

@@ -67,6 +67,8 @@
     "feature.cache.FontManagerOverride$LeoFontSolution",
     "feature.cache.ParticleManagerMixin",
     "feature.cache.SplashTextResourceSupplierMixin",
+    "feature.misc.DefaultResourcePackMixin",
+    "feature.misc.DirectoryResourcePackMixin",
     "feature.misc.ModelIdentifierMixin",
     "feature.misc.SoundManagerMixin",
     "feature.misc.TitleScreenMixin",

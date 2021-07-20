@@ -9,8 +9,8 @@ public class AdvancedRegistryStorage<O, D extends Dashable<O>> extends AbstractR
 
 	private final BiFunction<O, DashRegistry, D> function;
 
-	public AdvancedRegistryStorage(Class<O> originalObjectClass, DashRegistry registry, BiFunction<O, DashRegistry, D> function) {
-		super.init(registry, originalObjectClass);
+	public AdvancedRegistryStorage(DashRegistry registry, String objectName, BiFunction<O, DashRegistry, D> function) {
+		super.init(registry, objectName);
 		this.function = function;
 	}
 

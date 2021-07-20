@@ -3,6 +3,8 @@ package net.oskarstrom.dashloader.data;
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import io.activej.serializer.annotations.SerializeSubclasses;
+import net.oskarstrom.dashloader.DashLoader;
+import net.oskarstrom.dashloader.DashRegistry;
 import net.oskarstrom.dashloader.api.DashDataClass;
 import net.oskarstrom.dashloader.data.registry.*;
 
@@ -49,6 +51,29 @@ public class DashRegistryData {
 		this.predicateRegistryData = predicateRegistryData;
 		this.registryBakedQuadData = registryBakedQuadData;
 		this.dataClassList = dataClassList;
+	}
+
+	public DashRegistryData(DashRegistry registry) {
+		this.blockStateRegistryData = new RegistryBlockStateData(registry.blockstates);
+		this.fontRegistryData = new RegistryFontData(registry.fonts);
+		this.identifierRegistryData = new RegistryIdentifierData(registry.identifiers);
+		this.propertyRegistryData = new RegistryPropertyData(registry.properties);
+		this.propertyValueRegistryData = new RegistryPropertyValueData(registry.propertyValues);
+		this.spriteRegistryData = new RegistrySpriteData(registry.sprites);
+		this.predicateRegistryData = new RegistryPredicateData(registry.predicates);
+		this.registryBakedQuadData = new RegistryBakedQuadData(registry.bakedQuads);
+		this.dataClassList = DashLoader.getInstance().getApi().dataClasses;
+	}
+
+	public void dumpData(DashRegistry dashRegistry) {
+		dashRegistry.blockstates.populate(blockStateRegistryData.blockstates);
+		dashRegistry.sprites.populate(spriteRegistryData.sprites);
+		dashRegistry.fonts.populate(fontRegistryData.fonts);
+		dashRegistry.predicates.populate(predicateRegistryData.predicates);
+		dashRegistry.properties.populate(propertyRegistryData.property);
+		dashRegistry.propertyValues.populate(propertyValueRegistryData.propertyValues);
+		dashRegistry.identifiers.populate(identifierRegistryData.identifiers);
+		dashRegistry.bakedQuads.populate(registryBakedQuadData.quads);
 	}
 
 }

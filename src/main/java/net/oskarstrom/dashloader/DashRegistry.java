@@ -15,10 +15,9 @@ import net.oskarstrom.dashloader.api.DashDataClass;
 import net.oskarstrom.dashloader.api.enums.DashDataType;
 import net.oskarstrom.dashloader.blockstate.DashBlockState;
 import net.oskarstrom.dashloader.blockstate.property.DashProperty;
+import net.oskarstrom.dashloader.blockstate.property.value.DashPropertyValue;
 import net.oskarstrom.dashloader.data.DashID;
 import net.oskarstrom.dashloader.data.DashIdentifier;
-import net.oskarstrom.dashloader.data.DashRegistryData;
-import net.oskarstrom.dashloader.data.registry.*;
 import net.oskarstrom.dashloader.data.registry.storage.AbstractRegistryStorage;
 import net.oskarstrom.dashloader.data.registry.storage.AdvancedRegistryStorage;
 import net.oskarstrom.dashloader.data.registry.storage.FactoryRegistryStorage;
@@ -32,7 +31,6 @@ import net.oskarstrom.dashloader.image.DashSprite;
 import net.oskarstrom.dashloader.model.components.DashBakedQuad;
 import net.oskarstrom.dashloader.util.ThreadHelper;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.lang3.tuple.Triple;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -49,114 +47,54 @@ public class DashRegistry {
 
 	private static int totalTasks = 6;
 	private static int tasksDone = 0;
-	public final SimpleRegistryStorage<Identifier, DashID> identifiers;
-	public final SimpleRegistryStorage<NativeImage, DashImage> images;
-	public final AdvancedRegistryStorage<BlockState, DashBlockState> blockstates;
-	public final AdvancedRegistryStorage<Sprite, DashSprite> sprites;
-	public final AdvancedRegistryStorage<BakedQuad, DashBakedQuad> bakedQuads;
-	public final FactoryRegistryStorage<Font, DashFont> fonts;
-	public final FactoryRegistryStorage<Property<?>, DashProperty> properties;
-	public final ModelFactoryRegistryStorage models;
-	public final PropertyValueFactoryRegistryStorage propertyValues;
-	public final PredicateFactoryRegistryStorage predicates;
-	public final List<DashDataClass> dataClasses;
-	private final DashLoader loader;
+	public final SimpleRegistryStorage<Identifier, DashID> identifiers = new SimpleRegistryStorage<>(this, "Identifier", DashIdentifier::createIdentifier);
+	public final SimpleRegistryStorage<NativeImage, DashImage> images = new SimpleRegistryStorage<>(this, "NativeImage", DashImage::new);
+	public final AdvancedRegistryStorage<BlockState, DashBlockState> blockstates = new AdvancedRegistryStorage<>(this, "BlockState", DashBlockState::new);
+	public final AdvancedRegistryStorage<Sprite, DashSprite> sprites = new AdvancedRegistryStorage<>(this, "Sprite", DashSprite::new);
+	public final AdvancedRegistryStorage<BakedQuad, DashBakedQuad> bakedQuads = new AdvancedRegistryStorage<>(this, "BakedQuad", DashBakedQuad::new);
+	public final FactoryRegistryStorage<Font, DashFont> fonts = new FactoryRegistryStorage<>(this, DashDataType.FONT);
+	public final FactoryRegistryStorage<Property<?>, DashProperty> properties = new FactoryRegistryStorage<>(this, DashDataType.PROPERTY);
+	public final FactoryRegistryStorage<Comparable<?>, DashPropertyValue> propertyValues = new PropertyValueFactoryRegistryStorage(this, DashDataType.PROPERTY_VALUE);
+	public final PredicateFactoryRegistryStorage predicates = new PredicateFactoryRegistryStorage(this, DashDataType.PREDICATE);
+	public final ModelFactoryRegistryStorage models = new ModelFactoryRegistryStorage(this, DashDataType.MODEL);
+	public final List<AbstractRegistryStorage<?, ?>> registries = new ArrayList<>();
+	public final List<DashDataClass> dataClasses = new ArrayList<>();
 	public Map<Class<?>, DashDataType> apiFailed = new ConcurrentHashMap<>();
 
 
-	public DashRegistry(DashLoader loader) {
-		identifiers = new SimpleRegistryStorage<>(Identifier.class, this, DashIdentifier::createIdentifier);
-		images = new SimpleRegistryStorage<>(NativeImage.class, this, DashImage::new);
-		blockstates = new AdvancedRegistryStorage<>(BlockState.class, this, DashBlockState::new);
-		sprites = new AdvancedRegistryStorage<>(Sprite.class, this, DashSprite::new);
-		bakedQuads = new AdvancedRegistryStorage<>(BakedQuad.class, this, DashBakedQuad::new);
-		fonts = new FactoryRegistryStorage<>(Font.class, this, DashDataType.FONT);
-		predicates = new PredicateFactoryRegistryStorage(Predicate.class, this, DashDataType.PREDICATE);
-		properties = new FactoryRegistryStorage<>(Property.class, this, DashDataType.PROPERTY);
-		propertyValues = new PropertyValueFactoryRegistryStorage(Comparable.class, this, DashDataType.PROPERTY_VALUE);
-		models = new ModelFactoryRegistryStorage(BakedModel.class, this, DashDataType.MODEL);
-		dataClasses = new ArrayList<>();
-		this.loader = loader;
-	}
-
-	public Triple<DashRegistryData, RegistryImageData, RegistryModelData> createData() {
-		return Triple.of(
-				new DashRegistryData(
-						new RegistryBlockStateData(blockstates),
-						new RegistryFontData(fonts),
-						new RegistryIdentifierData(identifiers),
-						new RegistryPropertyData(properties),
-						new RegistryPropertyValueData(propertyValues),
-						new RegistrySpriteData(sprites),
-						new RegistryPredicateData(predicates),
-						new RegistryBakedQuadData(bakedQuads),
-						loader.getApi().dataClasses
-				),
-				new RegistryImageData(images),
-				new RegistryModelData(models));
-	}
-
-    /*
-    Assigning registries with deserialized entries.
-     */
-
-	public void loadData(DashRegistryData registryData) {
-		blockstates.populate(registryData.blockStateRegistryData.blockstates);
-		sprites.populate(registryData.spriteRegistryData.sprites);
-		fonts.populate(registryData.fontRegistryData.fonts);
-		predicates.populate(registryData.predicateRegistryData.predicates);
-		properties.populate(registryData.propertyRegistryData.property);
-		propertyValues.populate(registryData.propertyValueRegistryData.propertyValues);
-		identifiers.populate(registryData.identifierRegistryData.identifiers);
-		bakedQuads.populate(registryData.registryBakedQuadData.quads);
-		dataClasses.addAll(registryData.dataClassList);
+	public DashRegistry() {
+		registries.add(identifiers);
+		registries.add(images);
+		registries.add(properties);
+		registries.add(propertyValues);
+		registries.add(blockstates);
+		registries.add(predicates);
+		registries.add(sprites);
+		registries.add(bakedQuads);
+		registries.add(fonts);
+		registries.add(models);
 	}
 
 	/*
-	Assigning registries with deserialized entries.
- 	*/
-	public void loadImageData(RegistryImageData dashImageData) {
-		images.populate(dashImageData.images);
-	}
-
-	/*
-	Assigning registries with deserialized entries.
- 	*/
-	public void loadModelData(RegistryModelData registryModelData) {
-		models.populateModels(registryModelData.toUndash());
-	}
-
-
-	/*
-	Undashing everything (converting DashObjects to Minecraft Objects)
- 	*/
+		Undashing everything (converting DashObjects to Minecraft Objects)
+		 */
 	public void toUndash() {
 		Logger logger = LogManager.getLogger();
 		try {
 			tasksDone = 0;
-			totalTasks = 11;
+			totalTasks = registries.size() + 1;
 			dataClasses.forEach(dataClass -> dataClass.reload(this));
-			undashTask(identifiers, logger, "Identifiers");
-			undashTask(images, logger, "Images");
-			undashTask(properties, logger, "Properties");
-			undashTask(propertyValues, logger, "Property Values");
-			undashTask(blockstates, logger, "Blockstates");
-			undashTask(predicates, logger, "Predicates");
-			undashTask(sprites, logger, "Sprites");
-			undashTask(bakedQuads, logger, "Quads");
-			undashTask(fonts, logger, "Fonts");
-			undashTask(models, logger, "Models");
+			registries.forEach(abstractRegistryStorage -> undashTask(abstractRegistryStorage, logger));
 			dataClasses.forEach(dataClass -> dataClass.apply(this));
 			log(logger, "Applying Model Overrides");
-
 			models.getModelsToDeserialize().forEach(modelcategory -> ThreadHelper.applyExec(modelcategory, dashModel -> dashModel.apply(this)));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	private <D extends Dashable<O>, O> void undashTask(AbstractRegistryStorage<O, D> storage, Logger logger, String name) {
-		log(logger, "Loading {} {}", storage.getSize(), name);
+	private <D extends Dashable<O>, O> void undashTask(AbstractRegistryStorage<O, D> storage, Logger logger) {
+		log(logger, "Loading {} {}", storage.getSize(), storage.toString());
 		storage.toUndash(logger);
 	}
 

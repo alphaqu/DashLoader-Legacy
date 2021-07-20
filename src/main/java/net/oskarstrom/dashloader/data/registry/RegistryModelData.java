@@ -4,6 +4,7 @@ import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import io.activej.serializer.annotations.SerializeSubclasses;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import net.oskarstrom.dashloader.DashRegistry;
 import net.oskarstrom.dashloader.data.registry.storage.impl.ModelFactoryRegistryStorage;
 import net.oskarstrom.dashloader.data.serialization.Pointer2ObjectMap;
 import net.oskarstrom.dashloader.model.DashModel;
@@ -32,9 +33,9 @@ public class RegistryModelData {
 
 	}
 
-	public List<Int2ObjectMap<DashModel>> toUndash() {
+	public void dumpData(DashRegistry registry) {
 		List<Int2ObjectMap<DashModel>> list = new ArrayList<>(models.size());
 		models.forEach(entry -> list.add(entry.key, entry.value.convert()));
-		return list;
+		registry.models.populateModels(list);
 	}
 }

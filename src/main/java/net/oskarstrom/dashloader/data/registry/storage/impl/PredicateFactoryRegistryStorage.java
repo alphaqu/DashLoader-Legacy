@@ -14,8 +14,8 @@ import java.util.function.Predicate;
 
 public class PredicateFactoryRegistryStorage extends FactoryRegistryStorage<Predicate<BlockState>, DashPredicate> {
 
-	public PredicateFactoryRegistryStorage(Class<?> originalObjectClass, DashRegistry registry, DashDataType type) {
-		super(originalObjectClass, registry, type);
+	public PredicateFactoryRegistryStorage(DashRegistry registry, DashDataType type) {
+		super(registry, type);
 	}
 
 	public int register(MultipartModelSelector selector, StateManager<Block, BlockState> stateManager) {

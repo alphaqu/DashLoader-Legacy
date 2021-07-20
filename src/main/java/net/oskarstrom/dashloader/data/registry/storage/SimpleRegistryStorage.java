@@ -8,8 +8,8 @@ import java.util.function.Function;
 public class SimpleRegistryStorage<O, D extends Dashable<O>> extends AbstractRegistryStorage<O, D> {
 	private final Function<O, D> function;
 
-	public SimpleRegistryStorage(Class<O> originalObjectClass, DashRegistry registry, Function<O, D> function) {
-		super.init(registry, originalObjectClass);
+	public SimpleRegistryStorage(DashRegistry registry, String objectName, Function<O, D> function) {
+		super.init(registry, objectName);
 		this.function = function;
 	}
 

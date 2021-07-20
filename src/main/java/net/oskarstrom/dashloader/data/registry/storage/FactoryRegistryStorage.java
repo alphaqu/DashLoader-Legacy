@@ -12,8 +12,8 @@ public class FactoryRegistryStorage<O, D extends Factory<O>> extends AbstractReg
 	private final Map<Class<?>, FactoryConstructor> factoryMappings;
 	private final DashDataType type;
 
-	public FactoryRegistryStorage(Class<?> originalObjectClass, DashRegistry registry, DashDataType type) {
-		super.init(registry, originalObjectClass);
+	public FactoryRegistryStorage(DashRegistry registry, DashDataType type) {
+		super.init(registry, type.name);
 		this.factoryMappings = DashLoader.getInstance().getApi().mappings.get(type);
 		this.type = type;
 	}

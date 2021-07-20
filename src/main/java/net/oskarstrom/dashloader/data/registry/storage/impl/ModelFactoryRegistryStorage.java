@@ -17,8 +17,8 @@ public class ModelFactoryRegistryStorage extends FactoryRegistryStorage<BakedMod
 	@Nullable
 	private List<Int2ObjectMap<DashModel>> modelsToDeserialize;
 
-	public ModelFactoryRegistryStorage(Class<?> originalObjectClass, DashRegistry registry, DashDataType type) {
-		super(originalObjectClass, registry, type);
+	public ModelFactoryRegistryStorage(DashRegistry registry, DashDataType type) {
+		super(registry, type);
 	}
 
 	public Int2ObjectMap<DashModel> getRegistryStorage() {

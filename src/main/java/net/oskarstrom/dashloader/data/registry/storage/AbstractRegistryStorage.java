@@ -19,7 +19,7 @@ import org.apache.logging.log4j.Logger;
 public abstract class AbstractRegistryStorage<O, D extends Dashable<O>> {
 	@Serialize(order = 0)
 	protected final Int2ObjectMap<D> registryStorage;
-	protected Class<?> originalObjectClass;
+	protected String objectName;
 	protected DashRegistry registry;
 	protected Int2ObjectMap<O> registryStorageUndashed;
 
@@ -33,8 +33,8 @@ public abstract class AbstractRegistryStorage<O, D extends Dashable<O>> {
 		this.registryStorageUndashed = Int2ObjectMaps.synchronize(new Int2ObjectOpenHashMap<>());
 	}
 
-	public void init(DashRegistry registry, Class<?> originalObjectClass) {
-		this.originalObjectClass = originalObjectClass;
+	public void init(DashRegistry registry, String objectName) {
+		this.objectName = objectName;
 		this.registry = registry;
 	}
 
@@ -47,7 +47,7 @@ public abstract class AbstractRegistryStorage<O, D extends Dashable<O>> {
 		if (originalObject == null) {
 			//reified type parameters when?  - leocth
 			//DashLoader.LOGGER.error(T.class.getSimpleName() + " not found in data. PINTR: " + ptr);
-			DashLoader.LOGGER.error(originalObjectClass.getSimpleName() + " not found in data. PINTR: " + ptr);
+			DashLoader.LOGGER.error(objectName + " not found in data. PINTR: " + ptr);
 		}
 		return originalObject;
 	}
@@ -80,4 +80,8 @@ public abstract class AbstractRegistryStorage<O, D extends Dashable<O>> {
 		return out;
 	}
 
+	@Override
+	public String toString() {
+		return objectName + " Registry";
+	}
 }

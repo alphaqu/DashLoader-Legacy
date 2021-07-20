@@ -18,7 +18,6 @@ import net.oskarstrom.dashloader.util.ThreadHelper;
 import net.oskarstrom.dashloader.util.TimeHelper;
 import net.oskarstrom.dashloader.util.enums.DashCachePaths;
 import net.oskarstrom.dashloader.util.enums.DashCacheState;
-import org.apache.commons.lang3.tuple.Triple;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -125,12 +124,12 @@ public class DashLoader {
 	public void loadDashCache() {
 		LOGGER.info("Starting DashLoader Deserialization");
 		try {
-			DashRegistry registry = new DashRegistry(this);
+			DashRegistry registry = new DashRegistry();
 			ThreadHelper.exec(
-					() -> registry.loadData(DashSerializers.REGISTRY_SERIALIZER.deserializeObject("Cache")),
-					() -> registry.loadModelData(DashSerializers.MODEL_SERIALIZER.deserializeObject("Model Cache")),
-					() -> registry.loadImageData(DashSerializers.IMAGE_SERIALIZER.deserializeObject("Image Cache")),
-					() -> mappings = (DashSerializers.MAPPING_SERIALIZER.deserializeObject("Mapping"))
+					() -> DashSerializers.REGISTRY_SERIALIZER.deserializeObject("Cache").dumpData(registry),
+					() -> DashSerializers.MODEL_SERIALIZER.deserializeObject("Model Cache").dumpData(registry),
+					() -> DashSerializers.IMAGE_SERIALIZER.deserializeObject("Image Cache").dumpData(registry),
+					() -> mappings = DashSerializers.MAPPING_SERIALIZER.deserializeObject("Mapping")
 			);
 			assert mappings != null;
 
@@ -167,17 +166,16 @@ public class DashLoader {
 		TASK_HANDLER.completedTask();
 		final List<DashDataClass> dataClasses = api.dataClasses;
 		dataClasses.forEach(DashDataClass::saveInit);
-		DashRegistry registry = new DashRegistry(this);
+		DashRegistry registry = new DashRegistry();
 		DashMappings mappings = new DashMappings();
 		registryForEach(dataClasses, registry, DashDataClass::saveReload);
 		mappings.loadVanillaData(VANILLA_DATA, registry, TASK_HANDLER);
 		final Map<Class<?>, DashDataType> apiFailed = registry.apiFailed;
 		if (apiFailed.size() == 0) {
-			final Triple<DashRegistryData, RegistryImageData, RegistryModelData> data = registry.createData();
 			registryForEach(dataClasses, registry, DashDataClass::saveApply);
-			DashSerializers.REGISTRY_SERIALIZER.serializeObject(data.getLeft(), "Cache");
-			DashSerializers.IMAGE_SERIALIZER.serializeObject(data.getMiddle(), "Image Cache");
-			DashSerializers.MODEL_SERIALIZER.serializeObject(data.getRight(), "Model Cache");
+			DashSerializers.REGISTRY_SERIALIZER.serializeObject(new DashRegistryData(registry), "Cache");
+			DashSerializers.IMAGE_SERIALIZER.serializeObject(new RegistryImageData(registry.images), "Image Cache");
+			DashSerializers.MODEL_SERIALIZER.serializeObject(new RegistryModelData(registry.models), "Model Cache");
 			DashSerializers.MAPPING_SERIALIZER.serializeObject(mappings, "Mapping");
 			shutdownThreadPool();
 			TASK_HANDLER.setCurrentTask("Caching is now complete.");
