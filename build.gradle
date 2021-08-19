@@ -32,13 +32,17 @@ repositories {
             includeGroup "dev.latvian.mods"
         }
     }
+    maven {
+        url 'https://repo.maven.apache.org/maven2'
+        name 'Maven Central'
+    }
 }
 
 dependencies {
     modApi "io.activej:activej-serializer:$activej_version"
     include "io.activej:activej-serializer:$activej_version"
     include "io.activej:activej-codegen:$activej_version"
-    include "org.slf4j:slf4j-api:1.7.29"
+    include 'org.slf4j:slf4j-api:2.0.0-alpha4'
 
     //to change the versions see the gradle.properties file
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
@@ -46,10 +50,10 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
     //snakeyaml
-    modImplementation "org.yaml:snakeyaml:1.27"
-    include "org.yaml:snakeyaml:1.27"
+    modImplementation 'org.yaml:snakeyaml:1.29'
+    include 'org.yaml:snakeyaml:1.29'
 
-    modCompileOnly fabricApi.module("fabric-renderer-indigo", "0.36.1+1.17");
+    modCompileOnly fabricApi.module("fabric-renderer-indigo", "0.38.0+1.17");
 }
 
 processResources {
