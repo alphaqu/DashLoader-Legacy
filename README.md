@@ -1,4 +1,8 @@
-# DashLoader
+# Moved to 
+## Common: https://github.com/QuantumFusionMC/DashLoader-Core
+## Version Dependant: https://github.com/QuantumFusionMC/DashLoader-Definitions
+#### ^ main is empty, please pick the branch for your version
+
 
  ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/alphaqu/DashLoader/build?style=for-the-badge&logo=appveyor&logoColor=white)
  [![GitHub license](https://img.shields.io/github/license/alphaqu/DashLoader.svg?style=for-the-badge&logo=appveyor&logoColor=white)](https://github.com/alphaqu/DashLoader/blob/master/LICENSE)
